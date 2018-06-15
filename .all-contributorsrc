@@ -1,12 +1,25 @@
 {
   "projectName": "graphql-flutter",
-  "projectOwner": "Zino App B.V.",
+  "projectOwner": "zino-app",
   "repoType": "github",
-  "repoHost": "https://github.com/zino-app/graphql-flutter",
+  "repoHost": "https://github.com",
   "files": [
     "README.md"
   ],
   "imageSize": 100,
   "commit": true,
-  "contributors": []
+  "contributors": [
+    {
+      "login": "eusdima",
+      "name": "Eustatiu Dima",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/4757453?v=4",
+      "profile": "http://eusdima.com",
+      "contributions": [
+        "code",
+        "doc",
+        "example",
+        "ideas"
+      ]
+    }
+  ]
 }
