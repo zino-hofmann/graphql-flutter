@@ -1,4 +1,4 @@
-## [0.0.1] - June 15 2018.
+## [0.1.0] - June 15 2018.
 
 My collegue and I created a sipmple implementation of a GraphQL Client for Flutter. (Many thanks to Eus Dima, for his work on the innitial client.)
 
