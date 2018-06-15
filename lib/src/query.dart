@@ -4,9 +4,8 @@ import 'package:flutter/widgets.dart';
 import './client.dart';
 
 typedef Widget QueryBuilder({
-  bool loading,
-  // TODO: use a more exact type
-  var data,
+  @required bool loading,
+  Object data,
   String error,
 });
 
@@ -16,13 +15,13 @@ class Query extends StatefulWidget {
     Key key,
     this.variables = const {},
     @required this.builder,
-    this.polling = 10,
+    this.pollInterval,
   }) : super(key: key);
 
   final String query;
   final Map variables;
   final QueryBuilder builder;
-  final int polling;
+  final int pollInterval;
 
   @override
   QueryState createState() => new QueryState();
@@ -32,13 +31,16 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
   bool loading = true;
   Object data = {};
   String error = '';
-  Duration pollingInterval;
+  Duration pollInterval;
 
   @override
   void initState() {
     super.initState();
 
-    pollingInterval = new Duration(seconds: widget.polling);
+    if (widget.pollInterval != null) {
+      pollInterval = new Duration(seconds: widget.pollInterval);
+    }
+
     getQueryResult();
   }
 
@@ -55,16 +57,20 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
         data = result;
       });
 
-      new Timer(pollingInterval, getQueryResult);
+      if (widget.pollInterval != null) {
+        new Timer(pollInterval, getQueryResult);
+      }
     } catch (e) {
       setState(() {
         error = 'GQL ERROR';
         loading = false;
       });
 
-      new Timer(pollingInterval, getQueryResult);
+      if (widget.pollInterval != null) {
+        new Timer(pollInterval, getQueryResult);
+      }
 
-      // TODO: Handle error
+      // TODO: handle error
       print(e);
     }
   }
