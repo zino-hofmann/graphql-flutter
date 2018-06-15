@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+typedef Map<String, String> ParseResponse(http.Response response);
+
 Client client;
 
 class Client {
@@ -56,7 +58,7 @@ class Client {
     }
   }
 
-  Map _parseResponse(http.Response response) {
+  ParseResponse _parseResponse(http.Response response) {
     final statusCode = response.statusCode;
     final reasonPhrase = response.reasonPhrase;
 
