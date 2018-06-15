@@ -1,0 +1,12 @@
+{
+  "projectName": "graphql-flutter",
+  "projectOwner": "Zino App B.V.",
+  "repoType": "github",
+  "repoHost": "https://github.com/zino-app/graphql-flutter",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "contributors": []
+}
