@@ -1,14 +1,16 @@
-name: graphql
+name: graphql_flutter
 description: A GraphQL client for Flutter.
-version: 0.0.1
+version: 0.1.0
 authors:
 - Eus Dima <eus@zinoapp.com>
 - Zino Hofmann <zino@zinoapp.com>
-homepage:
+homepage: https://github.com/zino-app/graphql-flutter
 
 dependencies:
   flutter:
     sdk: flutter
+  http: ^0.11.0
+  test: ^0.12.0
 
 dev_dependencies:
   flutter_test:
@@ -50,3 +52,6 @@ flutter:
   #
   # For details regarding fonts in packages, see
   # https://flutter.io/custom-fonts/#from-packages
+
+environment:
+    sdk: ">=1.19.0 <2.0.0"
