@@ -6,9 +6,8 @@ typedef void RunMutation(Map variables);
 
 typedef Widget MutationBuilder(
   RunMutation mutation, {
-  bool loading,
-  // TODO: use a more exact type
-  var data,
+  @required bool loading,
+  Object data,
   String error,
 });
 
