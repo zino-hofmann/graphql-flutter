@@ -7,7 +7,7 @@ typedef void RunMutation(Map variables);
 typedef Widget MutationBuilder(
   RunMutation mutation, {
   @required bool loading,
-  Object data,
+  Map data,
   String error,
 });
 
@@ -27,7 +27,7 @@ class Mutation extends StatefulWidget {
 
 class MutationState extends State<Mutation> {
   bool loading = false;
-  Object data = {};
+  Map data = {};
   String error = '';
 
   void runMutation(Map variables) async {

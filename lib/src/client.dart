@@ -3,8 +3,6 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-typedef Map<String, String> ParseResponse(http.Response response);
-
 Client client;
 
 class Client {
@@ -36,7 +34,7 @@ class Client {
       {'Authorization': 'Bearer $apiToken', 'Content-Type': 'application/json'};
 
   // Methods
-  Future execute({
+  Future<Map> execute({
     String query,
     Object variables,
   }) async {
@@ -58,7 +56,7 @@ class Client {
     }
   }
 
-  ParseResponse _parseResponse(http.Response response) {
+  Map _parseResponse(http.Response response) {
     final statusCode = response.statusCode;
     final reasonPhrase = response.reasonPhrase;
 
@@ -67,7 +65,7 @@ class Client {
           'Network Error: $statusCode $reasonPhrase');
     }
 
-    final jsonResponse = json.decode(response.body);
+    final Map jsonResponse = json.decode(response.body);
 
     if (jsonResponse['errors'] != null) {
       throw new Exception(

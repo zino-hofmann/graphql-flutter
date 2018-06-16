@@ -5,7 +5,7 @@ import './client.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
-  Object data,
+  Map data,
   String error,
 });
 
@@ -29,7 +29,7 @@ class Query extends StatefulWidget {
 
 class QueryState extends State<Query> with WidgetsBindingObserver {
   bool loading = true;
-  Object data = {};
+  Map data = {};
   String error = '';
   Duration pollInterval;
 
