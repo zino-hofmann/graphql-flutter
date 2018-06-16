@@ -2,7 +2,7 @@
 
 [![version][version-badge]][package]
 [![MIT License][license-badge]][license]
-[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
