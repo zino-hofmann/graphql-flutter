@@ -17,7 +17,7 @@ In `main.dart`:
 ```dart
 ...
 
-import 'package:graphql/graphql.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() async {
   client = new Client('<YOUR_ENDPOINT>');
