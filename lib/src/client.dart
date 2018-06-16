@@ -30,8 +30,10 @@ class Client {
 
   String get apiToken => this._apiToken;
 
-  Map<String, String> get headers =>
-      {'Authorization': 'Bearer $apiToken', 'Content-Type': 'application/json'};
+  Map<String, String> get headers => {
+        'Authorization': 'Bearer $apiToken',
+        'Content-Type': 'application/json',
+      };
 
   // Methods
   Future<Map> execute({
@@ -62,14 +64,16 @@ class Client {
 
     if (statusCode < 200 || statusCode >= 400) {
       throw new http.ClientException(
-          'Network Error: $statusCode $reasonPhrase');
+        'Network Error: $statusCode $reasonPhrase',
+      );
     }
 
     final Map jsonResponse = json.decode(response.body);
 
     if (jsonResponse['errors'] != null) {
       throw new Exception(
-          'Error returned by the server in the query' + jsonResponse['errors']);
+        'Error returned by the server in the query' + jsonResponse['errors'],
+      );
     }
 
     return jsonResponse['data'];
