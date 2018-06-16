@@ -5,7 +5,7 @@ import './client.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
-  Map data,
+  Map<String, dynamic> data,
   String error,
 });
 
@@ -19,7 +19,7 @@ class Query extends StatefulWidget {
   }) : super(key: key);
 
   final String query;
-  final Map variables;
+  final Map<String, dynamic> variables;
   final QueryBuilder builder;
   final int pollInterval;
 
@@ -29,7 +29,7 @@ class Query extends StatefulWidget {
 
 class QueryState extends State<Query> with WidgetsBindingObserver {
   bool loading = true;
-  Map data = {};
+  Map<String, dynamic> data = {};
   String error = '';
   Duration pollInterval;
 
@@ -46,7 +46,7 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
 
   void getQueryResult() async {
     try {
-      final result = await client.execute(
+      final Map<String, dynamic> result = await client.execute(
         query: widget.query,
         variables: widget.variables,
       );

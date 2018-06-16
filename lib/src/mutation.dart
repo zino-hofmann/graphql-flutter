@@ -7,7 +7,7 @@ typedef void RunMutation(Map variables);
 typedef Widget MutationBuilder(
   RunMutation mutation, {
   @required bool loading,
-  Map data,
+  Map<String, dynamic> data,
   String error,
 });
 
@@ -27,10 +27,10 @@ class Mutation extends StatefulWidget {
 
 class MutationState extends State<Mutation> {
   bool loading = false;
-  Map data = {};
+  Map<String, dynamic> data = {};
   String error = '';
 
-  void runMutation(Map variables) async {
+  void runMutation(Map<String, dynamic> variables) async {
     setState(() {
       loading = true;
       error = '';
@@ -38,7 +38,7 @@ class MutationState extends State<Mutation> {
     });
 
     try {
-      final result = await client.execute(
+      final Map<String, dynamic> result = await client.execute(
         query: widget.mutation,
         variables: variables,
       );

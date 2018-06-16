@@ -36,17 +36,17 @@ class Client {
       };
 
   // Methods
-  Future<Map> execute({
+  Future<Map<String, dynamic>> execute({
     String query,
-    Object variables,
+    Map<String, dynamic> variables,
   }) async {
-    final requestBody = {
+    final Map<String, dynamic> requestBody = {
       'query': query,
       'variables': variables,
     };
 
     try {
-      final res = await client.post(
+      final http.Response res = await client.post(
         endPoint,
         headers: headers,
         body: json.encode(requestBody),
@@ -58,9 +58,9 @@ class Client {
     }
   }
 
-  Map _parseResponse(http.Response response) {
-    final statusCode = response.statusCode;
-    final reasonPhrase = response.reasonPhrase;
+  Map<String, dynamic> _parseResponse(http.Response response) {
+    final int statusCode = response.statusCode;
+    final String reasonPhrase = response.reasonPhrase;
 
     if (statusCode < 200 || statusCode >= 400) {
       throw new http.ClientException(
@@ -68,7 +68,7 @@ class Client {
       );
     }
 
-    final Map jsonResponse = json.decode(response.body);
+    final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
     if (jsonResponse['errors'] != null) {
       throw new Exception(
