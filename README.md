@@ -8,6 +8,15 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Queries](#queries)
+  - [Mutations](#mutations)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+
 ## Installation
 
 First depend on the library by adding this to your packages `pubspec.yaml`:
