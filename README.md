@@ -161,14 +161,16 @@ new Mutation(
 
 This is currently our roadmap, please feel free to request additions/changes.
 
-- [x] Basic queries
-- [x] Basic mutations
-- [x] Query variables
-- [x] Mutation variables
-- [x] Query polling
-- [ ] Caching
-- [ ] Optimistic results
-- [ ] Client state management
+| Feature                 | Progress |
+| :---------------------- | :------: |
+| Basic queries           |    ✅    |
+| Basic mutations         |    ✅    |
+| Query variables         |    ✅    |
+| Mutation variables      |    ✅    |
+| Query polling           |    ✅    |
+| Caching                 |    🔜    |
+| Optimistic results      |    🔜    |
+| Client state management |    🔜    |
 
 ## Contributing
 
