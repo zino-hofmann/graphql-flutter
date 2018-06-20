@@ -14,6 +14,7 @@
 - [Usage](#usage)
   - [Queries](#queries)
   - [Mutations](#mutations)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
 
