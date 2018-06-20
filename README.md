@@ -8,11 +8,35 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-https://pub.dartlang.org/packages/graphql_flutter
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+  - [Queries](#queries)
+  - [Mutations](#mutations)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+
+## Installation
+
+First depend on the library by adding this to your packages `pubspec.yaml`:
+
+```yaml
+dependencies:
+  graphql_flutter: ^0.3.0
+```
+
+Now inside your Dart code you can import it.
+
+```dart
+import 'package:graphql_flutter/graphql_flutter.dart';
+```
 
 ## Usage
 
-In `main.dart`:
+To use the client it first needs to be initialzed with an endpoint. If your endpoint requires authentication you can provide it to the client by calling the setter `apiToken` on the `Client` class.
+
+> For this example we will use the public GitHub API.
 
 ```dart
 ...
@@ -20,8 +44,8 @@ In `main.dart`:
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() async {
-  client = new Client('<YOUR_ENDPOINT>');
-  client.apiToken = '<YOUR_API_KEY>';
+  client = new Client('https://api.github.com/graphql');
+  client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
 
   ...
 }
@@ -29,20 +53,25 @@ void main() async {
 ...
 ```
 
-Now create a quiry:
+### Queries
+
+Creating a query, is as simple as creating a multiline string:
 
 ```dart
-String readAllPeople = """
-  query ReadAllPeople {
-    allPeople(first: 4) {
-      people {
-        id
-        name
+String readRepositories = """
+  query ReadRepositories(\$nRepositories) {
+    viewer {
+      repositories(last: \$nRepositories) {
+        nodes {
+          id
+          name
+          viewerHasStarred
+        }
       }
     }
   }
 """
-  .replaceAll('\n', ' ');
+    .replaceAll('\n', ' ');
 ```
 
 In your widget:
@@ -51,9 +80,11 @@ In your widget:
 ...
 
 new Query(
-  queries.readAllPeople,
-  variables: {},
-  pollInterval: 10,
+  readRepositories, // this is the query you just created
+  variables: {
+    'nRepositories': 50,
+  },
+  pollInterval: 10, // optional
   builder: ({
     bool loading,
     var data,
@@ -67,38 +98,55 @@ new Query(
       return new Text('Loading');
     }
 
-    // It can be either Map or List or Map
-    List people = data['allPeople']['people'];
+    // it can be either Map or List
+    List repositories = data['viewer']['repositories']['nodes'];
 
     return new ListView.builder(
-      itemCount: people.length,
+      itemCount: repositories.length,
       itemBuilder: (context, index) {
-        final item = people[index];
+        final repository = repositories[index];
 
-        return new Text(item['name']);
+        return new Text(repository['name']);
     });
   },
-)
+);
 
 ...
 ```
 
-The StarWars API does not have mutations, but has the same syntax as a query where the first argument of the builder function is the mutation function. Just call it to trigger the mutations (Yeah we deliberetly stole this from react-apollo.)
+### Mutations
+
+Again first create the mutation string string:
+
+```dart
+String addStar = """
+  mutation AddStar(\$starrableId: ID!) {
+    addStar(input: {starrableId: \$starrableId}) {
+      starrable {
+        viewerHasStarred
+      }
+    }
+  }
+"""
+    .replaceAll('\n', ' ');
+```
+
+The syntax for mutations fairly similar to those of a query. The only diffence is that the first argument of the builder function is the mutation function. Just call it to trigger the mutations (Yeah we deliberetly stole this from react-apollo.)
 
 ```dart
 ...
 
 new Mutation(
-  '<YOUR_MUTATION_STRING>',
+  addStar,
   builder: (
-    runMutation, {
+    runMutation, { // you can name it whatever you like
     bool loading,
     var data,
     String error,
 }) {
   return new FloatingActionButton(
     onPressed: () => runMutation({
-      <YOUR_PARAMETERS>
+      'starrableId': <A_STARTABLE_REPOSITORY_ID>,
     }),
     tooltip: 'Increment',
     child: new Icon(Icons.edit),
@@ -123,7 +171,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind welcome!
+This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
 [package]: https://pub.dartlang.org/packages/graphql_flutter
