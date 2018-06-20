@@ -14,6 +14,7 @@
 - [Usage](#usage)
   - [Queries](#queries)
   - [Mutations](#mutations)
+- [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
 
@@ -155,6 +156,21 @@ new Mutation(
 
 ...
 ```
+
+## Roadmap
+
+This is currently our roadmap, please feel free to request additions/changes.
+
+| Feature                 | Progress |
+| :---------------------- | :------: |
+| Basic queries           |    ✅    |
+| Basic mutations         |    ✅    |
+| Query variables         |    ✅    |
+| Mutation variables      |    ✅    |
+| Query polling           |    ✅    |
+| Caching                 |    🔜    |
+| Optimistic results      |    🔜    |
+| Client state management |    🔜    |
 
 ## Contributing
 

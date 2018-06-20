@@ -54,4 +54,4 @@ flutter:
   # https://flutter.io/custom-fonts/#from-packages
 
 environment:
-    sdk: ">=1.19.0 <2.0.0"
+    sdk: ">=2.0.0-dev.52.0"
