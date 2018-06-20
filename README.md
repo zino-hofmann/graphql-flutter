@@ -156,6 +156,19 @@ new Mutation(
 ...
 ```
 
+## Roadmap
+
+This is currently our roadmap, please feel free to request additions/changes.
+
+- [x] Basic queries
+- [x] Basic mutations
+- [x] Query variables
+- [x] Mutation variables
+- [x] Query polling
+- [ ] Caching
+- [ ] Optimistic results
+- [ ] Client state management
+
 ## Contributing
 
 Feel free to open a PR with any suggetions! We'll be actively working on the library ourselfs.
