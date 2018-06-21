@@ -1,5 +1,5 @@
 library graphql_flutter;
 
 export './src/client.dart';
-export './src/query.dart';
-export './src/mutation.dart';
+export './src/components/query.dart';
+export './src/components/mutation.dart';

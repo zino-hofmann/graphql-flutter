@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import './client.dart';
+import '../client.dart';
 
 typedef void RunMutation(Map variables);
 
