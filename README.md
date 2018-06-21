@@ -24,7 +24,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.3.0
+  graphql_flutter: ^0.4.0
 ```
 
 Now inside your Dart code you can import it.
@@ -35,7 +35,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 ## Usage
 
-To use the client it first needs to be initialzed with an endpoint. If your endpoint requires authentication you can provide it to the client by calling the setter `apiToken` on the `Client` class.
+To use the client it first needs to be initialzed with an endpoint and cache. If your endpoint requires authentication you can provide it to the client by calling the setter `apiToken` on the `Client` class.
 
 > For this example we will use the public GitHub API.
 
@@ -45,7 +45,10 @@ To use the client it first needs to be initialzed with an endpoint. If your endp
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() async {
-  client = new Client('https://api.github.com/graphql');
+  client = new Client(
+    endPoint: 'https://api.github.com/graphql',
+    cache: new InMemoryCache(), // currently the only cache type we have implemented.
+  );
   client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
 
   ...
@@ -168,7 +171,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Query variables         |    ✅    |
 | Mutation variables      |    ✅    |
 | Query polling           |    ✅    |
-| Caching                 |    🔜    |
+| Caching                 |    ✅    |
 | Optimistic results      |    🔜    |
 | Client state management |    🔜    |
 
