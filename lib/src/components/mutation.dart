@@ -38,7 +38,7 @@ class MutationState extends State<Mutation> {
     });
 
     try {
-      final Map<String, dynamic> result = await client.execute(
+      final Map<String, dynamic> result = await client.query(
         query: widget.mutation,
         variables: variables,
       );

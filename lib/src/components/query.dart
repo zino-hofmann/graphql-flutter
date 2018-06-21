@@ -46,7 +46,7 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
 
   void getQueryResult() async {
     try {
-      final Map<String, dynamic> result = await client.execute(
+      final Map<String, dynamic> result = await client.query(
         query: widget.query,
         variables: widget.variables,
       );
