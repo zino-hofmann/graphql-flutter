@@ -1,3 +1,22 @@
+## [0.4.0] - June 21 2018
+
+### Breaking change
+
+- The Client now requires a from of cache.
+- The name of the `execute` method on the `Client` class changed to `query`.
+
+#### Fixes / Enhancements
+
+- Implemented in-memory cache.
+- Write memory to file when in background.
+- Added provider widget to save and restore the in-memory cache.
+- Restructure the project.
+
+#### Docs
+
+- Update the `README.md` to refelct changes in the code.
+- update the example to refelct changes in the code.
+
 ## [0.3.0] - June 16 2018
 
 ### Breaking change

@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 
-import './client.dart';
+import '../client.dart';
 
-typedef void RunMutation(Map variables);
+typedef void RunMutation(Map<String, dynamic> variables);
 
 typedef Widget MutationBuilder(
   RunMutation mutation, {
@@ -38,7 +38,7 @@ class MutationState extends State<Mutation> {
     });
 
     try {
-      final Map<String, dynamic> result = await client.execute(
+      final Map<String, dynamic> result = await client.query(
         query: widget.mutation,
         variables: variables,
       );

@@ -3,18 +3,26 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import './cache/in_memory.dart';
+
 Client client;
 
 class Client {
-  String _endpoint;
-  String _apiToken;
-
-  http.Client client;
-
-  Client([String endPoint = ""]) {
+  Client({
+    String endPoint = '',
+    InMemoryCache cache,
+  }) {
     this.endPoint = endPoint;
+    this.cache = cache;
+
     this.client = new http.Client();
   }
+
+  String _endpoint;
+  String _apiToken;
+  InMemoryCache _cache;
+
+  http.Client client;
 
   // Setters
   set endPoint(String value) {
@@ -23,6 +31,10 @@ class Client {
 
   set apiToken(String value) {
     _apiToken = value;
+  }
+
+  set cache(InMemoryCache cache) {
+    _cache = cache;
   }
 
   // Getters
@@ -35,27 +47,17 @@ class Client {
         'Content-Type': 'application/json',
       };
 
+  InMemoryCache get cache => this._cache;
+
   // Methods
-  Future<Map<String, dynamic>> execute({
-    String query,
+  String _encodeBody(
+    String query, {
     Map<String, dynamic> variables,
-  }) async {
-    final Map<String, dynamic> requestBody = {
+  }) {
+    return json.encode({
       'query': query,
       'variables': variables,
-    };
-
-    try {
-      final http.Response res = await client.post(
-        endPoint,
-        headers: headers,
-        body: json.encode(requestBody),
-      );
-
-      return _parseResponse(res);
-    } catch (error) {
-      throw error;
-    }
+    });
   }
 
   Map<String, dynamic> _parseResponse(http.Response response) {
@@ -77,5 +79,49 @@ class Client {
     }
 
     return jsonResponse['data'];
+  }
+
+  // The query method may send a request to your server if the appropriate data is not in your cache.
+  Future<Map<String, dynamic>> query({
+    String query,
+    Map<String, dynamic> variables,
+  }) async {
+    final String body = _encodeBody(
+      query,
+      variables: variables,
+    );
+
+    try {
+      final http.Response res = await client.post(
+        endPoint,
+        headers: headers,
+        body: body,
+      );
+
+      final Map<String, dynamic> parsedResponse = _parseResponse(res);
+
+      cache.write(body, parsedResponse);
+
+      return parsedResponse;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // The readQuery method is very similar to the query method except that readQuery will never make a request to your GraphQL server.
+  Map<String, dynamic> readQuery({
+    String query,
+    Map<String, dynamic> variables,
+  }) {
+    final String body = _encodeBody(
+      query,
+      variables: variables,
+    );
+
+    if (cache.hasEntity(body)) {
+      return cache.read(body);
+    } else {
+      throw new Exception('Can\'t find field in cache.');
+    }
   }
 }
