@@ -161,7 +161,7 @@ new Mutation(
 ...
 ```
 
-## Offline Cache
+### Offline Cache
 
 The in-memory cache can autmaticly be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
 
