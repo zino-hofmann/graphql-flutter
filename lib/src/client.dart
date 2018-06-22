@@ -100,9 +100,7 @@ class Client {
 
       final Map<String, dynamic> parsedResponse = _parseResponse(res);
 
-      if (!cache.hasEntity(body)) {
-        cache.write(body, parsedResponse);
-      }
+      cache.write(body, parsedResponse);
 
       return parsedResponse;
     } catch (error) {

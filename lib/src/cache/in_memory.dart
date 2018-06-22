@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
 class InMemoryCache {
-  Map<String, dynamic> _inMemoryCache = new Map<String, dynamic>();
+  HashMap<String, dynamic> _inMemoryCache = new HashMap<String, dynamic>();
 
   Future<String> get _localStoragePath async {
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -19,38 +20,55 @@ class InMemoryCache {
     return File('$path/cache.txt');
   }
 
-  Future<File> _writeToStorage() async {
+  Future _writeToStorage() async {
     final File file = await _localStorageFile;
-    final String output = json.encode(_inMemoryCache);
+    // final String output = json.encode(_inMemoryCache);
 
-    print('STORAGE_OUT:');
-    print(output);
+    IOSink sink = file.openWrite();
 
-    return file.writeAsString(output);
+    _inMemoryCache.forEach((key, value) {
+      sink.writeln(json.encode([key, value]));
+    });
+
+    sink.close();
+
+    return sink.done;
   }
 
-  Future<Map<String, dynamic>> _readFromStorage() async {
+  Future<HashMap<String, dynamic>> _readFromStorage() async {
     try {
       final File file = await _localStorageFile;
-      final String content = await file.readAsString();
+      // final String content = await file.readAsString();
+      Stream<dynamic> inputStream = file.openRead();
 
-      print('STORAGE_IN:');
-      print(content);
+      final HashMap<String, dynamic> storedHashMap =
+          new HashMap<String, dynamic>();
 
-      return json.decode(content);
+      inputStream
+          .transform(utf8.decoder) // Decode bytes to UTF8.
+          .transform(new LineSplitter()) // Convert stream to individual lines.
+          .listen((String line) {
+        final List keyAndValue = json.decode(line);
+
+        storedHashMap[keyAndValue[0]] = keyAndValue[1];
+      });
+
+      return storedHashMap;
+    } on FileSystemException {
+      // TODO: handle No such file
+
+      return new HashMap<String, dynamic>();
     } catch (error) {
       // TODO: handle error
       print(error);
 
-      return new Map<String, dynamic>();
+      return new HashMap<String, dynamic>();
     }
   }
 
   bool hasEntity(String key) => _inMemoryCache.containsKey(key);
 
   void save() async {
-    print("CACHE: SAVE");
-
     await _writeToStorage();
   }
 
@@ -59,8 +77,6 @@ class InMemoryCache {
   }
 
   dynamic read(String key) {
-    print("CACHE: READ");
-
     if (hasEntity(key)) {
       return _inMemoryCache[key];
     }
@@ -69,14 +85,10 @@ class InMemoryCache {
   }
 
   void write(String key, dynamic value) {
-    print("CACHE: WRITE");
-
     _inMemoryCache[key] = value;
   }
 
   void reset() {
-    print("CACHE: RESET");
-
     _inMemoryCache.clear();
   }
 }

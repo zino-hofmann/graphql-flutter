@@ -46,6 +46,20 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
 
   void getQueryResult() async {
     try {
+      final Map<String, dynamic> result = client.readQuery(
+        query: widget.query,
+        variables: widget.variables,
+      );
+
+      setState(() {
+        loading = false;
+        error = '';
+        data = result;
+      });
+    } catch (e) {
+      print(e.toString());
+    }
+    try {
       final Map<String, dynamic> result = await client.query(
         query: widget.query,
         variables: widget.variables,
@@ -61,17 +75,19 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
         new Timer(pollInterval, getQueryResult);
       }
     } catch (e) {
-      setState(() {
-        error = 'GQL ERROR';
-        loading = false;
-      });
+      if (data == {}) {
+        setState(() {
+          error = e.toString();
+          loading = false;
+        });
+      }
 
       if (widget.pollInterval != null) {
         new Timer(pollInterval, getQueryResult);
       }
 
       // TODO: handle error
-      print(e);
+      print(e.toString());
     }
   }
 

@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../client.dart';
 
-typedef void RunMutation(Map variables);
+typedef void RunMutation(Map<String, dynamic> variables);
 
 typedef Widget MutationBuilder(
   RunMutation mutation, {
