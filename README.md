@@ -14,6 +14,7 @@
 - [Usage](#usage)
   - [Queries](#queries)
   - [Mutations](#mutations)
+  - [Offline Cache](#offline-cache)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
@@ -160,6 +161,31 @@ new Mutation(
 ...
 ```
 
+## Offline Cache
+
+The in-memory cache can autmaticly be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
+
+```dart
+...
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new CacheProvider(
+      child: new MaterialApp(
+        title: 'Flutter Demo',
+        theme: new ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: new MyHomePage(title: 'Flutter Demo Home Page'),
+      ),
+    );
+  }
+}
+
+...
+```
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
@@ -171,7 +197,8 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Query variables         |    ✅    |
 | Mutation variables      |    ✅    |
 | Query polling           |    ✅    |
-| Caching                 |    ✅    |
+| In memory caching       |    ✅    |
+| Offline caching         |    ✅    |
 | Optimistic results      |    🔜    |
 | Client state management |    🔜    |
 
@@ -187,6 +214,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 <!-- prettier-ignore -->
 | [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://eusdima.com)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-eusdima "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") | [<img src="https://avatars3.githubusercontent.com/u/17142193?v=4" width="100px;"/><br /><sub><b>Zino Hofmann</b></sub>](https://github.com/HofmannZ)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Documentation") [💡](#example-HofmannZ "Examples") [🤔](#ideas-HofmannZ "Ideas, Planning, & Feedback") [👀](#review-HofmannZ "Reviewed Pull Requests") |
 | :---: | :---: |
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
