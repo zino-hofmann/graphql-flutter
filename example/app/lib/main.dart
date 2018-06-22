@@ -5,7 +5,10 @@ import './queries/readRepositories.dart' as queries;
 import './mutations/addStar.dart' as mutations;
 
 void main() {
-  client = new Client('https://api.github.com/graphql');
+  client = new Client(
+    endPoint: 'https://api.github.com/graphql',
+    cache: new InMemoryCache(),
+  );
   client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
 
   runApp(new MyApp());

@@ -25,7 +25,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.4.0
+  graphql_flutter: ^0.4.1
 ```
 
 Now inside your Dart code you can import it.
@@ -161,7 +161,7 @@ new Mutation(
 ...
 ```
 
-## Offline Cache
+### Offline Cache
 
 The in-memory cache can autmaticly be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
 
