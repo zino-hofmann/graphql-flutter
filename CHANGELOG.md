@@ -1,3 +1,17 @@
+## [0.4.1] - June 22 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+n/a
+
+#### Docs
+
+- The examples now porperly reflect the changes to the library.
+
 ## [0.4.0] - June 21 2018
 
 ### Breaking change
