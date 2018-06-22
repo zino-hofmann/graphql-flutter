@@ -20,10 +20,8 @@ class InMemoryCache {
     return File('$path/cache.txt');
   }
 
-  Future _writeToStorage() async {
+  Future<dynamic> _writeToStorage() async {
     final File file = await _localStorageFile;
-    // final String output = json.encode(_inMemoryCache);
-
     IOSink sink = file.openWrite();
 
     _inMemoryCache.forEach((key, value) {
@@ -38,7 +36,6 @@ class InMemoryCache {
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     try {
       final File file = await _localStorageFile;
-      // final String content = await file.readAsString();
       Stream<dynamic> inputStream = file.openRead();
 
       final HashMap<String, dynamic> storedHashMap =
