@@ -98,10 +98,10 @@ packages:
   graphql_flutter:
     dependency: "direct main"
     description:
-      name: graphql_flutter
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.4.0"
+      path: "../.."
+      relative: true
+    source: path
+    version: "0.4.1"
   html:
     dependency: transitive
     description:
