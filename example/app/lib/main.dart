@@ -74,24 +74,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
               return new Mutation(
                 mutations.addStar,
-                onCompleted: (Map<String, dynamic> data) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Thanks for your star!'),
-                        actions: <Widget>[
-                          SimpleDialogOption(
-                            child: Text('Dismiss'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          )
-                        ],
-                      );
-                    }
-                  );
-                },
                 builder: (
                   addStar, {
                   bool loading,
@@ -109,6 +91,24 @@ class _MyHomePageState extends State<MyHomePage> {
                         'starrableId': repository['id'],
                       });
                     },
+                  );
+                },
+                onCompleted: (Map<String, dynamic> data) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Thanks for your star!'),
+                        actions: <Widget>[
+                          SimpleDialogOption(
+                            child: Text('Dismiss'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    }
                   );
                 },
               );
