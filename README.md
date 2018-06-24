@@ -36,7 +36,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 ## Usage
 
-To use the client it first needs to be initialzed with an endpoint and cache. If your endpoint requires authentication you can provide it to the client by calling the setter `apiToken` on the `Client` class.
+To use the client it first needs to be initialized with an endpoint and cache. If your endpoint requires authentication you can provide it to the client by calling the setter `apiToken` on the `Client` class.
 
 > For this example we will use the public GitHub API.
 
@@ -60,7 +60,7 @@ void main() async {
 
 ### Queries
 
-Creating a query, is as simple as creating a multiline string:
+Creating a query is as simple as creating a multiline string:
 
 ```dart
 String readRepositories = """
@@ -121,7 +121,7 @@ new Query(
 
 ### Mutations
 
-Again first create the mutation string string:
+Again first create a mutation string:
 
 ```dart
 String addStar = """
@@ -136,7 +136,7 @@ String addStar = """
     .replaceAll('\n', ' ');
 ```
 
-The syntax for mutations fairly similar to those of a query. The only diffence is that the first argument of the builder function is the mutation function. Just call it to trigger the mutations (Yeah we deliberetly stole this from react-apollo.)
+The syntax for mutations is fairly similar to that of a query. The only diffence is that the first argument of the builder function is a mutation function. Just call it to trigger the mutations (Yeah we deliberately stole this from react-apollo.)
 
 ```dart
 ...
@@ -163,7 +163,7 @@ new Mutation(
 
 ### Offline Cache
 
-The in-memory cache can autmaticly be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
+The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
 
 ```dart
 ...
@@ -204,7 +204,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 ## Contributing
 
-Feel free to open a PR with any suggetions! We'll be actively working on the library ourselfs.
+Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
 
 ## Contributors
 
