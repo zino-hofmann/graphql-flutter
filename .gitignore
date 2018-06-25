@@ -1,6 +1,8 @@
 .vs/
 .idea/libraries/
+.idea/workspace.xml
 example/.idea/libraries/
+example/.idea/workspace.xml
 
 .DS_Store
 .dart_tool/
