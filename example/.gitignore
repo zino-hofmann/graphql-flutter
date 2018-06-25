@@ -1,5 +1,9 @@
 .DS_Store
 .dart_tool/
+.idea/libraries/
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
 
 .packages
 .pub/

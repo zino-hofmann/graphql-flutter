@@ -9,7 +9,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^0.1.2
   graphql_flutter:
-    path: ../..
+    path: ..
 
 dev_dependencies:
   flutter_test:
