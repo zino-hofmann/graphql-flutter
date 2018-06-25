@@ -93,6 +93,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   );
                 },
+                onCompleted: (Map<String, dynamic> data) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Thanks for your star!'),
+                        actions: <Widget>[
+                          SimpleDialogOption(
+                            child: Text('Dismiss'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    }
+                  );
+                },
               );
             },
           );
