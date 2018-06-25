@@ -1,3 +1,4 @@
+*.lock
 .DS_Store
 .dart_tool/
 
