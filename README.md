@@ -153,8 +153,26 @@ new Mutation(
     onPressed: () => runMutation({
       'starrableId': <A_STARTABLE_REPOSITORY_ID>,
     }),
-    tooltip: 'Increment',
-    child: new Icon(Icons.edit),
+    tooltip: 'Star',
+    child: new Icon(Icons.star),
+  );
+},
+  onCompleted: (Map<String, dynamic> data) {
+    showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Thanks for your star!'),
+        actions: <Widget>[
+          SimpleDialogOption(
+            child: Text('Dismiss'),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          )
+        ],
+      );
+    }
   );
 }),
 

@@ -4,6 +4,8 @@ import '../client.dart';
 
 typedef void RunMutation(Map<String, dynamic> variables);
 
+typedef void OnMutationCompleted(Map<String, dynamic> data);
+
 typedef Widget MutationBuilder(
   RunMutation mutation, {
   @required bool loading,
@@ -16,10 +18,12 @@ class Mutation extends StatefulWidget {
     this.mutation, {
     Key key,
     @required this.builder,
+    this.onCompleted,
   }) : super(key: key);
 
   final String mutation;
   final MutationBuilder builder;
+  final OnMutationCompleted onCompleted;
 
   @override
   MutationState createState() => new MutationState();
@@ -47,6 +51,10 @@ class MutationState extends State<Mutation> {
         loading = false;
         data = result;
       });
+
+      if (widget.onCompleted != null) {
+        widget.onCompleted(result);
+      }
     } catch (e) {
       setState(() {
         loading = false;
