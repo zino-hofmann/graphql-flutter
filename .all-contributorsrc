@@ -44,6 +44,18 @@
         "doc",
         "ideas"
       ]
+    },
+    {
+      "login": "camuthig",
+      "name": "Chris Muthig",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/5178217?v=4",
+      "profile": "https://github.com/camuthig",
+      "contributions": [
+        "code",
+        "doc",
+        "example",
+        "ideas"
+      ]
     }
   ]
 }
