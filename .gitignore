@@ -1,5 +1,6 @@
 .vs/
 .idea/libraries/
+example/.idea/libraries/
 
 .DS_Store
 .dart_tool/

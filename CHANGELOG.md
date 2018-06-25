@@ -1,3 +1,19 @@
+## [0.5.0] - June 25 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Introduced `onCompleted` callback for mutiations.
+- Excluded some config files from version control.
+
+#### Docs
+
+- Fixed typos in the `readme.md`.
+- The examples inculde an example of the `onCompleted` callback.
+
 ## [0.4.1] - June 22 2018
 
 ### Breaking change
