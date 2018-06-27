@@ -11,18 +11,18 @@ class Client {
   Client({
     String endPoint = '',
     InMemoryCache cache,
-    String apiTokenPrefix = 'Bearer',
+    Map<String, String> Function(Map<String, String>) handleHeaders,
   }) {
     this.endPoint = endPoint;
     this.cache = cache;
-    this.apiTokenPrefix = apiTokenPrefix;
     this.client = new http.Client();
+    this._handleHeaders = handleHeaders;
   }
 
-  String _apiTokenPrefix;
   String _endpoint;
   String _apiToken;
   InMemoryCache _cache;
+  Map<String, String> Function(Map<String, String>) _handleHeaders;
 
   http.Client client;
 
@@ -39,8 +39,8 @@ class Client {
     _cache = cache;
   }
 
-  set apiTokenPrefix(String value) {
-    _apiTokenPrefix = value;
+  set handleHeaders(Map<String, String> Function(Map<String, String>) value) {
+    _handleHeaders = value;
   }
 
   // Getters
@@ -48,15 +48,23 @@ class Client {
 
   String get apiToken => this._apiToken;
 
-  String get apiTokenPrefix => this._apiTokenPrefix;
+  Map<String, String> Function(Map<String, String>) get handleHeaders =>
+      this._handleHeaders;
 
   Map<String, String> get headers {
-    Map<String, String> h = new Map();
+    Map<String, String> headersMap = new Map();
+
+    headersMap['Content-Type'] = 'application/json';
+
     if (apiToken != null) {
-      h['Authorization'] = '$apiTokenPrefix $apiToken';
+      headersMap['Authorization'] = 'Bearer $apiToken';
     }
-    h['Content-Type'] = 'application/json';
-    return h;
+
+    if (handleHeaders != null) {
+      headersMap.addAll(handleHeaders(headersMap));
+    }
+
+    return headersMap;
   }
 
   InMemoryCache get cache => this._cache;
