@@ -11,13 +11,15 @@ class Client {
   Client({
     String endPoint = '',
     InMemoryCache cache,
+    String apiTokenPrefix = 'Bearer',
   }) {
     this.endPoint = endPoint;
     this.cache = cache;
-
+    this.apiTokenPrefix = apiTokenPrefix;
     this.client = new http.Client();
   }
 
+  String _apiTokenPrefix;
   String _endpoint;
   String _apiToken;
   InMemoryCache _cache;
@@ -37,15 +39,25 @@ class Client {
     _cache = cache;
   }
 
+  set apiTokenPrefix(String value) {
+    _apiTokenPrefix = value;
+  }
+
   // Getters
   String get endPoint => this._endpoint;
 
   String get apiToken => this._apiToken;
 
-  Map<String, String> get headers => {
-        'Authorization': 'Bearer $apiToken',
-        'Content-Type': 'application/json',
-      };
+  String get apiTokenPrefix => this._apiTokenPrefix;
+
+  Map<String, String> get headers {
+    Map<String, String> h = new Map();
+    if (apiToken != null) {
+      h['Authorization'] = '$apiTokenPrefix $apiToken';
+    }
+    h['Content-Type'] = 'application/json';
+    return h;
+  }
 
   InMemoryCache get cache => this._cache;
 
