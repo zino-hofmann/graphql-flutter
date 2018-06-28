@@ -10,19 +10,22 @@ Client client;
 class Client {
   Client({
     String endPoint = '',
+    String apiToken,
     InMemoryCache cache,
     Map<String, String> Function(Map<String, String>) handleHeaders,
+    String Function(String) getAuthorizationHeader,
   }) {
     this.endPoint = endPoint;
+    this.apiToken = apiToken;
     this.cache = cache;
     this.client = new http.Client();
-    this._handleHeaders = handleHeaders;
+    this._getAuthorizationHeader = getAuthorizationHeader;
   }
 
   String _endpoint;
   String _apiToken;
   InMemoryCache _cache;
-  Map<String, String> Function(Map<String, String>) _handleHeaders;
+  String Function(String) _getAuthorizationHeader;
 
   http.Client client;
 
@@ -39,8 +42,8 @@ class Client {
     _cache = cache;
   }
 
-  set handleHeaders(Map<String, String> Function(Map<String, String>) value) {
-    _handleHeaders = value;
+  set getAuthorizationHeader(String Function(String) value) {
+    this._getAuthorizationHeader = value;
   }
 
   // Getters
@@ -48,8 +51,7 @@ class Client {
 
   String get apiToken => this._apiToken;
 
-  Map<String, String> Function(Map<String, String>) get handleHeaders =>
-      this._handleHeaders;
+  String Function(String) get getAuthorizationHeader => this._getAuthorizationHeader;
 
   Map<String, String> get headers {
     Map<String, String> headersMap = new Map();
@@ -58,10 +60,12 @@ class Client {
 
     if (apiToken != null) {
       headersMap['Authorization'] = 'Bearer $apiToken';
-    }
 
-    if (handleHeaders != null) {
-      headersMap.addAll(handleHeaders(headersMap));
+      if (getAuthorizationHeader is Function) {
+        headersMap['Authorization'] = getAuthorizationHeader(apiToken);
+      } else {
+        headersMap['Authorization'] = 'Bearer $apiToken';
+      }
     }
 
     return headersMap;
@@ -94,7 +98,8 @@ class Client {
 
     if (jsonResponse['errors'] != null) {
       throw new Exception(
-        'Error returned by the server in the query' + jsonResponse['errors'],
+        'Error returned by the server in the query' +
+            jsonResponse['errors'].toString(),
       );
     }
 
