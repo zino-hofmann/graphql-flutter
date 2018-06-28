@@ -12,7 +12,6 @@ class Client {
     String endPoint = '',
     String apiToken,
     InMemoryCache cache,
-    Map<String, String> Function(Map<String, String>) handleHeaders,
     String Function(String) getAuthorizationHeader,
   }) {
     this.endPoint = endPoint;
