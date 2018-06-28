@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import '../client.dart';
+import './graphql_provider.dart';
 
 typedef void RunMutation(Map<String, dynamic> variables);
 
@@ -34,41 +35,44 @@ class MutationState extends State<Mutation> {
   Map<String, dynamic> data = {};
   String error = '';
 
-  void runMutation(Map<String, dynamic> variables) async {
-    setState(() {
-      loading = true;
-      error = '';
-      data = {};
-    });
+  RunMutation runMutation(Client client) =>
+      (Map<String, dynamic> variables) async {
+        setState(() {
+          loading = true;
+          error = '';
+          data = {};
+        });
 
-    try {
-      final Map<String, dynamic> result = await client.query(
-        query: widget.mutation,
-        variables: variables,
-      );
+        try {
+          final Map<String, dynamic> result = await client.query(
+            query: widget.mutation,
+            variables: variables,
+          );
 
-      setState(() {
-        loading = false;
-        data = result;
-      });
+          setState(() {
+            loading = false;
+            data = result;
+          });
 
-      if (widget.onCompleted != null) {
-        widget.onCompleted(result);
-      }
-    } catch (e) {
-      setState(() {
-        loading = false;
-        error = 'GQL ERROR';
-      });
+          if (widget.onCompleted != null) {
+            widget.onCompleted(result);
+          }
+        } catch (e) {
+          setState(() {
+            loading = false;
+            error = 'GQL ERROR';
+          });
 
-      // TODO: Handle error
-      print(e);
-    }
-  }
+          // TODO: Handle error
+          print(e);
+        }
+      };
 
   Widget build(BuildContext context) {
+    final Client client = GraphqlProvider.of(context).client;
+
     return widget.builder(
-      runMutation,
+      runMutation(client),
       loading: loading,
       error: error,
       data: data,

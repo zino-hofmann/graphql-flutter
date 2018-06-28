@@ -5,8 +5,6 @@ import 'package:http/http.dart' as http;
 
 import './cache/in_memory.dart';
 
-Client client;
-
 class Client {
   Client({
     String endPoint = '',

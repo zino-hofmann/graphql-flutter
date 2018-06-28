@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../client.dart';
+import './graphql_provider.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
@@ -40,11 +41,9 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
     if (widget.pollInterval != null) {
       pollInterval = new Duration(seconds: widget.pollInterval);
     }
-
-    getQueryResult();
   }
 
-  void getQueryResult() async {
+  void getQueryResult(Client client) async {
     try {
       final Map<String, dynamic> result = client.readQuery(
         query: widget.query,
@@ -59,6 +58,7 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
     } catch (e) {
       print(e.toString());
     }
+
     try {
       final Map<String, dynamic> result = await client.query(
         query: widget.query,
@@ -72,7 +72,7 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
       });
 
       if (widget.pollInterval != null) {
-        new Timer(pollInterval, getQueryResult);
+        new Timer(pollInterval, () => getQueryResult(client));
       }
     } catch (e) {
       if (data == {}) {
@@ -83,7 +83,7 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
       }
 
       if (widget.pollInterval != null) {
-        new Timer(pollInterval, getQueryResult);
+        new Timer(pollInterval, () => getQueryResult(client));
       }
 
       // TODO: handle error
@@ -92,6 +92,10 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
   }
 
   Widget build(BuildContext context) {
+    final Client client = GraphqlProvider.of(context).client;
+
+    getQueryResult(client);
+
     return widget.builder(
       loading: loading,
       error: error,

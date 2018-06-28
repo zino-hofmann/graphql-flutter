@@ -4,20 +4,20 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import './queries/readRepositories.dart' as queries;
 import './mutations/addStar.dart' as mutations;
 
-void main() {
-  client = new Client(
-    endPoint: 'https://api.github.com/graphql',
-    cache: new InMemoryCache(),
-  );
-  client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
-
-  runApp(new MyApp());
-}
+void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new CacheProvider(
+    Client client = new Client(
+      endPoint: 'https://api.github.com/graphql',
+      cache: new InMemoryCache(),
+    );
+    client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
+
+    return new GraphqlProvider(
+      client: client,
+      // child: new CacheProvider(
       child: new MaterialApp(
         title: 'Flutter Demo',
         theme: new ThemeData(
@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
         ),
         home: new MyHomePage(title: 'Flutter Demo Home Page'),
       ),
+      // ),
     );
   }
 }
@@ -50,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: new Query(
         queries.readRepositories,
-        pollInterval: 1,
+        // pollInterval: 1,s
         builder: ({
           bool loading,
           Map data,
@@ -95,21 +96,20 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 onCompleted: (Map<String, dynamic> data) {
                   showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Thanks for your star!'),
-                        actions: <Widget>[
-                          SimpleDialogOption(
-                            child: Text('Dismiss'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          )
-                        ],
-                      );
-                    }
-                  );
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text('Thanks for your star!'),
+                          actions: <Widget>[
+                            SimpleDialogOption(
+                              child: Text('Dismiss'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            )
+                          ],
+                        );
+                      });
                 },
               );
             },
