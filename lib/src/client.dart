@@ -72,7 +72,7 @@ class Client {
 
     final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
-    if (jsonResponse['errors'] != null) {
+    if (jsonResponse['errors'] != null && jsonResponse['errors'].length > 0) {
       throw new Exception(
         'Error returned by the server in the query' + jsonResponse['errors'],
       );
