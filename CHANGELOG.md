@@ -1,3 +1,17 @@
+## [0.5.1] - June 25 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed json error parsing.
+
+#### Docs
+
+n/a
+
 ## [0.5.0] - June 25 2018
 
 ### Breaking change
