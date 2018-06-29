@@ -1,4 +1,4 @@
-## [0.5.1] - June 25 2018
+## [0.5.1] - June 29 2018
 
 ### Breaking change
 
