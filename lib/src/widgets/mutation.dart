@@ -69,10 +69,8 @@ class MutationState extends State<Mutation> {
       };
 
   Widget build(BuildContext context) {
-    final Client client = GraphqlProvider.of(context).client;
-
     return widget.builder(
-      runMutation(client),
+      runMutation(GraphqlProvider.of(context).client),
       loading: loading,
       error: error,
       data: data,

@@ -33,12 +33,14 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
   Map<String, dynamic> data = {};
   String error = '';
   Duration pollInterval;
+  Timer pollTimer;
+  bool initialFetch = false;
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.pollInterval != null) {
+    if (widget.pollInterval is int) {
       pollInterval = new Duration(seconds: widget.pollInterval);
     }
   }
@@ -71,8 +73,8 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
         data = result;
       });
 
-      if (widget.pollInterval != null) {
-        new Timer(pollInterval, () => getQueryResult(client));
+      if (pollInterval is Duration && !(pollTimer is Timer)) {
+        pollTimer = new Timer(pollInterval, () => getQueryResult(client));
       }
     } catch (e) {
       if (data == {}) {
@@ -82,8 +84,8 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
         });
       }
 
-      if (widget.pollInterval != null) {
-        new Timer(pollInterval, () => getQueryResult(client));
+      if (pollInterval is Duration && !(pollTimer is Timer)) {
+        pollTimer = new Timer(pollInterval, () => getQueryResult(client));
       }
 
       // TODO: handle error
@@ -92,9 +94,11 @@ class QueryState extends State<Query> with WidgetsBindingObserver {
   }
 
   Widget build(BuildContext context) {
-    final Client client = GraphqlProvider.of(context).client;
+    if (!initialFetch) {
+      initialFetch = true;
 
-    getQueryResult(client);
+      getQueryResult(GraphqlProvider.of(context).client);
+    }
 
     return widget.builder(
       loading: loading,
