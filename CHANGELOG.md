@@ -1,3 +1,17 @@
+## [0.5.2] - July 11 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed error when cache file is non-existent
+
+#### Docs
+
+n/a
+
 ## [0.5.1] - June 29 2018
 
 ### Breaking change
