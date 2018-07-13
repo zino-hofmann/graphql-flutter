@@ -1,3 +1,19 @@
+## [0.5.3] - July 13 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Added polling timer as a variable for easy deletion on dispose
+- Fixed bug when Query timer is still active when the Query is disposed
+- Added instant query fetch when the query variables are updated
+
+#### Docs
+
+n/a
+
 ## [0.5.2] - July 11 2018
 
 ### Breaking change
