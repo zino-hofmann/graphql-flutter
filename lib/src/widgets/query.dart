@@ -116,7 +116,7 @@ class QueryState extends State<Query> {
     bool areDifferent = false;
 
     a.forEach((key, value) {
-      if (b[key] != a[key]) {
+      if (b[key] != a[key] || (!b.containsKey(key))) {
         areDifferent = true;
       }
     });
