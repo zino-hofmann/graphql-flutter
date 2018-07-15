@@ -74,7 +74,7 @@ class Client {
 
     if (jsonResponse['errors'] != null && jsonResponse['errors'].length > 0) {
       throw new Exception(
-        'Error returned by the server in the query' + jsonResponse['errors'],
+        'Error returned by the server in the query' + jsonResponse['errors'].toString(),
       );
     }
 

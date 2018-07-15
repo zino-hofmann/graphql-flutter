@@ -55,7 +55,7 @@ class MutationState extends State<Mutation> {
       if (widget.onCompleted != null) {
         widget.onCompleted(result);
       }
-    } catch (e) {
+    } on Error catch (e) {
       setState(() {
         loading = false;
         error = 'GQL ERROR';
@@ -63,6 +63,7 @@ class MutationState extends State<Mutation> {
 
       // TODO: Handle error
       print(e);
+      print(e.stackTrace);
     }
   }
 
