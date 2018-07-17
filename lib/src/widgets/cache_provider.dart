@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../client.dart';
+
+import 'package:graphql_flutter/src/client.dart';
 
 class CacheProvider extends StatefulWidget {
   const CacheProvider({

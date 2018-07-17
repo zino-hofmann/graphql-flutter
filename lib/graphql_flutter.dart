@@ -1,9 +1,9 @@
 library graphql_flutter;
 
-export './src/client.dart';
+export 'package:graphql_flutter/src/client.dart';
 
-export './src/cache/in_memory.dart';
+export 'package:graphql_flutter/src/cache/in_memory.dart';
 
-export './src/widgets/query.dart';
-export './src/widgets/mutation.dart';
-export './src/widgets/cache_provider.dart';
+export 'package:graphql_flutter/src/widgets/query.dart';
+export 'package:graphql_flutter/src/widgets/mutation.dart';
+export 'package:graphql_flutter/src/widgets/cache_provider.dart';

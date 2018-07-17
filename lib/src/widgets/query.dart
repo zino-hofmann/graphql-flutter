@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 
-import '../client.dart';
+import 'package:graphql_flutter/src/client.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
