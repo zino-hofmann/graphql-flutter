@@ -1,3 +1,17 @@
+## [0.5.4] - July 17 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Query: changed Timer to Timer.periodic and one minor logic tweak.
+
+#### Docs
+
+n/a
+
 ## [0.5.3] - July 13 2018
 
 ### Breaking change
