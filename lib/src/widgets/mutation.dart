@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../client.dart';
+import 'package:graphql_flutter/src/client.dart';
 
 typedef void RunMutation(Map<String, dynamic> variables);
 
@@ -16,7 +16,7 @@ typedef Widget MutationBuilder(
 class Mutation extends StatefulWidget {
   Mutation(
     this.mutation, {
-    Key key,
+    final Key key,
     @required this.builder,
     this.onCompleted,
   }) : super(key: key);

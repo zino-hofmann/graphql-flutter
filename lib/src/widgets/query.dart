@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/widgets.dart';
 
-import '../client.dart';
+import 'package:graphql_flutter/src/client.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
@@ -12,7 +12,7 @@ typedef Widget QueryBuilder({
 class Query extends StatefulWidget {
   Query(
     this.query, {
-    Key key,
+    final Key key,
     this.variables = const {},
     @required this.builder,
     this.pollInterval,
@@ -31,9 +31,10 @@ class QueryState extends State<Query> {
   bool loading = true;
   Map<String, dynamic> data = {};
   String error = '';
+
+  bool initialFetch = false;
   Duration pollInterval;
   Timer pollTimer;
-  bool initialFetch = false;
   Map currentVariables = new Map();
 
   @override
