@@ -6,11 +6,13 @@ n/a
 
 #### Fixes / Enhancements
 
-- Query: changed Timer to Timer.periodic and one minor logic tweak.
+- Query: changed `Timer` to `Timer.periodic` @eusdima
+- Minor logic tweak @eusdima
+- Use absolute paths in the library @HofmannZ
 
 #### Docs
 
-n/a
+- Fix mutations example bug not updating star bool @cal-pratt
 
 ## [0.5.3] - July 13 2018
 
