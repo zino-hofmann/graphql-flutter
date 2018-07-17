@@ -87,10 +87,6 @@ class QueryState extends State<Query> {
         error = '';
         data = result;
       });
-
-      if (pollInterval is Duration && !(pollTimer is Timer)) {
-        pollTimer = new Timer(pollInterval, () => getQueryResult());
-      }
     } catch (e) {
       if (data == {}) {
         setState(() {
@@ -99,12 +95,15 @@ class QueryState extends State<Query> {
         });
       }
 
-      if (pollInterval is Duration && !(pollTimer is Timer)) {
-        pollTimer = new Timer(pollInterval, () => getQueryResult());
-      }
-
       // TODO: handle error
       print(e.toString());
+    }
+
+    if (pollInterval is Duration && !(pollTimer is Timer)) {
+      pollTimer = new Timer.periodic(
+        pollInterval,
+        (Timer t) => getQueryResult(),
+      );
     }
   }
 
