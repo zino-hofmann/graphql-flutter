@@ -16,7 +16,7 @@ typedef Widget MutationBuilder(
 class Mutation extends StatefulWidget {
   Mutation(
     this.mutation, {
-    Key key,
+    final Key key,
     @required this.builder,
     this.onCompleted,
   }) : super(key: key);
