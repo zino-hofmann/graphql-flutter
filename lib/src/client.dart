@@ -10,17 +10,21 @@ Client client;
 class Client {
   Client({
     String endPoint = '',
+    String apiToken,
     InMemoryCache cache,
+    String Function(String) getAuthorizationHeader,
   }) {
     this.endPoint = endPoint;
+    this.apiToken = apiToken;
     this.cache = cache;
-
     this.client = new http.Client();
+    this._getAuthorizationHeader = getAuthorizationHeader;
   }
 
   String _endpoint;
   String _apiToken;
   InMemoryCache _cache;
+  String Function(String) _getAuthorizationHeader;
 
   http.Client client;
 
@@ -37,15 +41,34 @@ class Client {
     _cache = cache;
   }
 
+  set getAuthorizationHeader(String Function(String) value) {
+    this._getAuthorizationHeader = value;
+  }
+
   // Getters
   String get endPoint => this._endpoint;
 
   String get apiToken => this._apiToken;
 
-  Map<String, String> get headers => {
-        'Authorization': 'Bearer $apiToken',
-        'Content-Type': 'application/json',
-      };
+  String Function(String) get getAuthorizationHeader => this._getAuthorizationHeader;
+
+  Map<String, String> get headers {
+    Map<String, String> headersMap = new Map();
+
+    headersMap['Content-Type'] = 'application/json';
+
+    if (apiToken != null) {
+      headersMap['Authorization'] = 'Bearer $apiToken';
+
+      if (getAuthorizationHeader is Function) {
+        headersMap['Authorization'] = getAuthorizationHeader(apiToken);
+      } else {
+        headersMap['Authorization'] = 'Bearer $apiToken';
+      }
+    }
+
+    return headersMap;
+  }
 
   InMemoryCache get cache => this._cache;
 

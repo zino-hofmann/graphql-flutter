@@ -51,7 +51,8 @@ void main() async {
     cache: new InMemoryCache(), // currently the only cache type we have implemented.
   );
   client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
-
+  // If you need a different auth token format, use getAuthorizationHeader callback function
+  client.getAuthorizationHeader = (String apiToken) => '<YOUR_CUSTOM_AUTHORIZATION_STRING>'
   ...
 }
 
