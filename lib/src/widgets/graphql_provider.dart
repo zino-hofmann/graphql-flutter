@@ -1,22 +1,66 @@
 import 'package:flutter/widgets.dart';
 
-import '../client.dart';
+import 'package:graphql_flutter/src/client.dart';
 
-class GraphqlProvider extends InheritedWidget {
-  GraphqlProvider({
+class GraphqlProvider extends StatefulWidget {
+  const GraphqlProvider({
     Key key,
-    @required this.client,
-    @required Widget child,
-  }) : super(key: key, child: child);
+    this.client,
+    this.child,
+  }) : super(key: key);
 
-  final Client client;
+  final ValueNotifier<Client> client;
+  final Widget child;
 
-  @override
-  bool updateShouldNotify(GraphqlProvider oldWidget) {
-    return client != oldWidget.client;
+  static ValueNotifier<Client> of(BuildContext context) {
+    _InheritedGraphqlProvider inheritedGraphqlProvider =
+        context.inheritFromWidgetOfExactType(_InheritedGraphqlProvider);
+
+    return inheritedGraphqlProvider.client;
   }
 
-  static GraphqlProvider of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(GraphqlProvider);
+  @override
+  State<StatefulWidget> createState() => new _GraphqlProviderState();
+}
+
+class _GraphqlProviderState extends State<GraphqlProvider> {
+  void didValueChange() => setState(() {});
+
+  @override
+  initState() {
+    super.initState();
+
+    widget.client.addListener(didValueChange);
+  }
+
+  @override
+  dispose() {
+    widget.client?.removeListener(didValueChange);
+
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return new _InheritedGraphqlProvider(
+      client: widget.client,
+      child: widget.child,
+    );
+  }
+}
+
+class _InheritedGraphqlProvider extends InheritedWidget {
+  _InheritedGraphqlProvider({
+    this.client,
+    this.child,
+  }) : clientValue = client.value;
+
+  final ValueNotifier<Client> client;
+  final Widget child;
+  final Client clientValue;
+
+  @override
+  bool updateShouldNotify(_InheritedGraphqlProvider oldWidget) {
+    return clientValue != oldWidget.clientValue;
   }
 }

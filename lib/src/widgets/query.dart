@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import 'package:graphql_flutter/src/client.dart';
+import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
@@ -63,6 +64,10 @@ class QueryState extends State<Query> {
   }
 
   void getQueryResult() async {
+    /// Gets the client from the closest wrapping [GraphqlProvider].
+    Client client = GraphqlProvider.of(context).value;
+    assert(client != null);
+
     try {
       final Map<String, dynamic> result = client.readQuery(
         query: widget.query,
@@ -77,6 +82,7 @@ class QueryState extends State<Query> {
     } catch (e) {
       print(e.toString());
     }
+
     try {
       final Map<String, dynamic> result = await client.query(
         query: widget.query,
