@@ -33,7 +33,7 @@ class QueryState extends State<Query> {
   Map<String, dynamic> data = {};
   String error = '';
 
-  bool initialFetch = false;
+  bool initialFetch = true;
   Duration pollInterval;
   Timer pollTimer;
   Map currentVariables = new Map();
@@ -131,9 +131,8 @@ class QueryState extends State<Query> {
   }
 
   Widget build(BuildContext context) {
-    if (!initialFetch) {
-      initialFetch = true;
-
+    if (initialFetch) {
+      initialFetch = false;
       currentVariables = widget.variables;
 
       getQueryResult();
