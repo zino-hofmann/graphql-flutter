@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import '../client.dart';
-import './graphql_provider.dart';
+import 'package:graphql_flutter/src/client.dart';
 
 typedef void RunMutation(Map<String, dynamic> variables);
 
@@ -17,7 +16,7 @@ typedef Widget MutationBuilder(
 class Mutation extends StatefulWidget {
   Mutation(
     this.mutation, {
-    Key key,
+    final Key key,
     @required this.builder,
     this.onCompleted,
   }) : super(key: key);
@@ -35,42 +34,42 @@ class MutationState extends State<Mutation> {
   Map<String, dynamic> data = {};
   String error = '';
 
-  RunMutation runMutation(Client client) =>
-      (Map<String, dynamic> variables) async {
-        setState(() {
-          loading = true;
-          error = '';
-          data = {};
-        });
+  void runMutation(Map<String, dynamic> variables) async {
+    setState(() {
+      loading = true;
+      error = '';
+      data = {};
+    });
 
-        try {
-          final Map<String, dynamic> result = await client.query(
-            query: widget.mutation,
-            variables: variables,
-          );
+    try {
+      final Map<String, dynamic> result = await client.query(
+        query: widget.mutation,
+        variables: variables,
+      );
 
-          setState(() {
-            loading = false;
-            data = result;
-          });
+      setState(() {
+        loading = false;
+        data = result;
+      });
 
-          if (widget.onCompleted != null) {
-            widget.onCompleted(result);
-          }
-        } catch (e) {
-          setState(() {
-            loading = false;
-            error = 'GQL ERROR';
-          });
+      if (widget.onCompleted != null) {
+        widget.onCompleted(result);
+      }
+    } on Error catch (e) {
+      setState(() {
+        loading = false;
+        error = 'GQL ERROR';
+      });
 
-          // TODO: Handle error
-          print(e);
-        }
-      };
+      // TODO: Handle error
+      print(e);
+      print(e.stackTrace);
+    }
+  }
 
   Widget build(BuildContext context) {
     return widget.builder(
-      runMutation(GraphqlProvider.of(context).client),
+      runMutation,
       loading: loading,
       error: error,
       data: data,

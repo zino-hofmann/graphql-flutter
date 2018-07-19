@@ -81,6 +81,11 @@ class _MyHomePageState extends State<MyHomePage> {
                   Map data,
                   String error,
                 }) {
+                  if (data.isNotEmpty) {
+                    repository['viewerHasStarred'] =
+                      data['addStar']['starrable']['viewerHasStarred'];
+                  }
+
                   return new ListTile(
                     leading: repository['viewerHasStarred']
                         ? const Icon(Icons.star, color: Colors.amber)

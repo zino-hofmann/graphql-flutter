@@ -15,6 +15,7 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/4757453?v=4",
       "profile": "http://eusdima.com",
       "contributions": [
+        "bug",
         "code",
         "doc",
         "example",
@@ -28,10 +29,12 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/17142193?v=4",
       "profile": "https://github.com/HofmannZ",
       "contributions": [
+        "bug",
         "code",
         "doc",
         "example",
         "ideas",
+        "infra",
         "review"
       ]
     },
@@ -51,6 +54,19 @@
       "avatar_url": "https://avatars3.githubusercontent.com/u/5178217?v=4",
       "profile": "https://github.com/camuthig",
       "contributions": [
+        "code",
+        "doc",
+        "example",
+        "ideas"
+      ]
+    },
+    {
+      "login": "cal-pratt",
+      "name": "Cal Pratt",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/7611406?v=4",
+      "profile": "http://stackoverflow.com/users/3280538/flkes",
+      "contributions": [
+        "bug",
         "code",
         "doc",
         "example",

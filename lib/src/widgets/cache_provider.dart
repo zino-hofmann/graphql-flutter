@@ -1,58 +1,59 @@
-// import 'package:flutter/material.dart';
-// import '../client.dart';
+import 'package:flutter/material.dart';
 
-// class CacheProvider extends StatefulWidget {
-//   const CacheProvider({
-//     Key key,
-//     @required this.child,
-//   }) : super(key: key);
+import 'package:graphql_flutter/src/client.dart';
 
-//   final Widget child;
+class CacheProvider extends StatefulWidget {
+  const CacheProvider({
+    final Key key,
+    @required this.child,
+  }) : super(key: key);
 
-//   @override
-//   _CacheProviderState createState() => new _CacheProviderState();
-// }
+  final Widget child;
 
-// class _CacheProviderState extends State<CacheProvider>
-//     with WidgetsBindingObserver {
-//   @override
-//   void initState() {
-//     super.initState();
+  @override
+  _CacheProviderState createState() => new _CacheProviderState();
+}
 
-//     client.cache.restore();
+class _CacheProviderState extends State<CacheProvider>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
 
-//     WidgetsBinding.instance.addObserver(this);
-//   }
+    client.cache.restore();
 
-//   @override
-//   void dispose() {
-//     super.dispose();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-//     WidgetsBinding.instance.removeObserver(this);
-//   }
+  @override
+  void dispose() {
+    super.dispose();
 
-//   @override
-//   void didChangeAppLifecycleState(AppLifecycleState state) {
-//     switch (state) {
-//       case AppLifecycleState.inactive:
-//         client.cache.save();
-//         break;
+    WidgetsBinding.instance.removeObserver(this);
+  }
 
-//       case AppLifecycleState.paused:
-//         client.cache.save();
-//         break;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.inactive:
+        client.cache.save();
+        break;
 
-//       case AppLifecycleState.suspending:
-//         break;
+      case AppLifecycleState.paused:
+        client.cache.save();
+        break;
 
-//       case AppLifecycleState.resumed:
-//         client.cache.restore();
-//         break;
-//     }
-//   }
+      case AppLifecycleState.suspending:
+        break;
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return widget.child;
-//   }
-// }
+      case AppLifecycleState.resumed:
+        client.cache.restore();
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}

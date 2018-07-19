@@ -1,3 +1,63 @@
+## [0.5.4] - July 17 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Query: changed `Timer` to `Timer.periodic` @eusdima
+- Minor logic tweak @eusdima
+- Use absolute paths in the library @HofmannZ
+
+#### Docs
+
+- Fix mutations example bug not updating star bool @cal-pratt
+
+## [0.5.3] - July 13 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Added polling timer as a variable for easy deletion on dispose
+- Fixed bug when Query timer is still active when the Query is disposed
+- Added instant query fetch when the query variables are updated
+
+#### Docs
+
+n/a
+
+## [0.5.2] - July 11 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed error when cache file is non-existent
+
+#### Docs
+
+n/a
+
+## [0.5.1] - June 29 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed json error parsing.
+
+#### Docs
+
+n/a
+
 ## [0.5.0] - June 25 2018
 
 ### Breaking change

@@ -2,7 +2,7 @@
 
 [![version][version-badge]][package]
 [![MIT License][license-badge]][license]
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-5-orange.svg?style=flat-square)](#contributors)
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
@@ -25,7 +25,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.4.1
+  graphql_flutter: ^0.5.4
 ```
 
 Now inside your Dart code you can import it.
@@ -230,8 +230,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://eusdima.com)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-eusdima "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") | [<img src="https://avatars3.githubusercontent.com/u/17142193?v=4" width="100px;"/><br /><sub><b>Zino Hofmann</b></sub>](https://github.com/HofmannZ)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Documentation") [💡](#example-HofmannZ "Examples") [🤔](#ideas-HofmannZ "Ideas, Planning, & Feedback") [👀](#review-HofmannZ "Reviewed Pull Requests") | [<img src="https://avatars2.githubusercontent.com/u/15068096?v=4" width="100px;"/><br /><sub><b>Harkirat Saluja</b></sub>](https://github.com/jinxac)<br />[📖](https://github.com/zino-app/graphql-flutter/commits?author=jinxac "Documentation") [🤔](#ideas-jinxac "Ideas, Planning, & Feedback") | [<img src="https://avatars3.githubusercontent.com/u/5178217?v=4" width="100px;"/><br /><sub><b>Chris Muthig</b></sub>](https://github.com/camuthig)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=camuthig "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=camuthig "Documentation") [💡](#example-camuthig "Examples") [🤔](#ideas-camuthig "Ideas, Planning, & Feedback") |
-| :---: | :---: | :---: | :---: |
+| [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://eusdima.com)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Aeusdima "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-eusdima "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") | [<img src="https://avatars3.githubusercontent.com/u/17142193?v=4" width="100px;"/><br /><sub><b>Zino Hofmann</b></sub>](https://github.com/HofmannZ)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3AHofmannZ "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Documentation") [💡](#example-HofmannZ "Examples") [🤔](#ideas-HofmannZ "Ideas, Planning, & Feedback") [🚇](#infra-HofmannZ "Infrastructure (Hosting, Build-Tools, etc)") [👀](#review-HofmannZ "Reviewed Pull Requests") | [<img src="https://avatars2.githubusercontent.com/u/15068096?v=4" width="100px;"/><br /><sub><b>Harkirat Saluja</b></sub>](https://github.com/jinxac)<br />[📖](https://github.com/zino-app/graphql-flutter/commits?author=jinxac "Documentation") [🤔](#ideas-jinxac "Ideas, Planning, & Feedback") | [<img src="https://avatars3.githubusercontent.com/u/5178217?v=4" width="100px;"/><br /><sub><b>Chris Muthig</b></sub>](https://github.com/camuthig)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=camuthig "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=camuthig "Documentation") [💡](#example-camuthig "Examples") [🤔](#ideas-camuthig "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/7611406?v=4" width="100px;"/><br /><sub><b>Cal Pratt</b></sub>](http://stackoverflow.com/users/3280538/flkes)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Acal-pratt "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=cal-pratt "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=cal-pratt "Documentation") [💡](#example-cal-pratt "Examples") [🤔](#ideas-cal-pratt "Ideas, Planning, & Feedback") |
+| :---: | :---: | :---: | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
