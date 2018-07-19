@@ -9,23 +9,25 @@ void main() => runApp(new MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Client client = new Client(
-      endPoint: 'https://api.github.com/graphql',
-      cache: new InMemoryCache(),
+    ValueNotifier<Client> client = new ValueNotifier(
+      new Client(
+        endPoint: 'https://api.github.com/graphql',
+        cache: new InMemoryCache(),
+        apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
+      ),
     );
-    client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
 
     return new GraphqlProvider(
       client: client,
-      // child: new CacheProvider(
-      child: new MaterialApp(
-        title: 'Flutter Demo',
-        theme: new ThemeData(
-          primarySwatch: Colors.blue,
+      child: new CacheProvider(
+        child: new MaterialApp(
+          title: 'Flutter Demo',
+          theme: new ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: new MyHomePage(title: 'Flutter Demo Home Page'),
         ),
-        home: new MyHomePage(title: 'Flutter Demo Home Page'),
       ),
-      // ),
     );
   }
 }
@@ -51,7 +53,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: new Query(
         queries.readRepositories,
-        // pollInterval: 1,s
+        pollInterval: 1,
         builder: ({
           bool loading,
           Map data,
@@ -83,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 }) {
                   if (data.isNotEmpty) {
                     repository['viewerHasStarred'] =
-                      data['addStar']['starrable']['viewerHasStarred'];
+                        data['addStar']['starrable']['viewerHasStarred'];
                   }
 
                   return new ListTile(
@@ -101,20 +103,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 onCompleted: (Map<String, dynamic> data) {
                   showDialog(
-                      context: context,
-                      builder: (BuildContext context) {
-                        return AlertDialog(
-                          title: Text('Thanks for your star!'),
-                          actions: <Widget>[
-                            SimpleDialogOption(
-                              child: Text('Dismiss'),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            )
-                          ],
-                        );
-                      });
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Thanks for your star!'),
+                        actions: <Widget>[
+                          SimpleDialogOption(
+                            child: Text('Dismiss'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    },
+                  );
                 },
               );
             },
