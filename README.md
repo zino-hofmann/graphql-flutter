@@ -15,6 +15,7 @@
   - [Graphql Provider](#graphql-provider)
   - [Queries](#queries)
   - [Mutations](#mutations)
+  - [Graphql Consumer](#graphql-consumer)
   - [Offline Cache](#offline-cache)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
@@ -198,6 +199,26 @@ new Mutation(
 }),
 
 ...
+```
+
+### Graphql Consumer
+
+You can always access the client direcly from the `GraphqlProvider` but to make it even easier you can also use the `GraphqlConsumer` widget.
+
+```dart
+  ...
+
+  return new GraphqlConsumer(
+    builder: (Client client) {
+      // do something with the client
+
+      return new Container(
+        child: new Text('Hello world'),
+      );
+    },
+  );
+
+  ...
 ```
 
 ### Offline Cache
