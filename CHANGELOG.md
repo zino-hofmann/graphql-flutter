@@ -1,3 +1,41 @@
+## [0.6.0] - July 19 2018
+
+### Breaking change
+
+- The library now requires your app to be wrapped with the `GraphqlProvider` widget @HofmannZ
+- The global `client` variable is no longer available. Instead use the `GraphqlConsumer` widget
+
+#### Fixes / Enhancements
+
+- Added the `GraphqlProvider` widget. The client is now stored in an `InheritedWidget`, and can be accessed anywhere within the app.
+
+```dart
+Client client = GraphqlProvider.of(context).value;
+```
+
+- Added the `GraphqlConsumer` widget. For ease of use we added a widget that uses the same builder structure as the `Query` and `Mutation` widgets.
+
+> Under the hood it access the client from the `BuildContext`.
+
+- Added the option to optionally provide the `apiToken` to the `Client` constructor. It is still possible to set the `apiToken` with setter method.
+
+```dart
+  return new GraphqlConsumer(
+    builder: (Client client) {
+      // do something with the client
+
+      return new Container();
+    },
+  );
+```
+
+#### Docs
+
+- Added documentation for the new `GraphqlProvider`
+- Added documentation for the new `GraphqlConsumer`
+- Changed the setup instructions to include the new widgets
+- Changed the example to include the new widgets
+
 ## [0.5.4] - July 17 2018
 
 ### Breaking change
