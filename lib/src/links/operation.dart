@@ -35,7 +35,10 @@ class Operation {
   }
 }
 
-createOperation(Map<String, dynamic> graphqlRequest) {
+createOperation(
+  Map<String, dynamic> startingContext,
+  Map<String, dynamic> graphqlRequest,
+) {
   Map<String, dynamic> variables = {};
   Map<String, dynamic> extensions = {};
 
@@ -47,10 +50,13 @@ createOperation(Map<String, dynamic> graphqlRequest) {
     extensions.addAll(graphqlRequest['extensions']);
   }
 
-  return new Operation(
+  Operation operation = new Operation(
     query: graphqlRequest['query'],
     variables: variables,
     operationName: graphqlRequest['operationName'],
     extensions: extensions,
   );
+  operation.setContext(startingContext);
+
+  return operation;
 }

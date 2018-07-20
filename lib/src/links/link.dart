@@ -42,6 +42,6 @@ Stream<Map<String, dynamic>> execute({
   Map<String, dynamic> operation,
 }) {
   return link.request(
-    createOperation(operation),
+    createOperation(operation['context'], operation),
   );
 }
