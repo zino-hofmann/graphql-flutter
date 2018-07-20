@@ -5,16 +5,18 @@ import 'package:http/http.dart' as http;
 
 import 'package:graphql_flutter/src/cache/in_memory.dart';
 
-Client client;
-
 class Client {
   Client({
     String endPoint = '',
     InMemoryCache cache,
+    String apiToken,
   }) {
+    assert(endPoint != null);
+    assert(cache != null);
+
     this.endPoint = endPoint;
     this.cache = cache;
-
+    this.apiToken = apiToken;
     this.client = new http.Client();
   }
 

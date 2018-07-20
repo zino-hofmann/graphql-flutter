@@ -4,26 +4,29 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import './queries/readRepositories.dart' as queries;
 import './mutations/addStar.dart' as mutations;
 
-void main() {
-  client = new Client(
-    endPoint: 'https://api.github.com/graphql',
-    cache: new InMemoryCache(),
-  );
-  client.apiToken = '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>';
-
-  runApp(new MyApp());
-}
+void main() => runApp(new MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new CacheProvider(
-      child: new MaterialApp(
-        title: 'Flutter Demo',
-        theme: new ThemeData(
-          primarySwatch: Colors.blue,
+    ValueNotifier<Client> client = new ValueNotifier(
+      new Client(
+        endPoint: 'https://api.github.com/graphql',
+        cache: new InMemoryCache(),
+        apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
+      ),
+    );
+
+    return new GraphqlProvider(
+      client: client,
+      child: new CacheProvider(
+        child: new MaterialApp(
+          title: 'Flutter Demo',
+          theme: new ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: new MyHomePage(title: 'Flutter Demo Home Page'),
         ),
-        home: new MyHomePage(title: 'Flutter Demo Home Page'),
       ),
     );
   }
@@ -82,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 }) {
                   if (data.isNotEmpty) {
                     repository['viewerHasStarred'] =
-                      data['addStar']['starrable']['viewerHasStarred'];
+                        data['addStar']['starrable']['viewerHasStarred'];
                   }
 
                   return new ListTile(
@@ -113,7 +116,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           )
                         ],
                       );
-                    }
+                    },
                   );
                 },
               );
