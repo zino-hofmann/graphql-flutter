@@ -1,12 +1,13 @@
 import 'dart:async';
 
 import 'package:graphql_flutter/src/links/operation.dart';
+import 'package:graphql_flutter/src/links/fetch_result.dart';
 
-typedef Stream<Map<String, dynamic>> NextLink(
+typedef NextLink = Stream<FetchResult> Function(
   Operation operation,
 );
 
-typedef Stream<Map<String, dynamic>> RequestHandler(
+typedef RequestHandler = Stream<FetchResult> Function(
   Operation operation, [
   NextLink forward,
 ]);
@@ -15,7 +16,7 @@ Link _concat(
   Link first,
   Link second,
 ) {
-  return new Link(request: (
+  return Link(request: (
     Operation operation, [
     NextLink forward,
   ]) {
@@ -37,7 +38,7 @@ class Link {
   }
 }
 
-Stream<Map<String, dynamic>> execute({
+Stream<FetchResult> execute({
   Link link,
   Map<String, dynamic> operation,
 }) {

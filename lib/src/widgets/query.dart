@@ -25,7 +25,7 @@ class Query extends StatefulWidget {
   final int pollInterval;
 
   @override
-  QueryState createState() => new QueryState();
+  QueryState createState() => QueryState();
 }
 
 class QueryState extends State<Query> {
@@ -36,14 +36,14 @@ class QueryState extends State<Query> {
   bool initialFetch = true;
   Duration pollInterval;
   Timer pollTimer;
-  Map currentVariables = new Map();
+  Map currentVariables = Map();
 
   @override
   void initState() {
     super.initState();
 
     if (widget.pollInterval is int) {
-      pollInterval = new Duration(seconds: widget.pollInterval);
+      pollInterval = Duration(seconds: widget.pollInterval);
     }
 
     getQueryResult();
@@ -107,7 +107,7 @@ class QueryState extends State<Query> {
     }
 
     if (pollInterval is Duration && !(pollTimer is Timer)) {
-      pollTimer = new Timer.periodic(
+      pollTimer = Timer.periodic(
         pollInterval,
         (Timer t) => getQueryResult(),
       );

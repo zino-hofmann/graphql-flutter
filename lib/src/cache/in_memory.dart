@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 class InMemoryCache {
-  HashMap<String, dynamic> _inMemoryCache = new HashMap<String, dynamic>();
+  HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
 
   Future<String> get _localStoragePath async {
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -36,16 +36,14 @@ class InMemoryCache {
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     try {
       final File file = await _localStorageFile;
-      final HashMap<String, dynamic> storedHashMap =
-          new HashMap<String, dynamic>();
+      final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
 
       if (file.existsSync()) {
         Stream<dynamic> inputStream = file.openRead();
 
         inputStream
             .transform(utf8.decoder) // Decode bytes to UTF8.
-            .transform(
-                new LineSplitter()) // Convert stream to individual lines.
+            .transform(LineSplitter()) // Convert stream to individual lines.
             .listen((String line) {
           final List keyAndValue = json.decode(line);
 
@@ -57,12 +55,12 @@ class InMemoryCache {
     } on FileSystemException {
       // TODO: handle No such file
 
-      return new HashMap<String, dynamic>();
+      return HashMap<String, dynamic>();
     } catch (error) {
       // TODO: handle error
       print(error);
 
-      return new HashMap<String, dynamic>();
+      return HashMap<String, dynamic>();
     }
   }
 

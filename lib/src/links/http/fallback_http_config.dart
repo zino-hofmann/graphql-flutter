@@ -1,4 +1,4 @@
-Map<String, bool> defaultHttpOptions = {
+Map<String, dynamic> defaultHttpOptions = {
   'includeQuery': true,
   'includeExtensions': false,
 };
