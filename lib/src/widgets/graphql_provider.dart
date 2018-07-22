@@ -20,7 +20,7 @@ class GraphqlProvider extends StatefulWidget {
   }
 
   @override
-  State<StatefulWidget> createState() => new _GraphqlProviderState();
+  State<StatefulWidget> createState() => _GraphqlProviderState();
 }
 
 class _GraphqlProviderState extends State<GraphqlProvider> {
@@ -42,7 +42,7 @@ class _GraphqlProviderState extends State<GraphqlProvider> {
 
   @override
   Widget build(BuildContext context) {
-    return new _InheritedGraphqlProvider(
+    return _InheritedGraphqlProvider(
       client: widget.client,
       child: widget.child,
     );

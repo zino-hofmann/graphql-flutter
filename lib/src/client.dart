@@ -17,7 +17,7 @@ class Client {
     this.endPoint = endPoint;
     this.cache = cache;
     this.apiToken = apiToken;
-    this.client = new http.Client();
+    this.client = http.Client();
   }
 
   String _endpoint;
@@ -67,7 +67,7 @@ class Client {
     final String reasonPhrase = response.reasonPhrase;
 
     if (statusCode < 200 || statusCode >= 400) {
-      throw new http.ClientException(
+      throw http.ClientException(
         'Network Error: $statusCode $reasonPhrase',
       );
     }
@@ -75,7 +75,7 @@ class Client {
     final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
     if (jsonResponse['errors'] != null && jsonResponse['errors'].length > 0) {
-      throw new Exception(
+      throw Exception(
         'Error returned by the server in the query' +
             jsonResponse['errors'].toString(),
       );
@@ -124,7 +124,7 @@ class Client {
     if (cache.hasEntity(body)) {
       return cache.read(body);
     } else {
-      throw new Exception('Can\'t find field in cache.');
+      throw Exception('Can\'t find field in cache.');
     }
   }
 }

@@ -25,7 +25,7 @@ class Mutation extends StatefulWidget {
   final OnMutationCompleted onCompleted;
 
   @override
-  MutationState createState() => new MutationState();
+  MutationState createState() => MutationState();
 }
 
 class MutationState extends State<Mutation> {
