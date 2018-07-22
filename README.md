@@ -248,6 +248,59 @@ class MyApp extends StatelessWidget {
 ...
 ```
 
+### Subscriptions (Experimental)
+
+The syntax for subscriptions is again similar to a query, however, this utilizes WebSockets and dart Streams to provide real-time updates from a server.
+Before subscriptions can performed the following code is required for initializing the global `socketClient` instance.
+
+```dart
+socketClient = await SocketClient.connect('ws://coolserver.com/graphql');
+
+// Example non-flutter usage:
+final String operationName = "SubscriptionQuery";
+final String query = """subscription $operationName(\$requestId: String!) {
+  requestSubscription(requestId: \$requestId) {
+    requestData
+  }
+}""";
+final dynamic variables = {
+  'requestId': 'My Request',
+};
+socketClient
+    .subscribe(SubscriptionRequest(operationName, query, variables))
+    .listen(print);
+```
+
+Once the `socketClient` has been initialized it can be used by the `Subscription` `Widget`
+
+```dart
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Subscription(
+          operationName,
+          query,
+          variables: variables,
+          builder: ({
+            bool loading,
+            dynamic payload,
+            dynamic error,
+          }) {
+            if (payload != null) {
+              return Text(payload['requestSubscription']['requestData']);
+            } else {
+              return Text('Data not found');
+            }
+          }
+        ),
+      )
+    );
+  }
+}
+```
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
