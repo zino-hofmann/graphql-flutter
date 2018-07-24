@@ -48,10 +48,10 @@ To use the client it first needs to be initialized with an endpoint and cache. I
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
-  ValueNotifier<Client> client = new ValueNotifier(
-    new Client(
+  ValueNotifier<Client> client = ValueNotifier(
+    Client(
       endPoint: 'https://api.github.com/graphql',
-      cache: new InMemoryCache(),
+      cache: InMemoryCache(),
       apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
     ),
   );
@@ -69,9 +69,9 @@ In order to use the client, you app needs to be wrapped with the `GraphqlProvide
 ```dart
   ...
 
-  return new GraphqlProvider(
+  return GraphqlProvider(
     client: client,
-    child: new MaterialApp(
+    child: MaterialApp(
       title: 'Flutter Demo',
       ...
     ),
@@ -106,7 +106,7 @@ In your widget:
 ```dart
 ...
 
-new Query(
+Query(
   readRepositories, // this is the query you just created
   variables: {
     'nRepositories': 50,
@@ -118,22 +118,22 @@ new Query(
     String error,
   }) {
     if (error != '') {
-      return new Text(error);
+      return Text(error);
     }
 
     if (loading) {
-      return new Text('Loading');
+      return Text('Loading');
     }
 
     // it can be either Map or List
     List repositories = data['viewer']['repositories']['nodes'];
 
-    return new ListView.builder(
+    return ListView.builder(
       itemCount: repositories.length,
       itemBuilder: (context, index) {
         final repository = repositories[index];
 
-        return new Text(repository['name']);
+        return Text(repository['name']);
     });
   },
 );
@@ -163,7 +163,7 @@ The syntax for mutations is fairly similar to that of a query. The only diffence
 ```dart
 ...
 
-new Mutation(
+Mutation(
   addStar,
   builder: (
     runMutation, { // you can name it whatever you like
@@ -171,12 +171,12 @@ new Mutation(
     var data,
     String error,
 }) {
-  return new FloatingActionButton(
+  return FloatingActionButton(
     onPressed: () => runMutation({
       'starrableId': <A_STARTABLE_REPOSITORY_ID>,
     }),
     tooltip: 'Star',
-    child: new Icon(Icons.star),
+    child: Icon(Icons.star),
   );
 },
   onCompleted: (Map<String, dynamic> data) {
@@ -208,12 +208,12 @@ You can always access the client direcly from the `GraphqlProvider` but to make 
 ```dart
   ...
 
-  return new GraphqlConsumer(
+  return GraphqlConsumer(
     builder: (Client client) {
       // do something with the client
 
-      return new Container(
-        child: new Text('Hello world'),
+      return Container(
+        child: Text('Hello world'),
       );
     },
   );
@@ -233,10 +233,10 @@ The in-memory cache can automatically be saved to and restored from offline stor
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new GraphqlProvider(
+    return GraphqlProvider(
       client: client,
-      child: new CacheProvider(
-        child: new MaterialApp(
+      child: CacheProvider(
+        child: MaterialApp(
           title: 'Flutter Demo',
           ...
         ),
