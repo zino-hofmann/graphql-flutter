@@ -10,16 +10,28 @@
 
 ## Table of Contents
 
+- [About this project](#about-this-project)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Graphql Provider](#graphql-provider)
   - [Queries](#queries)
   - [Mutations](#mutations)
+  - [Subscriptions (Experimental)](#subscriptions-experimental)
   - [Graphql Consumer](#graphql-consumer)
-  - [Offline Cache](#offline-cache)
+  - [Offline Cache (Experimental)](#offline-cache-experimental)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
+
+## About this project
+
+GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data useage. And to the programer: requests are arguable, they have the same structure as the request.
+
+The team at Apollo did a great job implenting GraphQL in Swift, Java and Javascript. But unfortunately they're not planning to release a Dart implementation.
+
+This project is filling the gap, bringing the GraphQL spec to yet another programming language. We plan to implement most functionality from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client) and from most features the [React Apollo](https://github.com/apollographql/react-apollo) components into Dart and Flutter respectively.
+
+With that being said, the project lives currently still inside one package. We plan to spilt up the project into multiple smaler packages in the near future, to follow Apollo's modules design.
 
 ## Installation
 
@@ -27,7 +39,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.6.0
+  graphql_flutter: ^0.7.0
 ```
 
 Now inside your Dart code you can import it.
@@ -201,74 +213,15 @@ new Mutation(
 ...
 ```
 
-### Graphql Consumer
-
-You can always access the client direcly from the `GraphqlProvider` but to make it even easier you can also use the `GraphqlConsumer` widget.
-
-```dart
-  ...
-
-  return new GraphqlConsumer(
-    builder: (Client client) {
-      // do something with the client
-
-      return new Container(
-        child: new Text('Hello world'),
-      );
-    },
-  );
-
-  ...
-```
-
-### Offline Cache
-
-The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
-
-> Make sure the `CacheProvider` widget is inside the `GraphqlProvider` widget.
-
-```dart
-...
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return new GraphqlProvider(
-      client: client,
-      child: new CacheProvider(
-        child: new MaterialApp(
-          title: 'Flutter Demo',
-          ...
-        ),
-      ),
-    );
-  }
-}
-
-...
-```
-
 ### Subscriptions (Experimental)
 
 The syntax for subscriptions is again similar to a query, however, this utilizes WebSockets and dart Streams to provide real-time updates from a server.
-Before subscriptions can performed the following code is required for initializing the global `socketClient` instance.
+Before subscriptions can be performed a global intance of `socketClient` needs to be initialized.
+
+> We are working on moving this into the same `GraphqlProvider` stucture as the http client. Therefore this api might change in the near future.
 
 ```dart
 socketClient = await SocketClient.connect('ws://coolserver.com/graphql');
-
-// Example non-flutter usage:
-final String operationName = "SubscriptionQuery";
-final String query = """subscription $operationName(\$requestId: String!) {
-  requestSubscription(requestId: \$requestId) {
-    requestData
-  }
-}""";
-final dynamic variables = {
-  'requestId': 'My Request',
-};
-socketClient
-    .subscribe(SubscriptionRequest(operationName, query, variables))
-    .listen(print);
 ```
 
 Once the `socketClient` has been initialized it can be used by the `Subscription` `Widget`
@@ -301,23 +254,85 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ```
 
+Once the `socketClient` is initialized you could also use it without Flutter.
+
+```dart
+final String operationName = "SubscriptionQuery";
+final String query = """subscription $operationName(\$requestId: String!) {
+  requestSubscription(requestId: \$requestId) {
+    requestData
+  }
+}""";
+final dynamic variables = {
+  'requestId': 'My Request',
+};
+socketClient
+    .subscribe(SubscriptionRequest(operationName, query, variables))
+    .listen(print);
+```
+
+### Graphql Consumer
+
+You can always access the client direcly from the `GraphqlProvider` but to make it even easier you can also use the `GraphqlConsumer` widget.
+
+```dart
+  ...
+
+  return new GraphqlConsumer(
+    builder: (Client client) {
+      // do something with the client
+
+      return new Container(
+        child: new Text('Hello world'),
+      );
+    },
+  );
+
+  ...
+```
+
+### Offline Cache (Experimental)
+
+The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
+
+> Make sure the `CacheProvider` widget is inside the `GraphqlProvider` widget.
+
+```dart
+...
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return new GraphqlProvider(
+      client: client,
+      child: new CacheProvider(
+        child: new MaterialApp(
+          title: 'Flutter Demo',
+          ...
+        ),
+      ),
+    );
+  }
+}
+
+...
+```
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Basic queries           |    ✅    |
-| Basic mutations         |    ✅    |
-| Basic subscriptions     |    🔜    |
-| Query variables         |    ✅    |
-| Mutation variables      |    ✅    |
-| Subscription variables  |    🔜    |
+| Queries                 |    ✅    |
+| Mutations               |    ✅    |
+| Subscriptions           |    ✅    |
 | Query polling           |    ✅    |
-| In memory caching       |    ✅    |
-| Offline caching         |    ✅    |
+| In memory cache         |    ✅    |
+| Offline cache sync      |    ✅    |
 | Optimistic results      |    🔜    |
 | Client state management |    🔜    |
+| Modularity              |    🔜    |
 
 ## Contributing
 
