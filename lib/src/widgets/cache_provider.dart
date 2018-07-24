@@ -12,7 +12,7 @@ class CacheProvider extends StatefulWidget {
   final Widget child;
 
   @override
-  _CacheProviderState createState() => new _CacheProviderState();
+  _CacheProviderState createState() => _CacheProviderState();
 }
 
 class _CacheProviderState extends State<CacheProvider>
