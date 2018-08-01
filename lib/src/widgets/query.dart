@@ -1,13 +1,13 @@
 import 'dart:async';
-import 'package:flutter/widgets.dart';
 
+import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/src/client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef Widget QueryBuilder({
   @required bool loading,
   Map<String, dynamic> data,
-  String error,
+  Exception error,
 });
 
 class Query extends StatefulWidget {
@@ -31,7 +31,7 @@ class Query extends StatefulWidget {
 class QueryState extends State<Query> {
   bool loading = true;
   Map<String, dynamic> data = {};
-  String error = '';
+  Exception error = null;
 
   bool initialFetch = true;
   Duration pollInterval;
@@ -75,12 +75,12 @@ class QueryState extends State<Query> {
       );
 
       setState(() {
-        loading = false;
-        error = '';
         data = result;
+        error = null;
+        loading = false;
       });
     } catch (e) {
-      print(e.toString());
+      // Ignore, right?
     }
 
     try {
@@ -90,20 +90,17 @@ class QueryState extends State<Query> {
       );
 
       setState(() {
-        loading = false;
-        error = '';
         data = result;
+        error = null;
+        loading = false;
       });
     } catch (e) {
       if (data == {}) {
         setState(() {
-          error = e.toString();
+          error = e;
           loading = false;
         });
       }
-
-      // TODO: handle error
-      print(e.toString());
     }
 
     if (pollInterval is Duration && !(pollTimer is Timer)) {
