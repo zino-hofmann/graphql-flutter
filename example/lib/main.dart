@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './queries/readRepositories.dart' as queries;
 import './mutations/addStar.dart' as mutations;
+import './queries/readRepositories.dart' as queries;
 
 void main() => runApp(MyApp());
 
@@ -57,10 +57,10 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: ({
           bool loading,
           Map data,
-          String error,
+          Exception error,
         }) {
-          if (error != '') {
-            return Text(error);
+          if (error != null) {
+            return Text(error.toString());
           }
 
           if (loading) {
@@ -81,7 +81,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   addStar, {
                   bool loading,
                   Map data,
-                  String error,
+                  Exception error,
                 }) {
                   if (data.isNotEmpty) {
                     repository['viewerHasStarred'] =

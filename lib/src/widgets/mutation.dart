@@ -1,5 +1,4 @@
 import 'package:flutter/widgets.dart';
-
 import 'package:graphql_flutter/src/client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
@@ -9,7 +8,7 @@ typedef Widget MutationBuilder(
   RunMutation mutation, {
   @required bool loading,
   Map<String, dynamic> data,
-  String error,
+  Exception error,
 });
 
 class Mutation extends StatefulWidget {
@@ -31,7 +30,7 @@ class Mutation extends StatefulWidget {
 class MutationState extends State<Mutation> {
   bool loading = false;
   Map<String, dynamic> data = {};
-  String error = '';
+  Exception error = null;
 
   void runMutation(Map<String, dynamic> variables) async {
     /// Gets the client from the closest wrapping [GraphqlProvider].
@@ -39,9 +38,9 @@ class MutationState extends State<Mutation> {
     assert(client != null);
 
     setState(() {
-      loading = true;
-      error = '';
       data = {};
+      error = null;
+      loading = true;
     });
 
     try {
@@ -51,22 +50,18 @@ class MutationState extends State<Mutation> {
       );
 
       setState(() {
-        loading = false;
         data = result;
+        loading = false;
       });
 
       if (widget.onCompleted != null) {
         widget.onCompleted(result);
       }
-    } on Error catch (e) {
+    } catch (e) {
       setState(() {
+        error = e;
         loading = false;
-        error = 'GQL ERROR';
       });
-
-      // TODO: Handle error
-      print(e);
-      print(e.stackTrace);
     }
   }
 
