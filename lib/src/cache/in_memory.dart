@@ -36,16 +36,14 @@ class InMemoryCache {
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     try {
       final File file = await _localStorageFile;
-      final HashMap<String, dynamic> storedHashMap =
-          HashMap<String, dynamic>();
+      final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
 
       if (file.existsSync()) {
         Stream<dynamic> inputStream = file.openRead();
 
         inputStream
             .transform(utf8.decoder) // Decode bytes to UTF8.
-            .transform(
-                LineSplitter()) // Convert stream to individual lines.
+            .transform(LineSplitter()) // Convert stream to individual lines.
             .listen((String line) {
           final List keyAndValue = json.decode(line);
 
