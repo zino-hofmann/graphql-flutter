@@ -49,8 +49,8 @@ class InitOperation extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-  };
+        'type': type,
+      };
 }
 
 /// Represent the payload used during a Start query operation.
@@ -66,10 +66,10 @@ class SubscriptionRequest extends JsonSerializable {
 
   @override
   dynamic toJson() => {
-    'operationName': operationName,
-    'query': query,
-    'variables': variables,
-  };
+        'operationName': operationName,
+        'query': query,
+        'variables': variables,
+      };
 }
 
 /// A message to tell the server to create a subscription. The contents of the
@@ -85,10 +85,10 @@ class StartOperation extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'id': id,
-    'payload': payload,
-  };
+        'type': type,
+        'id': id,
+        'payload': payload,
+      };
 }
 
 /// Tell the server to stop sending subscription data for a particular
@@ -100,9 +100,9 @@ class StopOperation extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'id': id,
-  };
+        'type': type,
+        'id': id,
+      };
 }
 
 /// The server will send this acknowledgment message after receiving the init
@@ -112,8 +112,8 @@ class ConnectionAck extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-  };
+        'type': type,
+      };
 }
 
 /// The server will send this error message after receiving the init command
@@ -125,9 +125,9 @@ class ConnectionError extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'payload': payload,
-  };
+        'type': type,
+        'payload': payload,
+      };
 }
 
 /// Data sent from the server to the client with subscription data or error
@@ -143,10 +143,10 @@ class SubscriptionData extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'data': data,
-    'errors': errors,
-  };
+        'type': type,
+        'data': data,
+        'errors': errors,
+      };
 }
 
 /// Errors sent from the server to the client if the subscription operation was
@@ -159,10 +159,10 @@ class SubscriptionError extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'id': id,
-    'payload': payload,
-  };
+        'type': type,
+        'id': id,
+        'payload': payload,
+      };
 }
 
 /// Server message to the client to indicate that no more data will be sent
@@ -174,9 +174,9 @@ class SubscriptionComplete extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'id': id,
-  };
+        'type': type,
+        'id': id,
+      };
 }
 
 /// Not expected to be created. Indicates there are problems parsing the server
@@ -189,7 +189,7 @@ class UnknownData extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() => {
-    'type': type,
-    'payload': payload,
-  };
+        'type': type,
+        'payload': payload,
+      };
 }

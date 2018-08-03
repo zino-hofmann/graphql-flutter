@@ -39,7 +39,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.7.0
+  graphql_flutter: ^0.7.1
 ```
 
 Now inside your Dart code you can import it.
@@ -339,6 +339,8 @@ This is currently our roadmap, please feel free to request additions/changes.
 Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
 
 ## Contributors
+
+This package was originally created and published by the engineers at [Zino App B.V.](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
 
 Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
 

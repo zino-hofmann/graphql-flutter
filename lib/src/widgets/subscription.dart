@@ -24,7 +24,7 @@ class Subscription extends StatefulWidget {
   Subscription(
     this.operationName,
     this.query, {
-    this.variables = const { },
+    this.variables = const {},
     final Key key,
     @required this.builder,
     this.initial,
@@ -48,16 +48,13 @@ class _SubscriptionState extends State<Subscription> {
 
     final Stream<SubscriptionData> stream = socketClient.subscribe(
         SubscriptionRequest(
-            widget.operationName,
-            widget.query,
-            widget.variables
-        ));
+            widget.operationName, widget.query, widget.variables));
 
     stream.takeWhile((message) => this._alive).listen(
-      _onData,
-      onError: _onError,
-      onDone: _onDone,
-    );
+          _onData,
+          onError: _onError,
+          onDone: _onDone,
+        );
 
     if (widget.initial != null) {
       setState(() {
