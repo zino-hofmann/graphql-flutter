@@ -1,9 +1,25 @@
+## [0.7.0] - July 22 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Added support for subsciptionsin the client.
+- Added the `Subscription` widget. You can no direcly acces streams from Flutter.
+
+#### Docs
+
+- Added instructions for adding subscripton to your poject.
+- Updated the `About this project` section.
+
 ## [0.6.0] - July 19 2018
 
 ### Breaking change
 
-- The library now requires your app to be wrapped with the `GraphqlProvider` widget @HofmannZ
-- The global `client` variable is no longer available. Instead use the `GraphqlConsumer` widget
+- The library now requires your app to be wrapped with the `GraphqlProvider` widget.
+- The global `client` variable is no longer available. Instead use the `GraphqlConsumer` widget.
 
 #### Fixes / Enhancements
 
@@ -46,7 +62,7 @@ n/a
 
 - Query: changed `Timer` to `Timer.periodic` @eusdima
 - Minor logic tweak @eusdima
-- Use absolute paths in the library @HofmannZ
+- Use absolute paths in the library
 
 #### Docs
 

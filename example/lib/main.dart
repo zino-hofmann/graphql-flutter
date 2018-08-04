@@ -1,31 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './queries/readRepositories.dart' as queries;
 import './mutations/addStar.dart' as mutations;
+import './queries/readRepositories.dart' as queries;
 
-void main() => runApp(new MyApp());
+void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<Client> client = new ValueNotifier(
-      new Client(
+    ValueNotifier<Client> client = ValueNotifier(
+      Client(
         endPoint: 'https://api.github.com/graphql',
-        cache: new InMemoryCache(),
+        cache: InMemoryCache(),
         apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
       ),
     );
 
-    return new GraphqlProvider(
+    return GraphqlProvider(
       client: client,
-      child: new CacheProvider(
-        child: new MaterialApp(
+      child: CacheProvider(
+        child: MaterialApp(
           title: 'Flutter Demo',
-          theme: new ThemeData(
+          theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: new MyHomePage(title: 'Flutter Demo Home Page'),
+          home: MyHomePage(title: 'Flutter Demo Home Page'),
         ),
       ),
     );
@@ -41,58 +41,58 @@ class MyHomePage extends StatefulWidget {
   final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(
-        title: new Text(widget.title),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.title),
       ),
-      body: new Query(
+      body: Query(
         queries.readRepositories,
         pollInterval: 1,
         builder: ({
           bool loading,
           Map data,
-          String error,
+          Exception error,
         }) {
-          if (error != '') {
-            return new Text(error);
+          if (error != null) {
+            return Text(error.toString());
           }
 
           if (loading) {
-            return new Text('Loading');
+            return Text('Loading');
           }
 
           // it can be either Map or List
           List repositories = data['viewer']['repositories']['nodes'];
 
-          return new ListView.builder(
+          return ListView.builder(
             itemCount: repositories.length,
             itemBuilder: (context, index) {
               final repository = repositories[index];
 
-              return new Mutation(
+              return Mutation(
                 mutations.addStar,
                 builder: (
                   addStar, {
                   bool loading,
                   Map data,
-                  String error,
+                  Exception error,
                 }) {
                   if (data.isNotEmpty) {
                     repository['viewerHasStarred'] =
                         data['addStar']['starrable']['viewerHasStarred'];
                   }
 
-                  return new ListTile(
+                  return ListTile(
                     leading: repository['viewerHasStarred']
                         ? const Icon(Icons.star, color: Colors.amber)
                         : const Icon(Icons.star_border),
-                    title: new Text(repository['name']),
+                    title: Text(repository['name']),
                     // NOTE: optimistic ui updates are not implemented yet, therefore changes may take upto 1 second to show.
                     onTap: () {
                       addStar({

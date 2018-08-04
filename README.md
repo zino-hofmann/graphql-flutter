@@ -10,16 +10,28 @@
 
 ## Table of Contents
 
+- [About this project](#about-this-project)
 - [Installation](#installation)
 - [Usage](#usage)
   - [Graphql Provider](#graphql-provider)
   - [Queries](#queries)
   - [Mutations](#mutations)
+  - [Subscriptions (Experimental)](#subscriptions-experimental)
   - [Graphql Consumer](#graphql-consumer)
-  - [Offline Cache](#offline-cache)
+  - [Offline Cache (Experimental)](#offline-cache-experimental)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
+
+## About this project
+
+GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data useage. And to the programer: requests are arguable, they have the same structure as the request.
+
+The team at Apollo did a great job implenting GraphQL in Swift, Java and Javascript. But unfortunately they're not planning to release a Dart implementation.
+
+This project is filling the gap, bringing the GraphQL spec to yet another programming language. We plan to implement most functionality from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client) and from most features the [React Apollo](https://github.com/apollographql/react-apollo) components into Dart and Flutter respectively.
+
+With that being said, the project lives currently still inside one package. We plan to spilt up the project into multiple smaler packages in the near future, to follow Apollo's modules design.
 
 ## Installation
 
@@ -27,7 +39,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.6.0
+  graphql_flutter: ^0.7.1
 ```
 
 Now inside your Dart code you can import it.
@@ -48,10 +60,10 @@ To use the client it first needs to be initialized with an endpoint and cache. I
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
-  ValueNotifier<Client> client = new ValueNotifier(
-    new Client(
+  ValueNotifier<Client> client = ValueNotifier(
+    Client(
       endPoint: 'https://api.github.com/graphql',
-      cache: new InMemoryCache(),
+      cache: InMemoryCache(),
       apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
     ),
   );
@@ -69,9 +81,9 @@ In order to use the client, you app needs to be wrapped with the `GraphqlProvide
 ```dart
   ...
 
-  return new GraphqlProvider(
+  return GraphqlProvider(
     client: client,
-    child: new MaterialApp(
+    child: MaterialApp(
       title: 'Flutter Demo',
       ...
     ),
@@ -106,7 +118,7 @@ In your widget:
 ```dart
 ...
 
-new Query(
+Query(
   readRepositories, // this is the query you just created
   variables: {
     'nRepositories': 50,
@@ -118,22 +130,22 @@ new Query(
     String error,
   }) {
     if (error != '') {
-      return new Text(error);
+      return Text(error);
     }
 
     if (loading) {
-      return new Text('Loading');
+      return Text('Loading');
     }
 
     // it can be either Map or List
     List repositories = data['viewer']['repositories']['nodes'];
 
-    return new ListView.builder(
+    return ListView.builder(
       itemCount: repositories.length,
       itemBuilder: (context, index) {
         final repository = repositories[index];
 
-        return new Text(repository['name']);
+        return Text(repository['name']);
     });
   },
 );
@@ -163,7 +175,7 @@ The syntax for mutations is fairly similar to that of a query. The only diffence
 ```dart
 ...
 
-new Mutation(
+Mutation(
   addStar,
   builder: (
     runMutation, { // you can name it whatever you like
@@ -171,12 +183,12 @@ new Mutation(
     var data,
     String error,
 }) {
-  return new FloatingActionButton(
+  return FloatingActionButton(
     onPressed: () => runMutation({
       'starrableId': <A_STARTABLE_REPOSITORY_ID>,
     }),
     tooltip: 'Star',
-    child: new Icon(Icons.star),
+    child: Icon(Icons.star),
   );
 },
   onCompleted: (Map<String, dynamic> data) {
@@ -201,6 +213,64 @@ new Mutation(
 ...
 ```
 
+### Subscriptions (Experimental)
+
+The syntax for subscriptions is again similar to a query, however, this utilizes WebSockets and dart Streams to provide real-time updates from a server.
+Before subscriptions can be performed a global intance of `socketClient` needs to be initialized.
+
+> We are working on moving this into the same `GraphqlProvider` stucture as the http client. Therefore this api might change in the near future.
+
+```dart
+socketClient = await SocketClient.connect('ws://coolserver.com/graphql');
+```
+
+Once the `socketClient` has been initialized it can be used by the `Subscription` `Widget`
+
+```dart
+class _MyHomePageState extends State<MyHomePage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Subscription(
+          operationName,
+          query,
+          variables: variables,
+          builder: ({
+            bool loading,
+            dynamic payload,
+            dynamic error,
+          }) {
+            if (payload != null) {
+              return Text(payload['requestSubscription']['requestData']);
+            } else {
+              return Text('Data not found');
+            }
+          }
+        ),
+      )
+    );
+  }
+}
+```
+
+Once the `socketClient` is initialized you could also use it without Flutter.
+
+```dart
+final String operationName = "SubscriptionQuery";
+final String query = """subscription $operationName(\$requestId: String!) {
+  requestSubscription(requestId: \$requestId) {
+    requestData
+  }
+}""";
+final dynamic variables = {
+  'requestId': 'My Request',
+};
+socketClient
+    .subscribe(SubscriptionRequest(operationName, query, variables))
+    .listen(print);
+```
+
 ### Graphql Consumer
 
 You can always access the client direcly from the `GraphqlProvider` but to make it even easier you can also use the `GraphqlConsumer` widget.
@@ -208,12 +278,12 @@ You can always access the client direcly from the `GraphqlProvider` but to make 
 ```dart
   ...
 
-  return new GraphqlConsumer(
+  return GraphqlConsumer(
     builder: (Client client) {
       // do something with the client
 
-      return new Container(
-        child: new Text('Hello world'),
+      return Container(
+        child: Text('Hello world'),
       );
     },
   );
@@ -221,7 +291,7 @@ You can always access the client direcly from the `GraphqlProvider` but to make 
   ...
 ```
 
-### Offline Cache
+### Offline Cache (Experimental)
 
 The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
 
@@ -233,10 +303,10 @@ The in-memory cache can automatically be saved to and restored from offline stor
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new GraphqlProvider(
+    return GraphqlProvider(
       client: client,
-      child: new CacheProvider(
-        child: new MaterialApp(
+      child: CacheProvider(
+        child: MaterialApp(
           title: 'Flutter Demo',
           ...
         ),
@@ -254,23 +324,23 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Basic queries           |    ✅    |
-| Basic mutations         |    ✅    |
-| Basic subscriptions     |    🔜    |
-| Query variables         |    ✅    |
-| Mutation variables      |    ✅    |
-| Subscription variables  |    🔜    |
+| Queries                 |    ✅    |
+| Mutations               |    ✅    |
+| Subscriptions           |    ✅    |
 | Query polling           |    ✅    |
-| In memory caching       |    ✅    |
-| Offline caching         |    ✅    |
+| In memory cache         |    ✅    |
+| Offline cache sync      |    ✅    |
 | Optimistic results      |    🔜    |
 | Client state management |    🔜    |
+| Modularity              |    🔜    |
 
 ## Contributing
 
 Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
 
 ## Contributors
+
+This package was originally created and published by the engineers at [Zino App B.V.](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
 
 Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
 
