@@ -25,13 +25,16 @@ class GQLError {
 
   /// The path of the field in error.
   final List<dynamic> path;
+  
+  final Map<String, dynamic> extensions;
 
   /// Constructs a [GQLError] from a JSON map.
   GQLError.fromJSON(Map data)
       : message = data['message'],
         locations = new List.from(
             (data['locations']).map((d) => new Location.fromJSON(d))),
-        path = data['path'];
+        path = data['path'],
+        extensions = data['extensions'];
 
   @override
   String toString() =>
