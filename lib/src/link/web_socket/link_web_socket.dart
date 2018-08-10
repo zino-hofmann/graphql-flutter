@@ -1,4 +1,4 @@
-import 'package:graphql_flutter/src/links/link.dart';
+import 'package:graphql_flutter/src/link/link.dart';
 
 class WebSocketLink extends Link {
   RequestHandler subscriptionClient;

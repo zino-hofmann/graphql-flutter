@@ -3,10 +3,10 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'package:graphql_flutter/src/links/link.dart';
-import 'package:graphql_flutter/src/links/operation.dart';
-import 'package:graphql_flutter/src/links/fetch_result.dart';
-import 'package:graphql_flutter/src/links/http/fallback_http_config.dart';
+import 'package:graphql_flutter/src/link/link.dart';
+import 'package:graphql_flutter/src/link/operation.dart';
+import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 
 Map<String, dynamic> _selectHttpOptionsAndBody(
   Operation operation,
