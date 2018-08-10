@@ -5,7 +5,9 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-class InMemoryCache {
+import 'package:graphql_flutter/src/cache/cache.dart';
+
+class InMemoryCache implements Cache {
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
 
   Future<String> get _localStoragePath async {
