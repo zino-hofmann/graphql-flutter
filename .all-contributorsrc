@@ -72,6 +72,24 @@
         "example",
         "ideas"
       ]
+    },
+    {
+      "login": "mmadjer",
+      "name": "Miroslav Valkovic-Madjer",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/9830761?v=4",
+      "profile": "http://madjer.info",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "AleksandarFaraj",
+      "name": "Aleksandar Faraj",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/4523129?v=4",
+      "profile": "https://github.com/AleksandarFaraj",
+      "contributions": [
+        "bug"
+      ]
     }
   ]
 }

@@ -1,3 +1,32 @@
+## [0.8.0] - August 10 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Added basic error handeling for queries and mutations @mmadjer
+- Added missing export for the `GraphqlConsumer` widget @AleksandarFaraj
+
+#### Docs
+
+n/a
+
+## [0.7.1] - August 3 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Code formatting
+
+#### Docs
+
+- Updated the package description
+
 ## [0.7.0] - July 22 2018
 
 ### Breaking change
