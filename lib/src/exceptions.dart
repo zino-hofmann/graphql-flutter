@@ -29,13 +29,14 @@ class GQLError {
   /// Constructs a [GQLError] from a JSON map.
   GQLError.fromJSON(Map data)
       : message = data['message'],
-        locations = new List.from(
-            (data['locations']).map((d) => new Location.fromJSON(d))),
+        locations = data["locations"] is List ? new List.from(
+            (data['locations']).map((d) => new Location.fromJSON(d)))
+            : null,
         path = data['path'];
 
   @override
   String toString() =>
-      '$message: ${locations.map((l) => '[${l.toString()}]').join('')}';
+      '$message: ${locations is List ? locations.map((l) => '[${l.toString()}]').join('') : ""}';
 }
 
 /// A Exception that is raised if the GQL response has a [GQLError].
