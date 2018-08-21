@@ -1,3 +1,17 @@
+## [0.8.1] - Unreleased
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Error handling when location is not provided @adelcasse
+
+#### Docs
+
+n/a
+
 ## [0.8.0] - August 10 2018
 
 ### Breaking change
