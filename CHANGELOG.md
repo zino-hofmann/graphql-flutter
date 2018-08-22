@@ -55,7 +55,7 @@ n/a
 #### Docs
 
 - Added instructions for adding subscripton to your poject. @cal-pratt 
-- Updated the `About this project` section. @HofamnnZ
+- Updated the `About this project` section. @HofmannZ
 
 ## [0.6.0] - July 19 2018
 
