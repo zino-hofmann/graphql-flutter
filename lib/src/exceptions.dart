@@ -25,7 +25,8 @@ class GQLError {
 
   /// The path of the field in error.
   final List<dynamic> path;
-  
+
+  /// Custom error data returned by your GraphQL API server
   final Map<String, dynamic> extensions;
 
   /// Constructs a [GQLError] from a JSON map.
