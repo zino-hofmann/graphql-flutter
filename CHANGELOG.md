@@ -35,11 +35,11 @@ n/a
 
 #### Fixes / Enhancements
 
-- Code formatting
+- Code formatting @HofmannZ
 
 #### Docs
 
-- Updated the package description
+- Updated the package description @HofmannZ
 
 ## [0.7.0] - July 22 2018
 
@@ -49,34 +49,34 @@ n/a
 
 #### Fixes / Enhancements
 
-- Added support for subsciptionsin the client.
-- Added the `Subscription` widget. You can no direcly acces streams from Flutter.
+- Added support for subsciptions in the client. @cal-pratt
+- Added the `Subscription` widget. You can no direcly acces streams from Flutter. @cal-pratt 
 
 #### Docs
 
-- Added instructions for adding subscripton to your poject.
-- Updated the `About this project` section.
+- Added instructions for adding subscripton to your poject. @cal-pratt 
+- Updated the `About this project` section. @HofamnnZ
 
 ## [0.6.0] - July 19 2018
 
 ### Breaking change
 
-- The library now requires your app to be wrapped with the `GraphqlProvider` widget.
-- The global `client` variable is no longer available. Instead use the `GraphqlConsumer` widget.
+- The library now requires your app to be wrapped with the `GraphqlProvider` widget. @HofmannZ
+- The global `client` variable is no longer available. Instead use the `GraphqlConsumer` widget. @HofmannZ
 
 #### Fixes / Enhancements
 
-- Added the `GraphqlProvider` widget. The client is now stored in an `InheritedWidget`, and can be accessed anywhere within the app.
+- Added the `GraphqlProvider` widget. The client is now stored in an `InheritedWidget`, and can be accessed anywhere within the app. @HofmannZ
 
 ```dart
 Client client = GraphqlProvider.of(context).value;
 ```
 
-- Added the `GraphqlConsumer` widget. For ease of use we added a widget that uses the same builder structure as the `Query` and `Mutation` widgets.
+- Added the `GraphqlConsumer` widget. For ease of use we added a widget that uses the same builder structure as the `Query` and `Mutation` widgets. @HofmannZ
 
 > Under the hood it access the client from the `BuildContext`.
 
-- Added the option to optionally provide the `apiToken` to the `Client` constructor. It is still possible to set the `apiToken` with setter method.
+- Added the option to optionally provide the `apiToken` to the `Client` constructor. It is still possible to set the `apiToken` with setter method. @HofmannZ
 
 ```dart
   return new GraphqlConsumer(
@@ -90,10 +90,10 @@ Client client = GraphqlProvider.of(context).value;
 
 #### Docs
 
-- Added documentation for the new `GraphqlProvider`
-- Added documentation for the new `GraphqlConsumer`
-- Changed the setup instructions to include the new widgets
-- Changed the example to include the new widgets
+- Added documentation for the new `GraphqlProvider` @HofmannZ
+- Added documentation for the new `GraphqlConsumer` @HofmannZ
+- Changed the setup instructions to include the new widgets @HofmannZ
+- Changed the example to include the new widgets @HofmannZ
 
 ## [0.5.4] - July 17 2018
 
@@ -105,7 +105,7 @@ n/a
 
 - Query: changed `Timer` to `Timer.periodic` @eusdima
 - Minor logic tweak @eusdima
-- Use absolute paths in the library
+- Use absolute paths in the library @HofmannZ
 
 #### Docs
 
