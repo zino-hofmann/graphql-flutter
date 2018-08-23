@@ -123,6 +123,7 @@ Query(
   variables: {
     'nRepositories': 50,
   },
+  debug: true, // optional
   pollInterval: 10, // optional
   builder: ({
     bool loading,
@@ -177,6 +178,7 @@ The syntax for mutations is fairly similar to that of a query. The only diffence
 
 Mutation(
   addStar,
+  debug: true, // optional
   builder: (
     runMutation, { // you can name it whatever you like
     bool loading,

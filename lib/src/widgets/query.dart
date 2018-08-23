@@ -15,6 +15,7 @@ class Query extends StatefulWidget {
     this.query, {
     final Key key,
     this.variables = const {},
+    this.debug,
     @required this.builder,
     this.pollInterval,
   }) : super(key: key);
@@ -23,6 +24,7 @@ class Query extends StatefulWidget {
   final Map<String, dynamic> variables;
   final QueryBuilder builder;
   final int pollInterval;
+  final bool debug;
 
   @override
   QueryState createState() => QueryState();

@@ -63,6 +63,25 @@ class Client {
     });
   }
 
+  _debugLogRequest(String body) {
+    final encoder = JsonEncoder.withIndent('\t');
+
+    print('=== Request ===');
+    print('URL\t: $endPoint');
+    print('Headers: ${encoder.convert(headers)}');
+    print('Body\t: ${body}');
+  }
+
+  _debugLogRespone(http.Response response) {
+    final encoder = JsonEncoder.withIndent('\t');
+
+    print('=== Response ===');
+    print('URL\t: ${response.request.url}');
+    print('Status\t: ${response.statusCode}');
+    print('Headers: ${encoder.convert(response.headers)}');
+    print('Body\t: ${response.body}');
+  }
+
   Map<String, dynamic> _parseResponse(http.Response response) {
     final int statusCode = response.statusCode;
     final String reasonPhrase = response.reasonPhrase;
@@ -89,6 +108,7 @@ class Client {
   Future<Map<String, dynamic>> query({
     String query,
     Map<String, dynamic> variables,
+    bool debug = false,
   }) async {
     final String body = _encodeBody(
       query,
@@ -101,6 +121,11 @@ class Client {
         headers: headers,
         body: body,
       );
+
+      if (debug) {
+        _debugLogRequest(body);
+        _debugLogRespone(res);
+      }
 
       final Map<String, dynamic> parsedResponse = _parseResponse(res);
 

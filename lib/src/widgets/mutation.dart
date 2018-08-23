@@ -17,11 +17,13 @@ class Mutation extends StatefulWidget {
   Mutation(
     this.mutation, {
     final Key key,
+    this.debug,
     @required this.builder,
     this.onCompleted,
   }) : super(key: key);
 
   final String mutation;
+  final bool debug;
   final MutationBuilder builder;
   final OnMutationCompleted onCompleted;
 
@@ -49,6 +51,7 @@ class MutationState extends State<Mutation> {
       final Map<String, dynamic> result = await client.query(
         query: widget.mutation,
         variables: variables,
+        debug: widget.debug,
       );
 
       setState(() {
