@@ -32,8 +32,9 @@ class GQLError {
   /// Constructs a [GQLError] from a JSON map.
   GQLError.fromJSON(Map data)
       : message = data['message'],
-        locations = data["locations"] is List ? new List.from(
-            (data['locations']).map((d) => new Location.fromJSON(d)))
+        locations = data["locations"] is List
+            ? new List.from(
+                (data['locations']).map((d) => new Location.fromJSON(d)))
             : null,
         path = data['path'],
         extensions = data['extensions'];
