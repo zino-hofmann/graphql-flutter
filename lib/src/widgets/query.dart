@@ -29,9 +29,11 @@ class Query extends StatefulWidget {
 }
 
 class QueryState extends State<Query> {
+  Client client;
+
   bool loading = true;
   Map<String, dynamic> data = {};
-  Exception error = null;
+  Exception error;
 
   bool initialFetch = true;
   Duration pollInterval;
@@ -50,6 +52,14 @@ class QueryState extends State<Query> {
   }
 
   @override
+  void didChangeDependencies() {
+    /// Gets the client from the closest wrapping [GraphqlProvider].
+    client = GraphqlProvider.of(context).value;
+
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _deleteTimer();
 
@@ -64,8 +74,6 @@ class QueryState extends State<Query> {
   }
 
   void getQueryResult() async {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    Client client = GraphqlProvider.of(context).value;
     assert(client != null);
 
     try {
