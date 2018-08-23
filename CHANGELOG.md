@@ -1,4 +1,4 @@
-## [0.8.1] - Unreleased
+## [0.9.0] - August 23 2018
 
 ### Breaking change
 
@@ -6,8 +6,10 @@ n/a
 
 #### Fixes / Enhancements
 
-- Fixed error handling when location is not provided. @adelcasse
 - Added error extensions support. @dustin-graham
+- Changed the mutation typedef to return a Future, allowing async/await. @HofmannZ
+- Fixed error handling when location is not provided. @adelcasse
+- Fixed a bug where the client might no longer be in the same context. @HofmannZ
 
 #### Docs
 
@@ -51,11 +53,11 @@ n/a
 #### Fixes / Enhancements
 
 - Added support for subsciptions in the client. @cal-pratt
-- Added the `Subscription` widget. You can no direcly acces streams from Flutter. @cal-pratt 
+- Added the `Subscription` widget. You can no direcly acces streams from Flutter. @cal-pratt
 
 #### Docs
 
-- Added instructions for adding subscripton to your poject. @cal-pratt 
+- Added instructions for adding subscripton to your poject. @cal-pratt
 - Updated the `About this project` section. @HofmannZ
 
 ## [0.6.0] - July 19 2018
