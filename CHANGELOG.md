@@ -6,7 +6,8 @@ n/a
 
 #### Fixes / Enhancements
 
-- Error handling when location is not provided @adelcasse
+- Fixed error handling when location is not provided. @adelcasse
+- Added error extensions support. @dustin-graham
 
 #### Docs
 
