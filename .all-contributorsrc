@@ -90,6 +90,26 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "adelcasse",
+      "name": "Arnaud Delcasse",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/403029?v=4",
+      "profile": "https://www.scity.coop",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "dustin-graham",
+      "name": "Dustin Graham",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/959931?v=4",
+      "profile": "https://github.com/dustin-graham",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ]
 }

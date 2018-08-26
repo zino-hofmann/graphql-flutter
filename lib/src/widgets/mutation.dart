@@ -1,8 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/src/client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef void RunMutation(Map<String, dynamic> variables);
+typedef Future<void> RunMutation(Map<String, dynamic> variables);
 typedef void OnMutationCompleted(Map<String, dynamic> data);
 typedef Widget MutationBuilder(
   RunMutation mutation, {
@@ -28,13 +30,13 @@ class Mutation extends StatefulWidget {
 }
 
 class MutationState extends State<Mutation> {
+  Client client;
+
   bool loading = false;
   Map<String, dynamic> data = {};
-  Exception error = null;
+  Exception error;
 
   void runMutation(Map<String, dynamic> variables) async {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    Client client = GraphqlProvider.of(context).value;
     assert(client != null);
 
     setState(() {
@@ -63,6 +65,14 @@ class MutationState extends State<Mutation> {
         loading = false;
       });
     }
+  }
+
+  @override
+  void didChangeDependencies() {
+    /// Gets the client from the closest wrapping [GraphqlProvider].
+    client = GraphqlProvider.of(context).value;
+
+    super.didChangeDependencies();
   }
 
   Widget build(BuildContext context) {
