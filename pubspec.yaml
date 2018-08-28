@@ -12,11 +12,12 @@ dependencies:
   http: ^0.11.0
   path_provider: ^0.4.0
   uuid: ^1.0.0
-  test: ^0.12.0
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  test: ^0.12.0
 
 environment:
   sdk: ">=2.0.0-dev.52.0 <3.0.0"
