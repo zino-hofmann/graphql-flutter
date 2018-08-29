@@ -26,16 +26,22 @@ class GQLError {
   /// The path of the field in error.
   final List<dynamic> path;
 
+  /// Custom error data returned by your GraphQL API server
+  final Map<String, dynamic> extensions;
+
   /// Constructs a [GQLError] from a JSON map.
   GQLError.fromJSON(Map data)
       : message = data['message'],
-        locations = new List.from(
-            (data['locations']).map((d) => new Location.fromJSON(d))),
-        path = data['path'];
+        locations = data["locations"] is List
+            ? new List.from(
+                (data['locations']).map((d) => new Location.fromJSON(d)))
+            : null,
+        path = data['path'],
+        extensions = data['extensions'];
 
   @override
   String toString() =>
-      '$message: ${locations.map((l) => '[${l.toString()}]').join('')}';
+      '$message: ${locations is List ? locations.map((l) => '[${l.toString()}]').join('') : ""}';
 }
 
 /// A Exception that is raised if the GQL response has a [GQLError].
