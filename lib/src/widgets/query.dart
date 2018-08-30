@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:graphql_flutter/src/client.dart';
+import 'package:graphql_flutter/src/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef Widget QueryBuilder({
@@ -29,7 +29,7 @@ class Query extends StatefulWidget {
 }
 
 class QueryState extends State<Query> {
-  Client client;
+  GraphQLClient client;
 
   bool loading = true;
   Map<String, dynamic> data = {};
@@ -44,33 +44,15 @@ class QueryState extends State<Query> {
   void initState() {
     super.initState();
 
-    if (widget.pollInterval is int) {
-      pollInterval = Duration(seconds: widget.pollInterval);
-    }
-
     getQueryResult();
   }
 
   @override
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphqlProvider].
-    client = GraphqlProvider.of(context).value;
+    client = GraphQLProvider.of(context).value;
 
     super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    _deleteTimer();
-
-    super.dispose();
-  }
-
-  void _deleteTimer() {
-    if (pollTimer is Timer) {
-      pollTimer.cancel();
-      pollTimer = null;
-    }
   }
 
   void getQueryResult() async {

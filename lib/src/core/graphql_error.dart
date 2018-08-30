@@ -15,8 +15,8 @@ class Location {
   String toString() => '{ line: $line, column: $column }';
 }
 
-/// A GQL error (returned by a GQL server).
-class GQLError {
+/// A GraphQL error (returned by a GraphQL server).
+class GraphQLError {
   /// The message of the error.
   final String message;
 
@@ -30,11 +30,10 @@ class GQLError {
   final Map<String, dynamic> extensions;
 
   /// Constructs a [GQLError] from a JSON map.
-  GQLError.fromJSON(Map data)
+  GraphQLError.fromJSON(Map data)
       : message = data['message'],
         locations = data["locations"] is List
-            ? new List.from(
-                (data['locations']).map((d) => new Location.fromJSON(d)))
+            ? List.from((data['locations']).map((d) => Location.fromJSON(d)))
             : null,
         path = data['path'],
         extensions = data['extensions'];
@@ -43,26 +42,3 @@ class GQLError {
   String toString() =>
       '$message: ${locations is List ? locations.map((l) => '[${l.toString()}]').join('') : ""}';
 }
-
-/// A Exception that is raised if the GQL response has a [GQLError].
-class GQLException implements Exception {
-  /// The Exception message.
-  final String message;
-
-  /// The list of [GQLError] in the response.
-  final List<GQLError> gqlErrors;
-
-  /// Creates a new [GQLException].
-  ///
-  /// It requires a message and a JSON list from a GQL response
-  /// (returned by a GQL server).
-  GQLException(this.message, List rawGQLError)
-      : gqlErrors =
-            new List.from(rawGQLError.map((d) => new GQLError.fromJSON(d)));
-
-  @override
-  String toString() =>
-      '$message: ${gqlErrors.map((e) => '[${e.toString()}]').join('')}';
-}
-
-class NoConnectionException implements Exception {}

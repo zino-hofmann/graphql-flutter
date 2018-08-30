@@ -1,1 +1,4 @@
-abstract class Cache {}
+abstract class Cache {
+  void save() {}
+  void restore() {}
+}

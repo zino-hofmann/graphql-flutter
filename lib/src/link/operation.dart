@@ -1,17 +1,17 @@
 import 'dart:convert';
 
 class Operation {
+  final String document;
+  final Map<String, dynamic> variables;
+  final String operationName;
+  final Map<String, dynamic> extensions;
+
   Operation({
-    this.query,
+    this.document,
     this.variables,
     this.operationName,
     this.extensions,
   });
-
-  final String query;
-  final Map<String, dynamic> variables;
-  final String operationName;
-  final Map<String, dynamic> extensions;
 
   Map<String, dynamic> _context = {};
 
@@ -31,32 +31,6 @@ class Operation {
     /// that might not always be true
     String encodedVariables = json.encode(variables);
 
-    return '$query|$encodedVariables|$operationName';
+    return '$document|$encodedVariables|$operationName';
   }
-}
-
-Operation createOperation(
-  Map<String, dynamic> startingContext,
-  Map<String, dynamic> graphqlRequest,
-) {
-  Map<String, dynamic> variables = {};
-  Map<String, dynamic> extensions = {};
-
-  if (graphqlRequest['variables'] != null) {
-    variables.addAll(graphqlRequest['variables']);
-  }
-
-  if (graphqlRequest['extensions'] != null) {
-    extensions.addAll(graphqlRequest['extensions']);
-  }
-
-  Operation operation = Operation(
-    query: graphqlRequest['query'],
-    variables: variables,
-    operationName: graphqlRequest['operationName'],
-    extensions: extensions,
-  );
-  operation.setContext(startingContext);
-
-  return operation;
 }

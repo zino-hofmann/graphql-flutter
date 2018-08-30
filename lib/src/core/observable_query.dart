@@ -1,49 +1,62 @@
 import 'dart:async';
 
-import 'package:graphql_flutter/src/core/query_scheduler.dart';
+import 'package:graphql_flutter/src/core/graphql_error.dart';
 import 'package:graphql_flutter/src/core/query_manager.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/core/watch_query_options.dart';
+import 'package:graphql_flutter/src/core/query_options.dart';
+import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
 class ObservableQuery {
-  ObservableQuery({
-    QueryScheduler scheduler,
-    WatchQueryOptions options,
-    bool shouldSubscribe,
-  }) {
-    // active state
-    this._isCurrentlyPolling = false;
-    this._isTornDown = false;
-
-    // query information
-    this.options = options;
-    this.variables = options.variables ?? {};
-    this.queryId = scheduler.queryManager.generateQueryId();
-    this._shouldSubscribe = shouldSubscribe;
-
-    // related classes
-    this._scheduler = scheduler;
-    this._queryManager = scheduler.queryManager;
-
-    // interal data stores
-    this._observers = [];
-    this._subscriptionHandles = [];
-  }
-
-  bool _isCurrentlyPolling;
-  bool _shouldSubscribe;
-  bool _isTornDown;
-  QueryScheduler _scheduler;
-  QueryManager _queryManager;
-  dynamic _observers;
-  dynamic _subscriptionHandles;
-
-  QueryResult _lastResult;
-  Exception _lastError;
+  StreamController controller;
 
   WatchQueryOptions options;
   String queryId;
-  Map<String, dynamic> variables;
 
-  Future result() async {}
+  /// The current value of the variables for this query. Can change.
+  Map<String, dynamic> variables;
+  bool isCurrentlyPolling;
+  bool shouldSubscribe;
+  bool isTornDown;
+  QueryScheduler scheduler;
+  QueryManager queryManager;
+
+  QueryResult lastResult;
+  GraphQLError lastError;
+
+  ObservableQuery({
+    this.options,
+    this.shouldSubscribe = false,
+  }) {
+    // observable
+    controller = StreamController.broadcast();
+
+    // active state
+    isCurrentlyPolling = false;
+    isTornDown = false;
+
+    // query information
+    variables = options.variables ?? {};
+    queryId = scheduler.queryManager.generateQueryId().toString();
+
+    // related classes
+    queryManager = scheduler.queryManager;
+  }
+
+  result() {
+    // listen to this stream
+
+    // return the first result
+  }
+
+  currentResult() {
+    // check if torn down
+
+    // call queryManager.getCurrentQueryResult(this);
+
+    // return the result
+  }
+
+  void close() {
+    controller.close();
+  }
 }

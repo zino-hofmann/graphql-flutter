@@ -40,9 +40,7 @@ class Link {
 
 Stream<FetchResult> execute({
   Link link,
-  Map<String, dynamic> operation,
+  Operation operation,
 }) {
-  return link.request(
-    createOperation(operation['context'], operation),
-  );
+  return link.request(operation);
 }

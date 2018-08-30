@@ -1,29 +1,29 @@
 import 'package:flutter/widgets.dart';
 
-import 'package:graphql_flutter/src/client.dart';
+import 'package:graphql_flutter/src/graphql_client.dart';
 
-class GraphqlProvider extends StatefulWidget {
-  const GraphqlProvider({
+class GraphQLProvider extends StatefulWidget {
+  const GraphQLProvider({
     Key key,
     this.client,
     this.child,
   }) : super(key: key);
 
-  final ValueNotifier<Client> client;
+  final ValueNotifier<GraphQLClient> client;
   final Widget child;
 
-  static ValueNotifier<Client> of(BuildContext context) {
-    _InheritedGraphqlProvider inheritedGraphqlProvider =
-        context.inheritFromWidgetOfExactType(_InheritedGraphqlProvider);
+  static ValueNotifier<GraphQLClient> of(BuildContext context) {
+    _InheritedGraphQLProvider inheritedGraphqlProvider =
+        context.inheritFromWidgetOfExactType(_InheritedGraphQLProvider);
 
     return inheritedGraphqlProvider.client;
   }
 
   @override
-  State<StatefulWidget> createState() => _GraphqlProviderState();
+  State<StatefulWidget> createState() => _GraphQLProviderState();
 }
 
-class _GraphqlProviderState extends State<GraphqlProvider> {
+class _GraphQLProviderState extends State<GraphQLProvider> {
   void didValueChange() => setState(() {});
 
   @override
@@ -42,25 +42,25 @@ class _GraphqlProviderState extends State<GraphqlProvider> {
 
   @override
   Widget build(BuildContext context) {
-    return _InheritedGraphqlProvider(
+    return _InheritedGraphQLProvider(
       client: widget.client,
       child: widget.child,
     );
   }
 }
 
-class _InheritedGraphqlProvider extends InheritedWidget {
-  _InheritedGraphqlProvider({
+class _InheritedGraphQLProvider extends InheritedWidget {
+  _InheritedGraphQLProvider({
     this.client,
     this.child,
   }) : clientValue = client.value;
 
-  final ValueNotifier<Client> client;
+  final ValueNotifier<GraphQLClient> client;
   final Widget child;
-  final Client clientValue;
+  final GraphQLClient clientValue;
 
   @override
-  bool updateShouldNotify(_InheritedGraphqlProvider oldWidget) {
+  bool updateShouldNotify(_InheritedGraphQLProvider oldWidget) {
     return clientValue != oldWidget.clientValue;
   }
 }

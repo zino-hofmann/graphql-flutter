@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:graphql_flutter/src/client.dart';
+import 'package:graphql_flutter/src/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef Future<void> RunMutation(Map<String, dynamic> variables);
@@ -30,57 +30,19 @@ class Mutation extends StatefulWidget {
 }
 
 class MutationState extends State<Mutation> {
-  Client client;
-
-  bool loading = false;
-  Map<String, dynamic> data = {};
-  Exception error;
-
-  void runMutation(Map<String, dynamic> variables) async {
-    assert(client != null);
-
-    setState(() {
-      data = {};
-      error = null;
-      loading = true;
-    });
-
-    try {
-      final Map<String, dynamic> result = await client.query(
-        query: widget.mutation,
-        variables: variables,
-      );
-
-      setState(() {
-        data = result;
-        loading = false;
-      });
-
-      if (widget.onCompleted != null) {
-        widget.onCompleted(result);
-      }
-    } catch (e) {
-      setState(() {
-        error = e;
-        loading = false;
-      });
-    }
-  }
+  GraphQLClient client;
 
   @override
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphqlProvider].
-    client = GraphqlProvider.of(context).value;
+    client = GraphQLProvider.of(context).value;
 
     super.didChangeDependencies();
   }
 
   Widget build(BuildContext context) {
-    return widget.builder(
-      runMutation,
-      loading: loading,
-      error: error,
-      data: data,
-    );
+    return StreamBuilder(steam: builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+
+    },);
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:graphql_flutter/src/link/link.dart';
@@ -55,7 +56,7 @@ Map<String, dynamic> _selectHttpOptionsAndBody(
   }
 
   if (http['includeQuery']) {
-    body['query'] = operation.query;
+    body['query'] = operation.document;
   }
 
   return <String, dynamic>{
@@ -74,15 +75,6 @@ FetchResult _parseResponse(http.Response response) {
     );
   }
 
-  // final FetchResult jsonResponse = json.decode(response.body);
-
-  // if (jsonResponse['errors'] != null && jsonResponse['errors'].length > 0) {
-  //   throw Exception(
-  //     'Error returned by the server in the query' +
-  //         jsonResponse['errors'].toString(),
-  //   );
-  // }
-
   final Map<String, dynamic> jsonResponse = json.decode(response.body);
   FetchResult fetchResult = FetchResult();
 
@@ -98,8 +90,8 @@ FetchResult _parseResponse(http.Response response) {
 }
 
 Link _createHttpLink({
-  String uri,
-  http.Client fetch,
+  @required String uri,
+  @required http.Client fetch,
   Map<String, dynamic> fetchOptions,
   Map<String, dynamic> credentials,
   Map<String, dynamic> headers,
@@ -129,10 +121,11 @@ Link _createHttpLink({
 
     StreamController<FetchResult> controller;
 
-    Future<dynamic> onListen() async {
+    Future<void> onListen() async {
       http.Response response;
 
       try {
+        // TODO: support multiple http methods
         response = await fetcher.post(
           uri,
           headers: options['headers'],
