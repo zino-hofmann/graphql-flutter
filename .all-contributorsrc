@@ -110,6 +110,15 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "fabiocarneiro",
+      "name": "Fábio Carneiro",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/1375034?v=4",
+      "profile": "https://github.com/fabiocarneiro",
+      "contributions": [
+        "bug"
+      ]
     }
   ]
 }
