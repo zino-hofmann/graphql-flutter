@@ -73,16 +73,7 @@ class Client {
       );
     }
 
-    final Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-    if (jsonResponse['errors'] != null && jsonResponse['errors'].length > 0) {
-      throw GQLException(
-        'Error returned by the server in the query',
-        jsonResponse['errors'],
-      );
-    }
-
-    return jsonResponse['data'];
+    return json.decode(response.body);
   }
 
   // The query method may send a request to your server if the appropriate data is not in your cache.
