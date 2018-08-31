@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:graphql_flutter/src/core/query_manager.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
 
 class QueryScheduler {
@@ -21,7 +20,7 @@ class QueryScheduler {
     intervalQueries[interval] = intervalQueries[interval].where(
       (String queryId) {
         Duration pollInterval =
-            Duration(seconds: registeredQueries[queryId].pollInterval);
+            Duration(seconds: registeredQueries[queryId].options.pollInterval);
 
         // If ObservableQuery can't be found from registeredQueries or if it has a
         // different interval, it means that this queryId is no longer registered

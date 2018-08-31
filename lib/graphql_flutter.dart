@@ -3,8 +3,12 @@ library graphql_flutter;
 export 'package:graphql_flutter/src/graphql_client.dart';
 export 'package:graphql_flutter/src/socket_client.dart';
 
+export 'package:graphql_flutter/src/core/query_options.dart';
 export 'package:graphql_flutter/src/core/query_result.dart';
 export 'package:graphql_flutter/src/core/graphql_error.dart';
+
+export 'package:graphql_flutter/src/link/link.dart';
+export 'package:graphql_flutter/src/link/http/link_http.dart';
 
 export 'package:graphql_flutter/src/cache/in_memory.dart';
 

@@ -1,69 +1,76 @@
-import 'dart:async';
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/core/graphql_error.dart';
 import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
 
 import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
 import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
 
 class QueryManager {
   final Link link;
   final QueryScheduler scheduler = QueryScheduler();
 
   int idCounter = 1;
-  Map<String, ObservableQuery> queries = Map();
 
   QueryManager({
     @required this.link,
   });
 
-  ObservableQuery query(WatchQueryOptions options) {
+  ObservableQuery query(QueryOptions options) {
     if (options.document == null) {
       throw new Exception(
           'document option is required. You must specify your GraphQL document in the query options.');
     }
 
-    Operation operation = Operation(
+    ObservalbeQueryOptions observalbeQueryOptions = ObservalbeQueryOptions(
       document: options.document,
       variables: options.variables,
-      operationName: null,
+      fetchPolicy: options.fetchPolicy,
+      errorPolicy: options.errorPolicy,
+      pollInterval: options.pollInterval,
+      context: options.context,
     );
 
     ObservableQuery observableQuery = ObservableQuery(
       queryManager: this,
-      operation: operation,
+      options: observalbeQueryOptions,
     );
 
-    queries[observableQuery.queryId] = observableQuery;
-
-    scheduler.sheduleQuery(observableQuery);
+    if (options.pollInterval != null) {
+      observableQuery.scheduleOnInterval(
+        Duration(
+          seconds: options.pollInterval,
+        ),
+      );
+    } else {
+      observableQuery.schedule();
+    }
 
     return observableQuery;
   }
 
   ObservableQuery mutate(MutationOptions options) {
     if (options.document == null) {
-      throw new Exception(
-          'document option is required. You must specify your GraphQL document in the mutaion options.');
-    }
-  }
-
-  ObservableQuery getQuery(String queryId) {
-    if (queries.containsKey(queryId)) {
-      return queries[queryId];
+      throw Exception(
+        'document option is required. You must specify your GraphQL document in the mutaion options.',
+      );
     }
 
-    return null;
-  }
+    ObservalbeQueryOptions observalbeQueryOptions = ObservalbeQueryOptions(
+      document: options.document,
+      variables: options.variables,
+      fetchPolicy: options.fetchPolicy,
+      errorPolicy: options.errorPolicy,
+      context: options.context,
+    );
 
-  void setQuery(ObservableQuery observableQuery) {
-    queries[observableQuery.queryId] = observableQuery;
+    ObservableQuery observableQuery = ObservableQuery(
+      queryManager: this,
+      options: observalbeQueryOptions,
+    );
+
+    return observableQuery;
   }
 
   int generateQueryId() {

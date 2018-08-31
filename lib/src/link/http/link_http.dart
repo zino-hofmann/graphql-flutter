@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:meta/meta.dart';
-import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
 
 import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
@@ -11,8 +11,8 @@ import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 
 class HttpLink extends Link {
   factory HttpLink({
-    String uri,
-    http.Client fetch,
+    @required String uri,
+    Client fetch,
     Map<String, dynamic> fetchOptions,
     Map<String, dynamic> credentials,
     Map<String, dynamic> headers,
@@ -31,14 +31,14 @@ class HttpLink extends Link {
 
 Link _createHttpLink({
   @required String uri,
-  @required http.Client fetch,
+  Client fetch,
   Map<String, dynamic> fetchOptions,
   Map<String, dynamic> credentials,
   Map<String, dynamic> headers,
 }) {
   assert(uri != null);
 
-  http.Client fetcher = fetch ?? http.Client();
+  Client fetcher = fetch ?? Client();
 
   Map<String, dynamic> linkConfig = {
     'options': fetchOptions,
@@ -62,7 +62,7 @@ Link _createHttpLink({
     StreamController<FetchResult> controller;
 
     Future<void> onListen() async {
-      http.Response response;
+      Response response;
 
       try {
         // TODO: support multiple http methods
@@ -92,12 +92,12 @@ Link _createHttpLink({
   });
 }
 
-FetchResult _parseResponse(http.Response response) {
+FetchResult _parseResponse(Response response) {
   final int statusCode = response.statusCode;
   final String reasonPhrase = response.reasonPhrase;
 
   if (statusCode < 200 || statusCode >= 400) {
-    throw http.ClientException(
+    throw ClientException(
       'Network Error: $statusCode $reasonPhrase',
     );
   }
