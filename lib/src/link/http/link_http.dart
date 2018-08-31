@@ -10,87 +10,132 @@ import 'package:graphql_flutter/src/link/fetch_result.dart';
 import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 
 class HttpLink extends Link {
-  factory HttpLink({
+  RequestHandler requester;
+  Client fetch = Client();
+
+  HttpLink({
     @required String uri,
-    Client fetch,
+    this.fetch,
     Map<String, dynamic> fetchOptions,
     Map<String, dynamic> credentials,
     Map<String, dynamic> headers,
-  }) {
-    return _createHttpLink(
-      uri: uri,
-      fetch: fetch,
-      fetchOptions: fetchOptions,
-      credentials: credentials,
-      headers: headers,
-    );
-  }
+  }) : super(
+          request: (
+            Operation operation, [
+            NextLink forward,
+          ]) {
+            Map<String, dynamic> linkConfig = {
+              'options': fetchOptions,
+              'credentials': credentials,
+              'headers': headers,
+            };
 
-  RequestHandler requester;
-}
+            Map<String, dynamic> httpOptionsAndBody = _selectHttpOptionsAndBody(
+              operation,
+              fallbackHttpConfig,
+              linkConfig,
+            );
 
-Link _createHttpLink({
-  @required String uri,
-  Client fetch,
-  Map<String, dynamic> fetchOptions,
-  Map<String, dynamic> credentials,
-  Map<String, dynamic> headers,
-}) {
-  assert(uri != null);
+            Map<String, dynamic> options = httpOptionsAndBody['options'];
+            Map<String, dynamic> body = httpOptionsAndBody['body'];
 
-  Client fetcher = fetch ?? Client();
+            StreamController<FetchResult> controller;
 
-  Map<String, dynamic> linkConfig = {
-    'options': fetchOptions,
-    'credentials': credentials,
-    'headers': headers,
-  };
+            Future<void> onListen() async {
+              Response response;
 
-  return new Link(request: (
-    Operation operation, [
-    NextLink forward,
-  ]) {
-    Map<String, dynamic> httpOptionsAndBody = _selectHttpOptionsAndBody(
-      operation,
-      fallbackHttpConfig,
-      linkConfig,
-    );
+              try {
+                // TODO: support multiple http methods
+                response = await fetch.post(
+                  uri,
+                  headers: options['headers'],
+                  body: body,
+                );
 
-    Map<String, dynamic> options = httpOptionsAndBody['options'];
-    Map<String, dynamic> body = httpOptionsAndBody['body'];
+                operation.setContext({
+                  'response': response,
+                });
 
-    StreamController<FetchResult> controller;
+                final FetchResult parsedResponse = _parseResponse(response);
 
-    Future<void> onListen() async {
-      Response response;
+                controller.add(parsedResponse);
+              } catch (error) {
+                controller.addError(error);
+              }
 
-      try {
-        // TODO: support multiple http methods
-        response = await fetcher.post(
-          uri,
-          headers: options['headers'],
-          body: body,
+              controller.close();
+            }
+
+            controller = StreamController(onListen: onListen);
+
+            return controller.stream;
+          },
         );
-
-        operation.setContext({
-          'response': response,
-        });
-
-        final FetchResult parsedResponse = _parseResponse(response);
-
-        controller.add(parsedResponse);
-      } catch (error) {
-        controller.addError(error);
-      }
-
-      controller.close();
-    }
-
-    controller = StreamController(onListen: onListen);
-
-    return controller.stream;
-  });
 }
+
+// Link _createHttpLink({
+//   @required String uri,
+//   Client fetch,
+//   Map<String, dynamic> fetchOptions,
+//   Map<String, dynamic> credentials,
+//   Map<String, dynamic> headers,
+// }) {
+
+//         assert(uri != null);
+
+//   Client fetcher = fetch ?? Client();
+
+//   Map<String, dynamic> linkConfig = {
+//     'options': fetchOptions,
+//     'credentials': credentials,
+//     'headers': headers,
+//   };
+
+//   return Link(request: (
+//     Operation operation, [
+//     NextLink forward,
+//   ]) {
+//     Map<String, dynamic> httpOptionsAndBody = _selectHttpOptionsAndBody(
+//       operation,
+//       fallbackHttpConfig,
+//       linkConfig,
+//     );
+
+//     Map<String, dynamic> options = httpOptionsAndBody['options'];
+//     Map<String, dynamic> body = httpOptionsAndBody['body'];
+
+//     StreamController<FetchResult> controller;
+
+//     Future<void> onListen() async {
+//       Response response;
+
+//       try {
+//         // TODO: support multiple http methods
+//         response = await fetcher.post(
+//           uri,
+//           headers: options['headers'],
+//           body: body,
+//         );
+
+//         operation.setContext({
+//           'response': response,
+//         });
+
+//         final FetchResult parsedResponse = _parseResponse(response);
+
+//         controller.add(parsedResponse);
+//       } catch (error) {
+//         controller.addError(error);
+//       }
+
+//       controller.close();
+//     }
+
+//     controller = StreamController(onListen: onListen);
+
+//     return controller.stream;
+//   });
+// }
 
 FetchResult _parseResponse(Response response) {
   final int statusCode = response.statusCode;

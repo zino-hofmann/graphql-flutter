@@ -49,6 +49,7 @@ class MutationState extends State<Mutation> {
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphqlProvider].
     client = GraphQLProvider.of(context).value;
+    observableQuery = client.mutate(widget.options);
 
     super.didChangeDependencies();
   }
@@ -60,9 +61,18 @@ class MutationState extends State<Mutation> {
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
+        if (snapshot.hasData) {
+          return widget.builder(
+            runMutation,
+            snapshot.data,
+          );
+        }
+
         return widget.builder(
           runMutation,
-          snapshot.data,
+          QueryResult(
+            loading: true,
+          ),
         );
       },
     );

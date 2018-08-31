@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:http/http.dart';
-
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import './mutations/addStar.dart' as mutations;
@@ -14,7 +12,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     HttpLink link = HttpLink(
       uri: 'https://api.github.com/graphql',
-      headers: <String, String>{},
+      headers: <String, String>{
+        'Authorization': 'Bearer 0fbb470710029e4a6af009d4ddc70c7e439433ea'
+      },
     );
 
     ValueNotifier<GraphQLClient> client = ValueNotifier(
@@ -61,6 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Query(
         options: QueryOptions(
           document: queries.readRepositories,
+          pollInterval: 1,
         ),
         builder: (QueryResult result) {
           if (result.errors != null) {

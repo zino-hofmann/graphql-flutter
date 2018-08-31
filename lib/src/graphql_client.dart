@@ -21,46 +21,27 @@ class GraphQLClient {
   GraphQLClient({
     @required this.link,
     @required this.cache,
-  });
+  }) {
+    queryManager = QueryManager(
+      link: link,
+    );
+  }
 
   /// This resolves a single query according to the options specified and
   /// returns a [ObservableQuery] which emits the resulting data or an error.
   ObservableQuery query(QueryOptions options) {
-    return initQueryManager().query(options);
+    return queryManager.query(options);
   }
 
   /// This resolves a single mutation according to the options specified and returns a
   /// [ObservableQuery] which emits the resulting data or an error.
   ObservableQuery mutate(MutationOptions options) {
-    return initQueryManager().mutate(options);
+    return queryManager.mutate(options);
   }
 
   /// This subscribes to a graphql subscription according to the options specified and returns an
   /// [Stream] which either emits received data or an error.
   Stream subscribe(options) {
     // TODO: merge the subscription client with the new client
-  }
-
-  /// This initializes the query manager that tracks queries and the cache
-  QueryManager initQueryManager() {
-    if (queryManager == null) {
-      queryManager = QueryManager(
-        link: link,
-      );
-    }
-
-    return queryManager;
-  }
-
-  /// Initializes a data proxy for this client instance if one does not already
-  /// exist and returns either a previously initialized proxy instance or the
-  /// newly initialized instance.
-  Cache _initProxy() {
-    if (proxy == null) {
-      initQueryManager();
-      proxy = cache;
-    }
-
-    return proxy;
   }
 }
