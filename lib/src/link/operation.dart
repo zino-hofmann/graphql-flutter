@@ -6,14 +6,14 @@ class Operation {
   final String operationName;
   final Map<String, dynamic> extensions;
 
+  Map<String, dynamic> _context = {};
+
   Operation({
     this.document,
     this.variables,
     this.operationName,
     this.extensions,
   });
-
-  Map<String, dynamic> _context = {};
 
   void setContext(Map<String, dynamic> next) {
     _context.addAll(next);

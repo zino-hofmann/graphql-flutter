@@ -1,62 +1,76 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'package:graphql_flutter/src/core/graphql_error.dart';
 import 'package:graphql_flutter/src/core/query_manager.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/core/query_options.dart';
+
 import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
-class ObservableQuery {
-  StreamController controller;
+import 'package:graphql_flutter/src/link/link.dart';
+import 'package:graphql_flutter/src/link/operation.dart';
+import 'package:graphql_flutter/src/link/fetch_result.dart';
 
-  WatchQueryOptions options;
+class ObservableQuery {
   String queryId;
 
-  /// The current value of the variables for this query. Can change.
-  Map<String, dynamic> variables;
-  bool isCurrentlyPolling;
-  bool shouldSubscribe;
-  bool isTornDown;
+  Operation operation;
+  int pollInterval;
   QueryScheduler scheduler;
   QueryManager queryManager;
+
+  StreamController<QueryResult> _controller;
+  List<StreamSubscription<QueryResult>> subscriptions = List();
 
   QueryResult lastResult;
   GraphQLError lastError;
 
   ObservableQuery({
-    this.options,
-    this.shouldSubscribe = false,
+    @required this.queryManager,
+    @required this.operation,
+    this.pollInterval,
   }) {
-    // observable
-    controller = StreamController.broadcast();
+    _controller = StreamController.broadcast();
+    queryId = queryManager.generateQueryId().toString();
 
-    // active state
-    isCurrentlyPolling = false;
-    isTornDown = false;
-
-    // query information
-    variables = options.variables ?? {};
-    queryId = scheduler.queryManager.generateQueryId().toString();
-
-    // related classes
-    queryManager = scheduler.queryManager;
+    scheduler = queryManager.scheduler;
   }
 
-  result() {
-    // listen to this stream
+  StreamSink<QueryResult> get stream => _controller;
 
-    // return the first result
-  }
+  Future<QueryResult> fetchQuery() async {
+    // execute the operation trough the provided link(s)
+    FetchResult fetchResult = await execute(
+      link: queryManager.link,
+      operation: operation,
+    ).last;
 
-  currentResult() {
-    // check if torn down
+    QueryResult queryResult = _mapFetchResultToQueryResult(fetchResult);
 
-    // call queryManager.getCurrentQueryResult(this);
+    // emit the event to the stream controller
+    _controller.add(queryResult);
 
-    // return the result
+    return queryResult;
   }
 
   void close() {
-    controller.close();
+    _controller.close();
+  }
+
+  QueryResult _mapFetchResultToQueryResult(FetchResult fetchResult) {
+    List<GraphQLError> errors;
+
+    if (fetchResult.errors != null) {
+      errors = List.from(fetchResult.errors.map(
+        (rawError) => GraphQLError.fromJSON(rawError),
+      ));
+    }
+
+    return QueryResult(
+      data: fetchResult.data,
+      errors: errors,
+      loading: false,
+    );
   }
 }

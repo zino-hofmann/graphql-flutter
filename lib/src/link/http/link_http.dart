@@ -9,84 +9,24 @@ import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 
-Map<String, dynamic> _selectHttpOptionsAndBody(
-  Operation operation,
-  Map<String, dynamic> fallbackConfig, [
-  Map<String, dynamic> linkConfig,
-  Map<String, dynamic> contextConfig,
-]) {
-  /// Setup fallback defaults
-  Map<String, dynamic> options = {
-    'headers': <String, dynamic>{},
-    'credentials': <String, dynamic>{},
-  };
-  options.addAll(fallbackConfig['options']);
-  options['headers'].addAll(fallbackConfig['headers']);
-
-  Map<String, dynamic> http = {};
-  http.addAll(fallbackConfig['http']);
-
-  /// inject the configured settings
-  if (linkConfig != null) {
-    options.addAll(linkConfig['options']);
-    options['headers'].addAll(linkConfig['headers']);
-    options['credentials'].addAll(linkConfig['credentials']);
-
-    http.addAll(linkConfig['http']);
-  }
-
-  /// override with context settings
-  if (contextConfig != null) {
-    options.addAll(contextConfig['options']);
-    options['headers'].addAll(contextConfig['headers']);
-    options['credentials'].addAll(contextConfig['credentials']);
-
-    http.addAll(contextConfig['http']);
-  }
-
-  /// the body depends on the http options
-  Map<String, dynamic> body = {
-    'operationName': operation.operationName,
-    'variables': operation.variables,
-  };
-
-  /// not sending the query (i.e persisted queries)
-  if (http['includeExtensions']) {
-    body['extensions'] = operation.extensions;
-  }
-
-  if (http['includeQuery']) {
-    body['query'] = operation.document;
-  }
-
-  return <String, dynamic>{
-    'options': options,
-    'body': json.encode(body),
-  };
-}
-
-FetchResult _parseResponse(http.Response response) {
-  final int statusCode = response.statusCode;
-  final String reasonPhrase = response.reasonPhrase;
-
-  if (statusCode < 200 || statusCode >= 400) {
-    throw http.ClientException(
-      'Network Error: $statusCode $reasonPhrase',
+class HttpLink extends Link {
+  factory HttpLink({
+    String uri,
+    http.Client fetch,
+    Map<String, dynamic> fetchOptions,
+    Map<String, dynamic> credentials,
+    Map<String, dynamic> headers,
+  }) {
+    return _createHttpLink(
+      uri: uri,
+      fetch: fetch,
+      fetchOptions: fetchOptions,
+      credentials: credentials,
+      headers: headers,
     );
   }
 
-  final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  FetchResult fetchResult = FetchResult();
-
-  if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'];
-  }
-
-  if (jsonResponse['data'] != null) {
-    fetchResult.data = jsonResponse['data'];
-  }
-
-  return fetchResult;
+  RequestHandler requester;
 }
 
 Link _createHttpLink({
@@ -152,22 +92,82 @@ Link _createHttpLink({
   });
 }
 
-class HttpLink extends Link {
-  factory HttpLink({
-    String uri,
-    http.Client fetch,
-    Map<String, dynamic> fetchOptions,
-    Map<String, dynamic> credentials,
-    Map<String, dynamic> headers,
-  }) {
-    return _createHttpLink(
-      uri: uri,
-      fetch: fetch,
-      fetchOptions: fetchOptions,
-      credentials: credentials,
-      headers: headers,
+FetchResult _parseResponse(http.Response response) {
+  final int statusCode = response.statusCode;
+  final String reasonPhrase = response.reasonPhrase;
+
+  if (statusCode < 200 || statusCode >= 400) {
+    throw http.ClientException(
+      'Network Error: $statusCode $reasonPhrase',
     );
   }
 
-  RequestHandler requester;
+  final Map<String, dynamic> jsonResponse = json.decode(response.body);
+  FetchResult fetchResult = FetchResult();
+
+  if (jsonResponse['errors'] != null) {
+    fetchResult.errors = jsonResponse['errors'];
+  }
+
+  if (jsonResponse['data'] != null) {
+    fetchResult.data = jsonResponse['data'];
+  }
+
+  return fetchResult;
+}
+
+Map<String, dynamic> _selectHttpOptionsAndBody(
+  Operation operation,
+  Map<String, dynamic> fallbackConfig, [
+  Map<String, dynamic> linkConfig,
+  Map<String, dynamic> contextConfig,
+]) {
+  /// Setup fallback defaults
+  Map<String, dynamic> options = {
+    'headers': <String, dynamic>{},
+    'credentials': <String, dynamic>{},
+  };
+  options.addAll(fallbackConfig['options']);
+  options['headers'].addAll(fallbackConfig['headers']);
+
+  Map<String, dynamic> http = {};
+  http.addAll(fallbackConfig['http']);
+
+  /// inject the configured settings
+  if (linkConfig != null) {
+    options.addAll(linkConfig['options']);
+    options['headers'].addAll(linkConfig['headers']);
+    options['credentials'].addAll(linkConfig['credentials']);
+
+    http.addAll(linkConfig['http']);
+  }
+
+  /// override with context settings
+  if (contextConfig != null) {
+    options.addAll(contextConfig['options']);
+    options['headers'].addAll(contextConfig['headers']);
+    options['credentials'].addAll(contextConfig['credentials']);
+
+    http.addAll(contextConfig['http']);
+  }
+
+  /// the body depends on the http options
+  Map<String, dynamic> body = {
+    'operationName': operation.operationName,
+    'variables': operation.variables,
+  };
+
+  /// not sending the query (i.e persisted queries)
+  if (http['includeExtensions']) {
+    body['extensions'] = operation.extensions;
+  }
+
+  if (http['includeQuery']) {
+    body['query'] = operation.document;
+  }
+
+  return <String, dynamic>{
+    'options': options,
+    'body': json.encode(body),
+  };
 }

@@ -1,4 +1,4 @@
-/// A location where a [GQLError] appears.
+/// A location where a [GraphQLError] appears.
 class Location {
   /// The line of the error in the query.
   final int line;
@@ -29,10 +29,10 @@ class GraphQLError {
   /// Custom error data returned by your GraphQL API server
   final Map<String, dynamic> extensions;
 
-  /// Constructs a [GQLError] from a JSON map.
-  GraphQLError.fromJSON(Map data)
+  /// Constructs a [GraphQLError] from a JSON map.
+  GraphQLError.fromJSON(Map<String, dynamic> data)
       : message = data['message'],
-        locations = data["locations"] is List
+        locations = data['locations'] is List
             ? List.from((data['locations']).map((d) => Location.fromJSON(d)))
             : null,
         path = data['path'],
