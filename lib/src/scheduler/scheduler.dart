@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:graphql_flutter/src/core/query_manager.dart';
+import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
+import 'package:graphql_flutter/src/core/query_result.dart';
 
 class QueryScheduler {
-  /// Map going from query ids to the [ObservableQuery] associated with those queries.
-  Map<String, ObservableQuery> registeredQueries = Map();
+  QueryManager queryManager;
+
+  /// Map going from query ids to the [WatchQueryOptions] associated with those queries.
+  Map<String, WatchQueryOptions> registeredQueries = Map();
 
   /// Map going from poling interval to the query ids that fire on that interval.
   /// These query ids are associated with a [ObservableQuery] in the registeredQueries.
@@ -13,14 +18,18 @@ class QueryScheduler {
   /// Map going from polling interval durations to polling timers.
   Map<Duration, Timer> _pollingTimers = Map();
 
+  QueryScheduler({
+    this.queryManager,
+  });
+
   void fetchQueriesOnInterval(
     Duration interval,
     Timer timer,
   ) {
-    intervalQueries[interval] = intervalQueries[interval].where(
+    intervalQueries[interval].retainWhere(
       (String queryId) {
         Duration pollInterval =
-            Duration(seconds: registeredQueries[queryId].options.pollInterval);
+            Duration(seconds: registeredQueries[queryId].pollInterval);
 
         // If ObservableQuery can't be found from registeredQueries or if it has a
         // different interval, it means that this queryId is no longer registered
@@ -44,28 +53,33 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    intervalQueries[interval].forEach((String queryId) {
-      ObservableQuery observableQuery = registeredQueries[queryId];
+    intervalQueries[interval].forEach((String queryId) async {
+      WatchQueryOptions options = registeredQueries[queryId];
+      QueryResult queryResult = await queryManager.fetchQuery(options);
 
-      observableQuery.fetchQuery();
+      queryManager.getQuery(queryId).controller.add(queryResult);
     });
   }
 
   void sheduleQuery(
-    ObservableQuery observableQuery, [
+    String queryId,
+    WatchQueryOptions options, [
     Duration interval,
   ]) {
-    registeredQueries[observableQuery.queryId] = observableQuery;
+    registeredQueries[queryId] = options;
 
     if (interval == null) {
-      Timer.run(() {
-        observableQuery.fetchQuery();
+      Timer.run(() async {
+        WatchQueryOptions options = registeredQueries[queryId];
+        QueryResult queryResult = await queryManager.fetchQuery(options);
+
+        queryManager.getQuery(queryId).controller.add(queryResult);
       });
     } else {
       if (intervalQueries.containsKey(interval)) {
-        intervalQueries[interval].add(observableQuery.queryId);
+        intervalQueries[interval].add(queryId);
       } else {
-        intervalQueries[interval] = [observableQuery.queryId];
+        intervalQueries[interval] = [queryId];
 
         _pollingTimers[interval] = Timer.periodic(
           interval,

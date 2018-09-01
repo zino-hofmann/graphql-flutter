@@ -40,6 +40,11 @@ class MutationState extends State<Mutation> {
   }
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     observableQuery.close();
     super.dispose();
@@ -49,7 +54,16 @@ class MutationState extends State<Mutation> {
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphqlProvider].
     client = GraphQLProvider.of(context).value;
-    observableQuery = client.mutate(widget.options);
+
+    WatchQueryOptions options = WatchQueryOptions(
+      document: widget.options.document,
+      variables: widget.options.variables,
+      fetchPolicy: widget.options.fetchPolicy,
+      errorPolicy: widget.options.errorPolicy,
+      fetchResults: false,
+    );
+
+    observableQuery = client.watchQuery(options);
 
     super.didChangeDependencies();
   }
@@ -57,22 +71,16 @@ class MutationState extends State<Mutation> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: observableQuery.stream,
+      initialData: QueryResult(
+        loading: true,
+      ),
       builder: (
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
-        if (snapshot.hasData) {
-          return widget.builder(
-            runMutation,
-            snapshot.data,
-          );
-        }
-
         return widget.builder(
           runMutation,
-          QueryResult(
-            loading: true,
-          ),
+          snapshot.data,
         );
       },
     );

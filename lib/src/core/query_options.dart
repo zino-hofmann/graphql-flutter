@@ -24,8 +24,27 @@ enum ErrorPolicy {
   all,
 }
 
+/// Base options.
+class BaseOptions {
+  /// A GraphQL document that consists of a single query to be sent down to the server.
+  String document;
+
+  /// A map going from variable name to variable value, where the variables are used
+  /// within the GraphQL query.
+  Map<String, dynamic> variables;
+
+  /// Specifies the [FetchPolicy] to be used.
+  FetchPolicy fetchPolicy;
+
+  /// Specifies the [ErrorPolicy] to be used.
+  ErrorPolicy errorPolicy;
+
+  /// Context to be passed to link execution chain.
+  dynamic context;
+}
+
 /// Query options.
-class QueryOptions {
+class QueryOptions extends BaseOptions {
   /// A GraphQL document that consists of a single query to be sent down to the server.
   String document;
 
@@ -43,12 +62,6 @@ class QueryOptions {
   /// refetched from the server.
   int pollInterval;
 
-  /// Whether or not to fetch result.
-  bool fetchResults;
-
-  /// Whether or not updates to the network status should trigger next on the observer of this query.
-  bool notifyOnNetworkStatusChange;
-
   /// Context to be passed to link execution chain.
   dynamic context;
 
@@ -58,14 +71,12 @@ class QueryOptions {
     this.fetchPolicy,
     this.errorPolicy,
     this.pollInterval,
-    this.fetchResults,
-    this.notifyOnNetworkStatusChange,
     this.context,
   });
 }
 
 /// Mutation options
-class MutationOptions {
+class MutationOptions implements BaseOptions {
   /// A GraphQL document that consists of a single query to be sent down to the server.
   String document;
 
@@ -92,7 +103,7 @@ class MutationOptions {
 }
 
 // ObservableQuery options
-class ObservalbeQueryOptions {
+class WatchQueryOptions extends BaseOptions {
   /// A GraphQL document that consists of a single query to be sent down to the server.
   String document;
 
@@ -110,15 +121,19 @@ class ObservalbeQueryOptions {
   /// refetched from the server.
   int pollInterval;
 
+  /// Whether or not to fetch result.
+  bool fetchResults;
+
   /// Context to be passed to link execution chain.
   dynamic context;
 
-  ObservalbeQueryOptions({
+  WatchQueryOptions({
     @required this.document,
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
     this.pollInterval,
+    this.fetchResults,
     this.context,
   });
 }

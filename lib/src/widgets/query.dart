@@ -28,6 +28,11 @@ class QueryState extends State<Query> {
   ObservableQuery observableQuery;
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   void dispose() {
     observableQuery.close();
     super.dispose();
@@ -37,7 +42,17 @@ class QueryState extends State<Query> {
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphQLProvider].
     client = GraphQLProvider.of(context).value;
-    observableQuery = client.query(widget.options);
+
+    WatchQueryOptions options = WatchQueryOptions(
+      document: widget.options.document,
+      variables: widget.options.variables,
+      fetchPolicy: widget.options.fetchPolicy,
+      errorPolicy: widget.options.errorPolicy,
+      pollInterval: widget.options.pollInterval,
+      fetchResults: true,
+    );
+
+    observableQuery = client.watchQuery(options);
 
     super.didChangeDependencies();
   }
@@ -45,17 +60,14 @@ class QueryState extends State<Query> {
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: observableQuery.stream,
+      initialData: QueryResult(
+        loading: true,
+      ),
       builder: (
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
-        if (snapshot.hasData) {
-          return widget.builder(snapshot.data);
-        }
-
-        return widget.builder(QueryResult(
-          loading: true,
-        ));
+        return widget.builder(snapshot.data);
       },
     );
   }

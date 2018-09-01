@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import 'package:graphql_flutter/src/core/query_manager.dart';
+import 'package:graphql_flutter/src/core/query_result.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
 import 'package:graphql_flutter/src/core/query_options.dart';
 
@@ -27,15 +28,19 @@ class GraphQLClient {
     );
   }
 
+  ObservableQuery watchQuery(WatchQueryOptions options) {
+    return queryManager.watchQuery(options);
+  }
+
   /// This resolves a single query according to the options specified and
-  /// returns a [ObservableQuery] which emits the resulting data or an error.
-  ObservableQuery query(QueryOptions options) {
+  /// returns a [Future] which resolves with the resulting data or throws an error.
+  Future<QueryResult> query(QueryOptions options) {
     return queryManager.query(options);
   }
 
   /// This resolves a single mutation according to the options specified and returns a
-  /// [ObservableQuery] which emits the resulting data or an error.
-  ObservableQuery mutate(MutationOptions options) {
+  /// [Future] which resolves with the resulting data or throws an error.
+  Future<QueryResult> mutate(MutationOptions options) {
     return queryManager.mutate(options);
   }
 

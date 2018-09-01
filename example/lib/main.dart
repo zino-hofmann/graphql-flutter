@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     HttpLink link = HttpLink(
       uri: 'https://api.github.com/graphql',
       headers: <String, String>{
-        'Authorization': 'Bearer 0fbb470710029e4a6af009d4ddc70c7e439433ea'
+        'Authorization': 'Bearer 8fcb65beb69be65821581efe4e90e2c3f6eb41c0',
       },
     );
 
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Query(
         options: QueryOptions(
           document: queries.readRepositories,
-          pollInterval: 1,
+          pollInterval: 4,
         ),
         builder: (QueryResult result) {
           if (result.errors != null) {
@@ -88,7 +88,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   RunMutation addStar,
                   QueryResult result,
                 ) {
-                  if (result.data.isNotEmpty) {
+                  if (result.data != null && result.data.isNotEmpty) {
                     repository['viewerHasStarred'] =
                         result.data['addStar']['starrable']['viewerHasStarred'];
                   }
