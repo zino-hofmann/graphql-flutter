@@ -1,3 +1,18 @@
+## [0.9.1] - August 30 2018
+
+### Breaking change
+
+n/a
+
+#### Fixes / Enhancements
+
+- Move test dependency to the dev section. @fabiocarneiro
+- Fix version resolving for test dependencies. @HofmannZ
+
+#### Docs
+
+n/a
+
 ## [0.9.0] - August 23 2018
 
 ### Breaking change
