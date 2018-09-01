@@ -1,3 +1,30 @@
+## [1.0.0-alpha.1] - September 2 2018
+
+### Breaking change
+
+- [x] Renamed `Client` to `GraphQLClient` to avoid name collision with other packages. @HofmannZ
+- [x] Renamed `GraphqlProvider` to `GraphQLProvider` to align with new naming. @HofmannZ
+- [x] Renamed `GraphqlConsumer` to `GraphQLConsumer` to align with new naming. @HofmannZ
+- [x] Renamed `GQLError` to `GraphQLError` to align with new naming. @HofmannZ
+- [x] `GraphQLClient` requires a `Link` to passed into the constructor. @HofmannZ
+- [x] `GraphQLClient` no longer requires a `endPoint` or `apiToken` to be passed into the constructor. Instead you can provide it to the `Link`. @HofmannZ
+- [x] The `Query` and `Mutation` widgets are now `StreamBuilders`, there the api did change slightly. @HofmannZ
+
+#### Fixes / Enhancements
+
+- [x] Improved typing throughout the library. @HofmannZ
+- [x] Queries are handled as streams of operations. @HofmannZ
+- [ ] Errors can be mutated in the stream of operations.
+- [x] Added the `HttpLink` to handle requests using http. @HofmannZ
+- [x] `HttpLink` allows headers to be customised. @HofmannZ
+- [x] The api allows contributors to write their own custom links. @HofmannZ
+
+#### Docs
+
+- [ ] Document the new link system.
+- [ ] Write an upgrade guide.
+- [x] Implement the new link system in the example. @HofmannZ
+
 ## [0.9.1] - August 30 2018
 
 ### Breaking change
