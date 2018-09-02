@@ -42,6 +42,7 @@ class QueryState extends State<Query> {
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphQLProvider].
     client = GraphQLProvider.of(context).value;
+    assert(client != null);
 
     WatchQueryOptions options = WatchQueryOptions(
       document: widget.options.document,

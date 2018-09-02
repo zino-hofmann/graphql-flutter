@@ -54,6 +54,7 @@ class MutationState extends State<Mutation> {
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphqlProvider].
     client = GraphQLProvider.of(context).value;
+    assert(client != null);
 
     WatchQueryOptions options = WatchQueryOptions(
       document: widget.options.document,
