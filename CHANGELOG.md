@@ -1,3 +1,18 @@
+## [1.0.0-alpha.3] - September 2 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Reverted changes to the required Dart version. @HofmannZ
+- Added missing return statsments. @HofmannZ
+
+#### Docs
+
+n/a
+
 ## [1.0.0-alpha.2] - September 2 2018
 
 ### Breaking changes
