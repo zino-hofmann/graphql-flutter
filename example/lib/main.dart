@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './mutations/addStar.dart' as mutations;
-import './queries/readRepositories.dart' as queries;
+import 'package:app/mutations/addStar.dart' as mutations;
+import 'package:app/queries/readRepositories.dart' as queries;
 
 void main() => runApp(MyApp());
 
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
     HttpLink link = HttpLink(
       uri: 'https://api.github.com/graphql',
       headers: <String, String>{
-        'Authorization': 'Bearer 8fcb65beb69be65821581efe4e90e2c3f6eb41c0',
+        'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
       },
     );
 
@@ -28,11 +28,11 @@ class MyApp extends StatelessWidget {
       client: client,
       child: CacheProvider(
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'GraphQL Flutter Demo',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: MyHomePage(title: 'Flutter Demo Home Page'),
+          home: MyHomePage(title: 'GraphQL Flutter Home Page'),
         ),
       ),
     );
