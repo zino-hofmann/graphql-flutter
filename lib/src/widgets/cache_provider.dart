@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:graphql_flutter/src/client.dart';
+import 'package:graphql_flutter/src/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 class CacheProvider extends StatefulWidget {
@@ -17,6 +17,8 @@ class CacheProvider extends StatefulWidget {
 
 class _CacheProviderState extends State<CacheProvider>
     with WidgetsBindingObserver {
+  GraphQLClient client;
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +28,8 @@ class _CacheProviderState extends State<CacheProvider>
 
   @override
   void didChangeDependencies() {
-    Client client = GraphqlProvider.of(context).value;
+    /// Gets the client from the closest wrapping [GraphqlProvider].
+    client = GraphQLProvider.of(context).value;
     assert(client != null);
 
     client.cache?.restore();
@@ -43,8 +46,6 @@ class _CacheProviderState extends State<CacheProvider>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    Client client = GraphqlProvider.of(context).value;
     assert(client != null);
 
     switch (state) {
