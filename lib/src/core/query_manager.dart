@@ -13,8 +13,11 @@ import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 
+import 'package:graphql_flutter/src/cache/cache.dart';
+
 class QueryManager {
   final Link link;
+  final Cache cache;
 
   QueryScheduler scheduler;
   int idCounter = 1;
@@ -22,6 +25,7 @@ class QueryManager {
 
   QueryManager({
     @required this.link,
+    @required this.cache,
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
@@ -45,27 +49,22 @@ class QueryManager {
     return observableQuery;
   }
 
-  Future<QueryResult> query(QueryOptions options) async {
-    if (options.document == null) {
-      throw Exception(
-        'document option is required. You must specify your GraphQL document in the query options.',
-      );
-    }
-
-    return fetchQuery(options);
+  Future<QueryResult> query(QueryOptions options) {
+    return fetchQuery('0', options);
   }
 
   Future<QueryResult> mutate(MutationOptions options) {
-    if (options.document == null) {
-      throw Exception(
-        'document option is required. You must specify your GraphQL document in the mutaion options.',
-      );
-    }
-
-    return fetchQuery(options);
+    return fetchQuery('0', options);
   }
 
-  Future<QueryResult> fetchQuery(BaseOptions options) async {
+  Future<QueryResult> fetchQuery(
+    String queryId,
+    BaseOptions options,
+  ) async {
+    FetchResult fetchResult;
+    QueryResult queryResult;
+    ObservableQuery observableQuery = getQuery(queryId);
+
     // create a new operation to fetch
     Operation operation = Operation(
       document: options.document,
@@ -73,19 +72,64 @@ class QueryManager {
       operationName: null,
     );
 
+    if (options.fetchPolicy == FetchPolicy.cache_first ||
+        options.fetchPolicy == FetchPolicy.cache_and_network ||
+        options.fetchPolicy == FetchPolicy.cache_only) {
+      dynamic cachedData = cache.read(operation.toKey());
+
+      if (cachedData != null) {
+        fetchResult = FetchResult(
+          data: cachedData,
+        );
+
+        queryResult = _mapFetchResultToQueryResult(fetchResult);
+
+        // add the result to an observable query if it exists
+        if (observableQuery != null) {
+          observableQuery.controller.add(queryResult);
+        }
+
+        if (options.fetchPolicy == FetchPolicy.cache_first ||
+            options.fetchPolicy == FetchPolicy.cache_only) {
+          return queryResult;
+        }
+      }
+
+      if (options.fetchPolicy == FetchPolicy.cache_only) {
+        throw Exception(
+          'Could not find that operation in the cache. (FetchPolicy: cache_only)',
+        );
+      }
+    }
+
     // execute the operation trough the provided link(s)
-    FetchResult fetchResult = await execute(
+    fetchResult = await execute(
       link: link,
       operation: operation,
     ).first;
 
-    QueryResult queryResult = _mapFetchResultToQueryResult(fetchResult);
+    // save the data from fetchResult to the cache
+    if (fetchResult.data != null) {
+      cache.write(
+        operation.toKey(),
+        fetchResult.data,
+      );
+    }
+
+    queryResult = _mapFetchResultToQueryResult(fetchResult);
+
+    // add the result to an observable query if it exists
+    if (observableQuery != null) {
+      observableQuery.controller.add(queryResult);
+    }
 
     return queryResult;
   }
 
   ObservableQuery getQuery(String queryId) {
-    return queries[queryId];
+    if (queries.containsKey(queryId)) {
+      return queries[queryId];
+    }
   }
 
   void setQuery(ObservableQuery observableQuery) {

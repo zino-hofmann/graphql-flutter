@@ -17,7 +17,6 @@ class GraphQLClient {
   final Cache cache;
 
   QueryManager queryManager;
-  Cache proxy;
 
   GraphQLClient({
     @required this.link,
@@ -25,6 +24,7 @@ class GraphQLClient {
   }) {
     queryManager = QueryManager(
       link: link,
+      cache: cache,
     );
   }
 
