@@ -1,6 +1,20 @@
+## [0.9.2] - 2 September 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Upgrade dependencies. @HofmannZ
+
+#### Docs
+
+- Added a refrence to our next major release. @HofmannZ
+
 ## [0.9.1] - August 30 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -15,7 +29,7 @@ n/a
 
 ## [0.9.0] - August 23 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -32,7 +46,7 @@ n/a
 
 ## [0.8.0] - August 10 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -47,7 +61,7 @@ n/a
 
 ## [0.7.1] - August 3 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -61,7 +75,7 @@ n/a
 
 ## [0.7.0] - July 22 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -77,7 +91,7 @@ n/a
 
 ## [0.6.0] - July 19 2018
 
-### Breaking change
+### Breaking changes
 
 - The library now requires your app to be wrapped with the `GraphqlProvider` widget. @HofmannZ
 - The global `client` variable is no longer available. Instead use the `GraphqlConsumer` widget. @HofmannZ
@@ -115,7 +129,7 @@ Client client = GraphqlProvider.of(context).value;
 
 ## [0.5.4] - July 17 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -131,7 +145,7 @@ n/a
 
 ## [0.5.3] - July 13 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -147,7 +161,7 @@ n/a
 
 ## [0.5.2] - July 11 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -161,7 +175,7 @@ n/a
 
 ## [0.5.1] - June 29 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -175,7 +189,7 @@ n/a
 
 ## [0.5.0] - June 25 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -191,7 +205,7 @@ n/a
 
 ## [0.4.1] - June 22 2018
 
-### Breaking change
+### Breaking changes
 
 n/a
 
@@ -205,7 +219,7 @@ n/a
 
 ## [0.4.0] - June 21 2018
 
-### Breaking change
+### Breaking changes
 
 - The Client now requires a from of cache.
 - The name of the `execute` method on the `Client` class changed to `query`.
@@ -224,7 +238,7 @@ n/a
 
 ## [0.3.0] - June 16 2018
 
-### Breaking change
+### Breaking changes
 
 - Changed data type to `Map` instaid of `Object` to be more explicit.
 
@@ -240,7 +254,7 @@ n/a
 
 ## [0.2.0] - June 15 2018
 
-### Breaking change
+### Breaking changes
 
 - Changed query widget `polling` argument to `pollInterval`, following the [react-apollo](https://github.com/apollographql/react-apollo) api.
 
@@ -256,7 +270,7 @@ n/a
 
 My colleague and I created a simple implementation of a GraphQL Client for Flutter. (Many thanks to Eus Dima, for his work on the initial client.)
 
-### Breaking change
+### Breaking changes
 
 n/a
 
