@@ -10,6 +10,32 @@ import 'package:graphql_flutter/src/cache/cache.dart';
 class InMemoryCache implements Cache {
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
 
+  void save() async {
+    await _writeToStorage();
+  }
+
+  void restore() async {
+    _inMemoryCache = await _readFromStorage();
+  }
+
+  bool hasEntity(String key) => _inMemoryCache.containsKey(key);
+
+  dynamic read(String key) {
+    if (hasEntity(key)) {
+      return _inMemoryCache[key];
+    }
+
+    return null;
+  }
+
+  void write(String key, dynamic value) {
+    _inMemoryCache[key] = value;
+  }
+
+  void reset() {
+    _inMemoryCache.clear();
+  }
+
   Future<String> get _localStoragePath async {
     final Directory directory = await getApplicationDocumentsDirectory();
 
@@ -64,31 +90,5 @@ class InMemoryCache implements Cache {
 
       return HashMap<String, dynamic>();
     }
-  }
-
-  bool hasEntity(String key) => _inMemoryCache.containsKey(key);
-
-  void save() async {
-    await _writeToStorage();
-  }
-
-  void restore() async {
-    _inMemoryCache = await _readFromStorage();
-  }
-
-  dynamic read(String key) {
-    if (hasEntity(key)) {
-      return _inMemoryCache[key];
-    }
-
-    return null;
-  }
-
-  void write(String key, dynamic value) {
-    _inMemoryCache[key] = value;
-  }
-
-  void reset() {
-    _inMemoryCache.clear();
   }
 }
