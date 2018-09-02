@@ -48,5 +48,6 @@ class GraphQLClient {
   /// [Stream] which either emits received data or an error.
   Stream subscribe(options) {
     // TODO: merge the subscription client with the new client
+    return Stream.empty();
   }
 }

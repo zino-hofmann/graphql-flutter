@@ -130,6 +130,8 @@ class QueryManager {
     if (queries.containsKey(queryId)) {
       return queries[queryId];
     }
+
+    return null;
   }
 
   void setQuery(ObservableQuery observableQuery) {
