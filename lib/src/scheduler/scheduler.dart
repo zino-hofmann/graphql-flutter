@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:graphql_flutter/src/core/query_manager.dart';
 import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
 
 class QueryScheduler {
   QueryManager queryManager;
@@ -53,11 +52,9 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    intervalQueries[interval].forEach((String queryId) async {
+    intervalQueries[interval].forEach((String queryId) {
       WatchQueryOptions options = registeredQueries[queryId];
-      QueryResult queryResult = await queryManager.fetchQuery(options);
-
-      queryManager.getQuery(queryId).controller.add(queryResult);
+      queryManager.fetchQuery(queryId, options);
     });
   }
 
@@ -69,11 +66,9 @@ class QueryScheduler {
     registeredQueries[queryId] = options;
 
     if (interval == null) {
-      Timer.run(() async {
+      Timer.run(() {
         WatchQueryOptions options = registeredQueries[queryId];
-        QueryResult queryResult = await queryManager.fetchQuery(options);
-
-        queryManager.getQuery(queryId).controller.add(queryResult);
+        queryManager.fetchQuery(queryId, options);
       });
     } else {
       if (intervalQueries.containsKey(interval)) {
