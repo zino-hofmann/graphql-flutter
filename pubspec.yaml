@@ -4,7 +4,7 @@ version: 1.0.0-alpha.2
 authors:
   - Eus Dima <eus@zinoapp.com>
   - Zino Hofmann <zino@zinoapp.com>
-homepage: https://github.com/zino-app/graphql-flutter
+homepage: https://github.com/zino-app/graphql-flutter/tree/next
 
 dependencies:
   flutter:
