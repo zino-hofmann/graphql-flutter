@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import 'package:app/mutations/addStar.dart' as mutations;
-import 'package:app/queries/readRepositories.dart' as queries;
+import './mutations/addStar.dart' as mutations;
+import './queries/readRepositories.dart' as queries;
 
 void main() => runApp(MyApp());
 
