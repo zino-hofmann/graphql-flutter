@@ -68,8 +68,8 @@ class QueryOptions extends BaseOptions {
   QueryOptions({
     @required this.document,
     this.variables,
-    this.fetchPolicy,
-    this.errorPolicy,
+    this.fetchPolicy = FetchPolicy.cache_first,
+    this.errorPolicy = ErrorPolicy.none,
     this.pollInterval,
     this.context,
   });
@@ -96,8 +96,8 @@ class MutationOptions implements BaseOptions {
   MutationOptions({
     @required this.document,
     this.variables,
-    this.fetchPolicy,
-    this.errorPolicy,
+    this.fetchPolicy = FetchPolicy.network_only,
+    this.errorPolicy = ErrorPolicy.none,
     this.context,
   });
 }
@@ -130,8 +130,8 @@ class WatchQueryOptions extends BaseOptions {
   WatchQueryOptions({
     @required this.document,
     this.variables,
-    this.fetchPolicy,
-    this.errorPolicy,
+    this.fetchPolicy = FetchPolicy.cache_and_network,
+    this.errorPolicy = ErrorPolicy.none,
     this.pollInterval,
     this.fetchResults,
     this.context,
