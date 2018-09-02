@@ -17,6 +17,8 @@ class CacheProvider extends StatefulWidget {
 
 class _CacheProviderState extends State<CacheProvider>
     with WidgetsBindingObserver {
+  GraphQLClient client;
+
   @override
   void initState() {
     super.initState();
@@ -26,7 +28,8 @@ class _CacheProviderState extends State<CacheProvider>
 
   @override
   void didChangeDependencies() {
-    GraphQLClient client = GraphQLProvider.of(context).value;
+    /// Gets the client from the closest wrapping [GraphqlProvider].
+    client = GraphQLProvider.of(context).value;
     assert(client != null);
 
     client.cache?.restore();
@@ -43,8 +46,6 @@ class _CacheProviderState extends State<CacheProvider>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
 
     switch (state) {
