@@ -36,7 +36,7 @@ class MutationState extends State<Mutation> {
   Map<String, dynamic> data = {};
   Exception error;
 
-  void runMutation(Map<String, dynamic> variables) async {
+  Future<void> runMutation(Map<String, dynamic> variables) async {
     assert(client != null);
 
     setState(() {
