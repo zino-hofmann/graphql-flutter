@@ -36,6 +36,8 @@ class MutationState extends State<Mutation> {
   Map<String, dynamic> data = {};
   Exception error;
 
+  /// Widgets runMutation function will be take Map<String, dynamic> variables
+  /// and return Future<void>
   Future<void> runMutation(Map<String, dynamic> variables) async {
     assert(client != null);
 
