@@ -136,4 +136,56 @@ class WatchQueryOptions extends BaseOptions {
     this.fetchResults,
     this.context,
   });
+
+  bool areEqualTo(WatchQueryOptions otherOptions) {
+    return !_areDifferentOptions(this, otherOptions);
+  }
+
+  /// Checks if two options are equal.
+  bool _areDifferentOptions(
+    WatchQueryOptions a,
+    WatchQueryOptions b,
+  ) {
+    if (a.document != b.document) {
+      return true;
+    }
+
+    if (a.fetchPolicy != b.fetchPolicy) {
+      return true;
+    }
+
+    if (a.errorPolicy != b.errorPolicy) {
+      return true;
+    }
+
+    if (a.pollInterval != b.pollInterval) {
+      return true;
+    }
+
+    if (a.fetchResults != b.fetchResults) {
+      return true;
+    }
+
+    // compare variables last, because maps take more time
+    return _areDifferentVariables(a.variables, b.variables);
+  }
+
+  bool _areDifferentVariables(
+    Map a,
+    Map b,
+  ) {
+    if (a.length != b.length) {
+      return true;
+    }
+
+    bool areDifferent = false;
+
+    a.forEach((key, value) {
+      if (b[key] != a[key] || (!b.containsKey(key))) {
+        areDifferent = true;
+      }
+    });
+
+    return areDifferent;
+  }
 }

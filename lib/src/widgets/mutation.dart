@@ -64,7 +64,19 @@ class MutationState extends State<Mutation> {
       fetchResults: false,
     );
 
-    observableQuery = client.watchQuery(options);
+    bool shouldCreateNewObservable = true;
+
+    if (observableQuery != null) {
+      if (observableQuery.options.areEqualTo(options)) {
+        shouldCreateNewObservable = false;
+      }
+
+      observableQuery.close();
+    }
+
+    if (shouldCreateNewObservable) {
+      observableQuery = client.watchQuery(options);
+    }
 
     super.didChangeDependencies();
   }
