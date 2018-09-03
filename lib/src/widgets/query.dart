@@ -51,6 +51,7 @@ class QueryState extends State<Query> {
       errorPolicy: widget.options.errorPolicy,
       pollInterval: widget.options.pollInterval,
       fetchResults: true,
+      context: widget.options.context,
     );
 
     observableQuery = client.watchQuery(options);

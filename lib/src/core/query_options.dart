@@ -40,7 +40,7 @@ class BaseOptions {
   ErrorPolicy errorPolicy;
 
   /// Context to be passed to link execution chain.
-  dynamic context;
+  Map<String, dynamic> context;
 }
 
 /// Query options.
@@ -63,7 +63,7 @@ class QueryOptions extends BaseOptions {
   int pollInterval;
 
   /// Context to be passed to link execution chain.
-  dynamic context;
+  Map<String, dynamic> context;
 
   QueryOptions({
     @required this.document,
@@ -91,7 +91,7 @@ class MutationOptions implements BaseOptions {
   ErrorPolicy errorPolicy;
 
   /// Context to be passed to link execution chain.
-  dynamic context;
+  Map<String, dynamic> context;
 
   MutationOptions({
     @required this.document,
@@ -125,7 +125,7 @@ class WatchQueryOptions extends BaseOptions {
   bool fetchResults;
 
   /// Context to be passed to link execution chain.
-  dynamic context;
+  Map<String, dynamic> context;
 
   WatchQueryOptions({
     @required this.document,
