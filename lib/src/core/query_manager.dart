@@ -97,7 +97,7 @@ class QueryManager {
 
       if (options.fetchPolicy == FetchPolicy.cache_only) {
         throw Exception(
-          'Could not find that operation in the cache. (FetchPolicy: cache_only)',
+          'Could not find that operation in the cache. (${options.fetchPolicy.toString()})',
         );
       }
     }
@@ -109,10 +109,19 @@ class QueryManager {
     ).first;
 
     // save the data from fetchResult to the cache
-    if (fetchResult.data != null) {
+    if (fetchResult.data != null &&
+        options.fetchPolicy != FetchPolicy.no_cache) {
       cache.write(
         operation.toKey(),
         fetchResult.data,
+      );
+    }
+
+    if (fetchResult.data == null &&
+        (options.fetchPolicy == FetchPolicy.no_cache ||
+            options.fetchPolicy == FetchPolicy.network_only)) {
+      throw Exception(
+        'Could not resolve that operation on the network. (${options.fetchPolicy.toString()})',
       );
     }
 
