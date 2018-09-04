@@ -137,6 +137,7 @@ class WatchQueryOptions extends BaseOptions {
     this.context,
   });
 
+  /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {
     return !_areDifferentOptions(this, otherOptions);
   }
@@ -171,8 +172,8 @@ class WatchQueryOptions extends BaseOptions {
   }
 
   bool _areDifferentVariables(
-    Map a,
-    Map b,
+    Map<String, dynamic> a,
+    Map<String, dynamic> b,
   ) {
     if (a.length != b.length) {
       return true;
@@ -181,7 +182,7 @@ class WatchQueryOptions extends BaseOptions {
     bool areDifferent = false;
 
     a.forEach((key, value) {
-      if (b[key] != a[key] || (!b.containsKey(key))) {
+      if ((!b.containsKey(key)) || b[key] != a[key]) {
         areDifferent = true;
       }
     });
