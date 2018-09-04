@@ -62,6 +62,7 @@ class MutationState extends State<Mutation> {
       fetchPolicy: widget.options.fetchPolicy,
       errorPolicy: widget.options.errorPolicy,
       fetchResults: false,
+      context: widget.options.context,
     );
 
     observableQuery = client.watchQuery(options);

@@ -27,12 +27,24 @@ class HttpLink extends Link {
               'options': fetchOptions ?? <String, dynamic>{},
               'credentials': credentials ?? <String, dynamic>{},
               'headers': headers ?? <String, String>{},
+              // TODO: add http as a link option
+              'http': <String, dynamic>{},
             };
+
+            Map<String, dynamic> contextConfig = {
+              'options': <String, dynamic>{},
+              'credentials': <String, dynamic>{},
+              'headers': <String, String>{},
+              'http': <String, dynamic>{},
+            };
+
+            contextConfig.addAll(operation.getContext());
 
             Map<String, dynamic> httpOptionsAndBody = _selectHttpOptionsAndBody(
               operation,
               fallbackHttpConfig,
               linkConfig,
+              contextConfig,
             );
 
             Map<String, dynamic> options = httpOptionsAndBody['options'];
@@ -94,6 +106,8 @@ Map<String, dynamic> _selectHttpOptionsAndBody(
     options.addAll(linkConfig['options']);
     options['headers'].addAll(linkConfig['headers']);
     options['credentials'].addAll(linkConfig['credentials']);
+
+    http.addAll(linkConfig['http']);
   }
 
   /// override with context settings

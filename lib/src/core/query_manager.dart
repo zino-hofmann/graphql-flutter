@@ -76,6 +76,10 @@ class QueryManager {
       operationName: operationName,
     );
 
+    if (options.context != null) {
+      operation.setContext(options.context);
+    }
+
     if (options.fetchPolicy == FetchPolicy.cache_first ||
         options.fetchPolicy == FetchPolicy.cache_and_network ||
         options.fetchPolicy == FetchPolicy.cache_only) {
