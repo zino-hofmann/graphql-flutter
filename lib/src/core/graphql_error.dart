@@ -7,7 +7,7 @@ class Location {
   final int column;
 
   /// Constructs a [Location] from a JSON map.
-  Location.fromJSON(Map data)
+  Location.fromJSON(Map<String, int> data)
       : line = data['line'],
         column = data['column'];
 
@@ -31,12 +31,16 @@ class GraphQLError {
 
   /// Constructs a [GraphQLError] from a JSON map.
   GraphQLError.fromJSON(Map<String, dynamic> data)
-      : message = data['message'],
-        locations = data['locations'] is List
-            ? List.from((data['locations']).map((d) => Location.fromJSON(d)))
+      : message = data['message'] as String,
+        locations = data['locations'] is List<Map<String, int>>
+            ? List.from(
+                (data['locations'] as List<Map<String, int>>).map<Location>(
+                  (Map<String, int> location) => Location.fromJSON(location),
+                ),
+              )
             : null,
-        path = data['path'],
-        extensions = data['extensions'];
+        path = data['path'] as List<dynamic>,
+        extensions = data['extensions'] as Map<String, dynamic>;
 
   @override
   String toString() =>

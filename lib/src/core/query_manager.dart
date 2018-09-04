@@ -167,7 +167,7 @@ class QueryManager {
     List<GraphQLError> errors;
 
     if (fetchResult.errors != null) {
-      errors = List.from(fetchResult.errors.map(
+      errors = List.from(fetchResult.errors.map<GraphQLError>(
         (rawError) => GraphQLError.fromJSON(rawError),
       ));
     }

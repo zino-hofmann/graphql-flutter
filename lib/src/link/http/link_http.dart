@@ -7,15 +7,17 @@ import 'package:http/http.dart';
 import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql_flutter/src/link/http/http_config.dart';
 import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 
 class HttpLink extends Link {
   HttpLink({
     @required String uri,
+    bool includeExtensions,
     Client fetch,
-    Map<String, dynamic> fetchOptions,
+    Map<String, String> headers,
     Map<String, dynamic> credentials,
-    Map<String, dynamic> headers,
+    Map<String, dynamic> fetchOptions,
   }) : super(
           request: (
             Operation operation, [
@@ -23,22 +25,28 @@ class HttpLink extends Link {
           ]) {
             Client fetcher = fetch ?? Client();
 
-            Map<String, dynamic> linkConfig = {
-              'options': fetchOptions ?? <String, dynamic>{},
-              'credentials': credentials ?? <String, dynamic>{},
-              'headers': headers ?? <String, String>{},
-              // TODO: add http as a link option
-              'http': <String, dynamic>{},
-            };
+            HttpConfig linkConfig = HttpConfig(
+              http: HttpQueryOptions(
+                includeExtensions: includeExtensions,
+              ),
+              options: fetchOptions,
+              credentials: credentials,
+              headers: headers,
+            );
 
-            Map<String, dynamic> contextConfig = {
-              'options': <String, dynamic>{},
-              'credentials': <String, dynamic>{},
-              'headers': <String, String>{},
-              'http': <String, dynamic>{},
-            };
+            HttpConfig contextConfig;
+            Map<String, dynamic> context = operation.getContext();
 
-            contextConfig.addAll(operation.getContext());
+            if (context != null) {
+              contextConfig = HttpConfig(
+                http: HttpQueryOptions(
+                  includeExtensions: context['includeExtensions'] as bool,
+                ),
+                options: context['fetchOptions'] as Map<String, dynamic>,
+                credentials: context['credentials'] as Map<String, dynamic>,
+                headers: context['credentials'] as Map<String, String>,
+              );
+            }
 
             Map<String, dynamic> httpOptionsAndBody = _selectHttpOptionsAndBody(
               operation,
@@ -59,11 +67,11 @@ class HttpLink extends Link {
                 // TODO: support multiple http methods
                 response = await fetcher.post(
                   uri,
-                  headers: options['headers'],
+                  headers: options['headers'] as Map<String, String>,
                   body: body,
                 );
 
-                operation.setContext({
+                operation.setContext(<String, Response>{
                   'response': response,
                 });
 
@@ -86,51 +94,88 @@ class HttpLink extends Link {
 
 Map<String, dynamic> _selectHttpOptionsAndBody(
   Operation operation,
-  Map<String, dynamic> fallbackConfig, [
-  Map<String, dynamic> linkConfig,
-  Map<String, dynamic> contextConfig,
+  HttpConfig fallbackConfig, [
+  HttpConfig linkConfig,
+  HttpConfig contextConfig,
 ]) {
-  /// Setup fallback defaults
-  Map<String, dynamic> options = {
+  Map<String, dynamic> options = <String, dynamic>{
     'headers': <String, String>{},
     'credentials': <String, dynamic>{},
   };
-  options.addAll(fallbackConfig['options']);
-  options['headers'].addAll(fallbackConfig['headers']);
+  HttpQueryOptions http = HttpQueryOptions();
 
-  Map<String, dynamic> http = {};
-  http.addAll(fallbackConfig['http']);
+  // http options
 
-  /// inject the configured settings
-  if (linkConfig != null) {
-    options.addAll(linkConfig['options']);
-    options['headers'].addAll(linkConfig['headers']);
-    options['credentials'].addAll(linkConfig['credentials']);
+  // initialze with fallback http options
+  http.addAll(fallbackConfig.http);
 
-    http.addAll(linkConfig['http']);
+  // inject the configured http options
+  if (linkConfig.http != null) {
+    http.addAll(linkConfig.http);
   }
 
-  /// override with context settings
-  if (contextConfig != null) {
-    options.addAll(contextConfig['options']);
-    options['headers'].addAll(contextConfig['headers']);
-    options['credentials'].addAll(contextConfig['credentials']);
+  // override with context http options
+  if (contextConfig.http != null) {
+    http.addAll(contextConfig.http);
+  }
 
-    http.addAll(contextConfig['http']);
+  // options
+
+  // initialze with fallback options
+  options.addAll(fallbackConfig.options);
+
+  // inject the configured options
+  if (linkConfig.options != null) {
+    options.addAll(linkConfig.options);
+  }
+
+  // override with context options
+  if (contextConfig.options != null) {
+    options.addAll(contextConfig.options);
+  }
+
+  // headers
+
+  // initialze with fallback headers
+  options['headers'].addAll(fallbackConfig.headers);
+
+  // inject the configured headers
+  if (linkConfig.headers != null) {
+    options['headers'].addAll(linkConfig.headers);
+  }
+
+  // inject the context headers
+  if (contextConfig.headers != null) {
+    options['headers'].addAll(contextConfig.headers);
+  }
+
+  // credentials
+
+  // initialze with fallback credentials
+  options['credentials'].addAll(fallbackConfig.credentials);
+
+  // inject the configured credentials
+  if (linkConfig.credentials != null) {
+    options['credentials'].addAll(linkConfig.credentials);
+  }
+
+  // inject the context credentials
+  if (contextConfig.credentials != null) {
+    options['credentials'].addAll(contextConfig.credentials);
   }
 
   /// the body depends on the http options
-  Map<String, dynamic> body = {
+  Map<String, dynamic> body = <String, dynamic>{
     'operationName': operation.operationName,
     'variables': operation.variables,
   };
 
   /// not sending the query (i.e persisted queries)
-  if (http['includeExtensions']) {
+  if (http.includeExtensions) {
     body['extensions'] = operation.extensions;
   }
 
-  if (http['includeQuery']) {
+  if (http.includeQuery) {
     body['query'] = operation.document;
   }
 
@@ -154,7 +199,7 @@ FetchResult _parseResponse(Response response) {
   FetchResult fetchResult = FetchResult();
 
   if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'];
+    fetchResult.errors = jsonResponse['errors'] as List<Map<String, dynamic>>;
   }
 
   if (jsonResponse['data'] != null) {

@@ -181,7 +181,7 @@ class WatchQueryOptions extends BaseOptions {
 
     bool areDifferent = false;
 
-    a.forEach((key, value) {
+    a.forEach((String key, dynamic value) {
       if ((!b.containsKey(key)) || b[key] != a[key]) {
         areDifferent = true;
       }

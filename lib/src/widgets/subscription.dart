@@ -24,7 +24,7 @@ class Subscription extends StatefulWidget {
   Subscription(
     this.operationName,
     this.query, {
-    this.variables = const {},
+    this.variables = const <String, dynamic>{},
     final Key key,
     @required this.builder,
     this.initial,

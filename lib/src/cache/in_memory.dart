@@ -50,8 +50,8 @@ class InMemoryCache implements Cache {
     final File file = await _localStorageFile;
     IOSink sink = file.openWrite();
 
-    _inMemoryCache.forEach((key, value) {
-      sink.writeln(json.encode([key, value]));
+    _inMemoryCache.forEach((String key, dynamic value) {
+      sink.writeln(json.encode(<dynamic>[key, value]));
     });
 
     sink.close();
@@ -73,7 +73,7 @@ class InMemoryCache implements Cache {
             .listen((String line) {
           final List keyAndValue = json.decode(line);
 
-          storedHashMap[keyAndValue[0]] = keyAndValue[1];
+          storedHashMap[keyAndValue[0] as String] = keyAndValue[1];
         });
       }
 
