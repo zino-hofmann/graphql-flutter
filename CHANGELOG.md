@@ -56,6 +56,20 @@ n/a
 
 - Implement the new link system in the example. @HofmannZ
 
+## [0.9.2] - 2 September 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Upgrade dependencies. @HofmannZ
+
+#### Docs
+
+- Added a refrence to our next major release. @HofmannZ
+
 ## [0.9.1] - August 30 2018
 
 ### Breaking changes

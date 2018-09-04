@@ -8,6 +8,8 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
+🎉🥂🍾 [Version 1.0.0](https://github.com/zino-app/graphql-flutter/releases/tag/1.0.0-alpha.1) just got promoted to alpha! We included an upgrade guide, so feel free to check it out on our [next banch](https://github.com/zino-app/graphql-flutter/tree/next).
+
 ## Table of Contents
 
 - [About this project](#about-this-project)
