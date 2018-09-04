@@ -15,6 +15,8 @@ import 'package:graphql_flutter/src/link/fetch_result.dart';
 
 import 'package:graphql_flutter/src/cache/cache.dart';
 
+import 'package:graphql_flutter/src/utilities/get_from_ast.dart';
+
 class QueryManager {
   final Link link;
   final Cache cache;
@@ -65,11 +67,13 @@ class QueryManager {
     QueryResult queryResult;
     ObservableQuery observableQuery = getQuery(queryId);
 
+    String operationName = getOperationName(options.document);
+
     // create a new operation to fetch
     Operation operation = Operation(
       document: options.document,
       variables: options.variables,
-      operationName: null,
+      operationName: operationName,
     );
 
     if (options.fetchPolicy == FetchPolicy.cache_first ||
