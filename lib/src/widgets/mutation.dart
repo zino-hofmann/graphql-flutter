@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/src/client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef Future<void> RunMutation(Map<String, dynamic> variables);
+typedef void RunMutation(Map<String, dynamic> variables);
 typedef void OnMutationCompleted(Map<String, dynamic> data);
 typedef Widget MutationBuilder(
   RunMutation mutation, {
