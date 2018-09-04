@@ -1,3 +1,25 @@
+## [1.0.0-alpha.4] - September 4 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Always return something from the `read` method in the cache class. @HofmannZ
+- Only save to cache with certain fetch policies. @HofmannZ
+- Throw an error when no data from network with certain fetch policies. @HofmannZ
+- Added a document parser. @HofmannZ
+- Added operation name from document to the operation. @HofmannZ
+- Only create a new observable query if options have changed. @HofmannZ
+- Add context to the links. @HofmannZ
+- Parse context in the http link to update the config. @HofmannZ
+- Change the type of context from dynamic to Map<String, dynamic. @HofmannZ
+
+#### Docs
+
+n/a
+
 ## [1.0.0-alpha.3] - September 2 2018
 
 ### Breaking changes
