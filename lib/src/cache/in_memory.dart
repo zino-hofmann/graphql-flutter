@@ -14,6 +14,8 @@ class InMemoryCache implements Cache {
     if (_inMemoryCache.containsKey(key)) {
       return _inMemoryCache[key];
     }
+
+    return null;
   }
 
   void write(String key, dynamic value) {
