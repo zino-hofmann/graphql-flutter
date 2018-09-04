@@ -14,8 +14,11 @@ Map<String, String> defaultHeaders = {
   'content-type': 'application/json',
 };
 
+Map<String, dynamic> defaultCredentials = <String, dynamic>{};
+
 HttpConfig fallbackHttpConfig = HttpConfig(
   http: defaultHttpOptions,
   options: defaultOptions,
   headers: defaultHeaders,
+  credentials: defaultCredentials,
 );
