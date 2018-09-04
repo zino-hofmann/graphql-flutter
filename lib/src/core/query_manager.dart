@@ -80,9 +80,9 @@ class QueryManager {
       operation.setContext(options.context);
     }
 
-    if (options.fetchPolicy == FetchPolicy.cache_first ||
-        options.fetchPolicy == FetchPolicy.cache_and_network ||
-        options.fetchPolicy == FetchPolicy.cache_only) {
+    if (options.fetchPolicy == FetchPolicy.cacheFirst ||
+        options.fetchPolicy == FetchPolicy.cacheAndNetwork ||
+        options.fetchPolicy == FetchPolicy.cacheOnly) {
       dynamic cachedData = cache.read(operation.toKey());
 
       if (cachedData != null) {
@@ -97,13 +97,13 @@ class QueryManager {
           observableQuery.controller.add(queryResult);
         }
 
-        if (options.fetchPolicy == FetchPolicy.cache_first ||
-            options.fetchPolicy == FetchPolicy.cache_only) {
+        if (options.fetchPolicy == FetchPolicy.cacheFirst ||
+            options.fetchPolicy == FetchPolicy.cacheOnly) {
           return queryResult;
         }
       }
 
-      if (options.fetchPolicy == FetchPolicy.cache_only) {
+      if (options.fetchPolicy == FetchPolicy.cacheOnly) {
         throw Exception(
           'Could not find that operation in the cache. (${options.fetchPolicy.toString()})',
         );
@@ -118,7 +118,7 @@ class QueryManager {
 
     // save the data from fetchResult to the cache
     if (fetchResult.data != null &&
-        options.fetchPolicy != FetchPolicy.no_cache) {
+        options.fetchPolicy != FetchPolicy.noCache) {
       cache.write(
         operation.toKey(),
         fetchResult.data,
@@ -126,8 +126,8 @@ class QueryManager {
     }
 
     if (fetchResult.data == null &&
-        (options.fetchPolicy == FetchPolicy.no_cache ||
-            options.fetchPolicy == FetchPolicy.network_only)) {
+        (options.fetchPolicy == FetchPolicy.noCache ||
+            options.fetchPolicy == FetchPolicy.networkOnly)) {
       throw Exception(
         'Could not resolve that operation on the network. (${options.fetchPolicy.toString()})',
       );

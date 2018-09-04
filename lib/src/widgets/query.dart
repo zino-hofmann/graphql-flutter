@@ -71,6 +71,7 @@ class QueryState extends State<Query> {
     super.didChangeDependencies();
   }
 
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: observableQuery.stream,

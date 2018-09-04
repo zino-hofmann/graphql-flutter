@@ -1,17 +1,17 @@
 import 'package:meta/meta.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
-/// - cache_first (default): return result from cache. Only fetch from network if cached result is not available.
-/// - cache_and_network: return result from cache first (if it exists), then return network result once it's available.
-/// - cache_only: return result from cache if available, fail otherwise.
-/// - no_cache: return result from network, fail if network call doesn't succeed, don't save to cache.
-/// - network_only: return result from network, fail if network call doesn't succeed, save to cache.
+/// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
+/// - cacheAndNetwork: return result from cache first (if it exists), then return network result once it's available.
+/// - cacheOnly: return result from cache if available, fail otherwise.
+/// - noCache: return result from network, fail if network call doesn't succeed, don't save to cache.
+/// - networkOnly: return result from network, fail if network call doesn't succeed, save to cache.
 enum FetchPolicy {
-  cache_first,
-  cache_and_network,
-  network_only,
-  cache_only,
-  no_cache,
+  cacheFirst,
+  cacheAndNetwork,
+  cacheOnly,
+  noCache,
+  networkOnly,
 }
 
 /// [ErrorPolicy] determines the level of events for errors in the execution result. The options are:
@@ -46,16 +46,20 @@ class BaseOptions {
 /// Query options.
 class QueryOptions extends BaseOptions {
   /// A GraphQL document that consists of a single query to be sent down to the server.
+  @override
   String document;
 
   /// A map going from variable name to variable value, where the variables are used
   /// within the GraphQL query.
+  @override
   Map<String, dynamic> variables;
 
   /// Specifies the [FetchPolicy] to be used for this query.
+  @override
   FetchPolicy fetchPolicy;
 
   /// Specifies the [ErrorPolicy] to be used for this query.
+  @override
   ErrorPolicy errorPolicy;
 
   /// The time interval (in milliseconds) on which this query should be
@@ -63,12 +67,13 @@ class QueryOptions extends BaseOptions {
   int pollInterval;
 
   /// Context to be passed to link execution chain.
+  @override
   Map<String, dynamic> context;
 
   QueryOptions({
     @required this.document,
     this.variables,
-    this.fetchPolicy = FetchPolicy.cache_first,
+    this.fetchPolicy = FetchPolicy.cacheFirst,
     this.errorPolicy = ErrorPolicy.none,
     this.pollInterval,
     this.context,
@@ -78,25 +83,30 @@ class QueryOptions extends BaseOptions {
 /// Mutation options
 class MutationOptions implements BaseOptions {
   /// A GraphQL document that consists of a single query to be sent down to the server.
+  @override
   String document;
 
   /// An object that maps from the name of a variable as used in the mutation
   /// GraphQL document to that variable's value.
+  @override
   Map<String, dynamic> variables;
 
   /// Specifies the [FetchPolicy] to be used for this mutation.
+  @override
   FetchPolicy fetchPolicy;
 
   /// Specifies the [ErrorPolicy] to be used for this operation.
+  @override
   ErrorPolicy errorPolicy;
 
   /// Context to be passed to link execution chain.
+  @override
   Map<String, dynamic> context;
 
   MutationOptions({
     @required this.document,
     this.variables,
-    this.fetchPolicy = FetchPolicy.network_only,
+    this.fetchPolicy = FetchPolicy.networkOnly,
     this.errorPolicy = ErrorPolicy.none,
     this.context,
   });
@@ -105,16 +115,20 @@ class MutationOptions implements BaseOptions {
 // ObservableQuery options
 class WatchQueryOptions extends BaseOptions {
   /// A GraphQL document that consists of a single query to be sent down to the server.
+  @override
   String document;
 
   /// An object that maps from the name of a variable as used in the mutation
   /// GraphQL document to that variable's value.
+  @override
   Map<String, dynamic> variables;
 
   /// Specifies the [FetchPolicy] to be used for this query.
+  @override
   FetchPolicy fetchPolicy;
 
   /// Specifies the [ErrorPolicy] to be used for this query.
+  @override
   ErrorPolicy errorPolicy;
 
   /// The time interval (in milliseconds) on which this query should be
@@ -125,12 +139,13 @@ class WatchQueryOptions extends BaseOptions {
   bool fetchResults;
 
   /// Context to be passed to link execution chain.
+  @override
   Map<String, dynamic> context;
 
   WatchQueryOptions({
     @required this.document,
     this.variables,
-    this.fetchPolicy = FetchPolicy.cache_and_network,
+    this.fetchPolicy = FetchPolicy.cacheAndNetwork,
     this.errorPolicy = ErrorPolicy.none,
     this.pollInterval,
     this.fetchResults,

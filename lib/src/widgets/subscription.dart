@@ -93,6 +93,7 @@ class _SubscriptionState extends State<Subscription> {
     }
   }
 
+  @override
   Widget build(final BuildContext context) {
     return widget.builder(
       loading: _loading,

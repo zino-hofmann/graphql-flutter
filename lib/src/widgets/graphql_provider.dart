@@ -27,14 +27,14 @@ class _GraphQLProviderState extends State<GraphQLProvider> {
   void didValueChange() => setState(() {});
 
   @override
-  initState() {
+  void initState() {
     super.initState();
 
     widget.client.addListener(didValueChange);
   }
 
   @override
-  dispose() {
+  void dispose() {
     widget.client?.removeListener(didValueChange);
 
     super.dispose();
@@ -56,6 +56,7 @@ class _InheritedGraphQLProvider extends InheritedWidget {
   }) : clientValue = client.value;
 
   final ValueNotifier<GraphQLClient> client;
+  @override
   final Widget child;
   final GraphQLClient clientValue;
 
