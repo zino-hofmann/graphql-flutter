@@ -8,13 +8,11 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-🎉🥂🍾 [Version 1.0.0](https://github.com/zino-app/graphql-flutter/releases/tag/1.0.0-alpha.1) just got promoted to alpha! We included an upgrade guide, so feel free to check it out on our [next banch](https://github.com/zino-app/graphql-flutter/tree/next).
-
 ## Table of Contents
 
 - [About this project](#about-this-project)
 - [Installation](#installation)
-- [Upgrading from 0.x.x to 1.x.x](#upgrading-from-0.x.x-to-1.x.x)
+- [Upgrading from 0.x.x](#upgrading-from-0xx)
 - [Usage](#usage)
   - [GraphQL Provider](#graphql-provider)
   - [Offline Cache](#offline-cache)
@@ -49,7 +47,7 @@ Now inside your Dart code you can import it.
 import 'package:graphql_flutter/graphql_flutter.dart';
 ```
 
-## Upgrading from 0.x.x to 1.x.x
+## Upgrading from 0.x.x
 
 Here is a guide to fix most of the breaking changes introduced in 1.x.x.
 
@@ -84,7 +82,7 @@ void main() {
 }
 ```
 
-We have made a load of changes how queries and mutations work under the hood. TO allow for these changes we had to make some small changes to the API of the `Query` and `Mutation` widgets.
+We have made a load of changes how queries and mutations work under the hood. To allow for these changes we had to make some small changes to the API of the `Query` and `Mutation` widgets.
 
 ```diff
 Query(
@@ -434,7 +432,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
-[package]: https://pub.dartlang.org/packages/graphql_flutter
+[package]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
 [license]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
