@@ -16,22 +16,26 @@ class SocketClient {
     final Map<String, String> headers = const {
       'content-type': 'application/json',
     },
+    final Map<String, String> initPayload
   }) async {
+    _initPayload = initPayload;
+
     return SocketClient(GraphQLSocket(await WebSocket.connect(
       endPoint,
       protocols: protocols,
-      headers: headers,
+      headers: headers
     )));
   }
 
   final Uuid _uuid = Uuid();
   final GraphQLSocket _socket;
+  static Map<String, String> _initPayload;
 
   SocketClient(this._socket) {
     _socket.connectionAck.listen(print);
     _socket.connectionError.listen(print);
     _socket.unknownData.listen(print);
-    _socket.write(InitOperation());
+    _socket.write(InitOperation(_initPayload));
   }
 
   Stream<SubscriptionData> subscribe(final SubscriptionRequest payload) {
