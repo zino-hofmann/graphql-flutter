@@ -34,7 +34,7 @@ class QueryState extends State<Query> {
 
   @override
   void dispose() {
-    observableQuery.close();
+    observableQuery?.close();
     super.dispose();
   }
 
@@ -74,10 +74,10 @@ class QueryState extends State<Query> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: observableQuery.stream,
       initialData: QueryResult(
         loading: true,
       ),
+      stream: observableQuery.stream,
       builder: (
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
