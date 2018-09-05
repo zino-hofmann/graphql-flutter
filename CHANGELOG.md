@@ -1,4 +1,4 @@
-## [0.9.3] - 5 September 2018
+## [0.9.3] - September 5 2018
 
 ### Breaking changes
 
@@ -12,7 +12,7 @@ n/a
 
 - Update the reference to the next branch. @HofmannZ
 
-## [0.9.2] - 2 September 2018
+## [0.9.2] - September 2 2018
 
 ### Breaking changes
 
