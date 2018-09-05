@@ -86,11 +86,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 builder: (
                   RunMutation addStar,
-                  QueryResult result,
+                  QueryResult addStarResult,
                 ) {
-                  if (result.data != null && result.data.isNotEmpty) {
-                    repository['viewerHasStarred'] =
-                        result.data['addStar']['starrable']['viewerHasStarred'];
+                  if (addStarResult.data != null &&
+                      addStarResult.data.isNotEmpty) {
+                    repository['viewerHasStarred'] = addStarResult
+                        .data['addStar']['starrable']['viewerHasStarred'];
                   }
 
                   return ListTile(
@@ -106,24 +107,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   );
                 },
-                // onCompleted: (Map<String, dynamic> data) {
-                //   showDialog(
-                //     context: context,
-                //     builder: (BuildContext context) {
-                //       return AlertDialog(
-                //         title: Text('Thanks for your star!'),
-                //         actions: <Widget>[
-                //           SimpleDialogOption(
-                //             child: Text('Dismiss'),
-                //             onPressed: () {
-                //               Navigator.of(context).pop();
-                //             },
-                //           )
-                //         ],
-                //       );
-                //     },
-                //   );
-                // },
+                onCompleted: (QueryResult onCompleteResult) {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Thanks for your star!'),
+                        actions: <Widget>[
+                          SimpleDialogOption(
+                            child: Text('Dismiss'),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      );
+                    },
+                  );
+                },
               );
             },
           );
