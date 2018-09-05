@@ -82,6 +82,7 @@ class MutationState extends State<Mutation> {
     super.didChangeDependencies();
   }
 
+  @override
   Widget build(BuildContext context) {
     return StreamBuilder(
       stream: observableQuery.stream,

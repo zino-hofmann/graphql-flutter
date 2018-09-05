@@ -24,7 +24,7 @@ class Subscription extends StatefulWidget {
   Subscription(
     this.operationName,
     this.query, {
-    this.variables = const {},
+    this.variables = const <String, dynamic>{},
     final Key key,
     @required this.builder,
     this.initial,
@@ -93,6 +93,7 @@ class _SubscriptionState extends State<Subscription> {
     }
   }
 
+  @override
   Widget build(final BuildContext context) {
     return widget.builder(
       loading: _loading,

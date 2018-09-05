@@ -6,7 +6,7 @@ class Operation {
   final String operationName;
   final Map<String, dynamic> extensions;
 
-  Map<String, dynamic> _context = {};
+  Map<String, dynamic> _context = <String, dynamic>{};
 
   Operation({
     this.document,
@@ -20,7 +20,7 @@ class Operation {
   }
 
   Map<String, dynamic> getContext() {
-    Map<String, dynamic> result = {};
+    Map<String, dynamic> result = <String, dynamic>{};
     result.addAll(_context);
 
     return result;

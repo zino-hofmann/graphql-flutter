@@ -1,6 +1,12 @@
-Map<String, dynamic> defaultHttpOptions = {
-  'includeQuery': true,
-  'includeExtensions': false,
+import 'package:graphql_flutter/src/link/http/http_config.dart';
+
+HttpQueryOptions defaultHttpOptions = HttpQueryOptions(
+  includeQuery: true,
+  includeExtensions: false,
+);
+
+Map<String, dynamic> defaultOptions = <String, dynamic>{
+  'method': 'POST',
 };
 
 Map<String, String> defaultHeaders = {
@@ -8,12 +14,11 @@ Map<String, String> defaultHeaders = {
   'content-type': 'application/json',
 };
 
-Map<String, String> defaultOptions = {
-  'method': 'POST',
-};
+Map<String, dynamic> defaultCredentials = <String, dynamic>{};
 
-Map<String, Map<String, dynamic>> fallbackHttpConfig = {
-  'http': defaultHttpOptions,
-  'headers': defaultHeaders,
-  'options': defaultOptions,
-};
+HttpConfig fallbackHttpConfig = HttpConfig(
+  http: defaultHttpOptions,
+  options: defaultOptions,
+  headers: defaultHeaders,
+  credentials: defaultCredentials,
+);

@@ -46,8 +46,8 @@ class GraphQLClient {
 
   /// This subscribes to a graphql subscription according to the options specified and returns an
   /// [Stream] which either emits received data or an error.
-  Stream subscribe(options) {
+  Stream<dynamic> subscribe(dynamic options) {
     // TODO: merge the subscription client with the new client
-    return Stream.empty();
+    return Stream<dynamic>.empty();
   }
 }
