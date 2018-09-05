@@ -78,6 +78,20 @@ n/a
 
 - Implement the new link system in the example. @HofmannZ
 
+## [0.9.3] - September 5 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fix wrong typedef causing runtime type mismatch. @HofmannZ
+
+#### Docs
+
+- Update the reference to the next branch. @HofmannZ
+
 ## [0.9.2] - 2 September 2018
 
 ### Breaking changes
