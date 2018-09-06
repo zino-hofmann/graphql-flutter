@@ -3,11 +3,22 @@ import 'dart:io';
 
 import 'package:uuid/uuid.dart';
 
-import '../graphql_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 SocketClient socketClient;
 
 class SocketClient {
+  final Uuid _uuid = Uuid();
+  final GraphQLSocket _socket;
+  static Map<String, String> _initPayload;
+
+  SocketClient(this._socket) {
+    _socket.connectionAck.listen(print);
+    _socket.connectionError.listen(print);
+    _socket.unknownData.listen(print);
+    _socket.write(InitOperation(_initPayload));
+  }
+
   static Future<SocketClient> connect(
     final String endPoint, {
     final List<String> protocols = const [
@@ -25,17 +36,6 @@ class SocketClient {
       protocols: protocols,
       headers: headers,
     )));
-  }
-
-  final Uuid _uuid = Uuid();
-  final GraphQLSocket _socket;
-  static Map<String, String> _initPayload;
-
-  SocketClient(this._socket) {
-    _socket.connectionAck.listen(print);
-    _socket.connectionError.listen(print);
-    _socket.unknownData.listen(print);
-    _socket.write(InitOperation(_initPayload));
   }
 
   Stream<SubscriptionData> subscribe(final SubscriptionRequest payload) {

@@ -5,8 +5,44 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 
-class InMemoryCache {
+import 'package:graphql_flutter/src/cache/cache.dart';
+
+class InMemoryCache implements Cache {
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
+
+  /// Reads an entity from the internal HashMap.
+  @override
+  dynamic read(String key) {
+    if (_inMemoryCache.containsKey(key)) {
+      return _inMemoryCache[key];
+    }
+
+    return null;
+  }
+
+  /// Writes an entity to the internal HashMap.
+  @override
+  void write(String key, dynamic value) {
+    _inMemoryCache[key] = value;
+  }
+
+  /// Saves the internal HashMap to a file.
+  @override
+  void save() async {
+    await _writeToStorage();
+  }
+
+  /// Restores the internal HashMap to a file.
+  @override
+  void restore() async {
+    _inMemoryCache = await _readFromStorage();
+  }
+
+  /// Clears the internal HashMap.
+  @override
+  void reset() {
+    _inMemoryCache.clear();
+  }
 
   Future<String> get _localStoragePath async {
     final Directory directory = await getApplicationDocumentsDirectory();
@@ -24,8 +60,8 @@ class InMemoryCache {
     final File file = await _localStorageFile;
     IOSink sink = file.openWrite();
 
-    _inMemoryCache.forEach((key, value) {
-      sink.writeln(json.encode([key, value]));
+    _inMemoryCache.forEach((String key, dynamic value) {
+      sink.writeln(json.encode(<dynamic>[key, value]));
     });
 
     sink.close();
@@ -47,13 +83,14 @@ class InMemoryCache {
             .listen((String line) {
           final List keyAndValue = json.decode(line);
 
-          storedHashMap[keyAndValue[0]] = keyAndValue[1];
+          storedHashMap[keyAndValue[0] as String] = keyAndValue[1];
         });
       }
 
       return storedHashMap;
     } on FileSystemException {
-      // TODO: handle No such file
+      // TODO: handle no such file
+      print('Can\'t read file from storage, returning an empty HashMap.');
 
       return HashMap<String, dynamic>();
     } catch (error) {
@@ -62,31 +99,5 @@ class InMemoryCache {
 
       return HashMap<String, dynamic>();
     }
-  }
-
-  bool hasEntity(String key) => _inMemoryCache.containsKey(key);
-
-  void save() async {
-    await _writeToStorage();
-  }
-
-  void restore() async {
-    _inMemoryCache = await _readFromStorage();
-  }
-
-  dynamic read(String key) {
-    if (hasEntity(key)) {
-      return _inMemoryCache[key];
-    }
-
-    return null;
-  }
-
-  void write(String key, dynamic value) {
-    _inMemoryCache[key] = value;
-  }
-
-  void reset() {
-    _inMemoryCache.clear();
   }
 }

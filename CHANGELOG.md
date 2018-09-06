@@ -1,3 +1,97 @@
+## [1.0.0-alpha.4] - September 4 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Always return something from the `read` method in the cache class. @HofmannZ
+- Only save to cache with certain fetch policies. @HofmannZ
+- Throw an error when no data from network with certain fetch policies. @HofmannZ
+- Added a document parser. @HofmannZ
+- Added operation name from document to the operation. @HofmannZ
+- Only create a new observable query if options have changed. @HofmannZ
+- Add context to the links. @HofmannZ
+- Parse context in the http link to update the config. @HofmannZ
+- Change the type of context from dynamic to Map<String, dynamic. @HofmannZ
+
+#### Docs
+
+n/a
+
+## [1.0.0-alpha.3] - September 2 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Reverted changes to the required Dart version. @HofmannZ
+- Added missing return statsments. @HofmannZ
+
+#### Docs
+
+n/a
+
+## [1.0.0-alpha.2] - September 2 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- `GraphQLClient` now reads and writes data from the `Cache` based on the provided `FetchPolicy` option. @HofmannZ
+- Implemented caching for data from `FetchResults`. @HofmannZ
+- The library now tagets Dart version `>=2.1.0-dev.0.0 <3.0.0` as recomended by Flutter `0.6.0`. @HofmannZ
+- Removed the old client from the library. @HofmannZ
+
+#### Docs
+
+- Document the new API. @HofmannZ
+- Write an upgrade guide. @HofmannZ
+- Clean up the example. @HofmannZ
+
+## [1.0.0-alpha.1] - September 2 2018
+
+### Breaking changes
+
+- Renamed `Client` to `GraphQLClient` to avoid name collision with other packages. @HofmannZ
+- Renamed `GraphqlProvider` to `GraphQLProvider` to align with new naming. @HofmannZ
+- Renamed `GraphqlConsumer` to `GraphQLConsumer` to align with new naming. @HofmannZ
+- Renamed `GQLError` to `GraphQLError` to align with new naming. @HofmannZ
+- `GraphQLClient` requires a `Link` to passed into the constructor. @HofmannZ
+- `GraphQLClient` no longer requires a `endPoint` or `apiToken` to be passed into the constructor. Instead you can provide it to the `Link`. @HofmannZ
+- The `Query` and `Mutation` widgets are now `StreamBuilders`, there the api did change slightly. @HofmannZ
+
+#### Fixes / Enhancements
+
+- Improved typing throughout the library. @HofmannZ
+- Queries are handled as streams of operations. @HofmannZ
+- Added the `HttpLink` to handle requests using http. @HofmannZ
+- `HttpLink` allows headers to be customised. @HofmannZ
+- The api allows contributors to write their own custom links. @HofmannZ
+
+#### Docs
+
+- Implement the new link system in the example. @HofmannZ
+
+## [0.9.3] - September 5 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fix wrong typedef causing runtime type mismatch. @HofmannZ
+
+#### Docs
+
+- Update the reference to the next branch. @HofmannZ
+
 ## [0.9.2] - 2 September 2018
 
 ### Breaking changes

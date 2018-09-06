@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import './mutations/addStar.dart' as mutations;
@@ -9,23 +10,29 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    ValueNotifier<Client> client = ValueNotifier(
-      Client(
-        endPoint: 'https://api.github.com/graphql',
+    HttpLink link = HttpLink(
+      uri: 'https://api.github.com/graphql',
+      headers: <String, String>{
+        'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
+      },
+    );
+
+    ValueNotifier<GraphQLClient> client = ValueNotifier(
+      GraphQLClient(
         cache: InMemoryCache(),
-        apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
+        link: link,
       ),
     );
 
-    return GraphqlProvider(
+    return GraphQLProvider(
       client: client,
       child: CacheProvider(
         child: MaterialApp(
-          title: 'Flutter Demo',
+          title: 'GraphQL Flutter Demo',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: MyHomePage(title: 'Flutter Demo Home Page'),
+          home: MyHomePage(title: 'GraphQL Flutter Home Page'),
         ),
       ),
     );
@@ -52,23 +59,21 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Query(
-        queries.readRepositories,
-        pollInterval: 1,
-        builder: ({
-          bool loading,
-          Map data,
-          Exception error,
-        }) {
-          if (error != null) {
-            return Text(error.toString());
+        options: QueryOptions(
+          document: queries.readRepositories,
+          pollInterval: 4,
+        ),
+        builder: (QueryResult result) {
+          if (result.errors != null) {
+            return Text(result.errors.toString());
           }
 
-          if (loading) {
+          if (result.loading) {
             return Text('Loading');
           }
 
           // it can be either Map or List
-          List repositories = data['viewer']['repositories']['nodes'];
+          List repositories = result.data['viewer']['repositories']['nodes'];
 
           return ListView.builder(
             itemCount: repositories.length,
@@ -76,16 +81,16 @@ class _MyHomePageState extends State<MyHomePage> {
               final repository = repositories[index];
 
               return Mutation(
-                mutations.addStar,
+                options: MutationOptions(
+                  document: mutations.addStar,
+                ),
                 builder: (
-                  addStar, {
-                  bool loading,
-                  Map data,
-                  Exception error,
-                }) {
-                  if (data.isNotEmpty) {
+                  RunMutation addStar,
+                  QueryResult result,
+                ) {
+                  if (result.data != null && result.data.isNotEmpty) {
                     repository['viewerHasStarred'] =
-                        data['addStar']['starrable']['viewerHasStarred'];
+                        result.data['addStar']['starrable']['viewerHasStarred'];
                   }
 
                   return ListTile(
@@ -101,24 +106,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     },
                   );
                 },
-                onCompleted: (Map<String, dynamic> data) {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: Text('Thanks for your star!'),
-                        actions: <Widget>[
-                          SimpleDialogOption(
-                            child: Text('Dismiss'),
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                          )
-                        ],
-                      );
-                    },
-                  );
-                },
+                // onCompleted: (Map<String, dynamic> data) {
+                //   showDialog(
+                //     context: context,
+                //     builder: (BuildContext context) {
+                //       return AlertDialog(
+                //         title: Text('Thanks for your star!'),
+                //         actions: <Widget>[
+                //           SimpleDialogOption(
+                //             child: Text('Dismiss'),
+                //             onPressed: () {
+                //               Navigator.of(context).pop();
+                //             },
+                //           )
+                //         ],
+                //       );
+                //     },
+                //   );
+                // },
               );
             },
           );

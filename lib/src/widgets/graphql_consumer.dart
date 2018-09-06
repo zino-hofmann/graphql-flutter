@@ -1,21 +1,22 @@
 import 'package:flutter/widgets.dart';
 
-import 'package:graphql_flutter/src/client.dart';
+import 'package:graphql_flutter/src/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef Widget GraphqlConsumerBuilder(Client client);
+typedef Widget GraphQLConsumerBuilder(GraphQLClient client);
 
-class GraphqlConsumer extends StatelessWidget {
-  GraphqlConsumer({
+class GraphQLConsumer extends StatelessWidget {
+  GraphQLConsumer({
     final Key key,
     @required this.builder,
   }) : super(key: key);
 
-  final GraphqlConsumerBuilder builder;
+  final GraphQLConsumerBuilder builder;
 
+  @override
   Widget build(BuildContext context) {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    Client client = GraphqlProvider.of(context).value;
+    /// Gets the client from the closest wrapping [GraphQLProvider].
+    GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
 
     return builder(client);

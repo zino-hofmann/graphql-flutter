@@ -13,10 +13,13 @@ class GraphQLSocket {
   final WebSocket _socket;
 
   GraphQLSocket(this._socket) {
-    _socket.map((message) => json.decode(message)).listen((message) {
+    _socket
+        .map<Map<String, dynamic>>((dynamic message) =>
+            json.decode(message as String) as Map<String, dynamic>)
+        .listen((Map<String, dynamic> message) {
       final dynamic type = message['type'] ?? 'unknown';
-      final dynamic payload = message['payload'] ?? {};
-      final dynamic id = message['id'] ?? 'none';
+      final dynamic payload = message['payload'] ?? <String, dynamic>{};
+      final String id = message['id'] ?? 'none';
 
       if (type == MessageTypes.GQL_CONNECTION_ACK) {
         _subject.add(ConnectionAck());
@@ -37,7 +40,7 @@ class GraphQLSocket {
   }
 
   void write(final GraphQLSocketMessage message) {
-    _socket.add(json.encode(message, toEncodable: (m) => m.toJson()));
+    _socket.add(json.encode(message, toEncodable: (dynamic m) => m.toJson()));
   }
 
   Stream<ConnectionAck> get connectionAck => _subject.stream

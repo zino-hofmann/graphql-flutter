@@ -8,19 +8,18 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-🎉🥂🍾 [Version 1.0.0](https://github.com/zino-app/graphql-flutter/releases/tag/1.0.0-alpha.1) just got promoted to alpha! We included an upgrade guide, so feel free to check it out on our [next banch](https://github.com/zino-app/graphql-flutter/tree/next).
-
 ## Table of Contents
 
 - [About this project](#about-this-project)
 - [Installation](#installation)
+- [Upgrading from 0.x.x](#upgrading-from-0xx)
 - [Usage](#usage)
-  - [Graphql Provider](#graphql-provider)
+  - [GraphQL Provider](#graphql-provider)
+  - [Offline Cache](#offline-cache)
   - [Queries](#queries)
   - [Mutations](#mutations)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
-  - [Graphql Consumer](#graphql-consumer)
-  - [Offline Cache (Experimental)](#offline-cache-experimental)
+  - [GraphQL Consumer](#graphql-consumer)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
@@ -29,11 +28,9 @@
 
 GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data useage. And to the programer: requests are arguable, they have the same structure as the request.
 
-The team at Apollo did a great job implenting GraphQL in Swift, Java and Javascript. But unfortunately they're not planning to release a Dart implementation.
+This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performace client.
 
-This project is filling the gap, bringing the GraphQL spec to yet another programming language. We plan to implement most functionality from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client) and from most features the [React Apollo](https://github.com/apollographql/react-apollo) components into Dart and Flutter respectively.
-
-With that being said, the project lives currently still inside one package. We plan to spilt up the project into multiple smaler packages in the near future, to follow Apollo's modules design.
+The project took inspriation from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
 ## Installation
 
@@ -41,7 +38,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.9.2
+  graphql_flutter: ^1.0.0-alpha
 ```
 
 Now inside your Dart code you can import it.
@@ -50,9 +47,115 @@ Now inside your Dart code you can import it.
 import 'package:graphql_flutter/graphql_flutter.dart';
 ```
 
+## Upgrading from 0.x.x
+
+Here is a guide to fix most of the breaking changes introduced in 1.x.x.
+
+Some class names have been renamed:
+
+- Renamed `Client` to `GraphQLClient`
+- Renamed `GraphqlProvider` to `GraphQLProvider`
+- Renamed `GraphqlConsumer` to `GraphQLConsumer`
+- Renamed `GQLError` to `GraphQLError`
+
+We changed the way the client handles requests, it now uses a `Link` to execute queries rather then depend on the http package. We've currently only implplemented the `HttpLink`, just drop it in like so:
+
+```diff
+void main() {
++  HttpLink link = HttpLink(
++    uri: 'https://api.github.com/graphql',
++    headers: <String, String>{
++      'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
++    },
++  );
+
+-  ValueNotifier<Client> client = ValueNotifier(
++  ValueNotifier<GraphQLClient> client = ValueNotifier(
+-  Client(
+-    endPoint: 'https://api.github.com/graphql',
++  GraphQLClient(
+      cache: InMemoryCache(),
+-      apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
++      link: link,
+    ),
+  );
+}
+```
+
+We have made a load of changes how queries and mutations work under the hood. To allow for these changes we had to make some small changes to the API of the `Query` and `Mutation` widgets.
+
+```diff
+Query(
+-  readRepositories,
++  options: QueryOptions(
++    document: readRepositories,
+    variables: {
+      'nRepositories': 50,
+    },
+    pollInterval: 10,
++  ),
+-  builder: ({
+-    bool loading,
+-    var data,
+-    String error,
+-  }) {
++  builder: (QueryResult result) {
+-    if (error != '') {
+-      return Text(error);
++    if (result.errors != null) {
++      return Text(result.errors.toString());
+    }
+
+-    if (loading) {
++    if (result.loading) {
+      return Text('Loading');
+    }
+
+-    List repositories = data['viewer']['repositories']['nodes'];
++    List repositories = result.data['viewer']['repositories']['nodes'];
+
+    return ListView.builder(
+      itemCount: repositories.length,
+      itemBuilder: (context, index) {
+        final repository = repositories[index];
+
+        return Text(repository['name']);
+    });
+  },
+);
+```
+
+```diff
+Mutation(
+-  addStar,
++  options: MutationOptions(
++    document: addStar,
++  ),
+  builder: (
+-    runMutation, {
+-    bool loading,
+-    var data,
+-    String error,
++    RunMutation runMutation,
++    QueryResult result,
+-  }) {
++  ) {
+    return FloatingActionButton(
+      onPressed: () => runMutation({
+        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+      }),
+      tooltip: 'Star',
+      child: Icon(Icons.star),
+    );
+  },
+);
+```
+
+That's it! You should now be able to use the latest version of our library.
+
 ## Usage
 
-To use the client it first needs to be initialized with an endpoint and cache. If your endpoint requires authentication you can provide it to the client contructor. If you need to change the api token at a later stage, you can call the setter `apiToken` on the `Client` class.
+To use the client it first needs to be initialized with an link and cache. For this example we will be uing an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can provide some custom headers to `HttpLink`.
 
 > For this example we will use the public GitHub API.
 
@@ -62,11 +165,17 @@ To use the client it first needs to be initialized with an endpoint and cache. I
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
-  ValueNotifier<Client> client = ValueNotifier(
-    Client(
-      endPoint: 'https://api.github.com/graphql',
+  HttpLink link = HttpLink(
+    uri: 'https://api.github.com/graphql',
+    headers: <String, String>{
+      'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
+    },
+  );
+
+  ValueNotifier<GraphQLClient> client = ValueNotifier(
+    GraphQLClient(
       cache: InMemoryCache(),
-      apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
+      link: link,
     ),
   );
 
@@ -76,14 +185,16 @@ void main() {
 ...
 ```
 
-### Graphql Provider
+### GraphQL Provider
 
-In order to use the client, you app needs to be wrapped with the `GraphqlProvider` widget.
+In order to use the client, you `Query` and `Mutation` widgets to be wrapped with the `GraphQLProvider` widget.
+
+> We recommend wrapping your `MaterialApp` with the `GraphQLProvider` widget.
 
 ```dart
   ...
 
-  return GraphqlProvider(
+  return GraphQLProvider(
     client: client,
     child: MaterialApp(
       title: 'Flutter Demo',
@@ -92,6 +203,33 @@ In order to use the client, you app needs to be wrapped with the `GraphqlProvide
   );
 
   ...
+```
+
+### Offline Cache
+
+The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
+
+> It is required to place the `CacheProvider` widget is inside the `GraphQLProvider` widget, because `GraphQLProvider` makes client available trough the build context.
+
+```dart
+...
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return GraphQLProvider(
+      client: client,
+      child: CacheProvider(
+        child: MaterialApp(
+          title: 'Flutter Demo',
+          ...
+        ),
+      ),
+    );
+  }
+}
+
+...
 ```
 
 ### Queries
@@ -121,26 +259,24 @@ In your widget:
 ...
 
 Query(
-  readRepositories, // this is the query you just created
-  variables: {
-    'nRepositories': 50,
-  },
-  pollInterval: 10, // optional
-  builder: ({
-    bool loading,
-    var data,
-    String error,
-  }) {
-    if (error != '') {
-      return Text(error);
+  options: QueryOptions(
+    document: readRepositories, // this is the query string you just created
+    variables: {
+      'nRepositories': 50,
+    },
+    pollInterval: 10,
+  ),
+  builder: (QueryResult result) {
+    if (result.errors != null) {
+      return Text(result.errors.toString());
     }
 
-    if (loading) {
+    if (result.loading) {
       return Text('Loading');
     }
 
     // it can be either Map or List
-    List repositories = data['viewer']['repositories']['nodes'];
+    List repositories = result.data['viewer']['repositories']['nodes'];
 
     return ListView.builder(
       itemCount: repositories.length,
@@ -178,39 +314,22 @@ The syntax for mutations is fairly similar to that of a query. The only diffence
 ...
 
 Mutation(
-  addStar,
+  options: MutationOptions(
+    document: addStar, // this is the mutation string you just created
+  ),
   builder: (
-    runMutation, { // you can name it whatever you like
-    bool loading,
-    var data,
-    String error,
-}) {
-  return FloatingActionButton(
-    onPressed: () => runMutation({
-      'starrableId': <A_STARTABLE_REPOSITORY_ID>,
-    }),
-    tooltip: 'Star',
-    child: Icon(Icons.star),
-  );
-},
-  onCompleted: (Map<String, dynamic> data) {
-    showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text('Thanks for your star!'),
-        actions: <Widget>[
-          SimpleDialogOption(
-            child: Text('Dismiss'),
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-          )
-        ],
-      );
-    }
-  );
-}),
+    RunMutation runMutation,
+    QueryResult result,
+  ) {
+    return FloatingActionButton(
+      onPressed: () => runMutation({
+        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+      }),
+      tooltip: 'Star',
+      child: Icon(Icons.star),
+    );
+  },
+);
 
 ...
 ```
@@ -220,7 +339,7 @@ Mutation(
 The syntax for subscriptions is again similar to a query, however, this utilizes WebSockets and dart Streams to provide real-time updates from a server.
 Before subscriptions can be performed a global intance of `socketClient` needs to be initialized.
 
-> We are working on moving this into the same `GraphqlProvider` stucture as the http client. Therefore this api might change in the near future.
+> We are working on moving this into the same `GraphQLProvider` stucture as the http client. Therefore this api might change in the near future.
 
 ```dart
 socketClient = await SocketClient.connect('ws://coolserver.com/graphql');
@@ -256,32 +375,15 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ```
 
-Once the `socketClient` is initialized you could also use it without Flutter.
-
-```dart
-final String operationName = "SubscriptionQuery";
-final String query = """subscription $operationName(\$requestId: String!) {
-  requestSubscription(requestId: \$requestId) {
-    requestData
-  }
-}""";
-final dynamic variables = {
-  'requestId': 'My Request',
-};
-socketClient
-    .subscribe(SubscriptionRequest(operationName, query, variables))
-    .listen(print);
-```
-
 ### Graphql Consumer
 
-You can always access the client direcly from the `GraphqlProvider` but to make it even easier you can also use the `GraphqlConsumer` widget.
+You can always access the client direcly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget.
 
 ```dart
   ...
 
-  return GraphqlConsumer(
-    builder: (Client client) {
+  return GraphQLConsumer(
+    builder: (GraphQLClient client) {
       // do something with the client
 
       return Container(
@@ -291,33 +393,6 @@ You can always access the client direcly from the `GraphqlProvider` but to make 
   );
 
   ...
-```
-
-### Offline Cache (Experimental)
-
-The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
-
-> Make sure the `CacheProvider` widget is inside the `GraphqlProvider` widget.
-
-```dart
-...
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GraphqlProvider(
-      client: client,
-      child: CacheProvider(
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          ...
-        ),
-      ),
-    );
-  }
-}
-
-...
 ```
 
 ## Roadmap
@@ -342,7 +417,7 @@ Feel free to open a PR with any suggestions! We'll be actively working on the li
 
 ## Contributors
 
-This package was originally created and published by the engineers at [Zino App B.V.](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
+This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
 
 Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
 
@@ -357,7 +432,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
-[package]: https://pub.dartlang.org/packages/graphql_flutter
+[package]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
 [license]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
