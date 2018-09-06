@@ -53,7 +53,7 @@ class InitOperation extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() {
-    final Map<String, String> jsonMap = new Map();
+    final Map<String, String> jsonMap = Map();
     jsonMap['type'] = type;
 
     if (this.payload != null) {
@@ -61,7 +61,6 @@ class InitOperation extends GraphQLSocketMessage {
     }
 
     return  json.encode(jsonMap);
-
   }
 }
 
