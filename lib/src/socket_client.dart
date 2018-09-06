@@ -23,7 +23,7 @@ class SocketClient {
     return SocketClient(GraphQLSocket(await WebSocket.connect(
       endPoint,
       protocols: protocols,
-      headers: headers
+      headers: headers,
     )));
   }
 
