@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 /// These messages represent the structures used for Client-server communication
 /// in a GraphQL web-socket subscription. Each message is represented in a JSON
 /// format where the data type is denoted by the `type` field.
@@ -45,12 +47,21 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
 /// send this message to tell the server that it is ready to begin sending
 /// new subscription queries.
 class InitOperation extends GraphQLSocketMessage {
-  InitOperation() : super(MessageTypes.GQL_CONNECTION_INIT);
+  final Map<String, String> payload;
+
+  InitOperation(this.payload) : super(MessageTypes.GQL_CONNECTION_INIT);
 
   @override
-  dynamic toJson() => <String, dynamic>{
-        'type': type,
-      };
+  dynamic toJson() {
+    final Map<String, dynamic> jsonMap = Map<String, dynamic>();
+    jsonMap['type'] = type;
+
+    if (this.payload != null) {
+      jsonMap['payload'] = json.encode(this.payload);
+    }
+
+    return json.encode(jsonMap);
+  }
 }
 
 /// Represent the payload used during a Start query operation.
