@@ -79,7 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
 
           // result.data can be either a Map or a List
-          final List<Map<String, dynamic>> repositories =
+          final List<dynamic> repositories =
               result.data['viewer']['repositories']['nodes'];
 
           return ListView.builder(
