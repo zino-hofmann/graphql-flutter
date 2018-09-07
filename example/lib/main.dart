@@ -62,6 +62,12 @@ class _MyHomePageState extends State<MyHomePage> {
         options: QueryOptions(
           document: queries.readRepositories,
           pollInterval: 4,
+          // you can optionally override some http options through the contexts
+          context: <String, dynamic>{
+            'headers': <String, String>{
+              'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
+            },
+          },
         ),
         builder: (QueryResult result) {
           if (result.errors != null) {
@@ -72,13 +78,13 @@ class _MyHomePageState extends State<MyHomePage> {
             return Text('Loading');
           }
 
-          // it can be either Map or List
+          // result.data can be either a Map or a List
           List repositories = result.data['viewer']['repositories']['nodes'];
 
           return ListView.builder(
             itemCount: repositories.length,
             itemBuilder: (context, index) {
-              final repository = repositories[index];
+              final Map<String, dynamic> repository = repositories[index];
 
               return Mutation(
                 options: MutationOptions(
@@ -89,19 +95,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   QueryResult addStarResult,
                 ) {
                   if (addStarResult.data != null &&
-                      addStarResult.data.isNotEmpty) {
+                      (addStarResult.data as Map).isNotEmpty) {
                     repository['viewerHasStarred'] = addStarResult
                         .data['addStar']['starrable']['viewerHasStarred'];
                   }
 
                   return ListTile(
-                    leading: repository['viewerHasStarred']
+                    leading: (repository['viewerHasStarred'] as bool)
                         ? const Icon(Icons.star, color: Colors.amber)
                         : const Icon(Icons.star_border),
-                    title: Text(repository['name']),
-                    // NOTE: optimistic ui updates are not implemented yet, therefore changes may take upto 1 second to show.
+                    title: Text(repository['name'] as String),
+                    // optimistic ui updates are not implemented yet, therefore changes may take some time to show
                     onTap: () {
-                      addStar({
+                      addStar(<String, dynamic>{
                         'starrableId': repository['id'],
                       });
                     },
