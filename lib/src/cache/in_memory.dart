@@ -58,15 +58,15 @@ class InMemoryCache implements Cache {
 
   Future<dynamic> _writeToStorage() async {
     final File file = await _localStorageFile;
-    IOSink sink = file.openWrite();
+    final IOSink sink = file.openWrite();
 
     _inMemoryCache.forEach((String key, dynamic value) {
       sink.writeln(json.encode(<dynamic>[key, value]));
     });
 
-    sink.close();
+    await sink.close();
 
-    return sink.done;
+    return;
   }
 
   Future<HashMap<String, dynamic>> _readFromStorage() async {
@@ -75,15 +75,17 @@ class InMemoryCache implements Cache {
       final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
 
       if (file.existsSync()) {
-        Stream<dynamic> inputStream = file.openRead();
+        final Stream<List<int>> inputStream = file.openRead();
 
         inputStream
             .transform(utf8.decoder) // Decode bytes to UTF8.
-            .transform(LineSplitter()) // Convert stream to individual lines.
+            .transform(
+              const LineSplitter(),
+            ) // Convert stream to individual lines.
             .listen((String line) {
-          final List keyAndValue = json.decode(line);
+          final List<dynamic> keyAndValue = json.decode(line);
 
-          storedHashMap[keyAndValue[0] as String] = keyAndValue[1];
+          storedHashMap[keyAndValue[0]] = keyAndValue[1];
         });
       }
 

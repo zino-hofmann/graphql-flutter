@@ -31,18 +31,18 @@ class GraphQLError {
 
   /// Constructs a [GraphQLError] from a JSON map.
   GraphQLError.fromJSON(Map<String, dynamic> data)
-      : message = data['message'] as String,
+      : message = data['message'],
         locations = data['locations'] is List<Map<String, int>>
-            ? List.from(
-                (data['locations'] as List<Map<String, int>>).map<Location>(
+            ? List<Location>.from(
+                (data['locations']).map<Location>(
                   (Map<String, int> location) => Location.fromJSON(location),
                 ),
               )
             : null,
-        path = data['path'] as List<dynamic>,
-        extensions = data['extensions'] as Map<String, dynamic>;
+        path = data['path'],
+        extensions = data['extensions'];
 
   @override
   String toString() =>
-      '$message: ${locations is List ? locations.map((l) => '[${l.toString()}]').join('') : ""}';
+      '$message: ${locations is List ? locations.map((Location l) => '[${l.toString()}]').join('') : ""}';
 }

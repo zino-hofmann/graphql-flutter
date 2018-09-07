@@ -23,7 +23,7 @@ class QueryManager {
 
   QueryScheduler scheduler;
   int idCounter = 1;
-  Map<String, ObservableQuery> queries = Map();
+  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   QueryManager({
     @required this.link,
@@ -41,7 +41,7 @@ class QueryManager {
       );
     }
 
-    ObservableQuery observableQuery = ObservableQuery(
+    final ObservableQuery observableQuery = ObservableQuery(
       queryManager: this,
       options: options,
     );
@@ -63,18 +63,17 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) async {
-    FetchResult fetchResult;
-    QueryResult queryResult;
-    ObservableQuery observableQuery = getQuery(queryId);
-
-    String operationName = getOperationName(options.document);
-
+    final ObservableQuery observableQuery = getQuery(queryId);
+    final String operationName = getOperationName(options.document);
     // create a new operation to fetch
-    Operation operation = Operation(
+    final Operation operation = Operation(
       document: options.document,
       variables: options.variables,
       operationName: operationName,
     );
+
+    FetchResult fetchResult;
+    QueryResult queryResult;
 
     if (options.context != null) {
       operation.setContext(options.context);
@@ -83,7 +82,7 @@ class QueryManager {
     if (options.fetchPolicy == FetchPolicy.cacheFirst ||
         options.fetchPolicy == FetchPolicy.cacheAndNetwork ||
         options.fetchPolicy == FetchPolicy.cacheOnly) {
-      dynamic cachedData = cache.read(operation.toKey());
+      final dynamic cachedData = cache.read(operation.toKey());
 
       if (cachedData != null) {
         fetchResult = FetchResult(
@@ -156,7 +155,7 @@ class QueryManager {
   }
 
   int generateQueryId() {
-    int requestId = idCounter;
+    final int requestId = idCounter;
 
     idCounter++;
 
@@ -167,8 +166,8 @@ class QueryManager {
     List<GraphQLError> errors;
 
     if (fetchResult.errors != null) {
-      errors = List.from(fetchResult.errors.map<GraphQLError>(
-        (rawError) => GraphQLError.fromJSON(rawError),
+      errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
+        (Map<String, dynamic> rawError) => GraphQLError.fromJSON(rawError),
       ));
     }
 

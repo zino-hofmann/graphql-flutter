@@ -6,7 +6,7 @@ class Operation {
   final String operationName;
   final Map<String, dynamic> extensions;
 
-  Map<String, dynamic> _context = <String, dynamic>{};
+  final Map<String, dynamic> _context = <String, dynamic>{};
 
   Operation({
     this.document,
@@ -20,7 +20,7 @@ class Operation {
   }
 
   Map<String, dynamic> getContext() {
-    Map<String, dynamic> result = <String, dynamic>{};
+    final Map<String, dynamic> result = <String, dynamic>{};
     result.addAll(_context);
 
     return result;
@@ -29,7 +29,7 @@ class Operation {
   String toKey() {
     /// XXX we're assuming here that variables will be serialized in the same order.
     /// that might not always be true
-    String encodedVariables = json.encode(variables);
+    final String encodedVariables = json.encode(variables);
 
     return '$document|$encodedVariables|$operationName';
   }

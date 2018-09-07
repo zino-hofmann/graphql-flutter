@@ -41,116 +41,76 @@ class BaseOptions {
 
   /// Context to be passed to link execution chain.
   Map<String, dynamic> context;
+
+  BaseOptions({
+    @required this.document,
+    this.variables,
+    this.fetchPolicy,
+    this.errorPolicy,
+    this.context,
+  });
 }
 
 /// Query options.
 class QueryOptions extends BaseOptions {
-  /// A GraphQL document that consists of a single query to be sent down to the server.
-  @override
-  String document;
-
-  /// A map going from variable name to variable value, where the variables are used
-  /// within the GraphQL query.
-  @override
-  Map<String, dynamic> variables;
-
-  /// Specifies the [FetchPolicy] to be used for this query.
-  @override
-  FetchPolicy fetchPolicy;
-
-  /// Specifies the [ErrorPolicy] to be used for this query.
-  @override
-  ErrorPolicy errorPolicy;
-
   /// The time interval (in milliseconds) on which this query should be
   /// refetched from the server.
   int pollInterval;
 
-  /// Context to be passed to link execution chain.
-  @override
-  Map<String, dynamic> context;
-
   QueryOptions({
-    @required this.document,
-    this.variables,
-    this.fetchPolicy = FetchPolicy.cacheFirst,
-    this.errorPolicy = ErrorPolicy.none,
+    @required String document,
+    Map<String, dynamic> variables,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
+    ErrorPolicy errorPolicy = ErrorPolicy.none,
     this.pollInterval,
-    this.context,
-  });
+    Map<String, dynamic> context,
+  }) : super(
+          document: document,
+          variables: variables,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          context: context,
+        );
 }
 
 /// Mutation options
-class MutationOptions implements BaseOptions {
-  /// A GraphQL document that consists of a single query to be sent down to the server.
-  @override
-  String document;
-
-  /// An object that maps from the name of a variable as used in the mutation
-  /// GraphQL document to that variable's value.
-  @override
-  Map<String, dynamic> variables;
-
-  /// Specifies the [FetchPolicy] to be used for this mutation.
-  @override
-  FetchPolicy fetchPolicy;
-
-  /// Specifies the [ErrorPolicy] to be used for this operation.
-  @override
-  ErrorPolicy errorPolicy;
-
-  /// Context to be passed to link execution chain.
-  @override
-  Map<String, dynamic> context;
-
+class MutationOptions extends BaseOptions {
   MutationOptions({
-    @required this.document,
-    this.variables,
-    this.fetchPolicy = FetchPolicy.networkOnly,
-    this.errorPolicy = ErrorPolicy.none,
-    this.context,
-  });
+    @required String document,
+    Map<String, dynamic> variables,
+    FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
+    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    Map<String, dynamic> context,
+  }) : super(
+          document: document,
+          variables: variables,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          context: context,
+        );
 }
 
 // ObservableQuery options
-class WatchQueryOptions extends BaseOptions {
-  /// A GraphQL document that consists of a single query to be sent down to the server.
-  @override
-  String document;
-
-  /// An object that maps from the name of a variable as used in the mutation
-  /// GraphQL document to that variable's value.
-  @override
-  Map<String, dynamic> variables;
-
-  /// Specifies the [FetchPolicy] to be used for this query.
-  @override
-  FetchPolicy fetchPolicy;
-
-  /// Specifies the [ErrorPolicy] to be used for this query.
-  @override
-  ErrorPolicy errorPolicy;
-
-  /// The time interval (in milliseconds) on which this query should be
-  /// refetched from the server.
-  int pollInterval;
-
+class WatchQueryOptions extends QueryOptions {
   /// Whether or not to fetch result.
   bool fetchResults;
 
-  /// Context to be passed to link execution chain.
-  @override
-  Map<String, dynamic> context;
-
   WatchQueryOptions({
-    @required this.document,
-    this.variables,
-    this.fetchPolicy = FetchPolicy.cacheAndNetwork,
-    this.errorPolicy = ErrorPolicy.none,
-    this.pollInterval,
+    @required String document,
+    Map<String, dynamic> variables,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
+    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    int pollInterval,
     this.fetchResults,
-    this.context,
-  });
+    Map<String, dynamic> context,
+  }) : super(
+          document: document,
+          variables: variables,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          pollInterval: pollInterval,
+          context: context,
+        );
 
   /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {

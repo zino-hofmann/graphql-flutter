@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import '../websocket/messages.dart';
 import '../socket_client.dart';
+import '../websocket/messages.dart';
 
 typedef OnSubscriptionCompleted = void Function();
 
@@ -21,7 +21,7 @@ class Subscription extends StatefulWidget {
   final OnSubscriptionCompleted onCompleted;
   final dynamic initial;
 
-  Subscription(
+  const Subscription(
     this.operationName,
     this.query, {
     this.variables = const <String, dynamic>{},
@@ -50,7 +50,7 @@ class _SubscriptionState extends State<Subscription> {
         SubscriptionRequest(
             widget.operationName, widget.query, widget.variables));
 
-    stream.takeWhile((message) => this._alive).listen(
+    stream.takeWhile((SubscriptionData message) => _alive).listen(
           _onData,
           onError: _onError,
           onDone: _onDone,

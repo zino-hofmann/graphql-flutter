@@ -48,6 +48,6 @@ class GraphQLClient {
   /// [Stream] which either emits received data or an error.
   Stream<dynamic> subscribe(dynamic options) {
     // TODO: merge the subscription client with the new client
-    return Stream<dynamic>.empty();
+    return const Stream<dynamic>.empty();
   }
 }

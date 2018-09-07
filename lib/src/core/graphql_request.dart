@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
 class GraphQLRequest {
-  String query;
+  final String query;
   Map<String, dynamic> variables;
   String operationName;
   Map<String, dynamic> context;
