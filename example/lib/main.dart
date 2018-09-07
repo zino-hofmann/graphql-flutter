@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   );
                 },
                 onCompleted: (QueryResult onCompleteResult) {
-                  showDialog(
+                  showDialog<AlertDialog>(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
