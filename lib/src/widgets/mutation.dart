@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 
 import 'package:graphql_flutter/src/graphql_client.dart';
@@ -33,9 +35,19 @@ class Mutation extends StatefulWidget {
 class MutationState extends State<Mutation> {
   GraphQLClient client;
   ObservableQuery observableQuery;
+  StreamSubscription<QueryResult> onCompleteSubscription;
 
   void runMutation(Map<String, dynamic> variables) {
     observableQuery.setVariables(variables);
+
+    if (widget.onCompleted != null) {
+      onCompleteSubscription =
+          observableQuery.stream.listen((QueryResult result) {
+        widget.onCompleted(result);
+        onCompleteSubscription.cancel();
+      });
+    }
+
     observableQuery.schedule();
   }
 
@@ -46,7 +58,8 @@ class MutationState extends State<Mutation> {
 
   @override
   void dispose() {
-    observableQuery.close();
+    onCompleteSubscription?.cancel();
+    observableQuery?.close();
     super.dispose();
   }
 
@@ -85,10 +98,10 @@ class MutationState extends State<Mutation> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: observableQuery.stream,
       initialData: QueryResult(
         loading: true,
       ),
+      stream: observableQuery.stream,
       builder: (
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
