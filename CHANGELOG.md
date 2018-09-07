@@ -7,7 +7,7 @@ n/a
 #### Fixes / Enhancements
 
 - Fixed a bug where the wrong key was selected from the context map. @HofmannZ
-- Fixed a scenario where the dispose method was calling close on the `observableQuery` but might not have been initialised. @HofmannZ
+- Fixed a scenario where the dispose method was calling the `close` method on the `observableQuery` class which might not have been initialised yet. @HofmannZ
 - Added the `onComplete` callback for the `Mutation` widget. @HofmannZ
 - Added the `initPayload` as an optional parameter for the `connect` method on the `SocketClient` class. @lordgreg
 
