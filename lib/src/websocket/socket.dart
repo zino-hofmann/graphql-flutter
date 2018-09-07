@@ -16,31 +16,44 @@ class GraphQLSocket {
     _socket
         .map<Map<String, dynamic>>((dynamic message) =>
             json.decode(message as String) as Map<String, dynamic>)
-        .listen((Map<String, dynamic> message) {
-      final dynamic type = message['type'] ?? 'unknown';
-      final dynamic payload = message['payload'] ?? <String, dynamic>{};
-      final String id = message['id'] ?? 'none';
+        .listen(
+      (Map<String, dynamic> message) {
+        final String type = message['type'] ?? 'unknown';
+        final dynamic payload = message['payload'] ?? <String, dynamic>{};
+        final String id = message['id'] ?? 'none';
 
-      if (type == MessageTypes.GQL_CONNECTION_ACK) {
-        _subject.add(ConnectionAck());
-      } else if (type == MessageTypes.GQL_CONNECTION_ERROR) {
-        _subject.add(ConnectionError(payload));
-      } else if (type == MessageTypes.GQL_DATA) {
-        final dynamic data = payload['data'] ?? null;
-        final dynamic errors = payload['errors'] ?? null;
-        _subject.add(SubscriptionData(id, data, errors));
-      } else if (type == MessageTypes.GQL_ERROR) {
-        _subject.add(SubscriptionError(id, payload));
-      } else if (type == MessageTypes.GQL_COMPLETE) {
-        _subject.add(SubscriptionComplete(id));
-      } else {
-        _subject.add(UnknownData(message));
-      }
-    });
+        switch (type) {
+          case MessageTypes.GQL_CONNECTION_ACK:
+            _subject.add(ConnectionAck());
+            break;
+          case MessageTypes.GQL_CONNECTION_ERROR:
+            _subject.add(ConnectionError(payload));
+            break;
+          case MessageTypes.GQL_DATA:
+            final dynamic data = payload['data'] ?? null;
+            final dynamic errors = payload['errors'] ?? null;
+            _subject.add(SubscriptionData(id, data, errors));
+            break;
+          case MessageTypes.GQL_ERROR:
+            _subject.add(SubscriptionError(id, payload));
+            break;
+          case MessageTypes.GQL_COMPLETE:
+            _subject.add(SubscriptionComplete(id));
+            break;
+          default:
+            _subject.add(UnknownData(message));
+        }
+      },
+    );
   }
 
   void write(final GraphQLSocketMessage message) {
-    _socket.add(json.encode(message, toEncodable: (dynamic m) => m.toJson()));
+    _socket.add(
+      json.encode(
+        message,
+        toEncodable: (dynamic m) => m.toJson(),
+      ),
+    );
   }
 
   Stream<ConnectionAck> get connectionAck => _subject.stream

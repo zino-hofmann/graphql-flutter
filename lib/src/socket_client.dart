@@ -27,15 +27,19 @@ class SocketClient {
     final Map<String, String> headers = const {
       'content-type': 'application/json',
     },
-    final Map<String, String> initPayload
+    final Map<String, String> initPayload,
   }) async {
     _initPayload = initPayload;
 
-    return SocketClient(GraphQLSocket(await WebSocket.connect(
-      endPoint,
-      protocols: protocols,
-      headers: headers,
-    )));
+    return SocketClient(
+      GraphQLSocket(
+        await WebSocket.connect(
+          endPoint,
+          protocols: protocols,
+          headers: headers,
+        ),
+      ),
+    );
   }
 
   Stream<SubscriptionData> subscribe(final SubscriptionRequest payload) {
