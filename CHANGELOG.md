@@ -1,3 +1,22 @@
+## [1.0.0-alpha.5] - September 7 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed a bug where the wrong key was selected from the context map. @HofmannZ
+- Fixed a scenario where the dispose method was calling close on the `observableQuery` but might not have been initialised. @HofmannZ
+- Added the `onComplete` callback for the `Mutation` widget. @HofmannZ
+- Added the `initPayload` as an optional parameter for the `connect` method on the `SocketClient` class. @lordgreg
+
+#### Docs
+
+- Added an example of optionally overriding http options trough the context. @HofmannZ
+- Updated the example with explicit type casting. @HofmannZ
+- Updated the `Mutation` example with the new `onComplete` callback. @HofmannZ
+
 ## [1.0.0-alpha.4] - September 4 2018
 
 ### Breaking changes
