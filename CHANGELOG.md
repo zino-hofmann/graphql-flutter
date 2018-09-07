@@ -14,6 +14,7 @@ n/a
 #### Docs
 
 - Added an example of optionally overriding http options trough the context. @HofmannZ
+- Added @lordgreg as a contributor. @HofmannZ
 - Updated the example with explicit type casting. @HofmannZ
 - Updated the `Mutation` example with the new `onComplete` callback. @HofmannZ
 
