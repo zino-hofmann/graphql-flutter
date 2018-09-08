@@ -201,8 +201,7 @@ FetchResult _parseResponse(Response response) {
   final FetchResult fetchResult = FetchResult();
 
   if (jsonResponse['errors'] != null) {
-    final List<Map<String, dynamic>> errors = jsonResponse['errors'];
-    fetchResult.errors = errors;
+    fetchResult.errors = jsonResponse['errors'];
   }
 
   if (jsonResponse['data'] != null) {
