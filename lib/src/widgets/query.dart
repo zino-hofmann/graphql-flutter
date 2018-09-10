@@ -47,8 +47,6 @@ class QueryState extends State<Query> {
     if (widget.pollInterval is int) {
       pollInterval = Duration(seconds: widget.pollInterval);
     }
-
-    getQueryResult();
   }
 
   @override
