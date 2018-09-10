@@ -8,8 +8,9 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-🎉🥂🍾 Time to celebrate!
-We're currently working on version 1.0.0, and it just entered the alpha stage. We'd recommend you check it out, we did break a couple things (on purpose), so be sure to check out the [upgrade guide](https://github.com/zino-app/graphql-flutter/tree/next#upgrading-from-0xx). Also feel free to help us out on the [next branch](https://github.com/zino-app/graphql-flutter/tree/next).
+## 🎉🥂🍾 Time to celebrate!
+
+**We're currently working on version 1.0.0 and we'd recommend you check it out. We did break a couple things (on purpose), so be sure to check out the [upgrade guide](https://github.com/zino-app/graphql-flutter/tree/next#upgrading-from-0xx). Also feel free to help us out on the [next branch](https://github.com/zino-app/graphql-flutter/tree/next).**
 
 ## Table of Contents
 
@@ -42,7 +43,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^0.9.3
+  graphql_flutter: ^0.9.4
 ```
 
 Now inside your Dart code you can import it.

@@ -1,3 +1,17 @@
+## [0.9.4] - September 10 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed a bug where getQueryResult was called before client could init. @HofmannZ
+
+#### Docs
+
+n/a
+
 ## [0.9.3] - September 5 2018
 
 ### Breaking changes
