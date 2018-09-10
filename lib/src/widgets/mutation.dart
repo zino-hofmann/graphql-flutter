@@ -21,7 +21,7 @@ class Mutation extends StatefulWidget {
   final MutationBuilder builder;
   final OnMutationCompleted onCompleted;
 
-  Mutation({
+  const Mutation({
     final Key key,
     @required this.options,
     @required this.builder,
@@ -69,7 +69,7 @@ class MutationState extends State<Mutation> {
     client = GraphQLProvider.of(context).value;
     assert(client != null);
 
-    WatchQueryOptions options = WatchQueryOptions(
+    final WatchQueryOptions options = WatchQueryOptions(
       document: widget.options.document,
       variables: widget.options.variables,
       fetchPolicy: widget.options.fetchPolicy,
@@ -97,7 +97,7 @@ class MutationState extends State<Mutation> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<QueryResult>(
       initialData: QueryResult(
         loading: true,
       ),

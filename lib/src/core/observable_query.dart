@@ -9,22 +9,20 @@ import 'package:graphql_flutter/src/core/query_result.dart';
 import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
 class ObservableQuery {
-  String queryId;
+  final String queryId;
+  final QueryScheduler scheduler;
+  final QueryManager queryManager;
 
   WatchQueryOptions options;
-  QueryScheduler scheduler;
-  QueryManager queryManager;
 
   StreamController<QueryResult> controller;
 
   ObservableQuery({
     @required this.queryManager,
     @required this.options,
-  }) {
-    queryId = queryManager.generateQueryId().toString();
-    scheduler = queryManager.scheduler;
-
-    controller = StreamController.broadcast(
+  })  : queryId = queryManager.generateQueryId().toString(),
+        scheduler = queryManager.scheduler {
+    controller = StreamController<QueryResult>.broadcast(
       onListen: onListen,
     );
   }
@@ -39,7 +37,7 @@ class ObservableQuery {
 
   void schedule() {
     if (options.pollInterval != null) {
-      Duration interval = Duration(
+      final Duration interval = Duration(
         seconds: options.pollInterval,
       );
 

@@ -14,8 +14,7 @@ class GraphQLSocket {
 
   GraphQLSocket(this._socket) {
     _socket
-        .map<Map<String, dynamic>>((dynamic message) =>
-            json.decode(message as String) as Map<String, dynamic>)
+        .map<Map<String, dynamic>>((dynamic message) => json.decode(message))
         .listen(
       (Map<String, dynamic> message) {
         final String type = message['type'] ?? 'unknown';
@@ -30,8 +29,8 @@ class GraphQLSocket {
             _subject.add(ConnectionError(payload));
             break;
           case MessageTypes.GQL_DATA:
-            final dynamic data = payload['data'] ?? null;
-            final dynamic errors = payload['errors'] ?? null;
+            final dynamic data = payload['data'];
+            final dynamic errors = payload['errors'];
             _subject.add(SubscriptionData(id, data, errors));
             break;
           case MessageTypes.GQL_ERROR:
@@ -57,26 +56,26 @@ class GraphQLSocket {
   }
 
   Stream<ConnectionAck> get connectionAck => _subject.stream
-      .where((message) => message is ConnectionAck)
+      .where((GraphQLSocketMessage message) => message is ConnectionAck)
       .cast<ConnectionAck>();
 
   Stream<ConnectionError> get connectionError => _subject.stream
-      .where((message) => message is ConnectionError)
+      .where((GraphQLSocketMessage message) => message is ConnectionError)
       .cast<ConnectionError>();
 
   Stream<UnknownData> get unknownData => _subject.stream
-      .where((message) => message is UnknownData)
+      .where((GraphQLSocketMessage message) => message is UnknownData)
       .cast<UnknownData>();
 
   Stream<SubscriptionData> get subscriptionData => _subject.stream
-      .where((message) => message is SubscriptionData)
+      .where((GraphQLSocketMessage message) => message is SubscriptionData)
       .cast<SubscriptionData>();
 
   Stream<SubscriptionError> get subscriptionError => _subject.stream
-      .where((message) => message is SubscriptionError)
+      .where((GraphQLSocketMessage message) => message is SubscriptionError)
       .cast<SubscriptionError>();
 
   Stream<SubscriptionComplete> get subscriptionComplete => _subject.stream
-      .where((message) => message is SubscriptionComplete)
+      .where((GraphQLSocketMessage message) => message is SubscriptionComplete)
       .cast<SubscriptionComplete>();
 }

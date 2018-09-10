@@ -8,14 +8,15 @@ class QueryScheduler {
   QueryManager queryManager;
 
   /// Map going from query ids to the [WatchQueryOptions] associated with those queries.
-  Map<String, WatchQueryOptions> registeredQueries = Map();
+  Map<String, WatchQueryOptions> registeredQueries =
+      <String, WatchQueryOptions>{};
 
   /// Map going from poling interval to the query ids that fire on that interval.
   /// These query ids are associated with a [ObservableQuery] in the registeredQueries.
-  Map<Duration, List<String>> intervalQueries = Map();
+  Map<Duration, List<String>> intervalQueries = <Duration, List<String>>{};
 
   /// Map going from polling interval durations to polling timers.
-  Map<Duration, Timer> _pollingTimers = Map();
+  final Map<Duration, Timer> _pollingTimers = <Duration, Timer>{};
 
   QueryScheduler({
     this.queryManager,
@@ -27,7 +28,7 @@ class QueryScheduler {
   ) {
     intervalQueries[interval].retainWhere(
       (String queryId) {
-        Duration pollInterval =
+        final Duration pollInterval =
             Duration(seconds: registeredQueries[queryId].pollInterval);
 
         // If ObservableQuery can't be found from registeredQueries or if it has a
@@ -44,7 +45,7 @@ class QueryScheduler {
     );
 
     // if no queries on the interval clean up
-    if (intervalQueries[interval].length == 0) {
+    if (intervalQueries[interval].isEmpty) {
       intervalQueries.remove(interval);
       _pollingTimers.remove(interval);
       timer.cancel();
@@ -52,10 +53,10 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    intervalQueries[interval].forEach((String queryId) {
-      WatchQueryOptions options = registeredQueries[queryId];
+    for (String queryId in intervalQueries[interval]) {
+      final WatchQueryOptions options = registeredQueries[queryId];
       queryManager.fetchQuery(queryId, options);
-    });
+    }
   }
 
   void sheduleQuery(
@@ -67,14 +68,14 @@ class QueryScheduler {
 
     if (interval == null) {
       Timer.run(() {
-        WatchQueryOptions options = registeredQueries[queryId];
+        final WatchQueryOptions options = registeredQueries[queryId];
         queryManager.fetchQuery(queryId, options);
       });
     } else {
       if (intervalQueries.containsKey(interval)) {
         intervalQueries[interval].add(queryId);
       } else {
-        intervalQueries[interval] = [queryId];
+        intervalQueries[interval] = <String>[queryId];
 
         _pollingTimers[interval] = Timer.periodic(
           interval,

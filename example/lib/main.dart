@@ -10,14 +10,14 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    HttpLink link = HttpLink(
+    final HttpLink link = HttpLink(
       uri: 'https://api.github.com/graphql',
       headers: <String, String>{
         'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
       },
     );
 
-    ValueNotifier<GraphQLClient> client = ValueNotifier(
+    final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: InMemoryCache(),
         link: link,
@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),
-          home: MyHomePage(title: 'GraphQL Flutter Home Page'),
+          home: const MyHomePage(title: 'GraphQL Flutter Home Page'),
         ),
       ),
     );
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({
+  const MyHomePage({
     Key key,
     this.title,
   }) : super(key: key);
@@ -75,15 +75,16 @@ class _MyHomePageState extends State<MyHomePage> {
           }
 
           if (result.loading) {
-            return Text('Loading');
+            return const Text('Loading');
           }
 
           // result.data can be either a Map or a List
-          List repositories = result.data['viewer']['repositories']['nodes'];
+          final List<dynamic> repositories =
+              result.data['viewer']['repositories']['nodes'];
 
           return ListView.builder(
             itemCount: repositories.length,
-            itemBuilder: (context, index) {
+            itemBuilder: (BuildContext context, int index) {
               final Map<String, dynamic> repository = repositories[index];
 
               return Mutation(
@@ -95,16 +96,16 @@ class _MyHomePageState extends State<MyHomePage> {
                   QueryResult addStarResult,
                 ) {
                   if (addStarResult.data != null &&
-                      (addStarResult.data as Map).isNotEmpty) {
+                      addStarResult.data.isNotEmpty) {
                     repository['viewerHasStarred'] = addStarResult
                         .data['addStar']['starrable']['viewerHasStarred'];
                   }
 
                   return ListTile(
-                    leading: (repository['viewerHasStarred'] as bool)
+                    leading: repository['viewerHasStarred']
                         ? const Icon(Icons.star, color: Colors.amber)
                         : const Icon(Icons.star_border),
-                    title: Text(repository['name'] as String),
+                    title: Text(repository['name']),
                     // optimistic ui updates are not implemented yet, therefore changes may take some time to show
                     onTap: () {
                       addStar(<String, dynamic>{
@@ -118,10 +119,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text('Thanks for your star!'),
+                        title: const Text('Thanks for your star!'),
                         actions: <Widget>[
                           SimpleDialogOption(
-                            child: Text('Dismiss'),
+                            child: const Text('Dismiss'),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },

@@ -1,8 +1,8 @@
 import 'package:graphql_parser/graphql_parser.dart';
 
 String getOperationName(String rawDoc) {
-  List<Token> tokens = scan(rawDoc);
-  Parser parser = Parser(tokens);
+  final List<Token> tokens = scan(rawDoc);
+  final Parser parser = Parser(tokens);
 
   if (parser.errors.isNotEmpty) {
     // Handle errors...
@@ -10,10 +10,10 @@ String getOperationName(String rawDoc) {
   }
 
   // Parse the GraphQL document using recursive descent
-  DocumentContext doc = parser.parseDocument();
+  final DocumentContext doc = parser.parseDocument();
 
   if (doc.definitions != null) {
-    OperationDefinitionContext definition = doc.definitions[0];
+    final OperationDefinitionContext definition = doc.definitions[0];
 
     if (definition != null) {
       if (definition.name != null) {

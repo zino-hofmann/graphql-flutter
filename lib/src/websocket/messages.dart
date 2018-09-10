@@ -9,24 +9,24 @@ class MessageTypes {
   MessageTypes._();
 
   // client connections
-  static const GQL_CONNECTION_INIT = 'connection_init';
-  static const GQL_CONNECTION_TERMINATE = 'connection_terminate';
+  static const String GQL_CONNECTION_INIT = 'connection_init';
+  static const String GQL_CONNECTION_TERMINATE = 'connection_terminate';
 
   // server connections
-  static const GQL_CONNECTION_ACK = 'connection_ack';
-  static const GQL_CONNECTION_ERROR = 'connection_error';
+  static const String GQL_CONNECTION_ACK = 'connection_ack';
+  static const String GQL_CONNECTION_ERROR = 'connection_error';
 
   // client operations
-  static const GQL_START = 'start';
-  static const GQL_STOP = 'stop';
+  static const String GQL_START = 'start';
+  static const String GQL_STOP = 'stop';
 
   // server operations
-  static const GQL_DATA = 'data';
-  static const GQL_ERROR = 'error';
-  static const GQL_COMPLETE = 'complete';
+  static const String GQL_DATA = 'data';
+  static const String GQL_ERROR = 'error';
+  static const String GQL_COMPLETE = 'complete';
 
   // default tag for use in identifying issues
-  static const GQL_UNKNOWN = 'unknown';
+  static const String GQL_UNKNOWN = 'unknown';
 }
 
 abstract class JsonSerializable {
@@ -53,11 +53,11 @@ class InitOperation extends GraphQLSocketMessage {
 
   @override
   dynamic toJson() {
-    final Map<String, dynamic> jsonMap = Map<String, dynamic>();
+    final Map<String, dynamic> jsonMap = <String, dynamic>{};
     jsonMap['type'] = type;
 
-    if (this.payload != null) {
-      jsonMap['payload'] = json.encode(this.payload);
+    if (payload != null) {
+      jsonMap['payload'] = json.encode(payload);
     }
 
     return json.encode(jsonMap);

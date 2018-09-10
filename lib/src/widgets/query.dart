@@ -13,7 +13,7 @@ class Query extends StatefulWidget {
   final QueryOptions options;
   final QueryBuilder builder;
 
-  Query({
+  const Query({
     final Key key,
     @required this.options,
     @required this.builder,
@@ -44,7 +44,7 @@ class QueryState extends State<Query> {
     client = GraphQLProvider.of(context).value;
     assert(client != null);
 
-    WatchQueryOptions options = WatchQueryOptions(
+    final WatchQueryOptions options = WatchQueryOptions(
       document: widget.options.document,
       variables: widget.options.variables,
       fetchPolicy: widget.options.fetchPolicy,
@@ -73,7 +73,7 @@ class QueryState extends State<Query> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
+    return StreamBuilder<QueryResult>(
       initialData: QueryResult(
         loading: true,
       ),

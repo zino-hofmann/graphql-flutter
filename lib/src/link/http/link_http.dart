@@ -23,9 +23,9 @@ class HttpLink extends Link {
             Operation operation, [
             NextLink forward,
           ]) {
-            Client fetcher = fetch ?? Client();
+            final Client fetcher = fetch ?? Client();
 
-            HttpConfig linkConfig = HttpConfig(
+            final HttpConfig linkConfig = HttpConfig(
               http: HttpQueryOptions(
                 includeExtensions: includeExtensions,
               ),
@@ -34,29 +34,31 @@ class HttpLink extends Link {
               headers: headers,
             );
 
+            final Map<String, dynamic> context = operation.getContext();
             HttpConfig contextConfig;
-            Map<String, dynamic> context = operation.getContext();
 
             if (context != null) {
+              // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
               contextConfig = HttpConfig(
                 http: HttpQueryOptions(
-                  includeExtensions: context['includeExtensions'] as bool,
+                  includeExtensions: context['includeExtensions'],
                 ),
-                options: context['fetchOptions'] as Map<String, dynamic>,
-                credentials: context['credentials'] as Map<String, dynamic>,
-                headers: context['headers'] as Map<String, String>,
+                options: context['fetchOptions'],
+                credentials: context['credentials'],
+                headers: context['headers'],
               );
             }
 
-            Map<String, dynamic> httpOptionsAndBody = _selectHttpOptionsAndBody(
+            final HttpOptionsAndBody httpOptionsAndBody =
+                _selectHttpOptionsAndBody(
               operation,
               fallbackHttpConfig,
               linkConfig,
               contextConfig,
             );
 
-            Map<String, dynamic> options = httpOptionsAndBody['options'];
-            String body = httpOptionsAndBody['body'];
+            final Map<String, dynamic> options = httpOptionsAndBody.options;
+            final Map<String, String> httpHeaders = options['headers'];
 
             StreamController<FetchResult> controller;
 
@@ -67,8 +69,8 @@ class HttpLink extends Link {
                 // TODO: support multiple http methods
                 response = await fetcher.post(
                   uri,
-                  headers: options['headers'] as Map<String, String>,
-                  body: body,
+                  headers: httpHeaders,
+                  body: httpOptionsAndBody.body,
                 );
 
                 operation.setContext(<String, Response>{
@@ -82,27 +84,27 @@ class HttpLink extends Link {
                 controller.addError(error);
               }
 
-              controller.close();
+              await controller.close();
             }
 
-            controller = StreamController(onListen: onListen);
+            controller = StreamController<FetchResult>(onListen: onListen);
 
             return controller.stream;
           },
         );
 }
 
-Map<String, dynamic> _selectHttpOptionsAndBody(
+HttpOptionsAndBody _selectHttpOptionsAndBody(
   Operation operation,
   HttpConfig fallbackConfig, [
   HttpConfig linkConfig,
   HttpConfig contextConfig,
 ]) {
-  Map<String, dynamic> options = <String, dynamic>{
+  final Map<String, dynamic> options = <String, dynamic>{
     'headers': <String, String>{},
     'credentials': <String, dynamic>{},
   };
-  HttpQueryOptions http = HttpQueryOptions();
+  final HttpQueryOptions http = HttpQueryOptions();
 
   // http options
 
@@ -164,13 +166,13 @@ Map<String, dynamic> _selectHttpOptionsAndBody(
     options['credentials'].addAll(contextConfig.credentials);
   }
 
-  /// the body depends on the http options
-  Map<String, dynamic> body = <String, dynamic>{
+  // the body depends on the http options
+  final Map<String, dynamic> body = <String, dynamic>{
     'operationName': operation.operationName,
     'variables': operation.variables,
   };
 
-  /// not sending the query (i.e persisted queries)
+  // not sending the query (i.e persisted queries)
   if (http.includeExtensions) {
     body['extensions'] = operation.extensions;
   }
@@ -179,10 +181,10 @@ Map<String, dynamic> _selectHttpOptionsAndBody(
     body['query'] = operation.document;
   }
 
-  return <String, dynamic>{
-    'options': options,
-    'body': json.encode(body),
-  };
+  return HttpOptionsAndBody(
+    options: options,
+    body: json.encode(body),
+  );
 }
 
 FetchResult _parseResponse(Response response) {
@@ -196,10 +198,10 @@ FetchResult _parseResponse(Response response) {
   }
 
   final Map<String, dynamic> jsonResponse = json.decode(response.body);
-  FetchResult fetchResult = FetchResult();
+  final FetchResult fetchResult = FetchResult();
 
   if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'] as List<Map<String, dynamic>>;
+    fetchResult.errors = jsonResponse['errors'];
   }
 
   if (jsonResponse['data'] != null) {

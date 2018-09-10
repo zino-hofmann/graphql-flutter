@@ -1,4 +1,4 @@
-String readRepositories = """
+final String readRepositories = '''
   query ReadRepositories {
     viewer {
       repositories(last: 50) {
@@ -10,5 +10,5 @@ String readRepositories = """
       }
     }
   }
-"""
+'''
     .replaceAll('\n', ' ');

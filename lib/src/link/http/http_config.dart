@@ -31,3 +31,10 @@ class HttpConfig {
     this.headers,
   });
 }
+
+class HttpOptionsAndBody {
+  final Map<String, dynamic> options;
+  final String body;
+
+  HttpOptionsAndBody({this.options, this.body});
+}
