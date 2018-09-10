@@ -1,3 +1,17 @@
+## [1.0.0-alpha.6] - September 10 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Updated lint options in preparation for upcoming CI checks. @HofmannZ
+
+#### Docs
+
+n/a
+
 ## [1.0.0-alpha.5] - September 7 2018
 
 ### Breaking changes
