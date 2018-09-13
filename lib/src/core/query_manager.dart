@@ -64,6 +64,8 @@ class QueryManager {
     BaseOptions options,
   ) async {
     final ObservableQuery observableQuery = getQuery(queryId);
+    // XXX there is a bug in the `graphql_parser` package, where this result might be
+    // null event though the operation name is present in the document
     final String operationName = getOperationName(options.document);
     // create a new operation to fetch
     final Operation operation = Operation(
@@ -134,8 +136,8 @@ class QueryManager {
 
     queryResult = _mapFetchResultToQueryResult(fetchResult);
 
-    // add the result to an observable query if it exists
-    if (observableQuery != null) {
+    // add the result to an observable query if it exists and not closed
+    if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.controller.add(queryResult);
     }
 
