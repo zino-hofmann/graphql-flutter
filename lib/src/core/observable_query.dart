@@ -14,6 +14,7 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   WatchQueryOptions options;
+  bool isCurrentlyPolling = false;
 
   StreamController<QueryResult> controller;
 
@@ -31,26 +32,41 @@ class ObservableQuery {
 
   void onListen() {
     if (options.fetchResults) {
-      schedule();
+      fetchResults();
     }
   }
 
-  void schedule() {
-    if (options.pollInterval != null) {
-      final Duration interval = Duration(
-        seconds: options.pollInterval,
-      );
+  void fetchResults() {
+    queryManager.fetchQuery(queryId, options);
 
-      queryManager.scheduler.sheduleQuery(
-        queryId,
-        options,
-        interval,
+    if (options.pollInterval != null) {
+      startPolling(options.pollInterval);
+    }
+  }
+
+  void startPolling(int pollInterval) {
+    if (options.fetchPolicy == FetchPolicy.cacheFirst ||
+        options.fetchPolicy == FetchPolicy.cacheOnly) {
+      throw Exception(
+        'Queries that specify the cacheFirst and cacheOnly fetch policies cannot also be polling queries.',
       );
-    } else {
-      queryManager.scheduler.sheduleQuery(
-        queryId,
-        options,
-      );
+    }
+
+    if (isCurrentlyPolling) {
+      scheduler.stopPollingQuery(queryId);
+      isCurrentlyPolling = false;
+    }
+
+    options.pollInterval = pollInterval;
+    isCurrentlyPolling = true;
+    scheduler.startPollingQuery(options, queryId);
+  }
+
+  void stopPolling() {
+    if (isCurrentlyPolling) {
+      scheduler.stopPollingQuery(queryId);
+      options.pollInterval = null;
+      isCurrentlyPolling = false;
     }
   }
 
@@ -58,7 +74,8 @@ class ObservableQuery {
     options.variables = variables;
   }
 
-  void close() {
-    controller.close();
+  Future<void> close() async {
+    stopPolling();
+    await controller.close();
   }
 }
