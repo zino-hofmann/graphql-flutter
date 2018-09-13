@@ -48,7 +48,7 @@ class MutationState extends State<Mutation> {
       });
     }
 
-    observableQuery.schedule();
+    observableQuery.fetchResults();
   }
 
   @override
