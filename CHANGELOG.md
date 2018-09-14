@@ -1,3 +1,26 @@
+## [1.0.0-alpha.7] - September 14 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed a bug where getting the operation name was always returning null. @HofmannZ
+- Override the fetch policy if the default query option is used. @HofmannZ
+- Split up fetching and polling in the observable query. @HofmannZ
+- Check if the stream is closed, before adding a new event to it. @HofmannZ
+- Check if the variables have actually changed form or to null. @HofmannZ
+- Added a new getter to check if a query result has errors. @HofmannZ
+- Refactored the scheduler to only handle polling queries. @HofmannZ
+- Updated the mutation widget to use the new api in observable query. @HofmannZ
+- Resolve type cast exception when handling GraphQL errors. @kolja-esders @HofmannZ
+- Propagate GraphQL errors to caller instead of throwing network exception. @kolja-esders
+
+#### Docs
+
+n/a
+
 ## [1.0.0-alpha.6] - September 10 2018
 
 ### Breaking changes
