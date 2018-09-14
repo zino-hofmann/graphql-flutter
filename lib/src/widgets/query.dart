@@ -39,15 +39,22 @@ class QueryState extends State<Query> {
   }
 
   @override
-  void didChangeDependencies() {
+  void didChangeDependencies() async {
     /// Gets the client from the closest wrapping [GraphQLProvider].
     client = GraphQLProvider.of(context).value;
     assert(client != null);
 
+    // override the default [QueryOptions] fetchPolicy.
+    FetchPolicy fetchPolicy = widget.options.fetchPolicy;
+
+    if (fetchPolicy == FetchPolicy.cacheFirst) {
+      fetchPolicy = FetchPolicy.cacheAndNetwork;
+    }
+
     final WatchQueryOptions options = WatchQueryOptions(
       document: widget.options.document,
       variables: widget.options.variables,
-      fetchPolicy: widget.options.fetchPolicy,
+      fetchPolicy: fetchPolicy,
       errorPolicy: widget.options.errorPolicy,
       pollInterval: widget.options.pollInterval,
       fetchResults: true,
@@ -61,7 +68,7 @@ class QueryState extends State<Query> {
         shouldCreateNewObservable = false;
       }
 
-      observableQuery.close();
+      await observableQuery.close();
     }
 
     if (shouldCreateNewObservable) {
@@ -82,7 +89,7 @@ class QueryState extends State<Query> {
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
-        return widget.builder(snapshot.data);
+        return widget?.builder(snapshot.data);
       },
     );
   }

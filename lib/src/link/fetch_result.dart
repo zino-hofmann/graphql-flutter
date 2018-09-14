@@ -1,6 +1,8 @@
 class FetchResult {
-  List<Map<String, dynamic>> errors;
-  dynamic data; // List<Map<String, dynamic>> or Map<String, dynamic>
+  List<dynamic> errors;
+
+  /// List<dynamic> or Map<String, dynamic>
+  dynamic data;
   Map<String, dynamic> extensions;
   Map<String, dynamic> context;
 

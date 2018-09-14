@@ -23,14 +23,11 @@ class QueryScheduler {
   });
 
   void fetchQueriesOnInterval(
-    Duration interval,
     Timer timer,
+    Duration interval,
   ) {
     intervalQueries[interval].retainWhere(
       (String queryId) {
-        final Duration pollInterval =
-            Duration(seconds: registeredQueries[queryId].pollInterval);
-
         // If ObservableQuery can't be found from registeredQueries or if it has a
         // different interval, it means that this queryId is no longer registered
         // and should be removed from the list of queries firing on this interval.
@@ -39,6 +36,13 @@ class QueryScheduler {
         // stopPollingQuery so that we can keep the timer consistent when queries
         // are removed and replaced, and to avoid quadratic behavior when stopping
         // many queries.
+        if (registeredQueries[queryId] == null) {
+          return false;
+        }
+
+        final Duration pollInterval =
+            Duration(seconds: registeredQueries[queryId].pollInterval);
+
         return registeredQueries.containsKey(queryId) &&
             pollInterval == interval;
       },
@@ -59,35 +63,31 @@ class QueryScheduler {
     }
   }
 
-  void sheduleQuery(
+  void startPollingQuery(
+    WatchQueryOptions options,
     String queryId,
-    WatchQueryOptions options, [
-    Duration interval,
-  ]) {
+  ) {
     registeredQueries[queryId] = options;
 
-    if (interval == null) {
-      Timer.run(() {
-        final WatchQueryOptions options = registeredQueries[queryId];
-        queryManager.fetchQuery(queryId, options);
-      });
-    } else {
-      if (intervalQueries.containsKey(interval)) {
-        intervalQueries[interval].add(queryId);
-      } else {
-        intervalQueries[interval] = <String>[queryId];
+    final Duration interval = Duration(
+      seconds: options.pollInterval,
+    );
 
-        _pollingTimers[interval] = Timer.periodic(
-          interval,
-          (Timer timer) => fetchQueriesOnInterval(interval, timer),
-        );
-      }
+    if (intervalQueries.containsKey(interval)) {
+      intervalQueries[interval].add(queryId);
+    } else {
+      intervalQueries[interval] = <String>[queryId];
+
+      _pollingTimers[interval] = Timer.periodic(
+        interval,
+        (Timer timer) => fetchQueriesOnInterval(timer, interval),
+      );
     }
   }
 
+  /// Removes the [ObservableQuery] from one of the registered queries.
+  /// The fetchQueriesOnInterval will then take care of not firing it anymore.
   void stopPollingQuery(String queryId) {
-    // remove the [ObservableQuery] from one of the registered queries.
-    // The fetchQueriesOnInterval will then take care of not firing it anymore.
     registeredQueries.remove(queryId);
   }
 }
