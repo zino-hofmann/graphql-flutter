@@ -150,6 +150,18 @@ class WatchQueryOptions extends QueryOptions {
     Map<String, dynamic> a,
     Map<String, dynamic> b,
   ) {
+    if (a == null && b == null) {
+      return false;
+    }
+
+    if (a == null && b != null) {
+      return true;
+    }
+
+    if (a != null && b == null) {
+      return true;
+    }
+
     if (a.length != b.length) {
       return true;
     }
@@ -157,7 +169,7 @@ class WatchQueryOptions extends QueryOptions {
     bool areDifferent = false;
 
     a.forEach((String key, dynamic value) {
-      if ((!b.containsKey(key)) || b[key] != a[key]) {
+      if ((!b.containsKey(key)) || b[key] != value) {
         areDifferent = true;
       }
     });

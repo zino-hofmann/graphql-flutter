@@ -12,14 +12,12 @@ String getOperationName(String rawDoc) {
   // Parse the GraphQL document using recursive descent
   final DocumentContext doc = parser.parseDocument();
 
-  if (doc.definitions != null) {
+  if (doc.definitions != null && doc.definitions.isNotEmpty) {
     final OperationDefinitionContext definition = doc.definitions[0];
 
     if (definition != null) {
       if (definition.name != null) {
-        return definition.name.runtimeType == OperationDefinitionContext
-            ? definition.name
-            : null;
+        return definition.name;
       }
     }
   }

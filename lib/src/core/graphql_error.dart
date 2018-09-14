@@ -30,7 +30,7 @@ class GraphQLError {
   final Map<String, dynamic> extensions;
 
   /// Constructs a [GraphQLError] from a JSON map.
-  GraphQLError.fromJSON(Map<String, dynamic> data)
+  GraphQLError.fromJSON(dynamic data)
       : message = data['message'],
         locations = data['locations'] is List<Map<String, int>>
             ? List<Location>.from(

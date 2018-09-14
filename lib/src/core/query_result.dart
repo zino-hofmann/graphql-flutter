@@ -1,7 +1,8 @@
 import 'package:graphql_flutter/src/core/graphql_error.dart';
 
 class QueryResult {
-  dynamic data; // List<Map<String, dynamic>> or Map<String, dynamic>
+  /// List<dynamic> or Map<String, dynamic>
+  dynamic data;
   List<GraphQLError> errors;
   bool loading;
   bool stale;
@@ -12,4 +13,12 @@ class QueryResult {
     this.loading,
     this.stale,
   });
+
+  bool get hasErrors {
+    if (errors == null) {
+      return false;
+    }
+
+    return errors.isEmpty;
+  }
 }
