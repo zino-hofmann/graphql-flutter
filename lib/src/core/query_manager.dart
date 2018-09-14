@@ -169,7 +169,7 @@ class QueryManager {
 
     if (fetchResult.errors != null) {
       errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
-        (Map<String, dynamic> rawError) => GraphQLError.fromJSON(rawError),
+        (dynamic rawError) => GraphQLError.fromJSON(rawError),
       ));
     }
 
