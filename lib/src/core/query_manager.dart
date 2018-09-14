@@ -126,7 +126,8 @@ class QueryManager {
       );
     }
 
-    if (fetchResult.data == null && fetchResult.errors == null &&
+    if (fetchResult.data == null &&
+        fetchResult.errors == null &&
         (options.fetchPolicy == FetchPolicy.noCache ||
             options.fetchPolicy == FetchPolicy.networkOnly)) {
       throw Exception(
