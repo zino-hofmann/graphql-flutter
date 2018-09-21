@@ -16,6 +16,8 @@ typedef MutationBuilder = Widget Function(
 );
 typedef void OnMutationCompleted(QueryResult result);
 
+/// Builds a [Mutation] widget based on the a given set of [MutationOptions]
+/// that streams [QueryResult]s into the [QueryBuilder].
 class Mutation extends StatefulWidget {
   final MutationOptions options;
   final MutationBuilder builder;

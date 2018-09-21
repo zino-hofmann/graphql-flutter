@@ -9,12 +9,12 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef QueryBuilder = Widget Function(QueryResult result);
 
+/// Builds a [Query] widget based on the a given set of [QueryOptions]
+/// that streams [QueryResult]s into the [QueryBuilder].
 class Query extends StatefulWidget {
   final QueryOptions options;
   final QueryBuilder builder;
 
-  /// Builds a [Query] widget based on the a given set of [QueryOptions]
-  /// that streams [QueryResult]s into the [QueryBuilder].
   const Query({
     final Key key,
     @required this.options,
