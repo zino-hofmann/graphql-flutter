@@ -76,6 +76,7 @@ class QueryManager {
 
     FetchResult fetchResult;
     QueryResult queryResult;
+    Exception exception;
 
     if (options.context != null) {
       operation.setContext(options.context);
@@ -112,37 +113,46 @@ class QueryManager {
     }
 
     // execute the operation trough the provided link(s)
-    fetchResult = await execute(
-      link: link,
-      operation: operation,
-    ).first;
+    try {
+      fetchResult = await execute(
+        link: link,
+        operation: operation,
+      ).first;
 
-    // save the data from fetchResult to the cache
-    if (fetchResult.data != null &&
-        options.fetchPolicy != FetchPolicy.noCache) {
-      cache.write(
-        operation.toKey(),
-        fetchResult.data,
-      );
+      // save the data from fetchResult to the cache
+      if (fetchResult.data != null &&
+          options.fetchPolicy != FetchPolicy.noCache) {
+        cache.write(
+          operation.toKey(),
+          fetchResult.data,
+        );
+      }
+
+      if (fetchResult.data == null &&
+          fetchResult.errors == null &&
+          (options.fetchPolicy == FetchPolicy.noCache ||
+              options.fetchPolicy == FetchPolicy.networkOnly)) {
+        throw Exception(
+          'Could not resolve that operation on the network. (${options.fetchPolicy.toString()})',
+        );
+      }
+
+      queryResult = _mapFetchResultToQueryResult(fetchResult);
+
+      // add the result to an observable query if it exists and not closed
+      if (observableQuery != null && !observableQuery.controller.isClosed) {
+        observableQuery.controller.add(queryResult);
+      }
+
+      return queryResult;
+    } catch (error) {
+      // add the error to an observable query if it exists and not closed
+      if (observableQuery != null && !observableQuery.controller.isClosed) {
+        observableQuery.controller.addError(error);
+      }
+
+      rethrow;
     }
-
-    if (fetchResult.data == null &&
-        fetchResult.errors == null &&
-        (options.fetchPolicy == FetchPolicy.noCache ||
-            options.fetchPolicy == FetchPolicy.networkOnly)) {
-      throw Exception(
-        'Could not resolve that operation on the network. (${options.fetchPolicy.toString()})',
-      );
-    }
-
-    queryResult = _mapFetchResultToQueryResult(fetchResult);
-
-    // add the result to an observable query if it exists and not closed
-    if (observableQuery != null && !observableQuery.controller.isClosed) {
-      observableQuery.controller.add(queryResult);
-    }
-
-    return queryResult;
   }
 
   ObservableQuery getQuery(String queryId) {
