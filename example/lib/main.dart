@@ -63,6 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
           document: queries.readRepositories,
           pollInterval: 4,
           // you can optionally override some http options through the contexts
+          //
           context: <String, dynamic>{
             'headers': <String, String>{
               'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
@@ -70,15 +71,15 @@ class _MyHomePageState extends State<MyHomePage> {
           },
         ),
         builder: (QueryResult result) {
-          if (result.errors != null) {
+          if (result.loading) {
+            return const CircularProgressIndicator();
+          }
+
+          if (result.hasErrors) {
             return Text(result.errors.toString());
           }
 
-          if (result.loading) {
-            return const Text('Loading');
-          }
-
-          // result.data can be either a Map or a List
+          // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
           final List<dynamic> repositories =
               result.data['viewer']['repositories']['nodes'];
 
@@ -103,11 +104,14 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   return ListTile(
                     leading: repository['viewerHasStarred']
-                        ? const Icon(Icons.star, color: Colors.amber)
+                        ? const Icon(
+                            Icons.star,
+                            color: Colors.amber,
+                          )
                         : const Icon(Icons.star_border),
                     title: Text(repository['name']),
-                    // optimistic ui updates are not implemented yet, therefore changes may take some time to show
                     onTap: () {
+                      // optimistic ui updates are not implemented yet, therefore changes may take some time to show
                       addStar(<String, dynamic>{
                         'starrableId': repository['id'],
                       });
