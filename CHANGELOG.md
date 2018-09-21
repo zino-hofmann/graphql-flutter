@@ -1,3 +1,21 @@
+## [1.0.0-alpha.8] - September 21 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Removed an unused class. @HofmannZ
+- Formatted the query manger. @HofmannZ
+- Handle charset encoding in responses @kolja-esders
+
+#### Docs
+
+- Added some inline docs to Query widget. @HofmannZ
+- Improved the inline docs of the client. @HofmannZ
+- Update the example. @HofmannZ
+
 ## [1.0.0-alpha.7] - September 14 2018
 
 ### Breaking changes

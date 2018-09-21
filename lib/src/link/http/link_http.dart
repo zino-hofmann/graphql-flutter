@@ -200,6 +200,7 @@ FetchResult _parseResponse(Response response) {
 
   final Encoding encoding = _determineEncodingFromResponse(response);
   final dynamic decodedBody = encoding.decode(response.bodyBytes);
+
   final Map<String, dynamic> jsonResponse = json.decode(decodedBody);
   final FetchResult fetchResult = FetchResult();
 
@@ -219,18 +220,22 @@ FetchResult _parseResponse(Response response) {
 /// The default fallback encoding is set to UTF-8 according to the IETF RFC4627 standard
 /// which specifies the application/json media type:
 ///   "JSON text SHALL be encoded in Unicode. The default encoding is UTF-8."
-Encoding _determineEncodingFromResponse(Response response, [Encoding fallback = utf8]) {
+Encoding _determineEncodingFromResponse(Response response,
+    [Encoding fallback = utf8]) {
   final String contentType = response.headers['content-type'];
+
   if (contentType == null) {
     return fallback;
   }
 
   final MediaType mediaType = new MediaType.parse(contentType);
   final String charset = mediaType.parameters['charset'];
+
   if (charset == null) {
     return fallback;
   }
 
   final Encoding encoding = Encoding.getByName(charset);
+
   return encoding == null ? fallback : encoding;
 }
