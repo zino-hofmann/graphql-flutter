@@ -76,7 +76,6 @@ class QueryManager {
 
     FetchResult fetchResult;
     QueryResult queryResult;
-    Exception exception;
 
     if (options.context != null) {
       operation.setContext(options.context);
