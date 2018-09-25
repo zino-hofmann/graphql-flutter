@@ -77,42 +77,42 @@ class QueryManager {
     FetchResult fetchResult;
     QueryResult queryResult;
 
-    if (options.context != null) {
-      operation.setContext(options.context);
-    }
-
-    if (options.fetchPolicy == FetchPolicy.cacheFirst ||
-        options.fetchPolicy == FetchPolicy.cacheAndNetwork ||
-        options.fetchPolicy == FetchPolicy.cacheOnly) {
-      final dynamic cachedData = cache.read(operation.toKey());
-
-      if (cachedData != null) {
-        fetchResult = FetchResult(
-          data: cachedData,
-        );
-
-        queryResult = _mapFetchResultToQueryResult(fetchResult);
-
-        // add the result to an observable query if it exists
-        if (observableQuery != null) {
-          observableQuery.controller.add(queryResult);
-        }
-
-        if (options.fetchPolicy == FetchPolicy.cacheFirst ||
-            options.fetchPolicy == FetchPolicy.cacheOnly) {
-          return queryResult;
-        }
-      }
-
-      if (options.fetchPolicy == FetchPolicy.cacheOnly) {
-        throw Exception(
-          'Could not find that operation in the cache. (${options.fetchPolicy.toString()})',
-        );
-      }
-    }
-
-    // execute the operation trough the provided link(s)
     try {
+      if (options.context != null) {
+        operation.setContext(options.context);
+      }
+
+      if (options.fetchPolicy == FetchPolicy.cacheFirst ||
+          options.fetchPolicy == FetchPolicy.cacheAndNetwork ||
+          options.fetchPolicy == FetchPolicy.cacheOnly) {
+        final dynamic cachedData = cache.read(operation.toKey());
+
+        if (cachedData != null) {
+          fetchResult = FetchResult(
+            data: cachedData,
+          );
+
+          queryResult = _mapFetchResultToQueryResult(fetchResult);
+
+          // add the result to an observable query if it exists
+          if (observableQuery != null) {
+            observableQuery.controller.add(queryResult);
+          }
+
+          if (options.fetchPolicy == FetchPolicy.cacheFirst ||
+              options.fetchPolicy == FetchPolicy.cacheOnly) {
+            return queryResult;
+          }
+        }
+
+        if (options.fetchPolicy == FetchPolicy.cacheOnly) {
+          throw Exception(
+            'Could not find that operation in the cache. (${options.fetchPolicy.toString()})',
+          );
+        }
+      }
+
+      // execute the operation trough the provided link(s)
       fetchResult = await execute(
         link: link,
         operation: operation,
@@ -137,21 +137,27 @@ class QueryManager {
       }
 
       queryResult = _mapFetchResultToQueryResult(fetchResult);
-
-      // add the result to an observable query if it exists and not closed
-      if (observableQuery != null && !observableQuery.controller.isClosed) {
-        observableQuery.controller.add(queryResult);
-      }
-
-      return queryResult;
     } catch (error) {
-      // add the error to an observable query if it exists and not closed
-      if (observableQuery != null && !observableQuery.controller.isClosed) {
-        observableQuery.controller.addError(error);
-      }
+      final GraphQLError graphQLError = GraphQLError(
+        message: error.message,
+      );
 
-      rethrow;
+      if (queryResult != null) {
+        queryResult.addError(graphQLError);
+      } else {
+        queryResult = QueryResult(
+          loading: false,
+        );
+        queryResult.addError(graphQLError);
+      }
     }
+
+    // add the result to an observable query if it exists and not closed
+    if (observableQuery != null && !observableQuery.controller.isClosed) {
+      observableQuery.controller.add(queryResult);
+    }
+
+    return queryResult;
   }
 
   ObservableQuery getQuery(String queryId) {

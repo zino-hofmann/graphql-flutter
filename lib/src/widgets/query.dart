@@ -42,6 +42,8 @@ class QueryState extends State<Query> {
 
   @override
   void didChangeDependencies() async {
+    print('didChangeDependencies');
+
     /// Gets the client from the closest wrapping [GraphQLProvider].
     client = GraphQLProvider.of(context).value;
     assert(client != null);
