@@ -1,3 +1,17 @@
+## [1.0.0-alpha.9] - September 25 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed connectivity errors not being thrown and streamed. @HofmannZ
+
+#### Docs
+
+n/a
+
 ## [1.0.0-alpha.8] - September 21 2018
 
 ### Breaking changes
