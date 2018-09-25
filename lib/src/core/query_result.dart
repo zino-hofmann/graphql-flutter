@@ -19,6 +19,14 @@ class QueryResult {
       return false;
     }
 
-    return errors.isEmpty;
+    return errors.isNotEmpty;
+  }
+
+  void addError(GraphQLError graphQLError) {
+    if (errors != null) {
+      errors.add(graphQLError);
+    } else {
+      errors = <GraphQLError>[graphQLError];
+    }
   }
 }

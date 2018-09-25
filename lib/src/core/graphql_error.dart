@@ -29,6 +29,13 @@ class GraphQLError {
   /// Custom error data returned by your GraphQL API server
   final Map<String, dynamic> extensions;
 
+  GraphQLError({
+    this.message,
+    this.locations,
+    this.path,
+    this.extensions,
+  });
+
   /// Constructs a [GraphQLError] from a JSON map.
   GraphQLError.fromJSON(dynamic data)
       : message = data['message'],
@@ -44,5 +51,5 @@ class GraphQLError {
 
   @override
   String toString() =>
-      '$message: ${locations is List ? locations.map((Location l) => '[${l.toString()}]').join('') : ""}';
+      '$message: ${locations is List ? locations.map((Location l) => '[${l.toString()}]').join('') : "Undefind location"}';
 }
