@@ -26,34 +26,16 @@ class Query extends StatefulWidget {
 }
 
 class QueryState extends State<Query> {
-  GraphQLClient client;
   ObservableQuery observableQuery;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    observableQuery?.close();
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() async {
-    /// Gets the client from the closest wrapping [GraphQLProvider].
-    client = GraphQLProvider.of(context).value;
-    assert(client != null);
-
-    // override the default [QueryOptions] fetchPolicy.
+  WatchQueryOptions get _options {
     FetchPolicy fetchPolicy = widget.options.fetchPolicy;
 
     if (fetchPolicy == FetchPolicy.cacheFirst) {
       fetchPolicy = FetchPolicy.cacheAndNetwork;
     }
 
-    final WatchQueryOptions options = WatchQueryOptions(
+    return WatchQueryOptions(
       document: widget.options.document,
       variables: widget.options.variables,
       fetchPolicy: fetchPolicy,
@@ -62,22 +44,39 @@ class QueryState extends State<Query> {
       fetchResults: true,
       context: widget.options.context,
     );
+  }
 
-    bool shouldCreateNewObservable = true;
+  void query(WatchQueryOptions options) {
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    observableQuery = client.watchQuery(options);
+  }
 
-    if (observableQuery != null) {
-      if (observableQuery.options.areEqualTo(options)) {
-        shouldCreateNewObservable = false;
-      }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    query(_options);
+  }
 
-      await observableQuery.close();
-    }
+  @override
+  void didUpdateWidget(Query oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    final WatchQueryOptions newOptions = _options;
+
+    final bool shouldCreateNewObservable =
+        !observableQuery.options.areEqualTo(newOptions);
 
     if (shouldCreateNewObservable) {
-      observableQuery = client.watchQuery(options);
+      observableQuery?.close();
+      query(newOptions);
     }
+  }
 
-    super.didChangeDependencies();
+  @override
+  void dispose() {
+    observableQuery?.close();
+    super.dispose();
   }
 
   @override

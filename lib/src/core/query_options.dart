@@ -154,11 +154,7 @@ class WatchQueryOptions extends QueryOptions {
       return false;
     }
 
-    if (a == null && b != null) {
-      return true;
-    }
-
-    if (a != null && b == null) {
+    if (a == null || b == null) {
       return true;
     }
 
