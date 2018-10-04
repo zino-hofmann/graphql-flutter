@@ -42,7 +42,7 @@ final Map<String, Object> updatedCValue = <String, Object>{
   'cField': 'changed value',
 };
 
-final Map<String, Object> updatedOperationData = <String, Object>{
+final Map<String, Object> updatedCOperationData = <String, Object>{
   'a': <String, Object>{
     '__typename': 'A',
     'id': 1,
@@ -77,7 +77,7 @@ void main() {
     });
     test('updating nested data changes top level operation', () {
       cache.write('C/6', updatedCValue);
-      expect(cache.read(rawOperationKey), equals(updatedOperationData));
+      expect(cache.read(rawOperationKey), equals(updatedCOperationData));
     });
   });
 }
