@@ -5,7 +5,7 @@ List<String> reference(String key) {
   return ['cache/reference', key];
 }
 
-final rawOperationKey = 'rawOperationKey';
+const String rawOperationKey = 'rawOperationKey';
 
 final Map<String, Object> rawOperationData = <String, Object>{
   'a': <String, Object>{
@@ -35,29 +35,35 @@ final Map<String, Object> rawOperationData = <String, Object>{
   'aField': <String, Object>{'field': false}
 };
 
-final Map<String, Object> normalizedOperationData = <String, Object>{
-  rawOperationKey: <String, Object>{
-    'a': reference('A/1'),
+final Map<String, Object> updatedCValue = <String, Object>{
+  '__typename': 'C',
+  'id': 6,
+  'new': 'field',
+  'cField': 'changed value',
+};
+
+final Map<String, Object> updatedOperationData = <String, Object>{
+  'a': <String, Object>{
+    '__typename': 'A',
+    'id': 1,
+    'list': <Object>[
+      1,
+      2,
+      3,
+      <String, Object>{
+        '__typename': 'Item',
+        'id': 4,
+        'value': 4,
+      }
+    ],
+    'b': <String, Object>{
+      '__typename': 'B',
+      'id': 5,
+      'c': updatedCValue,
+      'bField': <String, Object>{'field': true}
+    },
   },
-  'A/1': <String, Object>{
-    'list': <Object>[1, 2, 3, reference('Item/4')],
-    'b': reference('B/5'),
-    'aField': <String, Object>{'field': false},
-  },
-  'Item/4': <String, Object>{
-    '__typename': 'Item',
-    'id': 4,
-    'value': 4,
-  },
-  'B/5': <String, Object>{
-    'c': reference('C/6'),
-    'bField': <String, Object>{'field': false}
-  },
-  'C/6': <String, Object>{
-    '__typename': 'C',
-    'id': 5,
-    'cField': 'value',
-  },
+  'aField': <String, Object>{'field': false}
 };
 
 void main() {
@@ -65,25 +71,13 @@ void main() {
     final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
       dataIdFromObject: defaultDataIdFromObject,
     );
-    test('.write(data) normalizes input', () {
+    test('.read .write round trip', () {
       cache.write(rawOperationKey, rawOperationData);
-      cache._inMemoryCahce
-      //expect( string.split(','), equals(['foo', 'bar', 'baz']));
+      expect(cache.read(rawOperationKey), equals(rawOperationData));
     });
-
-    test('.trim() removes surrounding whitespace', () {
-      var string = '  foo ';
-      expect(string.trim(), equals('foo'));
-    });
-  });
-
-  group('int', () {
-    test('.remainder() returns the remainder of division', () {
-      expect(11.remainder(3), equals(2));
-    });
-
-    test('.toRadixString() returns a hex string', () {
-      expect(11.toRadixString(16), equals('b'));
+    test('updating nested data changes top level operation', () {
+      cache.write('C/6', updatedCValue);
+      expect(cache.read(rawOperationKey), equals(updatedOperationData));
     });
   });
 }
