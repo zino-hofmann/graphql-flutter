@@ -5,7 +5,7 @@ Map<String, Object> traverseValues(
   Transform transform,
 ) {
   return node.map<String, Object>(
-    (String key, Object value) => MapEntry<String, dynamic>(
+    (String key, Object value) => MapEntry<String, Object>(
           key,
           traverse(value, transform),
         ),
