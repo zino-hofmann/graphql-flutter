@@ -13,7 +13,10 @@ String getOperationName(String rawDoc) {
   final DocumentContext doc = parser.parseDocument();
 
   if (doc.definitions != null && doc.definitions.isNotEmpty) {
-    final OperationDefinitionContext definition = doc.definitions[0];
+    final OperationDefinitionContext definition = doc.definitions.lastWhere(
+      (DefinitionContext context) => context is OperationDefinitionContext,
+      orElse: () => null,
+    );
 
     if (definition != null) {
       if (definition.name != null) {
