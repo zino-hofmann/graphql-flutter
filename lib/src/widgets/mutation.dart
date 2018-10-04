@@ -50,6 +50,10 @@ class MutationState extends State<Mutation> {
       });
     }
 
+    observableQuery.controller.add(QueryResult(
+      loading: true,
+    ));
+
     observableQuery.fetchResults();
   }
 
@@ -101,7 +105,7 @@ class MutationState extends State<Mutation> {
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
       initialData: QueryResult(
-        loading: true,
+        loading: false,
       ),
       stream: observableQuery.stream,
       builder: (
