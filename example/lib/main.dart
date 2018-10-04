@@ -54,11 +54,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int numberOfRepos = 50;
+  int nRepositories = 50;
 
   void changeQuery(String number) {
     setState(() {
-      numberOfRepos = int.parse(number) ?? 50;
+      nRepositories = int.parse(number) ?? 50;
     });
   }
 
@@ -69,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Container(
-        padding: const EdgeInsets.fromLTRB(8.0, 0.0, 8.0, 0.0),
+        padding: const EdgeInsets.symmetric(horizontal: 8.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           mainAxisSize: MainAxisSize.max,
@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Query(
               options: QueryOptions(
                 document: queries.readRepositories,
-                variables: <String, dynamic>{'numberOfRepos': numberOfRepos},
+                variables: <String, dynamic>{'nRepositories': nRepositories},
                 pollInterval: 4,
                 // you can optionally override some http options through the contexts
                 //

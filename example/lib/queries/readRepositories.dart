@@ -1,7 +1,7 @@
 const String readRepositories = '''
-  query ReadRepositories(\$numberOfRepos: Int!) {
+  query ReadRepositories(\$nRepositories: Int!) {
     viewer {
-      repositories(last: \$numberOfRepos) {
+      repositories(last: \$nRepositories) {
         nodes {
           id
           name

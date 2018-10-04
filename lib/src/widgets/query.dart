@@ -46,30 +46,25 @@ class QueryState extends State<Query> {
     );
   }
 
-  void query(WatchQueryOptions options) {
+  void _initQuery() {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
-    observableQuery = client.watchQuery(options);
+    observableQuery?.close();
+    observableQuery = client.watchQuery(_options);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    query(_options);
+    _initQuery();
   }
 
   @override
   void didUpdateWidget(Query oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final WatchQueryOptions newOptions = _options;
-
-    final bool shouldCreateNewObservable =
-        !observableQuery.options.areEqualTo(newOptions);
-
-    if (shouldCreateNewObservable) {
-      observableQuery?.close();
-      query(newOptions);
+    if (!observableQuery.options.areEqualTo(_options)) {
+      _initQuery();
     }
   }
 
