@@ -15,9 +15,9 @@ class NormalizedInMemoryCache extends InMemoryCache {
 
   Object _dereference(Object node) {
     if (node is List && node.length == 2 && node[0] == _prefix) {
-      return read(node[2]);
+      return read(node[1]);
     }
-    return node;
+    return null;
   }
 
   /*
