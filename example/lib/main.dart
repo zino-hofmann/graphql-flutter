@@ -5,7 +5,9 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import './mutations/addStar.dart' as mutations;
 import './queries/readRepositories.dart' as queries;
 
-const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
+const String YOUR_PERSONAL_ACCESS_TOKEN =
+    'ea93c7fcc8982170f0b263876491429588de1431';
+//const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
 
 void main() => runApp(MyApp());
 
