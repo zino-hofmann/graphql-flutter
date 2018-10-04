@@ -50,7 +50,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   }
 }
 
-String defaultDataIdFromObject(Object object) {
+String typenameDataIdFromObject(Object object) {
   if (object is Map<String, Object> &&
       object.containsKey('__typename') &&
       object.containsKey('id')) {

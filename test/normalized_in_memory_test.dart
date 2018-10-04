@@ -69,7 +69,7 @@ final Map<String, Object> updatedCOperationData = <String, Object>{
 void main() {
   group('Normalizes writes', () {
     final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
-      dataIdFromObject: defaultDataIdFromObject,
+      dataIdFromObject: typenameDataIdFromObject,
     );
     test('.read .write round trip', () {
       cache.write(rawOperationKey, rawOperationData);
