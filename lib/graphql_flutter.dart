@@ -10,6 +10,7 @@ export 'package:graphql_flutter/src/core/graphql_error.dart';
 export 'package:graphql_flutter/src/link/link.dart';
 export 'package:graphql_flutter/src/link/http/link_http.dart';
 
+export 'package:graphql_flutter/src/cache/cache.dart';
 export 'package:graphql_flutter/src/cache/in_memory.dart';
 export 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
 
