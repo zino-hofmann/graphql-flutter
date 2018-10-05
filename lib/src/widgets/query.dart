@@ -64,9 +64,9 @@ class QueryState extends State<Query> {
   void didUpdateWidget(Query oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (!observableQuery.options.areEqualTo(_options)) {
-      _initQuery();
-    }
+    //if (!observableQuery.options.areEqualTo(_options)) {
+    _initQuery();
+    //}
   }
 
   @override

@@ -112,7 +112,7 @@ class QueryManager {
         }
       }
 
-      // execute the operation trough the provided link(s)
+      // execute the operation through the provided link(s)
       fetchResult = await execute(
         link: link,
         operation: operation,
