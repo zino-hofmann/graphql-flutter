@@ -6,6 +6,7 @@ import 'package:graphql_flutter/src/graphql_client.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
 import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
+import 'package:graphql_flutter/src/cache/cache.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
@@ -14,7 +15,9 @@ typedef MutationBuilder = Widget Function(
   RunMutation runMutation,
   QueryResult result,
 );
+
 typedef void OnMutationCompleted(QueryResult result);
+typedef void OnMutationUpdate(Cache cache, QueryResult result);
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
@@ -22,12 +25,14 @@ class Mutation extends StatefulWidget {
   final MutationOptions options;
   final MutationBuilder builder;
   final OnMutationCompleted onCompleted;
+  final OnMutationUpdate update;
 
   const Mutation({
     final Key key,
     @required this.options,
     @required this.builder,
     this.onCompleted,
+    this.update,
   }) : super(key: key);
 
   @override
@@ -42,13 +47,17 @@ class MutationState extends State<Mutation> {
   void runMutation(Map<String, dynamic> variables) {
     observableQuery.setVariables(variables);
 
-    if (widget.onCompleted != null) {
-      onCompleteSubscription = observableQuery.stream.listen(
-        (QueryResult result) {
+    if (widget.onCompleted != null || widget.update != null) {
+      onCompleteSubscription =
+          observableQuery.stream.listen((QueryResult result) {
+        if (widget.onCompleted != null) {
           widget.onCompleted(result);
-          onCompleteSubscription.cancel();
-        },
-      );
+        }
+        if (widget.update != null) {
+          widget.update(client.cache, result);
+        }
+        onCompleteSubscription.cancel();
+      });
     }
 
     observableQuery.controller.add(
