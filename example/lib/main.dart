@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: <Widget>[
             TextField(
               decoration: const InputDecoration(
-                labelText: 'Number of repos (default 50)',
+                labelText: 'Number of repositories (default 50)',
               ),
               keyboardType: TextInputType.number,
               onSubmitted: changeQuery,
@@ -84,10 +84,11 @@ class _MyHomePageState extends State<MyHomePage> {
             Query(
               options: QueryOptions(
                 document: queries.readRepositories,
-                variables: <String, dynamic>{'nRepositories': nRepositories},
+                variables: <String, dynamic>{
+                  'nRepositories': nRepositories,
+                },
                 pollInterval: 4,
                 // you can optionally override some http options through the contexts
-                //
                 context: <String, dynamic>{
                   'headers': <String, String>{
                     'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
@@ -96,9 +97,8 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
               builder: (QueryResult result) {
                 if (result.loading) {
-                  return Container(
-                    padding: const EdgeInsets.all(8.0),
-                    child: const CircularProgressIndicator(),
+                  return const Center(
+                    child: CircularProgressIndicator(),
                   );
                 }
 
