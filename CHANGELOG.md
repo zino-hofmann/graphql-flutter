@@ -1,3 +1,19 @@
+## [1.0.0-alpha.10] - October 6 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed `Query` variables not updating in the query. @micimize
+- Fixed `Mutation` widget's behavior to properly set loading status. @Igor1201
+
+#### Docs
+
+- Added @micimize as a contributor. @HofmannZ
+- Added @Igor1201 as a contributor. @HofmannZ
+
 ## [1.0.0-alpha.9] - September 25 2018
 
 ### Breaking changes
