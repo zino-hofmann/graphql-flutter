@@ -154,6 +154,16 @@
         "example",
         "ideas"
       ]
+    },
+    {
+      "login": "Igor1201",
+      "name": "Igor Borges",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/735858?v=4",
+      "profile": "http://borges.me/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ]
 }
