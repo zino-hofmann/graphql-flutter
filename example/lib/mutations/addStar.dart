@@ -1,4 +1,4 @@
-final String addStar = '''
+const String addStar = '''
   mutation AddStar(\$starrableId: ID!) {
     addStar(input: {starrableId: \$starrableId}) {
       starrable {
@@ -6,5 +6,4 @@ final String addStar = '''
       }
     }
   }
-'''
-    .replaceAll('\n', ' ');
+''';

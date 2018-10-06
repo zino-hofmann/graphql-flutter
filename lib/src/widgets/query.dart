@@ -26,34 +26,16 @@ class Query extends StatefulWidget {
 }
 
 class QueryState extends State<Query> {
-  GraphQLClient client;
   ObservableQuery observableQuery;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    observableQuery?.close();
-    super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() async {
-    /// Gets the client from the closest wrapping [GraphQLProvider].
-    client = GraphQLProvider.of(context).value;
-    assert(client != null);
-
-    // override the default [QueryOptions] fetchPolicy.
+  WatchQueryOptions get _options {
     FetchPolicy fetchPolicy = widget.options.fetchPolicy;
 
     if (fetchPolicy == FetchPolicy.cacheFirst) {
       fetchPolicy = FetchPolicy.cacheAndNetwork;
     }
 
-    final WatchQueryOptions options = WatchQueryOptions(
+    return WatchQueryOptions(
       document: widget.options.document,
       variables: widget.options.variables,
       fetchPolicy: fetchPolicy,
@@ -62,22 +44,34 @@ class QueryState extends State<Query> {
       fetchResults: true,
       context: widget.options.context,
     );
+  }
 
-    bool shouldCreateNewObservable = true;
+  void _initQuery() {
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    observableQuery?.close();
+    observableQuery = client.watchQuery(_options);
+  }
 
-    if (observableQuery != null) {
-      if (observableQuery.options.areEqualTo(options)) {
-        shouldCreateNewObservable = false;
-      }
-
-      await observableQuery.close();
-    }
-
-    if (shouldCreateNewObservable) {
-      observableQuery = client.watchQuery(options);
-    }
-
+  @override
+  void didChangeDependencies() {
     super.didChangeDependencies();
+    _initQuery();
+  }
+
+  @override
+  void didUpdateWidget(Query oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (!observableQuery.options.areEqualTo(_options)) {
+      _initQuery();
+    }
+  }
+
+  @override
+  void dispose() {
+    observableQuery?.close();
+    super.dispose();
   }
 
   @override
