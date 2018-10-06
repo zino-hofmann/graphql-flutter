@@ -141,6 +141,19 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "micimize",
+      "name": "Michael Joseph Rosenthal",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8343799?v=4",
+      "profile": "https://github.com/micimize",
+      "contributions": [
+        "bug",
+        "code",
+        "doc",
+        "example",
+        "ideas"
+      ]
     }
   ]
 }
