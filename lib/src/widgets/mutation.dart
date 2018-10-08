@@ -43,12 +43,19 @@ class MutationState extends State<Mutation> {
     observableQuery.setVariables(variables);
 
     if (widget.onCompleted != null) {
-      onCompleteSubscription =
-          observableQuery.stream.listen((QueryResult result) {
-        widget.onCompleted(result);
-        onCompleteSubscription.cancel();
-      });
+      onCompleteSubscription = observableQuery.stream.listen(
+        (QueryResult result) {
+          widget.onCompleted(result);
+          onCompleteSubscription.cancel();
+        },
+      );
     }
+
+    observableQuery.controller.add(
+      QueryResult(
+        loading: true,
+      ),
+    );
 
     observableQuery.fetchResults();
   }
@@ -101,7 +108,7 @@ class MutationState extends State<Mutation> {
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
       initialData: QueryResult(
-        loading: true,
+        loading: false,
       ),
       stream: observableQuery.stream,
       builder: (
