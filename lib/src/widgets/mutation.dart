@@ -44,8 +44,27 @@ class MutationState extends State<Mutation> {
   ObservableQuery observableQuery;
   StreamSubscription<QueryResult> onCompleteSubscription;
 
+  WatchQueryOptions get _options => WatchQueryOptions(
+        document: widget.options.document,
+        variables: widget.options.variables,
+        fetchPolicy: widget.options.fetchPolicy,
+        errorPolicy: widget.options.errorPolicy,
+        fetchResults: false,
+        context: widget.options.context,
+      );
+
+  void _cleanup() {
+    onCompleteSubscription?.cancel();
+    observableQuery?.close();
+  }
+
+  void _newMutation(Map<String, dynamic> variables) {
+    _cleanup();
+    observableQuery = client.watchQuery(_options);
+  }
+
   void runMutation(Map<String, dynamic> variables) {
-    observableQuery.setVariables(variables);
+    _newMutation(variables);
 
     if (widget.onCompleted != null || widget.update != null) {
       onCompleteSubscription =
@@ -70,14 +89,8 @@ class MutationState extends State<Mutation> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void dispose() {
-    onCompleteSubscription?.cancel();
-    observableQuery?.close();
+    _cleanup();
     super.dispose();
   }
 
@@ -86,30 +99,6 @@ class MutationState extends State<Mutation> {
     /// Gets the client from the closest wrapping [GraphqlProvider].
     client = GraphQLProvider.of(context).value;
     assert(client != null);
-
-    final WatchQueryOptions options = WatchQueryOptions(
-      document: widget.options.document,
-      variables: widget.options.variables,
-      fetchPolicy: widget.options.fetchPolicy,
-      errorPolicy: widget.options.errorPolicy,
-      fetchResults: false,
-      context: widget.options.context,
-    );
-
-    bool shouldCreateNewObservable = true;
-
-    if (observableQuery != null) {
-      if (observableQuery.options.areEqualTo(options)) {
-        shouldCreateNewObservable = false;
-      }
-
-      observableQuery.close();
-    }
-
-    if (shouldCreateNewObservable) {
-      observableQuery = client.watchQuery(options);
-    }
-
     super.didChangeDependencies();
   }
 
