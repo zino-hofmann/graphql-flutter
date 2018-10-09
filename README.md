@@ -16,6 +16,7 @@
 - [Usage](#usage)
   - [GraphQL Provider](#graphql-provider)
   - [Offline Cache](#offline-cache)
+    - [Normalization](#normalization)
   - [Queries](#queries)
   - [Mutations](#mutations)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
@@ -231,6 +232,32 @@ class MyApp extends StatelessWidget {
 
 ...
 ```
+
+#### Normalization
+To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache`:
+```dart
+ValueNotifier<GraphQLClient> client = ValueNotifier(
+  GraphQLClient(
+    cache: NormalizedInMemoryCache(
+      dataIdFromObject: typenameDataIdFromObject,
+    ),
+    link: link,
+  ),
+);
+```
+`dataIdFromObject` is required and has no defaults. Our implementation is similar to apollo's, requiring a function to return a universally unique string or `null`. The predefined `typenameDataIdFromObject` we provide is similar to apollo's default:
+```dart
+String typenameDataIdFromObject(Object object) {
+  if (object is Map<String, Object> &&
+      object.containsKey('__typename') &&
+      object.containsKey('id')) {
+    return "${object['__typename']}/${object['id']}";
+  }
+  return null;
+}
+```
+However note that **`graphql-flutter` does not inject __typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
+
 
 ### Queries
 
