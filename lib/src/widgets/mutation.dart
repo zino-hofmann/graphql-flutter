@@ -40,6 +40,7 @@ class Mutation extends StatefulWidget {
 }
 
 class MutationState extends State<Mutation> {
+  bool _observableIsStale;
   GraphQLClient client;
   ObservableQuery observableQuery;
   StreamSubscription<QueryResult> onCompleteSubscription;
@@ -53,18 +54,17 @@ class MutationState extends State<Mutation> {
         context: widget.options.context,
       );
 
-  void _cleanup() {
-    onCompleteSubscription?.cancel();
-    observableQuery?.close();
-  }
-
-  void _newMutation(Map<String, dynamic> variables) {
-    _cleanup();
-    observableQuery = client.watchQuery(_options);
+  void _replaceStaleObservable() {
+    if (_observableIsStale) {
+      observableQuery.close();
+      observableQuery = client.watchQuery(_options);
+      _observableIsStale = false;
+    }
   }
 
   void runMutation(Map<String, dynamic> variables) {
-    _newMutation(variables);
+    _replaceStaleObservable();
+    observableQuery.setVariables(variables);
 
     if (widget.onCompleted != null || widget.update != null) {
       onCompleteSubscription =
@@ -90,15 +90,27 @@ class MutationState extends State<Mutation> {
 
   @override
   void dispose() {
-    _cleanup();
+    onCompleteSubscription?.cancel();
+    observableQuery.close();
     super.dispose();
   }
 
   @override
   void didChangeDependencies() {
     /// Gets the client from the closest wrapping [GraphqlProvider].
-    client = GraphQLProvider.of(context).value;
-    assert(client != null);
+    final GraphQLClient newClient = GraphQLProvider.of(context).value;
+    assert(newClient != null);
+
+    if (observableQuery != null &&
+        observableQuery.isCurrentlyPolling &&
+        newClient != client) {
+      client = newClient;
+      _observableIsStale = true;
+    } else if (client != newClient) {
+      client = newClient;
+      _observableIsStale = false;
+      observableQuery = client.watchQuery(_options);
+    }
     super.didChangeDependencies();
   }
 
