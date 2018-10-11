@@ -80,11 +80,13 @@ class QueryState extends State<Query> {
         variables: widget.variables,
       );
 
-      setState(() {
-        data = result;
-        error = null;
-        loading = false;
-      });
+      if (this.mounted) {
+        setState(() {
+          data = result;
+          error = null;
+          loading = false;
+        });
+      }
     } catch (e) {
       // Ignore, right?
     }
@@ -95,17 +97,21 @@ class QueryState extends State<Query> {
         variables: widget.variables,
       );
 
-      setState(() {
-        data = result;
-        error = null;
-        loading = false;
-      });
-    } catch (e) {
-      if (data == {}) {
+      if (this.mounted) {
         setState(() {
-          error = e;
+          data = result;
+          error = null;
           loading = false;
         });
+      }
+    } catch (e) {
+      if (data == {}) {
+        if (this.mounted) {
+          setState(() {
+            error = e;
+            loading = false;
+          });
+        }
       }
     }
 
