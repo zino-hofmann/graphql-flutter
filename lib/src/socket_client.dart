@@ -5,8 +5,6 @@ import 'package:uuid/uuid.dart';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-SocketClient socketClient;
-
 class SocketClient {
   final Uuid _uuid = Uuid();
   final GraphQLSocket _socket;

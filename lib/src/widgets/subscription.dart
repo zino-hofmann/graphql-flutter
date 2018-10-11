@@ -16,6 +16,7 @@ typedef SubscriptionBuilder = Widget Function({
 class Subscription extends StatefulWidget {
   final String operationName;
   final String query;
+  final SocketClient socketClient;
   final dynamic variables;
   final SubscriptionBuilder builder;
   final OnSubscriptionCompleted onCompleted;
@@ -23,7 +24,8 @@ class Subscription extends StatefulWidget {
 
   const Subscription(
     this.operationName,
-    this.query, {
+    this.query,
+    this.socketClient, {
     this.variables = const <String, dynamic>{},
     final Key key,
     @required this.builder,
@@ -46,7 +48,7 @@ class _SubscriptionState extends State<Subscription> {
   void initState() {
     super.initState();
 
-    final Stream<SubscriptionData> stream = socketClient.subscribe(
+    final Stream<SubscriptionData> stream = widget.socketClient.subscribe(
         SubscriptionRequest(
             widget.operationName, widget.query, widget.variables));
 
