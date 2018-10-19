@@ -4,6 +4,14 @@ import 'package:graphql_flutter/src/cache/in_memory.dart';
 
 typedef String DataIdFromObject(Object node);
 
+class NormalizationException implements Exception {
+  StackOverflowError overflowError;
+  String cause;
+  Object value;
+  NormalizationException(this.cause, this.overflowError, this.value);
+  String get message => cause;
+}
+
 class NormalizedInMemoryCache extends InMemoryCache {
   DataIdFromObject dataIdFromObject;
   String _prefix;
@@ -27,7 +35,20 @@ class NormalizedInMemoryCache extends InMemoryCache {
   @override
   dynamic read(String key) {
     final Object value = super.read(key);
-    return traverse(value, _dereference);
+    try {
+      return traverse(value, _dereference);
+    } catch (error) {
+      if (error is StackOverflowError) {
+        throw NormalizationException(
+          '''
+          Dereferencing failed for $value this is likely caused by a circular reference.
+          Please ensure dataIdFromObject returns a unique identifier for all possible entities in your system
+          ''',
+          error,
+          value,
+        );
+      }
+    }
   }
 
   List<String> _normalize(Object node) {

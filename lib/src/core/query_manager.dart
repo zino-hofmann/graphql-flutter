@@ -138,6 +138,7 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(fetchResult);
     } catch (error) {
+      // TODO some dart errors break this
       final GraphQLError graphQLError = GraphQLError(
         message: error.message,
       );
