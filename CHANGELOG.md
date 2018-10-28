@@ -8,6 +8,7 @@ n/a
 
 - Added `NormalizedInMemoryCache` as a new cache option. @micimize
 - Fixed `Mutation` calling `onCompleted` for loading state. @rafaelring
+- Fix type annotations. @HofmannZ
 - Fixed http versions. @HofmannZ
 
 #### Docs
