@@ -1,3 +1,20 @@
+## [1.0.0-alpha.11] - October 28 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Added `NormalizedInMemoryCache` as a new cache option. @micimize
+- Fixed `Mutation` calling `onCompleted` for loading state. @rafaelring
+- Fixed http versions. @HofmannZ
+
+#### Docs
+
+- Added docs for the new `NormalizedInMemoryCache` option. @micimize
+- Added @rafaelring as a contributor. @HofmannZ
+
 ## [1.0.0-alpha.10] - October 6 2018
 
 ### Breaking changes
