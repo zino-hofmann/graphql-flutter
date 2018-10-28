@@ -45,8 +45,10 @@ class MutationState extends State<Mutation> {
     if (widget.onCompleted != null) {
       onCompleteSubscription = observableQuery.stream.listen(
         (QueryResult result) {
-          widget.onCompleted(result);
-          onCompleteSubscription.cancel();
+          if (!result.loading) {
+            widget.onCompleted(result);
+            onCompleteSubscription.cancel();
+          }        
         },
       );
     }
