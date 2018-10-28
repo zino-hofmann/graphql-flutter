@@ -8,7 +8,7 @@ import '../../graphql_flutter.dart';
 /// client payloads into dart object representation.
 class GraphQLSocket {
   final StreamController<GraphQLSocketMessage> _subject =
-      StreamController.broadcast<GraphQLSocketMessage>();
+      StreamController<GraphQLSocketMessage>.broadcast();
 
   final WebSocket _socket;
 
