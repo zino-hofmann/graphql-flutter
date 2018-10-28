@@ -2,7 +2,7 @@ import 'package:test/test.dart';
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
 
 List<String> reference(String key) {
-  return ['cache/reference', key];
+  return <String>['cache/reference', key];
 }
 
 const String rawOperationKey = 'rawOperationKey';
