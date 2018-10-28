@@ -131,10 +131,10 @@ Query(
   builder: ({
     bool loading,
     var data,
-    String error,
+    Exception error,
   }) {
-    if (error != '') {
-      return Text(error);
+    if (error != null) {
+      return Text(error.toString());
     }
 
     if (loading) {
@@ -185,7 +185,7 @@ Mutation(
     runMutation, { // you can name it whatever you like
     bool loading,
     var data,
-    String error,
+    Exception error,
 }) {
   return FloatingActionButton(
     onPressed: () => runMutation({
