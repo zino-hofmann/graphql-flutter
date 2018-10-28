@@ -48,7 +48,7 @@ class MutationState extends State<Mutation> {
           if (!result.loading) {
             widget.onCompleted(result);
             onCompleteSubscription.cancel();
-          }        
+          }
         },
       );
     }
