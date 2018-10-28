@@ -1,3 +1,18 @@
+## [0.9.5] - October 28 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed bug when set state was called after widget was unmounted. @SirKuryaki
+- Fixed types. @HofmannZ
+
+#### Docs
+
+- Fixed `Query` and `Mutation` examples on `README.md`. @SirKuryaki
+
 ## [0.9.4] - September 10 2018
 
 ### Breaking changes
