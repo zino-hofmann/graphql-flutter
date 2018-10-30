@@ -14,6 +14,8 @@ class NormalizationException implements Exception {
   String get message => cause;
 }
 
+typedef List<String> Normalizer(Object node);
+
 class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
@@ -31,14 +33,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return null;
   }
 
-  /*
-    Derefrences object references,
-    replacing them with cached instances
-  */
-  @override
-  dynamic read(String key) {
-    final Object value = super.read(key);
-
+  dynamic denormalize(Object value) {
     try {
       return traverse(value, _dereference);
     } catch (error) {
@@ -55,15 +50,52 @@ class NormalizedInMemoryCache extends InMemoryCache {
     }
   }
 
+  /*
+    Derefrences object references,
+    replacing them with cached instances
+  */
+  @override
+  dynamic read(String key) {
+    return denormalize(super.read(key));
+  }
+
+  Normalizer _normalizerFor(Map<String, Object> into) {
+    List<String> normalizer(Object node) {
+      final String dataId = dataIdFromObject(node);
+      if (dataId != null) {
+        writeInto(dataId, node, into, normalizer);
+        return <String>[_prefix, dataId];
+      }
+      return null;
+    }
+
+    return normalizer;
+  }
+
   List<String> _normalize(Object node) {
     final String dataId = dataIdFromObject(node);
 
     if (dataId != null) {
-      write(dataId, node);
+      writeInto(dataId, node, data, _normalize);
       return <String>[_prefix, dataId];
     }
 
     return null;
+  }
+
+  /*
+    Writes included objects to provided Map,
+    replacing them with references
+  */
+  void writeInto(
+    String key,
+    Object value,
+    Map<String, Object> into, [
+    Normalizer normalizer,
+  ]) {
+    final Object normalized =
+        traverseValues(value, normalizer ?? _normalizerFor(into));
+    into[key] = normalized;
   }
 
   /*
@@ -72,8 +104,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   */
   @override
   void write(String key, Object value) {
-    final Object normalized = traverseValues(value as Map<String, dynamic>, _normalize);
-    super.write(key, normalized);
+    writeInto(key, value, data, _normalize);
   }
 }
 

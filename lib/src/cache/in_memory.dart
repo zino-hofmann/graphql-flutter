@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:meta/meta.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart'
@@ -18,14 +19,16 @@ class InMemoryCache implements Cache {
   /// 'path_provider' will provide the storage directory.
   final Directory customStorageDirectory;
 
-  HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
   bool _writingToStorage = false;
+
+  @protected
+  HashMap<String, dynamic> data = HashMap<String, dynamic>();
 
   /// Reads an entity from the internal HashMap.
   @override
   dynamic read(String key) {
-    if (_inMemoryCache.containsKey(key)) {
-      return _inMemoryCache[key];
+    if (data.containsKey(key)) {
+      return data[key];
     }
 
     return null;
@@ -34,18 +37,17 @@ class InMemoryCache implements Cache {
   /// Writes an entity to the internal HashMap.
   @override
   void write(String key, dynamic value) {
-    if (_inMemoryCache.containsKey(key) &&
-        _inMemoryCache[key] is Map<String, dynamic> &&
+    if (data.containsKey(key) &&
+        data[key] is Map &&
         value != null &&
         value is Map<String, dynamic>) {
       // Avoid overriding a superset with a subset of a field (#155)
-      // this means deletions must be done by explicitly returning a field as null
-      _inMemoryCache[key] = deeplyMergeLeft(<Map<String, dynamic>>[
-        _inMemoryCache[key] as Map<String, dynamic>,
+      data[key] = deeplyMergeLeft(<Map<String, dynamic>>[
+        data[key] as Map<String, dynamic>,
         value,
       ]);
     } else {
-      _inMemoryCache[key] = value;
+      data[key] = value;
     }
   }
 
@@ -58,13 +60,13 @@ class InMemoryCache implements Cache {
   /// Restores the internal HashMap to a file.
   @override
   Future<void> restore() async {
-    _inMemoryCache = await _readFromStorage();
+    data = await _readFromStorage();
   }
 
   /// Clears the internal HashMap.
   @override
   void reset() {
-    _inMemoryCache.clear();
+    data.clear();
   }
 
   Future<String> get _localStoragePath async {
@@ -97,7 +99,7 @@ class InMemoryCache implements Cache {
     try {
       final File file = await _localStorageFile;
       final IOSink sink = file.openWrite();
-      _inMemoryCache.forEach((String key, dynamic value) {
+      data.forEach((String key, dynamic value) {
         sink.writeln(json.encode(<dynamic>[key, value]));
       });
 
@@ -119,7 +121,7 @@ class InMemoryCache implements Cache {
   /// or an empty map on failure
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     if (_writingToStorage) {
-      return _inMemoryCache;
+      return data;
     }
     try {
       final File file = await _localStorageFile;
