@@ -162,6 +162,9 @@ class StarrableRepository extends StatelessWidget {
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
+          trailing: repository['_loading'] == true
+              ? const CircularProgressIndicator()
+              : null,
           title: Text(repository['name']),
           onTap: () {
             // optimistic ui updates are not implemented yet, therefore changes may take some time to show
@@ -172,7 +175,6 @@ class StarrableRepository extends StatelessWidget {
         );
       },
       update: (Cache cache, QueryResult result) {
-        print(<dynamic>['wat', result.data]);
         if (result.hasErrors) {
           print(result.errors);
         } else {
