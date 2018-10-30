@@ -6,10 +6,15 @@ import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart';
+import 'package:graphql_flutter/src/cache/optimistic.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef RunMutation = void Function(Map<String, dynamic> variables);
+typedef RunMutation = void Function(
+  Map<String, dynamic> variables, {
+  Object optimisticResult,
+});
+
 typedef MutationBuilder = Widget Function(
   RunMutation runMutation,
   QueryResult result,
@@ -77,11 +82,14 @@ class MutationState extends State<Mutation> {
   }
 
   OnData get update {
-    // fallback client in case widget has been disposed of
     final Cache cache = client.cache;
+    final String mutationId = observableQuery.queryId;
     if (widget.update != null) {
       void updateOnData(QueryResult result) {
-        widget.update(client?.cache ?? cache, result);
+        widget.update(cache, result);
+        if (cache is OptimisticCache) {
+          cache.removeOptimisticPatch(mutationId);
+        }
       }
 
       return updateOnData;
@@ -93,11 +101,36 @@ class MutationState extends State<Mutation> {
     return <OnData>[widget.onCompleted, update].where(notNull);
   }
 
-  void runMutation(Map<String, dynamic> variables) => observableQuery
-    ..setVariables(variables)
-    ..onData(callbacks) // add callbacks to observable
-    ..sendLoading()
-    ..fetchResults();
+  // TODO not sure if we're properly caching results without update callbacks
+  /// handles optimistic updates
+  void handleOptimism(Object optimisticResult) {
+    final Cache cache = client.cache;
+    final String mutationId = observableQuery.queryId;
+    if (optimisticResult != null &&
+        widget.update != null &&
+        cache is OptimisticCache) {
+      cache.addOptimisiticPatch(mutationId, (Cache cache) {
+        widget.update(
+          cache,
+          QueryResult(
+            loading: true,
+            data: optimisticResult,
+          ),
+        );
+        return cache;
+      });
+    }
+  }
+
+  void runMutation(Map<String, dynamic> variables, {Object optimisticResult}) {
+    observableQuery
+      ..setVariables(variables)
+      ..onData(callbacks) // add callbacks to observable
+      ..sendLoading()
+      ..fetchResults();
+
+    handleOptimism(optimisticResult);
+  }
 
   @override
   void dispose() {

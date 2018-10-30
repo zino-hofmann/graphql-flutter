@@ -31,7 +31,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: NormalizedInMemoryCache(
+        cache: OptimisticCache(
           dataIdFromObject: typenameDataIdFromObject,
         ),
         link: link,
@@ -143,7 +143,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class StarrableRepository extends StatefulWidget {
+class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
     Key key,
     @required this.repository,
@@ -151,33 +151,31 @@ class StarrableRepository extends StatefulWidget {
 
   final Map<String, Object> repository;
 
-  @override
-  StarrableRepositoryState createState() {
-    return StarrableRepositoryState();
-  }
-}
-
-class StarrableRepositoryState extends State<StarrableRepository> {
-  bool loading = false;
-
-  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
-    final Map<String, Object> action = data['action'] as Map<String, Object>;
-
+  Map<String, Object> extractRepositoryData(Object data) {
+    final Map<String, Object> action =
+        (data as Map<String, Object>)['action'] as Map<String, Object>;
     if (action == null) {
       return null;
     }
-
     return action['starrable'] as Map<String, Object>;
   }
 
-  bool get viewerHasStarred => widget.repository['viewerHasStarred'] as bool;
+  bool get starred => repository['viewerHasStarred'] as bool;
+
+  bool get loading => repository['_loading'] == true;
+
+  Map<String, dynamic> get expectedResult => <String, dynamic>{
+        'action': <String, dynamic>{
+          'starrable': <String, dynamic>{
+            'viewerHasStarred': !starred,
+            '_loading': true
+          }
+        }
+      };
 
   @override
   Widget build(BuildContext context) {
-    final bool starred = loading ? !viewerHasStarred : viewerHasStarred;
-
     return Mutation(
-      key: Key(starred.toString()),
       options: MutationOptions(
         document: starred ? mutations.removeStar : mutations.addStar,
       ),
@@ -190,16 +188,14 @@ class StarrableRepositoryState extends State<StarrableRepository> {
                 )
               : const Icon(Icons.star_border),
           trailing: loading ? const CircularProgressIndicator() : null,
-          title: Text(widget.repository['name'] as String),
+          title: Text(repository['name'] as String),
           onTap: () {
-            // optimistic ui updates are not implemented yet,
-            // so we track loading manually
-            setState(() {
-              loading = true;
-            });
-            toggleStar(<String, dynamic>{
-              'starrableId': widget.repository['id'],
-            });
+            toggleStar(
+              <String, dynamic>{
+                'starrableId': repository['id'],
+              },
+              optimisticResult: expectedResult,
+            );
           },
         );
       },
@@ -207,10 +203,9 @@ class StarrableRepositoryState extends State<StarrableRepository> {
         if (result.hasErrors) {
           print(result.errors);
         } else {
-          final Map<String, Object> updated = Map<String, Object>.from(
-              widget.repository)
-            ..addAll(extractRepositoryData(result.data as Map<String, Object>));
-
+          final Map<String, Object> updated =
+              Map<String, Object>.from(repository)
+                ..addAll(extractRepositoryData(result.data));
           cache.write(typenameDataIdFromObject(updated), updated);
         }
       },
@@ -220,14 +215,13 @@ class StarrableRepositoryState extends State<StarrableRepository> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(
-                extractRepositoryData(result.data as Map<String, Object>)[
-                        'viewerHasStarred'] as bool
+                extractRepositoryData(result.data)['viewerHasStarred'] as bool
                     ? 'Thanks for your star!'
                     : 'Sorry you changed your mind!',
               ),
               actions: <Widget>[
                 SimpleDialogOption(
-                  child: const Text('DISMISS'),
+                  child: const Text('Dismiss'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
@@ -236,9 +230,6 @@ class StarrableRepositoryState extends State<StarrableRepository> {
             );
           },
         );
-        setState(() {
-          loading = false;
-        });
       },
     );
   }

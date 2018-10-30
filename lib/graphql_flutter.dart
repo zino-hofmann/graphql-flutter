@@ -13,6 +13,8 @@ export 'package:graphql_flutter/src/link/http/link_http.dart';
 export 'package:graphql_flutter/src/link/link.dart';
 export 'package:graphql_flutter/src/link/web_socket/link_web_socket.dart';
 export 'package:graphql_flutter/src/socket_client.dart';
+export 'package:graphql_flutter/src/cache/optimistic.dart';
+
 export 'package:graphql_flutter/src/websocket/messages.dart';
 export 'package:graphql_flutter/src/widgets/cache_provider.dart';
 export 'package:graphql_flutter/src/widgets/graphql_consumer.dart';

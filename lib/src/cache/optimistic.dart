@@ -10,7 +10,7 @@ class OptimisticPatch extends Object {
 }
 
 class OptimisticProxy implements Cache {
-  OptimisticNormalizedInMemoryCache cache;
+  OptimisticCache cache;
   HashMap<String, dynamic> data = HashMap<String, dynamic>();
   OptimisticProxy(this.cache);
 
@@ -38,14 +38,20 @@ class OptimisticProxy implements Cache {
 
 typedef Cache CacheTransform(Cache proxy);
 
-class OptimisticNormalizedInMemoryCache extends NormalizedInMemoryCache {
+class OptimisticCache extends NormalizedInMemoryCache {
   @protected
   List<OptimisticPatch> optimisticPatches = <OptimisticPatch>[];
+
+  OptimisticCache({
+    @required DataIdFromObject dataIdFromObject,
+    String prefix = '@cache/reference',
+  }) : super(dataIdFromObject: dataIdFromObject, prefix: prefix);
 
   /// Reads and dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
   @override
   dynamic read(String key) {
+    print(optimisticPatches);
     for (OptimisticPatch patch in optimisticPatches) {
       if (patch.data.containsKey(key)) {
         return denormalize(patch.data[key]);
