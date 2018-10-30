@@ -83,7 +83,7 @@ class MutationState extends State<Mutation> {
 
   @override
   void dispose() {
-    observableQuery.close(force: false);
+    observableQuery?.close(force: false);
     super.dispose();
   }
 
@@ -106,7 +106,7 @@ class MutationState extends State<Mutation> {
       initialData: QueryResult(
         loading: false,
       ),
-      stream: observableQuery.stream,
+      stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,

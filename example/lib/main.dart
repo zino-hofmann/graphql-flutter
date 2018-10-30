@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './mutations/addStar.dart' as mutations;
-import './queries/readRepositories.dart' as queries;
+// create this file with the line
+// const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
+import './local.dart';
 
-const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
+import './mutations/mutations.dart' as mutations;
+import './queries/readRepositories.dart' as queries;
 
 void main() => runApp(MyApp());
 
@@ -21,7 +23,9 @@ class MyApp extends StatelessWidget {
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: InMemoryCache(),
+        cache: NormalizedInMemoryCache(
+          dataIdFromObject: typenameDataIdFromObject,
+        ),
         link: link,
       ),
     );
@@ -113,61 +117,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Map<String, dynamic> repository =
-                          repositories[index];
-
-                      return Mutation(
-                        options: MutationOptions(
-                          document: mutations.addStar,
-                        ),
-                        builder: (
-                          RunMutation addStar,
-                          QueryResult addStarResult,
-                        ) {
-                          if (addStarResult.data != null &&
-                              addStarResult.data.isNotEmpty) {
-                            repository['viewerHasStarred'] =
-                                addStarResult.data['addStar']['starrable']
-                                    ['viewerHasStarred'];
-                          }
-
-                          return ListTile(
-                            leading: repository['viewerHasStarred']
-                                ? const Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                  )
-                                : const Icon(Icons.star_border),
-                            title: Text(repository['name']),
-                            onTap: () {
-                              // optimistic ui updates are not implemented yet, therefore changes may take some time to show
-                              addStar(<String, dynamic>{
-                                'starrableId': repository['id'],
-                              });
-                            },
-                          );
-                        },
-                        onCompleted: (QueryResult onCompleteResult) {
-                          showDialog<AlertDialog>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Thanks for your star!'),
-                                actions: <Widget>[
-                                  SimpleDialogOption(
-                                    child: const Text('Dismiss'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                    itemBuilder: (BuildContext context, int index) =>
+                        StarrableRepository(repository: repositories[index]),
                   ),
                 );
               },
@@ -175,6 +126,80 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class StarrableRepository extends StatelessWidget {
+  const StarrableRepository({
+    Key key,
+    @required this.repository,
+  }) : super(key: key);
+
+  final Map<String, Object> repository;
+
+  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
+    final Map<String, Object> action = data['action'];
+    if (action != null) {
+      return null;
+    }
+    return action['starrable'];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Mutation(
+      options: MutationOptions(
+        document: repository['viewerHasStarred']
+            ? mutations.removeStar
+            : mutations.addStar,
+      ),
+      builder: (RunMutation toggleStar, QueryResult addStarResult) {
+        return ListTile(
+          leading: repository['viewerHasStarred']
+              ? const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                )
+              : const Icon(Icons.star_border),
+          title: Text(repository['name']),
+          onTap: () {
+            // optimistic ui updates are not implemented yet, therefore changes may take some time to show
+            toggleStar(<String, dynamic>{
+              'starrableId': repository['id'],
+            });
+          },
+        );
+      },
+      update: (Cache cache, QueryResult result) {
+        print(<dynamic>['wat', result.data]);
+        if (result.hasErrors) {
+          print(result.errors);
+        } else {
+          final Map<String, Object> updated =
+              Map<String, Object>.from(repository)
+                ..addAll(extractRepositoryData(result.data));
+          cache.write(typenameDataIdFromObject(updated), updated);
+        }
+      },
+      onCompleted: (QueryResult onCompleteResult) {
+        showDialog<AlertDialog>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Thanks for your star!'),
+              actions: <Widget>[
+                SimpleDialogOption(
+                  child: const Text('Dismiss'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

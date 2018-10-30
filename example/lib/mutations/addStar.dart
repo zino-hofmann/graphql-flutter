@@ -1,6 +1,6 @@
-const String addStar = '''
-  mutation AddStar(\$starrableId: ID!) {
-    addStar(input: {starrableId: \$starrableId}) {
+const String addStar = r'''
+  mutation AddStar($starrableId: ID!) {
+    action: addStar(input: {starrableId: $starrableId}) {
       starrable {
         viewerHasStarred
       }
