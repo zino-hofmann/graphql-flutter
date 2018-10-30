@@ -211,9 +211,6 @@ class StarrableRepositoryState extends State<StarrableRepository> {
                 SimpleDialogOption(
                   child: const Text('Dismiss'),
                   onPressed: () {
-                    setState(() {
-                      loading = false;
-                    });
                     Navigator.of(context).pop();
                   },
                 )
@@ -221,6 +218,9 @@ class StarrableRepositoryState extends State<StarrableRepository> {
             );
           },
         );
+        setState(() {
+          loading = false;
+        });
       },
     );
   }
