@@ -40,10 +40,8 @@ class Mutation extends StatefulWidget {
 }
 
 class MutationState extends State<Mutation> {
-  bool _observableIsStale;
   GraphQLClient client;
   ObservableQuery observableQuery;
-  StreamSubscription<QueryResult> onCompleteSubscription;
 
   WatchQueryOptions get _options => WatchQueryOptions(
         document: widget.options.document,
@@ -54,46 +52,38 @@ class MutationState extends State<Mutation> {
         context: widget.options.context,
       );
 
-  void _replaceStaleObservable() {
-    if (_observableIsStale) {
-      observableQuery.close();
-      observableQuery = client.watchQuery(_options);
-      _observableIsStale = false;
-    }
-  }
-
-  void runMutation(Map<String, dynamic> variables) {
-    _replaceStaleObservable();
+  ObservableQuery _replaceObservableQuery(Map<String, dynamic> variables) {
+    // triggering a new mutation cancels previous queued callbacks
+    observableQuery?.close(force: true);
+    observableQuery = client.watchQuery(_options);
     observableQuery.setVariables(variables);
-
-    if (widget.onCompleted != null || widget.update != null) {
-      onCompleteSubscription =
-          observableQuery.stream.listen((QueryResult result) {
-        if (!result.loading) {
-          if (widget.onCompleted != null) {
-            widget.onCompleted(result);
-          }
-          if (widget.update != null) {
-            widget.update(client.cache, result);
-          }
-          onCompleteSubscription.cancel();
-        }
-      });
-    }
-
-    observableQuery.controller.add(
-      QueryResult(
-        loading: true,
-      ),
-    );
-
-    observableQuery.fetchResults();
+    return observableQuery;
   }
+
+  OnData get update {
+    if (widget.update != null) {
+      void updateOnData(QueryResult result) {
+        widget.update(client.cache, result);
+      }
+
+      return updateOnData;
+    }
+    return null;
+  }
+
+  Iterable<OnData> get callbacks {
+    return <OnData>[widget.onCompleted, update].where(notNull);
+  }
+
+  void runMutation(Map<String, dynamic> variables) =>
+      _replaceObservableQuery(variables)
+        ..onData(callbacks) // add callbacks to observable
+        ..sendLoading()
+        ..fetchResults();
 
   @override
   void dispose() {
-    onCompleteSubscription?.cancel();
-    observableQuery.close();
+    observableQuery.close(force: false);
     super.dispose();
   }
 
@@ -103,15 +93,9 @@ class MutationState extends State<Mutation> {
     final GraphQLClient newClient = GraphQLProvider.of(context).value;
     assert(newClient != null);
 
-    if (observableQuery != null &&
-        observableQuery.isCurrentlyPolling &&
-        newClient != client) {
+    if (client != newClient) {
       client = newClient;
-      _observableIsStale = true;
-    } else if (client != newClient) {
-      client = newClient;
-      _observableIsStale = false;
-      observableQuery = client.watchQuery(_options);
+      observableQuery?.close(force: false);
     }
     super.didChangeDependencies();
   }
@@ -134,4 +118,8 @@ class MutationState extends State<Mutation> {
       },
     );
   }
+}
+
+bool notNull(Object any) {
+  return any != null;
 }

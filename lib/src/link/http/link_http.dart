@@ -192,13 +192,12 @@ FetchResult _parseResponse(Response response) {
   final int statusCode = response.statusCode;
   final String reasonPhrase = response.reasonPhrase;
 
-  /* TODO this discards a lot of useful info in development
+  /* TODO this discards a lot of useful info in development */
   if (statusCode < 200 || statusCode >= 400) {
     throw ClientException(
       'Network Error: $statusCode $reasonPhrase',
     );
   }
-  */
 
   final Encoding encoding = _determineEncodingFromResponse(response);
   final dynamic decodedBody = encoding.decode(response.bodyBytes);

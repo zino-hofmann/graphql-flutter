@@ -8,13 +8,30 @@ import 'package:graphql_flutter/src/core/query_result.dart';
 
 import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
+typedef void OnData(QueryResult result);
+
+enum QueryLifecycle {
+  UNEXECUTED,
+  PENDING,
+  POLLING,
+  POLLING_STOPPED,
+  SIDE_EFFECTS_PENDING,
+  SIDE_EFFECTS_BLOCKING,
+
+  // right now only Mutations ever become completed
+  COMPLETED,
+}
+
 class ObservableQuery {
   final String queryId;
   final QueryScheduler scheduler;
   final QueryManager queryManager;
 
+  StreamSubscription<QueryResult> _onDataSubscription;
+
+  QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
+
   WatchQueryOptions options;
-  bool isCurrentlyPolling = false;
 
   StreamController<QueryResult> controller;
 
@@ -29,6 +46,7 @@ class ObservableQuery {
   }
 
   Stream<QueryResult> get stream => controller.stream;
+  bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
 
   void onListen() {
     if (options.fetchResults) {
@@ -39,8 +57,43 @@ class ObservableQuery {
   void fetchResults() {
     queryManager.fetchQuery(queryId, options);
 
+    // if onData callbacks have been registered,
+    // they should be waited on by default
+    lifecycle = _onDataSubscription != null
+        ? QueryLifecycle.SIDE_EFFECTS_PENDING
+        : QueryLifecycle.PENDING;
+
     if (options.pollInterval != null) {
       startPolling(options.pollInterval);
+    }
+  }
+
+  void sendLoading() {
+    controller.add(
+      QueryResult(
+        loading: true,
+      ),
+    );
+  }
+
+  // most mutation behavior happens here
+  void onData(Iterable<OnData> callbacks) {
+    if (callbacks != null && callbacks.isNotEmpty) {
+      _onDataSubscription = stream.listen((QueryResult result) {
+        void handle(OnData callback) {
+          callback(result);
+        }
+
+        if (!result.loading) {
+          callbacks.forEach(handle);
+        }
+        _onDataSubscription.cancel();
+        if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+          lifecycle = QueryLifecycle.COMPLETED;
+          close();
+        }
+        lifecycle = QueryLifecycle.COMPLETED;
+      });
     }
   }
 
@@ -54,11 +107,10 @@ class ObservableQuery {
 
     if (isCurrentlyPolling) {
       scheduler.stopPollingQuery(queryId);
-      isCurrentlyPolling = false;
     }
 
     options.pollInterval = pollInterval;
-    isCurrentlyPolling = true;
+    lifecycle = QueryLifecycle.POLLING;
     scheduler.startPollingQuery(options, queryId);
   }
 
@@ -66,7 +118,7 @@ class ObservableQuery {
     if (isCurrentlyPolling) {
       scheduler.stopPollingQuery(queryId);
       options.pollInterval = null;
-      isCurrentlyPolling = false;
+      lifecycle = QueryLifecycle.POLLING_STOPPED;
     }
   }
 
@@ -74,7 +126,15 @@ class ObservableQuery {
     options.variables = variables;
   }
 
-  Future<void> close() async {
+  Future<void> close({bool force = false, bool fromManager = false}) async {
+    if (lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING && !force) {
+      lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
+      return null;
+    }
+    if (!fromManager) {
+      queryManager.closeQuery(this, fromQuery: true);
+    }
+    _onDataSubscription?.cancel();
     stopPolling();
     await controller.close();
   }

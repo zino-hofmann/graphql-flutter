@@ -173,6 +173,13 @@ class QueryManager {
     queries[observableQuery.queryId] = observableQuery;
   }
 
+  void closeQuery(ObservableQuery observableQuery, {bool fromQuery = false}) {
+    if (!fromQuery) {
+      observableQuery.close(fromManager: true);
+    }
+    queries.remove(observableQuery.queryId);
+  }
+
   int generateQueryId() {
     final int requestId = idCounter;
 
