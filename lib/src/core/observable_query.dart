@@ -86,13 +86,13 @@ class ObservableQuery {
 
         if (!result.loading) {
           callbacks.forEach(handle);
-        }
-        _onDataSubscription.cancel();
-        if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+          _onDataSubscription.cancel();
+          if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+            lifecycle = QueryLifecycle.COMPLETED;
+            close();
+          }
           lifecycle = QueryLifecycle.COMPLETED;
-          close();
         }
-        lifecycle = QueryLifecycle.COMPLETED;
       });
     }
   }
