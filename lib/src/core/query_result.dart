@@ -6,6 +6,7 @@ class QueryResult {
     this.errors,
     this.loading,
     this.stale,
+    this.optimistic = false,
   });
 
   /// List<dynamic> or Map<String, dynamic>
@@ -13,6 +14,7 @@ class QueryResult {
   List<GraphQLError> errors;
   bool loading;
   bool stale;
+  bool optimistic;
 
   bool get hasErrors {
     if (errors == null) {

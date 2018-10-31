@@ -71,7 +71,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
 
   void removeOptimisticPatch(String removeId) {
     optimisticPatches.removeWhere(
-      (OptimisticPatch patch) => patch.id != removeId,
+      (OptimisticPatch patch) => patch.id == removeId,
     );
   }
 }

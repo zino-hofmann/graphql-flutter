@@ -1,5 +1,6 @@
 import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
+import 'package:graphql_flutter/src/core/raw_operation_data.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
@@ -26,21 +27,14 @@ enum ErrorPolicy {
 }
 
 /// Base options.
-class BaseOptions {
+class BaseOptions extends RawOperationData {
   BaseOptions({
-    @required this.document,
-    this.variables,
+    @required String document,
+    Map<String, dynamic> variables,
     this.fetchPolicy,
     this.errorPolicy,
     this.context,
-  });
-
-  /// A GraphQL document that consists of a single query to be sent down to the server.
-  String document;
-
-  /// A map going from variable name to variable value, where the variables are used
-  /// within the GraphQL query.
-  Map<String, dynamic> variables;
+  }) : super(document: document, variables: variables);
 
   /// Specifies the [FetchPolicy] to be used.
   FetchPolicy fetchPolicy;

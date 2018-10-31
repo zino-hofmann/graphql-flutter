@@ -42,6 +42,8 @@ class ObservableQuery {
       // ignore: prefer_collection_literals
       Set<StreamSubscription<QueryResult>>();
 
+  QueryResult previousResult;
+
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
   WatchQueryOptions options;
@@ -50,6 +52,22 @@ class ObservableQuery {
 
   Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
+
+  bool get isRebroadcastSafe {
+    switch (lifecycle) {
+      case QueryLifecycle.PENDING:
+      case QueryLifecycle.COMPLETED:
+      case QueryLifecycle.POLLING:
+      case QueryLifecycle.POLLING_STOPPED:
+        return true;
+
+      case QueryLifecycle.UNEXECUTED: // this might be ok
+      case QueryLifecycle.SIDE_EFFECTS_PENDING:
+      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+        return false;
+    }
+    return false;
+  }
 
   void onListen() {
     if (options.fetchResults) {
@@ -71,12 +89,16 @@ class ObservableQuery {
     }
   }
 
-  void sendLoading() {
-    controller.add(
-      QueryResult(
-        loading: true,
-      ),
-    );
+  /// add a result to the stream,
+  /// copying `loading` and `optimistic`
+  /// from the `previousResult` if they aren't set.
+  void addResult(QueryResult result) {
+    if (previousResult != null) {
+      result.loading ??= previousResult.loading;
+      result.optimistic ??= previousResult.optimistic;
+    }
+    previousResult = result;
+    controller.add(result);
   }
 
   // most mutation behavior happens here
@@ -101,6 +123,7 @@ class ObservableQuery {
             }
 
             lifecycle = QueryLifecycle.COMPLETED;
+            close();
           }
         }
       });

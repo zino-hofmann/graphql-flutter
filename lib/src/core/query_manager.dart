@@ -16,8 +16,6 @@ import 'package:graphql_flutter/src/link/fetch_result.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/cache/optimistic.dart' show OptimisticCache;
 
-import 'package:graphql_flutter/src/utilities/get_from_ast.dart';
-
 class QueryManager {
   QueryManager({
     @required this.link,
@@ -65,15 +63,8 @@ class QueryManager {
     BaseOptions options,
   ) async {
     final ObservableQuery observableQuery = getQuery(queryId);
-    // XXX there is a bug in the `graphql_parser` package, where this result might be
-    // null event though the operation name is present in the document
-    final String operationName = getOperationName(options.document);
     // create a new operation to fetch
-    final Operation operation = Operation(
-      document: options.document,
-      variables: options.variables,
-      operationName: operationName,
-    );
+    final Operation operation = Operation.fromOptions(observableQuery.options);
 
     FetchResult fetchResult;
     QueryResult queryResult;
@@ -93,11 +84,14 @@ class QueryManager {
             data: cachedData,
           );
 
-          queryResult = _mapFetchResultToQueryResult(fetchResult);
+          queryResult = _mapFetchResultToQueryResult(
+            fetchResult,
+            loading: false,
+          );
 
           // add the cache result to an observable query if it exists
           if (observableQuery != null) {
-            observableQuery.controller.add(queryResult);
+            observableQuery.addResult(queryResult);
           }
 
           if (options.fetchPolicy == FetchPolicy.cacheFirst ||
@@ -143,7 +137,10 @@ class QueryManager {
         );
       }
 
-      queryResult = _mapFetchResultToQueryResult(fetchResult);
+      queryResult = _mapFetchResultToQueryResult(
+        fetchResult,
+        loading: false,
+      );
     } catch (error) {
       String errorMessage;
 
@@ -171,7 +168,7 @@ class QueryManager {
 
     // add the result to an observable query if it exists and not closed
     if (observableQuery != null && !observableQuery.controller.isClosed) {
-      observableQuery.controller.add(queryResult);
+      observableQuery.addResult(queryResult);
     }
 
     return queryResult;
@@ -183,6 +180,23 @@ class QueryManager {
     }
 
     return null;
+  }
+
+  /// push changed data from cache to query streams
+  void rebroadcastQueries({bool optimistic}) {
+    for (ObservableQuery query in queries.values) {
+      if (query.isRebroadcastSafe) {
+        final dynamic cachedData = cache.read(query.options.toKey());
+        if (cachedData != null) {
+          query.addResult(
+            _mapFetchResultToQueryResult(
+              FetchResult(data: cachedData),
+              optimistic: optimistic,
+            ),
+          );
+        }
+      }
+    }
   }
 
   void setQuery(ObservableQuery observableQuery) {
@@ -204,7 +218,11 @@ class QueryManager {
     return requestId;
   }
 
-  QueryResult _mapFetchResultToQueryResult(FetchResult fetchResult) {
+  QueryResult _mapFetchResultToQueryResult(
+    FetchResult fetchResult, {
+    bool loading,
+    bool optimistic,
+  }) {
     List<GraphQLError> errors;
 
     if (fetchResult.errors != null) {
@@ -216,7 +234,8 @@ class QueryManager {
     return QueryResult(
       data: fetchResult.data,
       errors: errors,
-      loading: false,
+      loading: loading,
+      optimistic: optimistic,
     );
   }
 }

@@ -1,19 +1,20 @@
-import 'dart:collection' show SplayTreeMap;
-import 'dart:convert' show json;
-import 'dart:io' show File;
+import 'package:meta/meta.dart';
+import 'package:graphql_flutter/src/core/raw_operation_data.dart';
 
-class Operation {
+class Operation extends RawOperationData {
   Operation({
-    this.document,
+    @required String document,
     Map<String, dynamic> variables,
-    this.operationName,
     this.extensions,
-  }) : this.variables =
-            SplayTreeMap<String, dynamic>.of(variables ?? <String, dynamic>{});
+  }) : super(document: document, variables: variables);
 
-  final String document;
-  final SplayTreeMap<String, dynamic> variables;
-  final String operationName;
+  factory Operation.fromOptions(RawOperationData options) {
+    return Operation(
+      document: options.document,
+      variables: options.variables,
+    );
+  }
+
   final Map<String, dynamic> extensions;
 
   final Map<String, dynamic> _context = <String, dynamic>{};
@@ -30,20 +31,8 @@ class Operation {
     return result;
   }
 
+  // operationName should never be null, but leaving this check in anyways
   bool get isSubscription =>
       operationName != null &&
       document.contains(RegExp(r'.*?subscription ' + operationName));
-
-  String toKey() {
-    /// SplayTreeMap is always sorted
-    final String encodedVariables =
-        json.encode(variables, toEncodable: (dynamic object) {
-      if (object is File) {
-        return object.path;
-      }
-      return object;
-    });
-
-    return '$document|$encodedVariables|$operationName';
-  }
 }

@@ -89,6 +89,9 @@ class MutationState extends State<Mutation> {
         widget.update(cache, result);
         if (cache is OptimisticCache) {
           cache.removeOptimisticPatch(mutationId);
+          observableQuery.queryManager.rebroadcastQueries(
+            optimistic: false,
+          );
         }
       }
 
@@ -119,6 +122,9 @@ class MutationState extends State<Mutation> {
         );
         return cache;
       });
+      observableQuery.queryManager.rebroadcastQueries(
+        optimistic: true,
+      );
     }
   }
 
@@ -126,7 +132,7 @@ class MutationState extends State<Mutation> {
     observableQuery
       ..setVariables(variables)
       ..onData(callbacks) // add callbacks to observable
-      ..sendLoading()
+      ..addResult(QueryResult(loading: true))
       ..fetchResults();
 
     handleOptimism(optimisticResult);
