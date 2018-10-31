@@ -14,6 +14,7 @@ import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 
 import 'package:graphql_flutter/src/cache/cache.dart';
+import 'package:graphql_flutter/src/cache/optimistic.dart' show OptimisticCache;
 
 import 'package:graphql_flutter/src/utilities/get_from_ast.dart';
 
@@ -94,7 +95,7 @@ class QueryManager {
 
           queryResult = _mapFetchResultToQueryResult(fetchResult);
 
-          // add the result to an observable query if it exists
+          // add the cache result to an observable query if it exists
           if (observableQuery != null) {
             observableQuery.controller.add(queryResult);
           }
@@ -125,6 +126,12 @@ class QueryManager {
           operation.toKey(),
           fetchResult.data,
         );
+        if (cache is OptimisticCache) {
+          // allow optimistic data to overwrite server results
+          fetchResult.data = cache.read(
+            operation.toKey(),
+          );
+        }
       }
 
       if (fetchResult.data == null &&
