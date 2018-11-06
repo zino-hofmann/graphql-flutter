@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 
 import 'package:graphql_flutter/src/graphql_client.dart';
@@ -7,6 +5,7 @@ import 'package:graphql_flutter/src/core/observable_query.dart';
 import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
+import 'package:graphql_flutter/src/utilities/helpers.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
@@ -118,8 +117,4 @@ class MutationState extends State<Mutation> {
       },
     );
   }
-}
-
-bool notNull(Object any) {
-  return any != null;
 }
