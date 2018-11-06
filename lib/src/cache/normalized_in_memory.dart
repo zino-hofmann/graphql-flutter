@@ -8,7 +8,9 @@ class NormalizationException implements Exception {
   StackOverflowError overflowError;
   String cause;
   Object value;
+
   NormalizationException(this.cause, this.overflowError, this.value);
+
   String get message => cause;
 }
 
@@ -25,6 +27,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
     if (node is List && node.length == 2 && node[0] == _prefix) {
       return read(node[1]);
     }
+
     return null;
   }
 
@@ -35,6 +38,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   @override
   dynamic read(String key) {
     final Object value = super.read(key);
+
     try {
       return traverse(value, _dereference);
     } catch (error) {

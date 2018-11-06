@@ -21,9 +21,11 @@ class StarrableRepositoryState extends State<StarrableRepository> {
 
   Map<String, Object> extractRepositoryData(Map<String, Object> data) {
     final Map<String, Object> action = data['action'];
+
     if (action == null) {
       return null;
     }
+
     return action['starrable'];
   }
 
@@ -32,6 +34,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
   @override
   Widget build(BuildContext context) {
     final bool starred = loading ? !viewerHasStarred : viewerHasStarred;
+
     return Mutation(
       key: Key(starred.toString()),
       options: MutationOptions(
@@ -66,6 +69,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
           final Map<String, Object> updated =
               Map<String, Object>.from(widget.repository)
                 ..addAll(extractRepositoryData(result.data));
+
           cache.write(typenameDataIdFromObject(updated), updated);
         }
       },
