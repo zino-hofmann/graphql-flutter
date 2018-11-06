@@ -87,10 +87,12 @@ class ObservableQuery {
         if (!result.loading) {
           callbacks.forEach(handle);
           _onDataSubscription.cancel();
+
           if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
             lifecycle = QueryLifecycle.COMPLETED;
             close();
           }
+
           lifecycle = QueryLifecycle.COMPLETED;
         }
       });
@@ -131,9 +133,11 @@ class ObservableQuery {
       lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
       return null;
     }
+
     if (!fromManager) {
       queryManager.closeQuery(this, fromQuery: true);
     }
+
     _onDataSubscription?.cancel();
     stopPolling();
     await controller.close();
