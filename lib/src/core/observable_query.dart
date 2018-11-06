@@ -113,6 +113,7 @@ class ObservableQuery {
 
         if (!result.loading) {
           callbacks.forEach(handle);
+          queryManager.rebroadcastQueries(optimistic: false);
           subscription.cancel();
           _onDataSubscriptions.remove(subscription);
 
@@ -121,9 +122,6 @@ class ObservableQuery {
               lifecycle = QueryLifecycle.COMPLETED;
               close();
             }
-
-            lifecycle = QueryLifecycle.COMPLETED;
-            close();
           }
         }
       });

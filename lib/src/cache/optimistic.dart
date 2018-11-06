@@ -51,7 +51,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
   /// defaulting to the base internal HashMap.
   @override
   dynamic read(String key) {
-    for (OptimisticPatch patch in optimisticPatches) {
+    for (OptimisticPatch patch in optimisticPatches.reversed) {
       if (patch.data.containsKey(key)) {
         return denormalize(patch.data[key]);
       }
@@ -66,7 +66,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
     CacheTransform transform,
   ) {
     final OptimisticProxy patch = transform(_proxy);
-    optimisticPatches.insert(0, OptimisticPatch(addId, patch.data));
+    optimisticPatches.add(OptimisticPatch(addId, patch.data));
   }
 
   void removeOptimisticPatch(String removeId) {

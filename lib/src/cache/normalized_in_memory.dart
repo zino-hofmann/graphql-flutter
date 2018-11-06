@@ -93,8 +93,10 @@ class NormalizedInMemoryCache extends InMemoryCache {
     Map<String, Object> into, [
     Normalizer normalizer,
   ]) {
-    final Object normalized =
-        traverseValues(value, normalizer ?? _normalizerFor(into));
+    // writing non-map data to the store is allowed
+    final Object normalized = value is Map<String, Object>
+        ? traverseValues(value, normalizer ?? _normalizerFor(into))
+        : value;
     into[key] = normalized;
   }
 
