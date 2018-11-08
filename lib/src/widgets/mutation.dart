@@ -51,18 +51,37 @@ class MutationState extends State<Mutation> {
         context: widget.options.context,
       );
 
-  ObservableQuery _replaceObservableQuery(Map<String, dynamic> variables) {
-    // triggering a new mutation cancels previous queued callbacks
-    observableQuery?.close(force: true);
+  // TODO is it possible to extract shared logic into mixin
+  void _initQuery() {
+    client = GraphQLProvider.of(context).value;
+    assert(client != null);
+
+    observableQuery?.close();
     observableQuery = client.watchQuery(_options);
-    observableQuery.setVariables(variables);
-    return observableQuery;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initQuery();
+  }
+
+  @override
+  void didUpdateWidget(Mutation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // TODO @micimize - investigate why/if this was causing issues
+    if (!observableQuery.options.areEqualTo(_options)) {
+      _initQuery();
+    }
   }
 
   OnData get update {
+    // fallback client in case widget has been disposed of
+    final Cache cache = client.cache;
     if (widget.update != null) {
       void updateOnData(QueryResult result) {
-        widget.update(client.cache, result);
+        widget.update(client?.cache ?? cache, result);
       }
 
       return updateOnData;
@@ -74,29 +93,16 @@ class MutationState extends State<Mutation> {
     return <OnData>[widget.onCompleted, update].where(notNull);
   }
 
-  void runMutation(Map<String, dynamic> variables) =>
-      _replaceObservableQuery(variables)
-        ..onData(callbacks) // add callbacks to observable
-        ..sendLoading()
-        ..fetchResults();
+  void runMutation(Map<String, dynamic> variables) => observableQuery
+    ..setVariables(variables)
+    ..onData(callbacks) // add callbacks to observable
+    ..sendLoading()
+    ..fetchResults();
 
   @override
   void dispose() {
     observableQuery?.close(force: false);
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    final GraphQLClient newClient = GraphQLProvider.of(context).value;
-    assert(newClient != null);
-
-    if (client != newClient) {
-      client = newClient;
-      observableQuery?.close(force: false);
-    }
-    super.didChangeDependencies();
   }
 
   @override

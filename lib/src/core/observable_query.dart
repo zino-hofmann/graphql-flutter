@@ -27,7 +27,8 @@ class ObservableQuery {
   final QueryScheduler scheduler;
   final QueryManager queryManager;
 
-  StreamSubscription<QueryResult> _onDataSubscription;
+  final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
+      Set<StreamSubscription<QueryResult>>();
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
@@ -59,7 +60,7 @@ class ObservableQuery {
 
     // if onData callbacks have been registered,
     // they should be waited on by default
-    lifecycle = _onDataSubscription != null
+    lifecycle = _onDataSubscriptions.isNotEmpty
         ? QueryLifecycle.SIDE_EFFECTS_PENDING
         : QueryLifecycle.PENDING;
 
@@ -79,23 +80,30 @@ class ObservableQuery {
   // most mutation behavior happens here
   void onData(Iterable<OnData> callbacks) {
     if (callbacks != null && callbacks.isNotEmpty) {
-      _onDataSubscription = stream.listen((QueryResult result) {
+      StreamSubscription<QueryResult> subscription;
+
+      subscription = stream.listen((QueryResult result) {
         void handle(OnData callback) {
           callback(result);
         }
 
         if (!result.loading) {
           callbacks.forEach(handle);
-          _onDataSubscription.cancel();
+          subscription.cancel();
+          _onDataSubscriptions.remove(subscription);
 
-          if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+          if (_onDataSubscriptions.isEmpty) {
+            if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+              lifecycle = QueryLifecycle.COMPLETED;
+              close();
+            }
+
             lifecycle = QueryLifecycle.COMPLETED;
-            close();
           }
-
-          lifecycle = QueryLifecycle.COMPLETED;
         }
       });
+
+      _onDataSubscriptions.add(subscription);
     }
   }
 
@@ -138,7 +146,10 @@ class ObservableQuery {
       queryManager.closeQuery(this, fromQuery: true);
     }
 
-    _onDataSubscription?.cancel();
+    for (StreamSubscription<QueryResult> subscription in _onDataSubscriptions) {
+      subscription.cancel();
+    }
+
     stopPolling();
     await controller.close();
   }
