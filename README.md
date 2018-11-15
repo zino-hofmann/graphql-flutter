@@ -322,6 +322,31 @@ class MyApp extends StatelessWidget {
 ...
 ```
 
+### Using Client Without Widget
+
+You can using the GraphQL client directly to make queries or mutations without flutter widgets.
+
+```dart
+import 'dart:async';
+import 'package:graphql_flutter/graphql_flutter.dart';
+
+Client client = Client(
+    endPoint: 'https://api.github.com/graphql',
+    cache: InMemoryCache(),
+    apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
+);
+
+Future<Map<String, dynamic>> queryData() async {
+    Map<String, dynamic> data = await client.query(
+        readRepositories,
+        variables: {
+            'nRepositories': 50,
+        },
+    );
+    return data;
+}
+```
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
