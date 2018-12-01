@@ -14,7 +14,6 @@ import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 import 'package:graphql_flutter/src/link/http/http_config.dart';
-import 'package:rxdart/rxdart.dart';
 
 class HttpLink extends Link {
   HttpLink({
@@ -96,6 +95,7 @@ class HttpLink extends Link {
 
                 controller.add(parsedResponse);
               } catch (error) {
+                print(<dynamic>[error.runtimeType, error]);
                 controller.addError(error);
               }
 
