@@ -2,6 +2,8 @@ import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/utilities/traverse.dart';
 import 'package:graphql_flutter/src/cache/in_memory.dart';
 
+import './lazy_cache_map.dart';
+
 typedef DataIdFromObject = String Function(Object node);
 
 class NormalizationException implements Exception {
@@ -14,37 +16,59 @@ class NormalizationException implements Exception {
   String get message => cause;
 }
 
-typedef List<String> Normalizer(Object node);
+typedef Normalizer = List<String> Function(Object node);
 
 class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
-    String prefix = '@cache/reference',
-  }) : _prefix = prefix;
+    this.prefix = '@cache/reference',
+  });
+
+  bool _isReference(Object node) =>
+      node is List && node.length == 2 && node[0] == prefix;
 
   DataIdFromObject dataIdFromObject;
-  String _prefix;
+  String prefix;
 
   Object _dereference(Object node) {
-    if (node is List && node.length == 2 && node[0] == _prefix) {
+    if (node is List && _isReference(node)) {
       return read(node[1] as String);
     }
 
     return null;
   }
 
-  dynamic denormalize(Object value) {
+  LazyMap lazilyDenormalized(Object data) {
+    // TODO typping
+    return LazyMap(
+      data: data as Map<String, Object>,
+      dereference: _dereference,
+    );
+  }
+
+  Object _denormalizingDereference(Object node) {
+    if (node is List && _isReference(node)) {
+      return denormalizedRead(node[1] as String);
+    }
+
+    return null;
+  }
+
+  // TODO ideally cyclical references would be noticed and replaced with null or something
+  /// eagerly dereferences all cache references.
+  /// *WARNING* if your system allows cyclical references, this will break
+  dynamic denormalizedRead(String key) {
     try {
-      return traverse(value, _dereference);
+      return traverse(super.read(key), _denormalizingDereference);
     } catch (error) {
       if (error is StackOverflowError) {
         throw NormalizationException(
           '''
-          Dereferencing failed for $value this is likely caused by a circular reference.
+          Denormalization failed for $key this is likely caused by a circular reference.
           Please ensure dataIdFromObject returns a unique identifier for all possible entities in your system
           ''',
           error,
-          value,
+          key,
         );
       }
     }
@@ -55,8 +79,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
     replacing them with cached instances
   */
   @override
-  dynamic read(String key) {
-    return denormalize(super.read(key));
+  LazyMap read(String key) {
+    return lazilyDenormalized(super.read(key));
   }
 
   Normalizer _normalizerFor(Map<String, Object> into) {
@@ -64,7 +88,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
       final String dataId = dataIdFromObject(node);
       if (dataId != null) {
         writeInto(dataId, node, into, normalizer);
-        return <String>[_prefix, dataId];
+        return <String>[prefix, dataId];
       }
       return null;
     }
@@ -77,7 +101,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
 
     if (dataId != null) {
       writeInto(dataId, node, data, _normalize);
-      return <String>[_prefix, dataId];
+      return <String>[prefix, dataId];
     }
 
     return null;

@@ -3,21 +3,31 @@ import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
 
+import './lazy_cache_map.dart';
+
 class OptimisticPatch extends Object {
+  OptimisticPatch(this.id, this.data);
   String id;
   HashMap<String, dynamic> data;
-  OptimisticPatch(this.id, this.data);
 }
 
 class OptimisticProxy implements Cache {
+  OptimisticProxy(this.cache);
   OptimisticCache cache;
   HashMap<String, dynamic> data = HashMap<String, dynamic>();
-  OptimisticProxy(this.cache);
+
+  Object _dereference(Object node) {
+    if (node is List && node.length == 2 && node[0] == cache.prefix) {
+      return read(node[1]);
+    }
+
+    return null;
+  }
 
   @override
   dynamic read(String key) {
     if (data.containsKey(key)) {
-      return cache.denormalize(data[key]);
+      return LazyMap(data: data[key], dereference: _dereference);
     }
     return cache.read(key);
   }
@@ -50,10 +60,10 @@ class OptimisticCache extends NormalizedInMemoryCache {
   /// Reads and dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
   @override
-  dynamic read(String key) {
+  LazyMap read(String key) {
     for (OptimisticPatch patch in optimisticPatches.reversed) {
       if (patch.data.containsKey(key)) {
-        return denormalize(patch.data[key]);
+        return lazilyDenormalized(patch.data[key]);
       }
     }
     return super.read(key);

@@ -1,5 +1,6 @@
 import 'package:test/test.dart';
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
+import 'package:graphql_flutter/src/cache/lazy_cache_map.dart';
 
 List<String> reference(String key) {
   return <String>['cache/reference', key];
@@ -122,25 +123,64 @@ final Map<String, Object> updatedSubsetOperationData = <String, Object>{
   'aField': <String, Object>{'field': false}
 };
 
+final Map<String, Object> cyclicalOperationData = <String, Object>{
+  'a': <String, Object>{
+    '__typename': 'A',
+    'id': 1,
+    'b': <String, Object>{
+      '__typename': 'B',
+      'id': 5,
+      'a': <String, Object>{
+        '__typename': 'A',
+        'id': 1,
+      },
+    },
+  },
+};
+
+final Map<String, Object> cyclicalNormalizedA = <String, Object>{
+  '__typename': 'A',
+  'id': 1,
+  'b': <String>['@cache/reference', 'B/5'],
+};
+
+final Map<String, Object> cyclicalNormalizedB = <String, Object>{
+  '__typename': 'B',
+  'id': 5,
+  'a': <String>['@cache/reference', 'A/1'],
+};
+
 void main() {
   group('Normalizes writes', () {
     final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
     );
-
-    test('.read .write round trip', () {
+    test('.write .readDenormalize round trip', () {
       cache.write(rawOperationKey, rawOperationData);
-      expect(cache.read(rawOperationKey), equals(rawOperationData));
+      expect(cache.denormalizedRead(rawOperationKey), equals(rawOperationData));
     });
-
     test('updating nested data changes top level operation', () {
       cache.write('C/6', updatedCValue);
-      expect(cache.read(rawOperationKey), equals(updatedCOperationData));
+      expect(
+        cache.denormalizedRead(rawOperationKey),
+        equals(updatedCOperationData),
+      );
     });
-
     test('updating subset query does not override superset query', () {
       cache.write('anotherUnrelatedKey', subsetAValue);
       expect(cache.read(rawOperationKey), equals(updatedSubsetOperationData));
+    });
+  });
+  group('Normalizes writes', () {
+    final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
+      dataIdFromObject: typenameDataIdFromObject,
+    );
+    test('lazily reads cyclical references', () {
+      cache.write(rawOperationKey, cyclicalOperationData);
+      final LazyMap a = cache.read('A/1');
+      expect(a.data, equals(cyclicalNormalizedA));
+      final LazyMap b = a['b'];
+      expect(b.data, equals(cyclicalNormalizedB));
     });
   });
 }
