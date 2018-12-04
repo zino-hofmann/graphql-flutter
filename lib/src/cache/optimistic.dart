@@ -69,6 +69,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
         return lazilyDenormalized(patch.data[key]);
       }
     }
+
     return super.read(key);
   }
 

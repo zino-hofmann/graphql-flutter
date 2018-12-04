@@ -74,7 +74,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   }
 
   /*
-    Derefrences object references,
+    Dereferences object references,
     replacing them with cached instances
   */
   @override
@@ -107,10 +107,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return null;
   }
 
-  /*
-    Writes included objects to provided Map,
-    replacing them with references
-  */
+  /// Writes included objects to provided Map,
+  /// replacing discernable entities with references
   void writeInto(
     String key,
     Object value,
@@ -124,10 +122,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
     into[key] = normalized;
   }
 
-  /*
-    Writes included objects to store,
-    replacing them with references
-  */
+  /// Writes included objects to store,
+  /// replacing discernable entities with references
   @override
   void write(String key, Object value) {
     writeInto(key, value, data, _normalize);
