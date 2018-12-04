@@ -27,7 +27,10 @@ class OptimisticProxy implements Cache {
   @override
   dynamic read(String key) {
     if (data.containsKey(key)) {
-      return LazyMap(data: data[key], dereference: _dereference);
+      final Object value = data[key];
+      return value is Map
+          ? LazyMap(data: value, dereference: _dereference)
+          : value;
     }
     return cache.read(key);
   }
@@ -60,7 +63,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
   /// Reads and dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
   @override
-  LazyMap read(String key) {
+  dynamic read(String key) {
     for (OptimisticPatch patch in optimisticPatches.reversed) {
       if (patch.data.containsKey(key)) {
         return lazilyDenormalized(patch.data[key]);

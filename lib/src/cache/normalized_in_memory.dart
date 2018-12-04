@@ -38,10 +38,9 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return null;
   }
 
-  LazyMap lazilyDenormalized(Object data) {
-    // TODO typping
+  LazyMap lazilyDenormalized(Map<String, Object> data) {
     return LazyMap(
-      data: data as Map<String, Object>,
+      data: data,
       dereference: _dereference,
     );
   }
@@ -79,8 +78,9 @@ class NormalizedInMemoryCache extends InMemoryCache {
     replacing them with cached instances
   */
   @override
-  LazyMap read(String key) {
-    return lazilyDenormalized(super.read(key));
+  dynamic read(String key) {
+    final Object value = super.read(key);
+    return value is Map<String, Object> ? lazilyDenormalized(value) : value;
   }
 
   Normalizer _normalizerFor(Map<String, Object> into) {
