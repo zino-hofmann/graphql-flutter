@@ -30,18 +30,30 @@ class NormalizedInMemoryCache extends InMemoryCache {
   DataIdFromObject dataIdFromObject;
   String prefix;
 
-  Object _dereference(Object node) {
-    if (node is List && _isReference(node)) {
-      return read(node[1] as String);
+  Dereference get _dereference {
+    final Map<String, Object> seen = <String, Object>{};
+    Object dereference(Object node) {
+      if (node is List && _isReference(node)) {
+        final String key = node[1] as String;
+        if (seen.containsKey(key)) {
+          return seen[key];
+        }
+        return read(key, dereference: dereference);
+      }
+
+      return null;
     }
 
-    return null;
+    return dereference;
   }
 
-  LazyMap lazilyDenormalized(Map<String, Object> data) {
+  LazyMap lazilyDenormalized(
+    Map<String, Object> data, {
+    Dereference dereference,
+  }) {
     return LazyMap(
       data: data,
-      dereference: _dereference,
+      dereference: dereference ?? _dereference,
     );
   }
 
@@ -78,9 +90,14 @@ class NormalizedInMemoryCache extends InMemoryCache {
     replacing them with cached instances
   */
   @override
-  dynamic read(String key) {
+  dynamic read(
+    String key, {
+    Dereference dereference,
+  }) {
     final Object value = super.read(key);
-    return value is Map<String, Object> ? lazilyDenormalized(value) : value;
+    return value is Map<String, Object>
+        ? lazilyDenormalized(value, dereference: dereference ?? _dereference)
+        : value;
   }
 
   Normalizer _normalizerFor(Map<String, Object> into) {

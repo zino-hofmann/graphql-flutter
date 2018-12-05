@@ -20,13 +20,15 @@ typedef Dereference = Object Function(Object node);
 /// As well as `cast`
 class LazyMap implements Map<String, Object> {
   LazyMap({
-    @required this.data,
+    @required Map<String, Object> data,
     @required Dereference dereference,
-  }) : _dereference = dereference;
+  })  : _data = data is LazyMap ? data.data : data,
+        _dereference = dereference;
 
   Dereference _dereference;
 
-  final Map<String, Object> data;
+  final Map<String, Object> _data;
+  Map<String, Object> get data => _data;
 
   Object _getValue(Object value) {
     final Object result = _dereference(value) ?? value;
@@ -44,7 +46,9 @@ class LazyMap implements Map<String, Object> {
   }
 
   @override
-  Object operator [](Object key) => _getValue(data[key]);
+  Object operator [](Object key) {
+    return _getValue(data[key]);
+  }
 
   @override
   bool containsKey(Object key) => data.containsKey(key);
