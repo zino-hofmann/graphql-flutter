@@ -64,13 +64,19 @@ class OptimisticCache extends NormalizedInMemoryCache {
   /// defaulting to the base internal HashMap.
   @override
   dynamic read(String key) {
-    for (OptimisticPatch patch in optimisticPatches.reversed) {
+    Object value = super.read(key);
+    for (OptimisticPatch patch in optimisticPatches) {
       if (patch.data.containsKey(key)) {
-        return lazilyDenormalized(patch.data[key]);
+        final Object patchData = patch.data[key];
+        if (value is Map<String, Object> && patchData is Map<String, Object>) {
+          value = patchData..addAll(value is LazyMap ? value.data : value);
+        } else {
+          // Overwrite if not mergable
+          value = patchData;
+        }
       }
     }
-
-    return super.read(key);
+    return value is Map<String, Object> ? lazilyDenormalized(value) : value;
   }
 
   OptimisticProxy get _proxy => OptimisticProxy(this);

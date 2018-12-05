@@ -50,6 +50,10 @@ class LazyMap implements Map<String, Object> {
     return _getValue(data[key]);
   }
 
+  Object get(Object key) {
+    return _getValue(data[key]);
+  }
+
   @override
   bool containsKey(Object key) => data.containsKey(key);
 

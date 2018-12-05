@@ -107,7 +107,6 @@ class ObservableQuery {
       StreamSubscription<QueryResult> subscription;
 
       subscription = stream.listen((QueryResult result) {
-        print([options.operationName, lifecycle]);
         void handle(OnData callback) {
           callback(result);
         }
