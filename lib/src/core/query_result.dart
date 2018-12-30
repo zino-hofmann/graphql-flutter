@@ -6,12 +6,14 @@ class QueryResult {
   List<GraphQLError> errors;
   bool loading;
   bool stale;
+  void Function() refetch;
 
   QueryResult({
     this.data,
     this.errors,
     this.loading,
     this.stale,
+    this.refetch,
   });
 
   bool get hasErrors {
