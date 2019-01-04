@@ -86,13 +86,7 @@ class QueryState extends State<Query> {
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
-        final QueryResult data = snapshot.data;
-        data.refetch = () async {
-          observableQuery.fetchResults();
-          await observableQuery.stream
-              .firstWhere((QueryResult result) => !result.loading);
-        };
-        return widget?.builder(data);
+        return widget?.builder(snapshot.data);
       },
     );
   }

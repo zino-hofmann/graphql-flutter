@@ -28,7 +28,10 @@ class ObservableQuery {
     );
   }
 
-  Stream<QueryResult> get stream => controller.stream;
+  Stream<QueryResult> get stream => controller.stream.map((QueryResult result) {
+        result.refetch = fetchResults;
+        return result;
+      });
 
   void onListen() {
     if (options.fetchResults) {
@@ -36,12 +39,15 @@ class ObservableQuery {
     }
   }
 
-  void fetchResults() {
-    queryManager.fetchQuery(queryId, options);
+  Future<QueryResult> fetchResults() {
+    final Future<QueryResult> result =
+        queryManager.fetchQuery(queryId, options);
 
     if (options.pollInterval != null) {
       startPolling(options.pollInterval);
     }
+
+    return result;
   }
 
   void startPolling(int pollInterval) {

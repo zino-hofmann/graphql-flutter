@@ -6,7 +6,7 @@ class QueryResult {
   List<GraphQLError> errors;
   bool loading;
   bool stale;
-  void Function() refetch;
+  Future<QueryResult> Function() refetch;
 
   QueryResult({
     this.data,
