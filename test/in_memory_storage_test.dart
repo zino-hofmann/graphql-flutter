@@ -38,16 +38,15 @@ final Map<String, Object> eData = <String, Object>{
   }
 };
 
+final Directory customStorageDirectory =
+    Directory.systemTemp.createTempSync('file_test_');
+
 void main() {
   group('Normalizes writes', () {
-    final Directory customStorageDirectory =
-        Directory.systemTemp.createTempSync('file_test_');
-
-    final InMemoryCache cache = InMemoryCache(
-      customStorageDirectory: customStorageDirectory,
-    );
-
     test('.write .read round trip', () async {
+      final InMemoryCache cache = InMemoryCache(
+        customStorageDirectory: customStorageDirectory,
+      );
       cache.write(aKey, aData);
       await cache.save();
       cache.reset();
@@ -56,6 +55,9 @@ void main() {
     });
 
     test('saving concurrently wont error', () async {
+      final InMemoryCache cache = InMemoryCache(
+        customStorageDirectory: customStorageDirectory,
+      );
       cache.write(aKey, aData);
       cache.write(bKey, bData);
       cache.write(cKey, cData);
