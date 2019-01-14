@@ -9,6 +9,7 @@ import 'package:graphql_flutter/src/cache/cache.dart';
 
 class InMemoryCache implements Cache {
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
+  bool _writing = false;
 
   /// Reads an entity from the internal HashMap.
   @override
@@ -60,10 +61,9 @@ class InMemoryCache implements Cache {
     return File('$path/cache.txt');
   }
 
-  bool writing = false;
   Future<dynamic> _writeToStorage() async {
-    if (!writing) {
-      writing = true;
+    if (!_writing) {
+      _writing = true;
     } else {
       return;
     }
@@ -76,7 +76,7 @@ class InMemoryCache implements Cache {
     });
 
     await sink.close();
-    writing = false;
+    _writing = false;
     return;
   }
 
