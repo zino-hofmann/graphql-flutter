@@ -9,7 +9,7 @@ import 'package:graphql_flutter/src/cache/cache.dart';
 
 class InMemoryCache implements Cache {
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
-  bool _writing = false;
+  bool _writingToStorage = false;
 
   /// Reads an entity from the internal HashMap.
   @override
@@ -24,7 +24,9 @@ class InMemoryCache implements Cache {
   /// Writes an entity to the internal HashMap.
   @override
   void write(String key, dynamic value) {
-    if (_inMemoryCache.containsKey(key) && _inMemoryCache[key] is Map) {
+    if (_inMemoryCache.containsKey(key) &&
+        _inMemoryCache[key] is Map &&
+        value is Map) {
       _inMemoryCache[key].addAll(value);
     } else {
       _inMemoryCache[key] = value;
@@ -62,8 +64,8 @@ class InMemoryCache implements Cache {
   }
 
   Future<dynamic> _writeToStorage() async {
-    if (!_writing) {
-      _writing = true;
+    if (!_writingToStorage) {
+      _writingToStorage = true;
     } else {
       return;
     }
@@ -76,7 +78,7 @@ class InMemoryCache implements Cache {
     });
 
     await sink.close();
-    _writing = false;
+    _writingToStorage = false;
     return;
   }
 
