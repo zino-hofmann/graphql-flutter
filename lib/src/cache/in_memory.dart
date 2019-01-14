@@ -14,7 +14,7 @@ class InMemoryCache implements Cache {
 
   /// A directory to be used for storage.
   /// This is used for testing, on regular usage
-  /// 'path_provider' will return the storage directory.
+  /// 'path_provider' will provide the storage directory.
   final Directory customStorageDirectory;
 
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
