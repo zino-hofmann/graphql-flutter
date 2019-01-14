@@ -121,7 +121,7 @@ void main() {
       expect(cache.read(rawOperationKey), equals(updatedCOperationData));
     });
 
-    test('updating smaller query update parent', () {
+    test('updating smaller query does not override parent', () {
       cache.write('anotherKey', smallerAValue);
       expect(cache.read(rawOperationKey), equals(updatedAOperationData));
     });
