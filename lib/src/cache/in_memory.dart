@@ -69,9 +69,9 @@ class InMemoryCache implements Cache {
     }
     _writingToStorage = true;
 
-    // catching errors to avoid locking forever
-    // maybe the device couldn't write in the past
-    // but now it can
+    // Catching errors to avoid locking forever.
+    // Maybe the device couldn't write in the past
+    // but in the future it may.
     try {
       final File file = await _localStorageFile;
       final IOSink sink = file.openWrite();
@@ -82,7 +82,7 @@ class InMemoryCache implements Cache {
 
       await sink.close();
     } catch (err) {
-      // XXX is there anything we could do?
+      // XXX Is there anything to be done?
     }
     _writingToStorage = false;
     return;
