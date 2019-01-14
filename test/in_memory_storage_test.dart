@@ -1,35 +1,41 @@
-import 'dart:io' show Directory, File, Platform;
+import 'dart:io' show Directory;
 import 'package:test/test.dart';
 import 'package:graphql_flutter/src/cache/in_memory.dart';
 
-const String rawOperationKey = 'rawOperationKey';
+const String aKey = 'aKey';
+const String bKey = 'bKey';
+const String cKey = 'cKey';
+const String dKey = 'dKey';
+const String eKey = 'eKey';
 
-final Map<String, Object> rawOperationData = <String, Object>{
+final Map<String, Object> aData = <String, Object>{
   'a': <String, Object>{
     '__typename': 'A',
-    'id': 1,
-    'list': <Object>[
-      1,
-      2,
-      3,
-      <String, Object>{
-        '__typename': 'Item',
-        'id': 4,
-        'value': 4,
-      }
-    ],
-    'b': <String, Object>{
-      '__typename': 'B',
-      'id': 5,
-      'c': <String, Object>{
-        '__typename': 'C',
-        'id': 6,
-        'cField': 'value',
-      },
-      'bField': <String, Object>{'field': true}
-    },
-  },
-  'aField': <String, Object>{'field': false}
+  }
+};
+
+final Map<String, Object> bData = <String, Object>{
+  'b': <String, Object>{
+    '__typename': 'B',
+  }
+};
+
+final Map<String, Object> cData = <String, Object>{
+  'c': <String, Object>{
+    '__typename': 'C',
+  }
+};
+
+final Map<String, Object> dData = <String, Object>{
+  'd': <String, Object>{
+    '__typename': 'D',
+  }
+};
+
+final Map<String, Object> eData = <String, Object>{
+  'e': <String, Object>{
+    '__typename': 'E',
+  }
 };
 
 void main() {
@@ -42,15 +48,19 @@ void main() {
     );
 
     test('.write .read round trip', () async {
-      cache.write(rawOperationKey, rawOperationData);
+      cache.write(aKey, aData);
       await cache.save();
       cache.reset();
       await cache.restore();
-      expect(cache.read(rawOperationKey), equals(rawOperationData));
+      expect(cache.read(aKey), equals(aData));
     });
 
     test('saving concurrently wont error', () async {
-      cache.write(rawOperationKey, rawOperationData);
+      cache.write(aKey, aData);
+      cache.write(bKey, bData);
+      cache.write(cKey, cData);
+      cache.write(dKey, dData);
+      cache.write(eKey, eData);
 
       await Future.wait(<Future<void>>[
         cache.save(),
@@ -62,7 +72,11 @@ void main() {
 
       cache.reset();
       await cache.restore();
-      expect(cache.read(rawOperationKey), equals(rawOperationData));
+      expect(cache.read(aKey), equals(aData));
+      expect(cache.read(bKey), equals(bData));
+      expect(cache.read(cKey), equals(cData));
+      expect(cache.read(dKey), equals(dData));
+      expect(cache.read(eKey), equals(eData));
     });
   });
 }
