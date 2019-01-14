@@ -27,6 +27,7 @@ class InMemoryCache implements Cache {
     if (_inMemoryCache.containsKey(key) &&
         _inMemoryCache[key] is Map &&
         value is Map) {
+      // Avoid overriding a superset with a subset of a field (#155)
       _inMemoryCache[key].addAll(value);
     } else {
       _inMemoryCache[key] = value;
