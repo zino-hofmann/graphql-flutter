@@ -83,10 +83,11 @@ class InMemoryCache implements Cache {
       });
 
       await sink.close();
+      _writingToStorage = false;
     } catch (err) {
-      // XXX Is there anything to be done?
+      _writingToStorage = false;
+      rethrow;
     }
-    _writingToStorage = false;
     return;
   }
 
