@@ -23,7 +23,11 @@ class InMemoryCache implements Cache {
   /// Writes an entity to the internal HashMap.
   @override
   void write(String key, dynamic value) {
-    _inMemoryCache[key] = value;
+    if (_inMemoryCache.containsKey(key) && _inMemoryCache[key] is Map) {
+      _inMemoryCache[key].addAll(value);
+    } else {
+      _inMemoryCache[key] = value;
+    }
   }
 
   /// Saves the internal HashMap to a file.
@@ -56,8 +60,15 @@ class InMemoryCache implements Cache {
     return File('$path/cache.txt');
   }
 
+  bool writing = false;
   Future<dynamic> _writeToStorage() async {
+    if (!writing) {
+      writing = true;
+    } else {
+      return;
+    }
     final File file = await _localStorageFile;
+
     final IOSink sink = file.openWrite();
 
     _inMemoryCache.forEach((String key, dynamic value) {
@@ -65,7 +76,7 @@ class InMemoryCache implements Cache {
     });
 
     await sink.close();
-
+    writing = false;
     return;
   }
 
@@ -76,7 +87,6 @@ class InMemoryCache implements Cache {
 
       if (file.existsSync()) {
         final Stream<List<int>> inputStream = file.openRead();
-
         inputStream
             .transform(utf8.decoder) // Decode bytes to UTF8.
             .transform(
