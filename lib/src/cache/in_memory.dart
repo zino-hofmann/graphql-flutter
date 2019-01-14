@@ -26,6 +26,7 @@ class InMemoryCache implements Cache {
   void write(String key, dynamic value) {
     if (_inMemoryCache.containsKey(key) &&
         _inMemoryCache[key] is Map &&
+        value != null &&
         value is Map) {
       // Avoid overriding a superset with a subset of a field (#155)
       _inMemoryCache[key].addAll(value);
@@ -72,7 +73,7 @@ class InMemoryCache implements Cache {
 
     // Catching errors to avoid locking forever.
     // Maybe the device couldn't write in the past
-    // but in the future it may.
+    // but it may in the future.
     try {
       final File file = await _localStorageFile;
       final IOSink sink = file.openWrite();

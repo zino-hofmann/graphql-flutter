@@ -66,7 +66,7 @@ final Map<String, Object> updatedCOperationData = <String, Object>{
   'aField': <String, Object>{'field': false}
 };
 
-final Map<String, Object> smallerAValue = <String, Object>{
+final Map<String, Object> subsetAValue = <String, Object>{
   'a': <String, Object>{
     '__typename': 'A',
     'id': 1,
@@ -83,7 +83,7 @@ final Map<String, Object> smallerAValue = <String, Object>{
   },
 };
 
-final Map<String, Object> updatedAOperationData = <String, Object>{
+final Map<String, Object> updatedSubsetOperationData = <String, Object>{
   'a': <String, Object>{
     '__typename': 'A',
     'id': 1,
@@ -121,9 +121,9 @@ void main() {
       expect(cache.read(rawOperationKey), equals(updatedCOperationData));
     });
 
-    test('updating smaller query does not override bigger query', () {
-      cache.write('anotherKey', smallerAValue);
-      expect(cache.read(rawOperationKey), equals(updatedAOperationData));
+    test('updating subset query does not override superset query', () {
+      cache.write('anotherUnrelatedKey', subsetAValue);
+      expect(cache.read(rawOperationKey), equals(updatedSubsetOperationData));
     });
   });
 }
