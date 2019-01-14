@@ -8,6 +8,15 @@ import 'package:path_provider/path_provider.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 
 class InMemoryCache implements Cache {
+  InMemoryCache({
+    this.customStorageDirectory,
+  });
+
+  /// A directory to be used for storage.
+  /// This is used for testing, on regular usage
+  /// 'path_provider' will return the storage directory.
+  final Directory customStorageDirectory;
+
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
   bool _writingToStorage = false;
 
@@ -37,13 +46,13 @@ class InMemoryCache implements Cache {
 
   /// Saves the internal HashMap to a file.
   @override
-  void save() async {
+  Future<void> save() async {
     await _writeToStorage();
   }
 
   /// Restores the internal HashMap to a file.
   @override
-  void restore() async {
+  Future<void> restore() async {
     _inMemoryCache = await _readFromStorage();
   }
 
@@ -54,8 +63,12 @@ class InMemoryCache implements Cache {
   }
 
   Future<String> get _localStoragePath async {
-    final Directory directory = await getApplicationDocumentsDirectory();
+    if (customStorageDirectory != null) {
+      // Used for testing
+      return customStorageDirectory.path;
+    }
 
+    final Directory directory = await getApplicationDocumentsDirectory();
     return directory.path;
   }
 
@@ -77,7 +90,6 @@ class InMemoryCache implements Cache {
     try {
       final File file = await _localStorageFile;
       final IOSink sink = file.openWrite();
-
       _inMemoryCache.forEach((String key, dynamic value) {
         sink.writeln(json.encode(<dynamic>[key, value]));
       });
@@ -98,16 +110,15 @@ class InMemoryCache implements Cache {
 
       if (file.existsSync()) {
         final Stream<List<int>> inputStream = file.openRead();
-        inputStream
+
+        await for (String line in inputStream
             .transform(utf8.decoder) // Decode bytes to UTF8.
             .transform(
               const LineSplitter(),
-            ) // Convert stream to individual lines.
-            .listen((String line) {
+            )) {
           final List<dynamic> keyAndValue = json.decode(line);
-
           storedHashMap[keyAndValue[0]] = keyAndValue[1];
-        });
+        }
       }
 
       return storedHashMap;
