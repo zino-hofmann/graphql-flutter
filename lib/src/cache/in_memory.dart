@@ -64,20 +64,22 @@ class InMemoryCache implements Cache {
   }
 
   Future<dynamic> _writeToStorage() async {
-    if (!_writingToStorage) {
-      _writingToStorage = true;
-    } else {
+    if (_writingToStorage) {
       return;
     }
-    final File file = await _localStorageFile;
+    _writingToStorage = true;
+    try {
+      final File file = await _localStorageFile;
+      final IOSink sink = file.openWrite();
 
-    final IOSink sink = file.openWrite();
+      _inMemoryCache.forEach((String key, dynamic value) {
+        sink.writeln(json.encode(<dynamic>[key, value]));
+      });
 
-    _inMemoryCache.forEach((String key, dynamic value) {
-      sink.writeln(json.encode(<dynamic>[key, value]));
-    });
-
-    await sink.close();
+      await sink.close();
+    } catch (err) {
+      // TODO: handle error
+    }
     _writingToStorage = false;
     return;
   }
