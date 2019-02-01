@@ -15,6 +15,7 @@ class MessageTypes {
   // server connections
   static const String GQL_CONNECTION_ACK = 'connection_ack';
   static const String GQL_CONNECTION_ERROR = 'connection_error';
+  static const String GQL_CONNECTION_KEEP_ALIVE = 'ka';
 
   // client operations
   static const String GQL_START = 'start';
@@ -141,6 +142,16 @@ class ConnectionError extends GraphQLSocketMessage {
       };
 }
 
+/// The server will send this connection keep alive message periodically.
+class ConnectionKeepAlive extends GraphQLSocketMessage {
+  ConnectionKeepAlive() : super(MessageTypes.GQL_CONNECTION_KEEP_ALIVE);
+
+  @override
+  dynamic toJson() => <String, dynamic>{
+        'type': type,
+      };
+}
+
 /// Data sent from the server to the client with subscription data or error
 /// payload. The user should check the errors result before processing the
 /// data value. These error are from the query resolvers.
@@ -149,8 +160,7 @@ class SubscriptionData extends GraphQLSocketMessage {
   final dynamic data;
   final dynamic errors;
 
-  SubscriptionData(this.id, this.data, this.errors)
-      : super(MessageTypes.GQL_DATA);
+  SubscriptionData(this.id, this.data, this.errors) : super(MessageTypes.GQL_DATA);
 
   @override
   dynamic toJson() => <String, dynamic>{

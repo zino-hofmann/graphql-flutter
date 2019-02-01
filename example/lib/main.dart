@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import './mutations/addStar.dart' as mutations;
@@ -7,9 +6,22 @@ import './queries/readRepositories.dart' as queries;
 
 const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
 
-void main() => runApp(MyApp());
+void main() async {
+  final websocketLink = WebSocketLink(SocketClient(GraphQLSocket(
+    'ws://192.168.88.79:8080/ws/graphql',
+    headers: <String, String>{
+      'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    },
+    config: GraphQLSocketConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+  )));
+
+  runApp(MyApp(websocketLink));
+}
 
 class MyApp extends StatelessWidget {
+  final WebSocketLink wsLink;
+  MyApp(this.wsLink);
+
   @override
   Widget build(BuildContext context) {
     final HttpLink link = HttpLink(
@@ -22,7 +34,7 @@ class MyApp extends StatelessWidget {
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: InMemoryCache(),
-        link: link,
+        link: wsLink,
       ),
     );
 
@@ -87,8 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
-                pollInterval: 4,
-                // you can optionally override some http options through the contexts
+                pollInterval: 4, // you can optionally override some http options through the contexts
                 context: <String, dynamic>{
                   'headers': <String, String>{
                     'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
@@ -107,15 +118,13 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<dynamic> repositories =
-                    result.data['viewer']['repositories']['nodes'];
+                final List<dynamic> repositories = result.data['viewer']['repositories']['nodes'];
 
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
                     itemBuilder: (BuildContext context, int index) {
-                      final Map<String, dynamic> repository =
-                          repositories[index];
+                      final Map<String, dynamic> repository = repositories[index];
 
                       return Mutation(
                         options: MutationOptions(
@@ -125,11 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
                           RunMutation addStar,
                           QueryResult addStarResult,
                         ) {
-                          if (addStarResult.data != null &&
-                              addStarResult.data.isNotEmpty) {
-                            repository['viewerHasStarred'] =
-                                addStarResult.data['addStar']['starrable']
-                                    ['viewerHasStarred'];
+                          if (addStarResult.data != null && addStarResult.data.isNotEmpty) {
+                            repository['viewerHasStarred'] = addStarResult.data['addStar']['starrable']['viewerHasStarred'];
                           }
 
                           return ListTile(
