@@ -7,13 +7,13 @@ import './queries/readRepositories.dart' as queries;
 const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
 
 void main() async {
-  final websocketLink = WebSocketLink(SocketClient(GraphQLSocket(
+  final websocketLink = WebSocketLink(SocketClient(
     'ws://192.168.88.79:8080/ws/graphql',
     headers: <String, String>{
       'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     },
-    config: GraphQLSocketConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-  )));
+    config: SocketClientConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+  ));
 
   runApp(MyApp(websocketLink));
 }
