@@ -17,5 +17,4 @@ class WebSocketLink extends Link {
             });
           },
         );
-// TODO: implement https://github.com/apollographql/apollo-link/blob/master/packages/apollo-link-ws/src/webSocketLink.ts
 }

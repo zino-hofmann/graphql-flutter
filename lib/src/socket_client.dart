@@ -13,14 +13,14 @@ class SocketClientConfig {
   final bool autoReconnect;
 
   /// The duration after which the connection is considered unstable, because no keep alive message
-  /// was received from the server. The connection to the server will be closed. If [autoReconnect] is
-  /// set to true, we try to reconnect to the server.
+  /// was received from the server in the given time-frame. The connection to the server will be closed.
+  /// If [autoReconnect] is set to true, we try to reconnect to the server.
   ///
   /// If null, the keep alive messages will be ignored.
   final Duration inactivityTimeout;
 
-  /// The duration after a connection loss that needs to pass before trying to reconnect to the socket.
-  /// This field only takes effect when [autoReconnect] is set to true.
+  /// The duration after a connection loss that needs to pass before trying to reconnect to the server.
+  /// This only takes effect when [autoReconnect] is set to true.
   ///
   /// If null, the reconnection will occur immediately, although not recommended.
   final Duration delayBetweenReconnectionAttempts;
@@ -37,6 +37,10 @@ enum SocketConnectionState { NOT_CONNECTED, CONNECTING, CONNECTED }
 /// client payloads into dart object representation.
 ///
 /// This class also deals with reconnection, handles timeout and keep alive messages.
+///
+/// It is meant to be instantiated once, and you can let this class handle all the heavy-
+/// lifting of socket state management. Once you're done with the socket connection, make sure
+/// you call the [dispose] method to release all allocated resources.
 class SocketClient {
   final Uuid _uuid = Uuid();
   final String url;
@@ -48,11 +52,12 @@ class SocketClient {
   final _connectionStateController = StreamController<SocketConnectionState>.broadcast();
   final _messageController = StreamController<GraphQLSocketMessage>.broadcast();
 
+  bool disposed = false;
   WebSocket _socket;
 
-  StreamSubscription _keepAliveSubscription;
-  StreamSubscription _messageSubscription;
-  StreamSubscription _connectionStateSubscription;
+  StreamSubscription<ConnectionKeepAlive> _keepAliveSubscription;
+  StreamSubscription<GraphQLSocketMessage> _messageSubscription;
+  StreamSubscription<SocketConnectionState> _connectionStateSubscription;
 
   SocketClient(this.url,
       {this.protocols = const <String>[
@@ -64,15 +69,19 @@ class SocketClient {
       this.compression = CompressionOptions.compressionDefault,
       this.config = const SocketClientConfig(),
       this.initPayload}) {
-    _connect();
-
     _connectionStateSubscription = connectionState.listen((SocketConnectionState state) {
       print('WebSocket connection state changed to: $state');
-      if (state == SocketConnectionState.CONNECTED) _write(InitOperation(initPayload));
     });
+
+    _connect();
   }
 
+  /// Connects to the server.
+  ///
+  /// If this instance is disposed, this method does nothing.
   Future<void> _connect({Duration delayUntilConnectionAttempt}) async {
+    if (disposed) return;
+
     if (delayUntilConnectionAttempt != null) {
       print('Scheduling to connect in ${delayUntilConnectionAttempt.inSeconds} seconds...');
       await Future<void>.delayed(delayUntilConnectionAttempt);
@@ -84,6 +93,7 @@ class SocketClient {
     try {
       _socket = await WebSocket.connect(url, protocols: protocols, headers: headers, compression: compression);
       _connectionStateController.add(SocketConnectionState.CONNECTED);
+      _write(InitOperation(initPayload));
 
       final messageStream = _socket.asBroadcastStream().map<GraphQLSocketMessage>(_parseSocketMessage);
       _messageController.addStream(messageStream);
@@ -117,15 +127,19 @@ class SocketClient {
     _messageSubscription?.cancel();
     _connectionStateController.add(SocketConnectionState.NOT_CONNECTED);
 
-    if (config.autoReconnect) {
+    if (config.autoReconnect && !disposed) {
       _connect(delayUntilConnectionAttempt: config.delayBetweenReconnectionAttempts);
     }
   }
 
   /// Closes the underlying socket if connected, and stops reconnection attempts.
-  /// After calling this method, this [GraphQLSocket] instance must be considered
-  /// obsolete, and should not be used. Instead, create a new instance of this class.
+  /// After calling this method, this [SocketClient] instance must be considered
+  /// unusable. Instead, create a new instance of this class.
+  ///
+  /// Use this method if you'd like to disconnect from the specified server permanently,
+  /// and you'd like to connect to another server instead of the current one.
   void dispose() {
+    disposed = true;
     _socket?.close();
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
