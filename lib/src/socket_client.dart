@@ -14,12 +14,12 @@ class SocketClientConfig {
 
   /// The duration after which the connection is considered unstable, because no keep alive message
   /// was received from the server in the given time-frame. The connection to the server will be closed.
-  /// If [autoReconnect] is set to true, we try to reconnect to the server.
+  /// If [autoReconnect] is set to true, we try to reconnect to the server after the specified [delayBetweenReconnectionAttempts].
   ///
   /// If null, the keep alive messages will be ignored.
   final Duration inactivityTimeout;
 
-  /// The duration after a connection loss that needs to pass before trying to reconnect to the server.
+  /// The duration that needs to pass before trying to reconnect to the server after a connection loss.
   /// This only takes effect when [autoReconnect] is set to true.
   ///
   /// If null, the reconnection will occur immediately, although not recommended.
@@ -57,7 +57,6 @@ class SocketClient {
 
   StreamSubscription<ConnectionKeepAlive> _keepAliveSubscription;
   StreamSubscription<GraphQLSocketMessage> _messageSubscription;
-  StreamSubscription<SocketConnectionState> _connectionStateSubscription;
 
   SocketClient(this.url,
       {this.protocols = const <String>[
@@ -69,10 +68,6 @@ class SocketClient {
       this.compression = CompressionOptions.compressionDefault,
       this.config = const SocketClientConfig(),
       this.initPayload}) {
-    _connectionStateSubscription = connectionState.listen((SocketConnectionState state) {
-      print('WebSocket connection state changed to: $state');
-    });
-
     _connect();
   }
 
@@ -100,6 +95,7 @@ class SocketClient {
 
       if (config.inactivityTimeout != null) {
         _keepAliveSubscription = _connectionKeepAlive.timeout(config.inactivityTimeout, onTimeout: (event) {
+          print("Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..");
           event.close();
           _socket.close(WebSocketStatus.goingAway);
         }).listen(null);
@@ -143,7 +139,6 @@ class SocketClient {
     _socket?.close();
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
-    _connectionStateSubscription?.cancel();
   }
 
   static GraphQLSocketMessage _parseSocketMessage(dynamic message) {
