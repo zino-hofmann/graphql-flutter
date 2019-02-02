@@ -52,7 +52,7 @@ class SocketClient {
   final _connectionStateController = StreamController<SocketConnectionState>.broadcast();
   final _messageController = StreamController<GraphQLSocketMessage>.broadcast();
 
-  bool disposed = false;
+  bool _disposed = false;
   WebSocket _socket;
 
   StreamSubscription<ConnectionKeepAlive> _keepAliveSubscription;
@@ -80,7 +80,7 @@ class SocketClient {
   ///
   /// If this instance is disposed, this method does nothing.
   Future<void> _connect({Duration delayUntilConnectionAttempt}) async {
-    if (disposed) return;
+    if (_disposed) return;
 
     if (delayUntilConnectionAttempt != null) {
       print('Scheduling to connect in ${delayUntilConnectionAttempt.inSeconds} seconds...');
@@ -127,7 +127,7 @@ class SocketClient {
     _messageSubscription?.cancel();
     _connectionStateController.add(SocketConnectionState.NOT_CONNECTED);
 
-    if (config.autoReconnect && !disposed) {
+    if (config.autoReconnect && !_disposed) {
       _connect(delayUntilConnectionAttempt: config.delayBetweenReconnectionAttempts);
     }
   }
@@ -139,7 +139,7 @@ class SocketClient {
   /// Use this method if you'd like to disconnect from the specified server permanently,
   /// and you'd like to connect to another server instead of the current one.
   void dispose() {
-    disposed = true;
+    _disposed = true;
     _socket?.close();
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
