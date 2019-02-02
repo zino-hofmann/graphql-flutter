@@ -84,10 +84,12 @@ class SocketClient {
 
     if (_socket != null) print('Reconnecting to socket...');
     _connectionStateController.add(SocketConnectionState.CONNECTING);
+    print('Connecting to websocket: $url...');
 
     try {
       _socket = await WebSocket.connect(url, protocols: protocols, headers: headers, compression: compression);
       _connectionStateController.add(SocketConnectionState.CONNECTED);
+      print('Connected to websocket.');
       _write(InitOperation(initPayload));
 
       final messageStream = _socket.asBroadcastStream().map<GraphQLSocketMessage>(_parseSocketMessage);
@@ -119,6 +121,7 @@ class SocketClient {
   }
 
   void onConnectionLost() {
+    print('Disconnected from websocket.');
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
     _connectionStateController.add(SocketConnectionState.NOT_CONNECTED);
