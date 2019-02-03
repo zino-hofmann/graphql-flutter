@@ -104,7 +104,7 @@ class StartOperation extends GraphQLSocketMessage {
 }
 
 /// Tell the server to stop sending subscription data for a particular
-/// subscription instance. See StartOperation
+/// subscription instance. See [StartOperation].
 class StopOperation extends GraphQLSocketMessage {
   final String id;
 

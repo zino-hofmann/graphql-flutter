@@ -12,9 +12,8 @@ class WebSocketLink extends Link {
             Operation operation, [
             NextLink forward,
           ]) {
-            return socketClient.subscribe(SubscriptionRequest(operation.operationName, operation.document, operation.variables)).map((result) {
-              return FetchResult(data: result.data, errors: result.errors, context: operation.getContext(), extensions: operation.extensions);
-            });
+            return socketClient.subscribe(SubscriptionRequest(operation.operationName, operation.document, operation.variables), false).map(
+                (result) => FetchResult(data: result.data, errors: result.errors, context: operation.getContext(), extensions: operation.extensions));
           },
         );
 }

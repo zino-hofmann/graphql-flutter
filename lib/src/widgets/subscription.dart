@@ -46,9 +46,7 @@ class _SubscriptionState extends State<Subscription> {
   void initState() {
     super.initState();
 
-    final Stream<SubscriptionData> stream = socketClient.subscribe(
-        SubscriptionRequest(
-            widget.operationName, widget.query, widget.variables));
+    final Stream<SubscriptionData> stream = socketClient.subscribe(SubscriptionRequest(widget.operationName, widget.query, widget.variables), true);
 
     stream.takeWhile((SubscriptionData message) => _alive).listen(
           _onData,
