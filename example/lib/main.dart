@@ -6,21 +6,12 @@ import './queries/readRepositories.dart' as queries;
 
 const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
 
-void main() async {
-  final websocketLink = WebSocketLink(SocketClient(
-    'ws://localhost:8080/ws/graphql',
-    headers: <String, String>{
-      'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-    },
-    config: SocketClientConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-  ));
-
-  runApp(MyApp(websocketLink));
+void main() {
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final WebSocketLink wsLink;
-  MyApp(this.wsLink);
+  MyApp();
 
   @override
   Widget build(BuildContext context) {
@@ -31,11 +22,17 @@ class MyApp extends StatelessWidget {
       },
     );
 
+    final WebSocketLink websocketLink = WebSocketLink(SocketClient(
+      'ws://api.github.com/graphql',
+      headers: <String, String>{
+        'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      },
+      config: SocketClientConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+    ));
+
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
-      GraphQLClient(
-        cache: InMemoryCache(),
-        link: wsLink,
-      ),
+      GraphQLClient(cache: InMemoryCache(), link: link // or websocketLink,
+          ),
     );
 
     return GraphQLProvider(
