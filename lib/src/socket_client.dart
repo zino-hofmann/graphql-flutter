@@ -143,12 +143,11 @@ class SocketClient {
   ///
   /// Use this method if you'd like to disconnect from the specified server permanently,
   /// and you'd like to connect to another server instead of the current one.
-  void dispose() {
-    _socket?.close();
-    _keepAliveSubscription?.cancel();
-    _messageSubscription?.cancel();
-
-    _connectionStateController?.close();
+  Future<void> dispose() async {
+    await _socket?.close();
+    await _keepAliveSubscription?.cancel();
+    await _messageSubscription?.cancel();
+    await _connectionStateController?.close();
   }
 
   static GraphQLSocketMessage _parseSocketMessage(dynamic message) {
