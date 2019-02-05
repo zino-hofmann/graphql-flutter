@@ -57,6 +57,7 @@ class SocketClient {
   final CompressionOptions compression;
   final _connectionStateController = BehaviorSubject<SocketConnectionState>();
 
+  Timer _reconnectTimer;
   WebSocket _socket;
   Stream<GraphQLSocketMessage> _messageStream;
 
@@ -79,13 +80,8 @@ class SocketClient {
   /// Connects to the server.
   ///
   /// If this instance is disposed, this method does nothing.
-  Future<void> _connect({Duration delayUntilConnectionAttempt}) async {
+  Future<void> _connect() async {
     if (_connectionStateController.isClosed) return;
-
-    if (delayUntilConnectionAttempt != null) {
-      print('Scheduling to connect in ${delayUntilConnectionAttempt.inSeconds} seconds...');
-      await Future<void>.delayed(delayUntilConnectionAttempt);
-    }
 
     if (_socket != null) print('Reconnecting to socket...');
     _connectionStateController.value = SocketConnectionState.CONNECTING;
@@ -136,7 +132,15 @@ class SocketClient {
       _connectionStateController.value = SocketConnectionState.NOT_CONNECTED;
 
     if (config.autoReconnect && !_connectionStateController.isClosed) {
-      _connect(delayUntilConnectionAttempt: config.delayBetweenReconnectionAttempts);
+      if (config.delayBetweenReconnectionAttempts != null) {
+        print('Scheduling to connect in ${config.delayBetweenReconnectionAttempts.inSeconds} seconds...');
+
+        _reconnectTimer = Timer(config.delayBetweenReconnectionAttempts, () {
+          _connect();
+        });
+      } else {
+        Timer.run(() => _connect());
+      }
     }
   }
 
@@ -147,6 +151,7 @@ class SocketClient {
   /// Use this method if you'd like to disconnect from the specified server permanently,
   /// and you'd like to connect to another server instead of the current one.
   Future<void> dispose() async {
+    _reconnectTimer?.cancel();
     await _socket?.close();
     await _keepAliveSubscription?.cancel();
     await _messageSubscription?.cancel();
