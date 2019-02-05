@@ -129,6 +129,9 @@ class SocketClient {
     print('Disconnected from websocket.');
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
+
+    if (_connectionStateController.isClosed) return;
+
     if (_connectionStateController.value != SocketConnectionState.NOT_CONNECTED)
       _connectionStateController.value = SocketConnectionState.NOT_CONNECTED;
 
