@@ -8,6 +8,10 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
+## NOTICE
+
+**We're planning to make quite some changes to the projects workflow. We've also planned a coding session this weekend(17&18 Feb). In order to make informed decisions we created a short survey, it would really help if you would answer it: https://goo.gl/forms/WZ5JlNWASxd1ojfG3** 
+
 ## 🎉🥂🍾 Time to celebrate!
 
 **We're currently working on version 1.0.0 and we'd recommend you check it out. We did break a couple things (on purpose), so be sure to check out the [upgrade guide](https://github.com/zino-app/graphql-flutter/tree/next#upgrading-from-0xx). Also feel free to help us out on the [next branch](https://github.com/zino-app/graphql-flutter/tree/next).**
