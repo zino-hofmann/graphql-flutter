@@ -15,15 +15,18 @@ class MyApp extends StatelessWidget {
       uri: 'https://api.github.com/graphql',
     );
 
-    final AuthLink authLink =
-        AuthLink(getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN');
+    final AuthLink authLink = AuthLink(
+      getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    );
+
+    final Link link = authLink.concat(httpLink);
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: NormalizedInMemoryCache(
           dataIdFromObject: typenameDataIdFromObject,
         ),
-        link: authLink.concat(httpLink),
+        link: link,
       ),
     );
 

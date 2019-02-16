@@ -156,7 +156,7 @@ That's it! You should now be able to use the latest version of our library.
 
 ## Usage
 
-To use the client it first needs to be initialized with an link and cache. For this example we will be uing an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can provide some custom headers to `HttpLink`.
+To use the client it first needs to be initialized with an link and cache. For this example we will be using an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can provide some custom headers to `HttpLink`.
 
 > For this example we will use the public GitHub API.
 
@@ -166,12 +166,15 @@ To use the client it first needs to be initialized with an link and cache. For t
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 void main() {
-  HttpLink link = HttpLink(
+  final HttpLink httpLink = HttpLink(
     uri: 'https://api.github.com/graphql',
-    headers: <String, String>{
-      'Authorization': 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
-    },
   );
+
+  final AuthLink authLink = AuthLink(
+    getToken: () => 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
+  );
+
+  final Link link = authLink.concat(httpLink);
 
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
@@ -234,7 +237,9 @@ class MyApp extends StatelessWidget {
 ```
 
 #### Normalization
+
 To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache`:
+
 ```dart
 ValueNotifier<GraphQLClient> client = ValueNotifier(
   GraphQLClient(
@@ -245,7 +250,9 @@ ValueNotifier<GraphQLClient> client = ValueNotifier(
   ),
 );
 ```
+
 `dataIdFromObject` is required and has no defaults. Our implementation is similar to apollo's, requiring a function to return a universally unique string or `null`. The predefined `typenameDataIdFromObject` we provide is similar to apollo's default:
+
 ```dart
 String typenameDataIdFromObject(Object object) {
   if (object is Map<String, Object> &&
@@ -256,8 +263,8 @@ String typenameDataIdFromObject(Object object) {
   return null;
 }
 ```
-However note that **`graphql-flutter` does not inject __typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
 
+However note that **`graphql-flutter` does not inject \_\_typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
 
 ### Queries
 
@@ -364,9 +371,9 @@ Mutation(
 ### Subscriptions (Experimental)
 
 The syntax for subscriptions is again similar to a query, however, this utilizes WebSockets and dart Streams to provide real-time updates from a server.
-Before subscriptions can be performed a global intance of `socketClient` needs to be initialized.
+Before subscriptions can be performed a global instance of `socketClient` needs to be initialized.
 
-> We are working on moving this into the same `GraphQLProvider` stucture as the http client. Therefore this api might change in the near future.
+> We are working on moving this into the same `GraphQLProvider` structure as the http client. Therefore this api might change in the near future.
 
 ```dart
 socketClient = await SocketClient.connect('ws://coolserver.com/graphql');
@@ -404,7 +411,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
 ### Graphql Consumer
 
-You can always access the client direcly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget.
+You can always access the client directly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget.
 
 ```dart
   ...
@@ -454,6 +461,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | [<img src="https://avatars0.githubusercontent.com/u/403029?v=4" width="100px;"/><br /><sub><b>Arnaud Delcasse</b></sub>](https://www.scity.coop)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Aadelcasse "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=adelcasse "Code") | [<img src="https://avatars0.githubusercontent.com/u/959931?v=4" width="100px;"/><br /><sub><b>Dustin Graham</b></sub>](https://github.com/dustin-graham)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Adustin-graham "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=dustin-graham "Code") | [<img src="https://avatars3.githubusercontent.com/u/1375034?v=4" width="100px;"/><br /><sub><b>Fábio Carneiro</b></sub>](https://github.com/fabiocarneiro)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Afabiocarneiro "Bug reports") | [<img src="https://avatars0.githubusercontent.com/u/480546?v=4" width="100px;"/><br /><sub><b>Gregor</b></sub>](https://github.com/lordgreg)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Alordgreg "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=lordgreg "Code") [🤔](#ideas-lordgreg "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/5159563?v=4" width="100px;"/><br /><sub><b>Kolja Esders</b></sub>](https://github.com/kolja-esders)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Akolja-esders "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=kolja-esders "Code") [🤔](#ideas-kolja-esders "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/8343799?v=4" width="100px;"/><br /><sub><b>Michael Joseph Rosenthal</b></sub>](https://github.com/micimize)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Amicimize "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=micimize "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=micimize "Documentation") [💡](#example-micimize "Examples") [🤔](#ideas-micimize "Ideas, Planning, & Feedback") [⚠️](https://github.com/zino-app/graphql-flutter/commits?author=micimize "Tests") | [<img src="https://avatars2.githubusercontent.com/u/735858?v=4" width="100px;"/><br /><sub><b>Igor Borges</b></sub>](http://borges.me/)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3AIgor1201 "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=Igor1201 "Code") |
 | [<img src="https://avatars1.githubusercontent.com/u/6992724?v=4" width="100px;"/><br /><sub><b>Rafael Ring</b></sub>](https://github.com/rafaelring)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Arafaelring "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=rafaelring "Code") |
+
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
