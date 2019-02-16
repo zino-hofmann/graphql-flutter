@@ -105,7 +105,7 @@ class QueryState extends State<Query> {
         });
       }
     } catch (e) {
-      if (data == {}) {
+      if (data.isEmpty) {
         if (this.mounted) {
           setState(() {
             error = e;
