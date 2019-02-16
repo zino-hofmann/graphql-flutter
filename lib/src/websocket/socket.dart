@@ -28,6 +28,9 @@ class GraphQLSocket {
           case MessageTypes.GQL_CONNECTION_ERROR:
             _subject.add(ConnectionError(payload));
             break;
+          case MessageTypes.GQL_CONNECTION_KEEP_ALIVE:
+            _subject.add(ConnectionKeepAlive());
+            break;
           case MessageTypes.GQL_DATA:
             final dynamic data = payload['data'];
             final dynamic errors = payload['errors'];
@@ -58,6 +61,10 @@ class GraphQLSocket {
   Stream<ConnectionAck> get connectionAck => _subject.stream
       .where((GraphQLSocketMessage message) => message is ConnectionAck)
       .cast<ConnectionAck>();
+
+  Stream<ConnectionKeepAlive> get connectionKeepAlive => _subject.stream
+      .where((GraphQLSocketMessage message) => message is ConnectionKeepAlive)
+      .cast<ConnectionKeepAlive>();
 
   Stream<ConnectionError> get connectionError => _subject.stream
       .where((GraphQLSocketMessage message) => message is ConnectionError)

@@ -15,6 +15,7 @@ class MessageTypes {
   // server connections
   static const String GQL_CONNECTION_ACK = 'connection_ack';
   static const String GQL_CONNECTION_ERROR = 'connection_error';
+  static const String GQL_CONNECTION_KEEP_ALIVE = 'ka';
 
   // client operations
   static const String GQL_START = 'start';
@@ -138,6 +139,16 @@ class ConnectionError extends GraphQLSocketMessage {
   dynamic toJson() => <String, dynamic>{
         'type': type,
         'payload': payload,
+      };
+}
+
+/// The server will send this message to keep the connection alive
+class ConnectionKeepAlive extends GraphQLSocketMessage {
+  ConnectionKeepAlive(): super(MessageTypes.GQL_CONNECTION_KEEP_ALIVE);
+
+  @override
+  dynamic toJson() => <String, dynamic>{
+        'type': type,
       };
 }
 
