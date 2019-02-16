@@ -11,19 +11,19 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HttpLink link = HttpLink(
+    final HttpLink httpLink = HttpLink(
       uri: 'https://api.github.com/graphql',
-      headers: <String, String>{
-        'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-      },
     );
+
+    final AuthLink authLink =
+        AuthLink(getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN');
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: NormalizedInMemoryCache(
           dataIdFromObject: typenameDataIdFromObject,
         ),
-        link: link,
+        link: authLink.concat(httpLink),
       ),
     );
 
@@ -89,12 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   'nRepositories': nRepositories,
                 },
                 pollInterval: 4,
-                // you can optionally override some http options through the contexts
-                context: <String, dynamic>{
-                  'headers': <String, String>{
-                    'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-                  },
-                },
               ),
               builder: (QueryResult result) {
                 if (result.loading) {
