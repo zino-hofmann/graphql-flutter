@@ -64,6 +64,7 @@ class QueryState extends State<Query> {
   void didUpdateWidget(Query oldWidget) {
     super.didUpdateWidget(oldWidget);
 
+    // TODO @micimize - investigate why/if this was causing issues
     if (!observableQuery.options.areEqualTo(_options)) {
       _initQuery();
     }

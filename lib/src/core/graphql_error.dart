@@ -18,6 +18,9 @@ class Location {
 /// A GraphQL error (returned by a GraphQL server).
 class GraphQLError {
   /// The message of the error.
+  final dynamic raw;
+
+  /// The message of the error.
   final String message;
 
   /// Locations where the error appear.
@@ -30,6 +33,7 @@ class GraphQLError {
   final Map<String, dynamic> extensions;
 
   GraphQLError({
+    this.raw,
     this.message,
     this.locations,
     this.path,
@@ -38,7 +42,8 @@ class GraphQLError {
 
   /// Constructs a [GraphQLError] from a JSON map.
   GraphQLError.fromJSON(dynamic data)
-      : message = data['message'],
+      : raw = data,
+        message = data['message'],
         locations = data['locations'] is List<Map<String, int>>
             ? List<Location>.from(
                 (data['locations']).map<Location>(
@@ -51,5 +56,5 @@ class GraphQLError {
 
   @override
   String toString() =>
-      '$message: ${locations is List ? locations.map((Location l) => '[${l.toString()}]').join('') : "Undefind location"}';
+      '$message: ${locations is List ? locations.map((Location l) => '[${l.toString()}]').join('') : "Undefined location"}';
 }

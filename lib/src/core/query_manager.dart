@@ -112,7 +112,7 @@ class QueryManager {
         }
       }
 
-      // execute the operation trough the provided link(s)
+      // execute the operation through the provided link(s)
       fetchResult = await execute(
         link: link,
         operation: operation,
@@ -138,6 +138,7 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(fetchResult);
     } catch (error) {
+      // TODO some dart errors break this
       final GraphQLError graphQLError = GraphQLError(
         message: error.message,
       );
@@ -170,6 +171,13 @@ class QueryManager {
 
   void setQuery(ObservableQuery observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
+  }
+
+  void closeQuery(ObservableQuery observableQuery, {bool fromQuery = false}) {
+    if (!fromQuery) {
+      observableQuery.close(fromManager: true);
+    }
+    queries.remove(observableQuery.queryId);
   }
 
   int generateQueryId() {
