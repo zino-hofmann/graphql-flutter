@@ -27,11 +27,11 @@
 
 ## About this project
 
-GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data useage. And to the programer: requests are arguable, they have the same structure as the request.
+GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data usage. And to the programer: requests are arguable, they have the same structure as the request.
 
-This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performace client.
+This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performance client.
 
-The project took inspriation from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
+The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
 ## Installation
 
@@ -39,7 +39,7 @@ First depend on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^1.0.0-alpha
+  graphql_flutter: ^1.0.0-beta
 ```
 
 Now inside your Dart code you can import it.
@@ -59,7 +59,7 @@ Some class names have been renamed:
 - Renamed `GraphqlConsumer` to `GraphQLConsumer`
 - Renamed `GQLError` to `GraphQLError`
 
-We changed the way the client handles requests, it now uses a `Link` to execute queries rather then depend on the http package. We've currently only implplemented the `HttpLink`, just drop it in like so:
+We changed the way the client handles requests, it now uses a `Link` to execute queries rather then depend on the http package. We've currently only implemented the `HttpLink`, just drop it in like so:
 
 ```diff
 void main() {
@@ -156,7 +156,7 @@ That's it! You should now be able to use the latest version of our library.
 
 ## Usage
 
-To use the client it first needs to be initialized with an link and cache. For this example we will be using an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can provide some custom headers to `HttpLink`.
+To use the client it first needs to be initialized with an link and cache. For this example we will be using an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can concatenate the `AuthLink`, it resolves the credentials using a future, so you can authenticate asynchronously.
 
 > For this example we will use the public GitHub API.
 
