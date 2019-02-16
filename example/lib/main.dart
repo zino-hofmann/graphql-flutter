@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     );
 
     final AuthLink authLink = AuthLink(
-      getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
     final Link link = authLink.concat(httpLink);

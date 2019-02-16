@@ -4,7 +4,7 @@ import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 
-typedef GetToken = String Function();
+typedef GetToken = Future<String> Function();
 
 class AuthLink extends Link {
   AuthLink({
@@ -15,7 +15,7 @@ class AuthLink extends Link {
 
             Future<void> onListen() async {
               try {
-                final String token = getToken();
+                final String token = await getToken();
 
                 operation.setContext(<String, Map<String, String>>{
                   'headers': <String, String>{'Authorization': token}
