@@ -7,11 +7,6 @@ import '../../graphql_flutter.dart';
 /// Wraps a standard web socket instance to marshal and un-marshal the server /
 /// client payloads into dart object representation.
 class GraphQLSocket {
-  final StreamController<GraphQLSocketMessage> _subject =
-      StreamController<GraphQLSocketMessage>.broadcast();
-
-  final WebSocket _socket;
-
   GraphQLSocket(this._socket) {
     _socket
         .map<Map<String, dynamic>>((dynamic message) => json.decode(message))
@@ -48,6 +43,11 @@ class GraphQLSocket {
       },
     );
   }
+
+  final StreamController<GraphQLSocketMessage> _subject =
+      StreamController<GraphQLSocketMessage>.broadcast();
+
+  final WebSocket _socket;
 
   void write(final GraphQLSocketMessage message) {
     _socket.add(

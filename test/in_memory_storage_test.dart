@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show Directory;
 import 'package:test/test.dart';
 import 'package:graphql_flutter/src/cache/in_memory.dart';
@@ -74,6 +75,7 @@ void main() {
 
       cache.reset();
       await cache.restore();
+
       expect(cache.read(aKey), equals(aData));
       expect(cache.read(bKey), equals(bData));
       expect(cache.read(cKey), equals(cData));

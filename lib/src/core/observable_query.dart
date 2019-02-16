@@ -23,6 +23,16 @@ enum QueryLifecycle {
 }
 
 class ObservableQuery {
+  ObservableQuery({
+    @required this.queryManager,
+    @required this.options,
+  })  : queryId = queryManager.generateQueryId().toString(),
+        scheduler = queryManager.scheduler {
+    controller = StreamController<QueryResult>.broadcast(
+      onListen: onListen,
+    );
+  }
+
   final String queryId;
   final QueryScheduler scheduler;
   final QueryManager queryManager;
@@ -35,16 +45,6 @@ class ObservableQuery {
   WatchQueryOptions options;
 
   StreamController<QueryResult> controller;
-
-  ObservableQuery({
-    @required this.queryManager,
-    @required this.options,
-  })  : queryId = queryManager.generateQueryId().toString(),
-        scheduler = queryManager.scheduler {
-    controller = StreamController<QueryResult>.broadcast(
-      onListen: onListen,
-    );
-  }
 
   Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;

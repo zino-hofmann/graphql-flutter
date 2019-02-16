@@ -5,23 +5,23 @@ import 'package:graphql_flutter/src/cache/in_memory.dart';
 typedef String DataIdFromObject(Object node);
 
 class NormalizationException implements Exception {
+  NormalizationException(this.cause, this.overflowError, this.value);
+
   StackOverflowError overflowError;
   String cause;
   Object value;
-
-  NormalizationException(this.cause, this.overflowError, this.value);
 
   String get message => cause;
 }
 
 class NormalizedInMemoryCache extends InMemoryCache {
-  DataIdFromObject dataIdFromObject;
-  String _prefix;
-
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
     String prefix = '@cache/reference',
   }) : _prefix = prefix;
+
+  DataIdFromObject dataIdFromObject;
+  String _prefix;
 
   Object _dereference(Object node) {
     if (node is List && node.length == 2 && node[0] == _prefix) {
@@ -57,10 +57,12 @@ class NormalizedInMemoryCache extends InMemoryCache {
 
   List<String> _normalize(Object node) {
     final String dataId = dataIdFromObject(node);
+
     if (dataId != null) {
       write(dataId, node);
       return <String>[_prefix, dataId];
     }
+
     return null;
   }
 
@@ -81,5 +83,6 @@ String typenameDataIdFromObject(Object object) {
       object.containsKey('id')) {
     return "${object['__typename']}/${object['id']}";
   }
+
   return null;
 }

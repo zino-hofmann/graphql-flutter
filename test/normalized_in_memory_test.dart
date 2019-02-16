@@ -112,10 +112,12 @@ void main() {
     final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
     );
+
     test('.read .write round trip', () {
       cache.write(rawOperationKey, rawOperationData);
       expect(cache.read(rawOperationKey), equals(rawOperationData));
     });
+
     test('updating nested data changes top level operation', () {
       cache.write('C/6', updatedCValue);
       expect(cache.read(rawOperationKey), equals(updatedCOperationData));

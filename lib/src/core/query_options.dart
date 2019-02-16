@@ -26,6 +26,14 @@ enum ErrorPolicy {
 
 /// Base options.
 class BaseOptions {
+  BaseOptions({
+    @required this.document,
+    this.variables,
+    this.fetchPolicy,
+    this.errorPolicy,
+    this.context,
+  });
+
   /// A GraphQL document that consists of a single query to be sent down to the server.
   String document;
 
@@ -41,22 +49,10 @@ class BaseOptions {
 
   /// Context to be passed to link execution chain.
   Map<String, dynamic> context;
-
-  BaseOptions({
-    @required this.document,
-    this.variables,
-    this.fetchPolicy,
-    this.errorPolicy,
-    this.context,
-  });
 }
 
 /// Query options.
 class QueryOptions extends BaseOptions {
-  /// The time interval (in milliseconds) on which this query should be
-  /// refetched from the server.
-  int pollInterval;
-
   QueryOptions({
     @required String document,
     Map<String, dynamic> variables,
@@ -71,6 +67,10 @@ class QueryOptions extends BaseOptions {
           errorPolicy: errorPolicy,
           context: context,
         );
+
+  /// The time interval (in milliseconds) on which this query should be
+  /// refetched from the server.
+  int pollInterval;
 }
 
 /// Mutation options
@@ -92,9 +92,6 @@ class MutationOptions extends BaseOptions {
 
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
-  /// Whether or not to fetch result.
-  bool fetchResults;
-
   WatchQueryOptions({
     @required String document,
     Map<String, dynamic> variables,
@@ -111,6 +108,9 @@ class WatchQueryOptions extends QueryOptions {
           pollInterval: pollInterval,
           context: context,
         );
+
+  /// Whether or not to fetch result.
+  bool fetchResults;
 
   /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {

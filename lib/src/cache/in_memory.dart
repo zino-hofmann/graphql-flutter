@@ -69,6 +69,7 @@ class InMemoryCache implements Cache {
     }
 
     final Directory directory = await getApplicationDocumentsDirectory();
+
     return directory.path;
   }
 
@@ -82,6 +83,7 @@ class InMemoryCache implements Cache {
     if (_writingToStorage) {
       return;
     }
+
     _writingToStorage = true;
 
     // Catching errors to avoid locking forever.
@@ -95,9 +97,11 @@ class InMemoryCache implements Cache {
       });
 
       await sink.close();
+
       _writingToStorage = false;
     } catch (err) {
       _writingToStorage = false;
+
       rethrow;
     }
     return;

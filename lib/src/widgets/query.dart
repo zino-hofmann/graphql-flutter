@@ -12,14 +12,14 @@ typedef QueryBuilder = Widget Function(QueryResult result);
 /// Builds a [Query] widget based on the a given set of [QueryOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
 class Query extends StatefulWidget {
-  final QueryOptions options;
-  final QueryBuilder builder;
-
   const Query({
     final Key key,
     @required this.options,
     @required this.builder,
   }) : super(key: key);
+
+  final QueryOptions options;
+  final QueryBuilder builder;
 
   @override
   QueryState createState() => QueryState();

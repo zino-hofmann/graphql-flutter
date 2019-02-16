@@ -21,11 +21,6 @@ typedef void OnMutationUpdate(Cache cache, QueryResult result);
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
 class Mutation extends StatefulWidget {
-  final MutationOptions options;
-  final MutationBuilder builder;
-  final OnMutationCompleted onCompleted;
-  final OnMutationUpdate update;
-
   const Mutation({
     final Key key,
     @required this.options,
@@ -33,6 +28,11 @@ class Mutation extends StatefulWidget {
     this.onCompleted,
     this.update,
   }) : super(key: key);
+
+  final MutationOptions options;
+  final MutationBuilder builder;
+  final OnMutationCompleted onCompleted;
+  final OnMutationUpdate update;
 
   @override
   MutationState createState() => MutationState();

@@ -18,13 +18,6 @@ import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/get_from_ast.dart';
 
 class QueryManager {
-  final Link link;
-  final Cache cache;
-
-  QueryScheduler scheduler;
-  int idCounter = 1;
-  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
-
   QueryManager({
     @required this.link,
     @required this.cache,
@@ -33,6 +26,13 @@ class QueryManager {
       queryManager: this,
     );
   }
+
+  final Link link;
+  final Cache cache;
+
+  QueryScheduler scheduler;
+  int idCounter = 1;
+  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
     if (options.document == null) {
