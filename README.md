@@ -210,7 +210,7 @@ In order to use the client, you `Query` and `Mutation` widgets to be wrapped wit
 
 The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
 
-> It is required to place the `CacheProvider` widget is inside the `GraphQLProvider` widget, because `GraphQLProvider` makes client available trough the build context.
+> It is required to place the `CacheProvider` widget is inside the `GraphQLProvider` widget, because `GraphQLProvider` makes client available through the build context.
 
 ```dart
 ...

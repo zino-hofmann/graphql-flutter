@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
-
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './mutations/addStar.dart' as mutations;
+import './mutations/mutations.dart' as mutations;
 import './queries/readRepositories.dart' as queries;
 
-const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN_HERE>';
+const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HttpLink link = HttpLink(
+    final HttpLink httpLink = HttpLink(
       uri: 'https://api.github.com/graphql',
-      headers: <String, String>{
-        'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-      },
     );
+
+    final AuthLink authLink =
+        AuthLink(getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN');
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: InMemoryCache(),
-        link: link,
+        cache: NormalizedInMemoryCache(
+          dataIdFromObject: typenameDataIdFromObject,
+        ),
+        link: authLink.concat(httpLink),
       ),
     );
 
@@ -88,12 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   'nRepositories': nRepositories,
                 },
                 pollInterval: 4,
-                // you can optionally override some http options through the contexts
-                context: <String, dynamic>{
-                  'headers': <String, String>{
-                    'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-                  },
-                },
               ),
               builder: (QueryResult result) {
                 if (result.loading) {
@@ -113,61 +108,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      final Map<String, dynamic> repository =
-                          repositories[index];
-
-                      return Mutation(
-                        options: MutationOptions(
-                          document: mutations.addStar,
-                        ),
-                        builder: (
-                          RunMutation addStar,
-                          QueryResult addStarResult,
-                        ) {
-                          if (addStarResult.data != null &&
-                              addStarResult.data.isNotEmpty) {
-                            repository['viewerHasStarred'] =
-                                addStarResult.data['addStar']['starrable']
-                                    ['viewerHasStarred'];
-                          }
-
-                          return ListTile(
-                            leading: repository['viewerHasStarred']
-                                ? const Icon(
-                                    Icons.star,
-                                    color: Colors.amber,
-                                  )
-                                : const Icon(Icons.star_border),
-                            title: Text(repository['name']),
-                            onTap: () {
-                              // optimistic ui updates are not implemented yet, therefore changes may take some time to show
-                              addStar(<String, dynamic>{
-                                'starrableId': repository['id'],
-                              });
-                            },
-                          );
-                        },
-                        onCompleted: (QueryResult onCompleteResult) {
-                          showDialog<AlertDialog>(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return AlertDialog(
-                                title: const Text('Thanks for your star!'),
-                                actions: <Widget>[
-                                  SimpleDialogOption(
-                                    child: const Text('Dismiss'),
-                                    onPressed: () {
-                                      Navigator.of(context).pop();
-                                    },
-                                  )
-                                ],
-                              );
-                            },
-                          );
-                        },
-                      );
-                    },
+                    itemBuilder: (BuildContext context, int index) =>
+                        StarrableRepository(repository: repositories[index]),
                   ),
                 );
               },
@@ -175,6 +117,106 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class StarrableRepository extends StatefulWidget {
+  const StarrableRepository({
+    Key key,
+    @required this.repository,
+  }) : super(key: key);
+
+  final Map<String, Object> repository;
+
+  @override
+  StarrableRepositoryState createState() {
+    return new StarrableRepositoryState();
+  }
+}
+
+class StarrableRepositoryState extends State<StarrableRepository> {
+  bool loading = false;
+
+  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
+    final Map<String, Object> action = data['action'];
+
+    if (action == null) {
+      return null;
+    }
+
+    return action['starrable'];
+  }
+
+  bool get viewerHasStarred => widget.repository['viewerHasStarred'];
+
+  @override
+  Widget build(BuildContext context) {
+    final bool starred = loading ? !viewerHasStarred : viewerHasStarred;
+
+    return Mutation(
+      key: Key(starred.toString()),
+      options: MutationOptions(
+        document: starred ? mutations.removeStar : mutations.addStar,
+      ),
+      builder: (RunMutation toggleStar, QueryResult result) {
+        return ListTile(
+          leading: starred
+              ? const Icon(
+                  Icons.star,
+                  color: Colors.amber,
+                )
+              : const Icon(Icons.star_border),
+          trailing: loading ? const CircularProgressIndicator() : null,
+          title: Text(widget.repository['name']),
+          onTap: () {
+            // optimistic ui updates are not implemented yet,
+            // so we track loading manually
+            setState(() {
+              loading = true;
+            });
+            toggleStar(<String, dynamic>{
+              'starrableId': widget.repository['id'],
+            });
+          },
+        );
+      },
+      update: (Cache cache, QueryResult result) {
+        if (result.hasErrors) {
+          print(result.errors);
+        } else {
+          final Map<String, Object> updated =
+              Map<String, Object>.from(widget.repository)
+                ..addAll(extractRepositoryData(result.data));
+
+          cache.write(typenameDataIdFromObject(updated), updated);
+        }
+      },
+      onCompleted: (QueryResult result) {
+        showDialog<AlertDialog>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(
+                extractRepositoryData(result.data)['viewerHasStarred']
+                    ? 'Thanks for your star!'
+                    : 'Sorry you changed your mind!',
+              ),
+              actions: <Widget>[
+                SimpleDialogOption(
+                  child: const Text('Dismiss'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          },
+        );
+        setState(() {
+          loading = false;
+        });
+      },
     );
   }
 }
