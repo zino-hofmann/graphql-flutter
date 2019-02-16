@@ -1,3 +1,57 @@
+## [1.0.0-beta.1] - February 16 2019
+
+We are finally in BETA. This means we're one step closer to our first stable release.
+
+Thanks to all the contributes.
+
+### What's changed?
+
+We have added a brand new `Link` that handles authentication. You can drop it in like so:
+
+```dart
+final HttpLink httpLink = HttpLink(
+  uri: 'https://api.github.com/graphql',
+);
+
+final AuthLink authLink = AuthLink(
+  getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+);
+
+final Link link = authLink.concat(httpLink);
+
+GraphQLClient client = GraphQLClient(
+  cache: NormalizedInMemoryCache(
+    dataIdFromObject: typenameDataIdFromObject,
+  ),
+  link: link,
+);
+```
+
+The `getToken` function will be called right before each event gets passed to the next link. It set the `Authorization` header to the value returned by `getToken` and passes it under the `header` map to the context.
+
+#### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed decouple mutation side effects from component (#114). @micimize
+- Fixed `data == {}` was always false, instead of `data.isEmpty`. @nesger
+- Added `update(cache, result)` attribute to `Mutation`. @micimize
+- Added `NormalizationException` to handle infinite dereference StackOverflow due to user error. @micimize
+- Added the GraphQL message type `GQL_CONNECTION_KEEP_ALIVE`, so it isn't interpreted as `UnknownData` anymore. @ArneSchulze
+- Added the brand ne `AuthLink` class. @HofmannZ
+- Update example to use `NormalizedCache` / test decoupling by replacing the `Mutation` while in flight. @micimize
+- Removed closed observable queries from `QueryManager`. @micimize
+
+#### Docs
+
+- Fixed typos. @xtian
+- Added `MessageType` constant `GQL_CONNECTION_KEEP_ALIVE`. @ArneSchulze
+- Added `GraphQLSocketMessage` class `ConnectionKeepAlive`. @ArneSchulze
+- Added `Stream<ConnectionKeepAlive>` to `GraphQLSocket`. @ArneSchulze
+- Updated the example to use the new AuthLink. @HofmannZ
+
 ## [1.0.0-alpha.11] - October 28 2018
 
 ### Breaking changes
