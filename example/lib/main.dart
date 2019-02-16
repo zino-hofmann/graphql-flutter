@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-// create this file with the line
-// const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
-import './local.dart';
-
 import './mutations/mutations.dart' as mutations;
 import './queries/readRepositories.dart' as queries;
+
+const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
 
 void main() => runApp(MyApp());
 
