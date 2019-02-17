@@ -8,7 +8,17 @@ import 'package:path_provider/path_provider.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 
 class InMemoryCache implements Cache {
+  InMemoryCache({
+    this.customStorageDirectory,
+  });
+
+  /// A directory to be used for storage.
+  /// This is used for testing, on regular usage
+  /// 'path_provider' will provide the storage directory.
+  final Directory customStorageDirectory;
+
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
+  bool _writingToStorage = false;
 
   /// Reads an entity from the internal HashMap.
   @override
@@ -23,18 +33,26 @@ class InMemoryCache implements Cache {
   /// Writes an entity to the internal HashMap.
   @override
   void write(String key, dynamic value) {
-    _inMemoryCache[key] = value;
+    if (_inMemoryCache.containsKey(key) &&
+        _inMemoryCache[key] is Map &&
+        value != null &&
+        value is Map) {
+      // Avoid overriding a superset with a subset of a field (#155)
+      _inMemoryCache[key].addAll(value);
+    } else {
+      _inMemoryCache[key] = value;
+    }
   }
 
   /// Saves the internal HashMap to a file.
   @override
-  void save() async {
+  Future<void> save() async {
     await _writeToStorage();
   }
 
   /// Restores the internal HashMap to a file.
   @override
-  void restore() async {
+  Future<void> restore() async {
     _inMemoryCache = await _readFromStorage();
   }
 
@@ -45,6 +63,11 @@ class InMemoryCache implements Cache {
   }
 
   Future<String> get _localStoragePath async {
+    if (customStorageDirectory != null) {
+      // Used for testing
+      return customStorageDirectory.path;
+    }
+
     final Directory directory = await getApplicationDocumentsDirectory();
 
     return directory.path;
@@ -57,15 +80,30 @@ class InMemoryCache implements Cache {
   }
 
   Future<dynamic> _writeToStorage() async {
-    final File file = await _localStorageFile;
-    final IOSink sink = file.openWrite();
+    if (_writingToStorage) {
+      return;
+    }
 
-    _inMemoryCache.forEach((String key, dynamic value) {
-      sink.writeln(json.encode(<dynamic>[key, value]));
-    });
+    _writingToStorage = true;
 
-    await sink.close();
+    // Catching errors to avoid locking forever.
+    // Maybe the device couldn't write in the past
+    // but it may in the future.
+    try {
+      final File file = await _localStorageFile;
+      final IOSink sink = file.openWrite();
+      _inMemoryCache.forEach((String key, dynamic value) {
+        sink.writeln(json.encode(<dynamic>[key, value]));
+      });
 
+      await sink.close();
+
+      _writingToStorage = false;
+    } catch (err) {
+      _writingToStorage = false;
+
+      rethrow;
+    }
     return;
   }
 
@@ -77,16 +115,14 @@ class InMemoryCache implements Cache {
       if (file.existsSync()) {
         final Stream<List<int>> inputStream = file.openRead();
 
-        inputStream
+        await for (String line in inputStream
             .transform(utf8.decoder) // Decode bytes to UTF8.
             .transform(
               const LineSplitter(),
-            ) // Convert stream to individual lines.
-            .listen((String line) {
+            )) {
           final List<dynamic> keyAndValue = json.decode(line);
-
           storedHashMap[keyAndValue[0]] = keyAndValue[1];
-        });
+        }
       }
 
       return storedHashMap;

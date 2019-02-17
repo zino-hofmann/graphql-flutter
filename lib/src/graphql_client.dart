@@ -13,14 +13,6 @@ import 'package:graphql_flutter/src/cache/cache.dart';
 /// The link is a [Link] over which GraphQL documents will be resolved into a [FetchResult].
 /// The cache is the initial [Cache] to use in the data store.
 class GraphQLClient {
-  /// The [Link] over which GraphQL documents will be resolved into a [FetchResult].
-  final Link link;
-
-  /// The initial [Cache] to use in the data store.
-  final Cache cache;
-
-  QueryManager queryManager;
-
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
   GraphQLClient({
     @required this.link,
@@ -31,6 +23,14 @@ class GraphQLClient {
       cache: cache,
     );
   }
+
+  /// The [Link] over which GraphQL documents will be resolved into a [FetchResult].
+  final Link link;
+
+  /// The initial [Cache] to use in the data store.
+  final Cache cache;
+
+  QueryManager queryManager;
 
   /// This registers a query in the [QueryManager] and returns an [ObservableQuery]
   /// based on the provided [WatchQueryOptions].

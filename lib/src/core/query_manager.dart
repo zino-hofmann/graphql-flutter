@@ -18,13 +18,6 @@ import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/get_from_ast.dart';
 
 class QueryManager {
-  final Link link;
-  final Cache cache;
-
-  QueryScheduler scheduler;
-  int idCounter = 1;
-  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
-
   QueryManager({
     @required this.link,
     @required this.cache,
@@ -33,6 +26,13 @@ class QueryManager {
       queryManager: this,
     );
   }
+
+  final Link link;
+  final Cache cache;
+
+  QueryScheduler scheduler;
+  int idCounter = 1;
+  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
     if (options.document == null) {
@@ -112,7 +112,7 @@ class QueryManager {
         }
       }
 
-      // execute the operation trough the provided link(s)
+      // execute the operation through the provided link(s)
       fetchResult = await execute(
         link: link,
         operation: operation,
@@ -138,6 +138,7 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(fetchResult);
     } catch (error) {
+      // TODO some dart errors break this
       final GraphQLError graphQLError = GraphQLError(
         message: error.message,
       );
@@ -170,6 +171,13 @@ class QueryManager {
 
   void setQuery(ObservableQuery observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
+  }
+
+  void closeQuery(ObservableQuery observableQuery, {bool fromQuery = false}) {
+    if (!fromQuery) {
+      observableQuery.close(fromManager: true);
+    }
+    queries.remove(observableQuery.queryId);
   }
 
   int generateQueryId() {

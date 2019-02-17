@@ -1,19 +1,19 @@
 import 'dart:convert';
 
 class Operation {
-  final String document;
-  final Map<String, dynamic> variables;
-  final String operationName;
-  final Map<String, dynamic> extensions;
-
-  final Map<String, dynamic> _context = <String, dynamic>{};
-
   Operation({
     this.document,
     this.variables,
     this.operationName,
     this.extensions,
   });
+
+  final String document;
+  final Map<String, dynamic> variables;
+  final String operationName;
+  final Map<String, dynamic> extensions;
+
+  final Map<String, dynamic> _context = <String, dynamic>{};
 
   /// Sets the context of an opration by merging the new context with the old one.
   void setContext(Map<String, dynamic> next) {

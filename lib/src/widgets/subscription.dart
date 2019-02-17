@@ -14,13 +14,6 @@ typedef SubscriptionBuilder = Widget Function({
 });
 
 class Subscription extends StatefulWidget {
-  final String operationName;
-  final String query;
-  final dynamic variables;
-  final SubscriptionBuilder builder;
-  final OnSubscriptionCompleted onCompleted;
-  final dynamic initial;
-
   const Subscription(
     this.operationName,
     this.query, {
@@ -30,6 +23,13 @@ class Subscription extends StatefulWidget {
     this.initial,
     this.onCompleted,
   }) : super(key: key);
+
+  final String operationName;
+  final String query;
+  final dynamic variables;
+  final SubscriptionBuilder builder;
+  final OnSubscriptionCompleted onCompleted;
+  final dynamic initial;
 
   @override
   _SubscriptionState createState() => _SubscriptionState();

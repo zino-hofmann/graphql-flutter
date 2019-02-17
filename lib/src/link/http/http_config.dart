@@ -1,11 +1,11 @@
 class HttpQueryOptions {
-  bool includeQuery;
-  bool includeExtensions;
-
   HttpQueryOptions({
     this.includeQuery,
     this.includeExtensions,
   });
+
+  bool includeQuery;
+  bool includeExtensions;
 
   void addAll(HttpQueryOptions options) {
     if (options.includeQuery != null) {
@@ -19,22 +19,25 @@ class HttpQueryOptions {
 }
 
 class HttpConfig {
-  HttpQueryOptions http;
-  Map<String, dynamic> options;
-  Map<String, dynamic> credentials;
-  Map<String, String> headers;
-
   HttpConfig({
     this.http,
     this.options,
     this.credentials,
     this.headers,
   });
+
+  HttpQueryOptions http;
+  Map<String, dynamic> options;
+  Map<String, dynamic> credentials;
+  Map<String, String> headers;
 }
 
 class HttpOptionsAndBody {
+  HttpOptionsAndBody({
+    this.options,
+    this.body,
+  });
+
   final Map<String, dynamic> options;
   final String body;
-
-  HttpOptionsAndBody({this.options, this.body});
 }

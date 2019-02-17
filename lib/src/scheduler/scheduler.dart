@@ -5,6 +5,10 @@ import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/observable_query.dart';
 
 class QueryScheduler {
+  QueryScheduler({
+    this.queryManager,
+  });
+
   QueryManager queryManager;
 
   /// Map going from query ids to the [WatchQueryOptions] associated with those queries.
@@ -17,10 +21,6 @@ class QueryScheduler {
 
   /// Map going from polling interval durations to polling timers.
   final Map<Duration, Timer> _pollingTimers = <Duration, Timer>{};
-
-  QueryScheduler({
-    this.queryManager,
-  });
 
   void fetchQueriesOnInterval(
     Timer timer,

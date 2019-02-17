@@ -123,6 +123,7 @@ class SocketClient {
 
   void onConnectionLost() {
     print('Disconnected from websocket.');
+    _reconnectTimer?.cancel();
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
 
