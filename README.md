@@ -10,7 +10,7 @@
 
 ## NOTICE
 
-**We're planning to make quite some changes to the projects workflow. We've also planned a coding session this weekend(17&18 Feb). In order to make informed decisions we created a short survey, it would really help if you would answer it: https://goo.gl/forms/WZ5JlNWASxd1ojfG3** 
+**We're planning to make quite some changes to the projects workflow. We're also letting the community decide who will join our core contributors team, you can vote on the nomenies here https://goo.gl/forms/19KNF9IMuBKGngrz2** 
 
 ## 🎉🥂🍾 Time to celebrate!
 
