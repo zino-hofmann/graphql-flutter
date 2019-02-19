@@ -2,10 +2,24 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:path_provider/path_provider.dart';
-
 import 'package:graphql_flutter/src/cache/cache.dart';
+
+void _recursiveAddAll(
+  Map<String, dynamic> oldData,
+  Map<String, dynamic> newData,
+) {
+  newData.forEach((String key, dynamic value) {
+    if (oldData.containsKey(key) &&
+        oldData[key] is Map &&
+        value != null &&
+        value is Map) {
+      _recursiveAddAll(oldData[key], value);
+    } else {
+      oldData[key] = value;
+    }
+  });
+}
 
 class InMemoryCache implements Cache {
   InMemoryCache({
@@ -38,7 +52,7 @@ class InMemoryCache implements Cache {
         value != null &&
         value is Map) {
       // Avoid overriding a superset with a subset of a field (#155)
-      _inMemoryCache[key].addAll(value);
+      _recursiveAddAll(_inMemoryCache[key], value);
     } else {
       _inMemoryCache[key] = value;
     }
