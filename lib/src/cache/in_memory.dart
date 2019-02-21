@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart'
     show deeplyMergeLeft;
@@ -38,11 +37,11 @@ class InMemoryCache implements Cache {
     if (_inMemoryCache.containsKey(key) &&
         _inMemoryCache[key] is Map &&
         value != null &&
-        value is Map) {
+        value is Map<String, dynamic>) {
       // Avoid overriding a superset with a subset of a field (#155)
       // this means deletions must be done by explicitly returning a field as null
       _inMemoryCache[key] = deeplyMergeLeft(<Map<String, dynamic>>[
-        _inMemoryCache[key],
+        _inMemoryCache[key] as Map<String, dynamic>,
         value,
       ]);
     } else {
@@ -102,6 +101,8 @@ class InMemoryCache implements Cache {
         sink.writeln(json.encode(<dynamic>[key, value]));
       });
 
+      // before calling sink.close() we should call sink.flush()
+      await sink.flush();
       await sink.close();
 
       _writingToStorage = false;
@@ -114,6 +115,18 @@ class InMemoryCache implements Cache {
   }
 
   Future<HashMap<String, dynamic>> _readFromStorage() async {
+    if (_writingToStorage) {
+      // On android the app will fire 'inactive' and then 'restored'
+      // when it is restored. Then, while this is reading it may read
+      // incomplete data because the writer may be writing data.
+      // And if it is writing the file was overwritten anyway, so we don't
+      // have what to read and best hope that the data we have in memory
+      // is the correct one.
+      // TODO: should we call save when the app enters inactive (why?)
+      // When the app is 'cold-started' then save won't be called and
+      // restore will run ok.
+      return _inMemoryCache;
+    }
     try {
       final File file = await _localStorageFile;
       final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
