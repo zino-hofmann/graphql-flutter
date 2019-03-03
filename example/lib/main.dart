@@ -8,28 +8,27 @@ const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
 
 void main() => runApp(MyApp());
 
-class MyApp extends StatelessWidget {
-  MyApp();
+final HttpLink httpLink = HttpLink(
+  uri: 'https://api.github.com/graphql',
+);
 
+final AuthLink authLink = AuthLink(
+  getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+);
+
+// to handle subscriptions
+final WebSocketLink websocketLink = WebSocketLink(
+  url: 'ws://localhost:8080/ws/graphql',
+  config: SocketClientConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+);
+
+// the order is important!
+final Link link = authLink.concat(httpLink).concat(websocketLink);
+
+class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HttpLink httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
-    );
-
-    final AuthLink authLink = AuthLink(
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-    );
-
-    final Link link = authLink.concat(httpLink);
-
-    final WebSocketLink websocketLink = WebSocketLink(SocketClient(
-      'ws://api.github.com/graphql',
-      headers: <String, String>{
-        'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-      },
-      config: SocketClientConfig(autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-    ));
+    // websocketLink.connectOrReconnect();
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
@@ -115,18 +114,31 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<dynamic> repositories =
-                    result.data['viewer']['repositories']['nodes'];
+                final List<dynamic> repositories = result.data['viewer']['repositories']['nodes'];
 
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                        StarrableRepository(repository: repositories[index]),
+                    itemBuilder: (BuildContext context, int index) => StarrableRepository(repository: repositories[index]),
                   ),
                 );
               },
             ),
+            Subscription<Map<String, dynamic>>(
+              'test',
+              queries.testSubscription,
+              builder: ({loading, payload, dynamic error}) => loading ? Text('Loading...') : Text(payload.toString()),
+            ),
+            Subscription<Map<String, dynamic>>(
+              'test',
+              queries.testSubscription,
+              builder: ({loading, payload, dynamic error}) => loading ? Text('Loading2...') : Text(payload.toString()),
+            ),
+            Subscription<Map<String, dynamic>>(
+              'test',
+              queries.testSubscription,
+              builder: ({loading, payload, dynamic error}) => loading ? Text('Loading3...') : Text(payload.toString()),
+            )
           ],
         ),
       ),
@@ -198,9 +210,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
         if (result.hasErrors) {
           print(result.errors);
         } else {
-          final Map<String, Object> updated =
-              Map<String, Object>.from(widget.repository)
-                ..addAll(extractRepositoryData(result.data));
+          final Map<String, Object> updated = Map<String, Object>.from(widget.repository)..addAll(extractRepositoryData(result.data));
 
           cache.write(typenameDataIdFromObject(updated), updated);
         }
@@ -211,9 +221,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(
-                extractRepositoryData(result.data)['viewerHasStarred']
-                    ? 'Thanks for your star!'
-                    : 'Sorry you changed your mind!',
+                extractRepositoryData(result.data)['viewerHasStarred'] ? 'Thanks for your star!' : 'Sorry you changed your mind!',
               ),
               actions: <Widget>[
                 SimpleDialogOption(

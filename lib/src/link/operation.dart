@@ -15,7 +15,7 @@ class Operation {
 
   final Map<String, dynamic> _context = <String, dynamic>{};
 
-  /// Sets the context of an opration by merging the new context with the old one.
+  /// Sets the context of an operation by merging the new context with the old one.
   void setContext(Map<String, dynamic> next) {
     _context.addAll(next);
   }
@@ -26,6 +26,8 @@ class Operation {
 
     return result;
   }
+
+  bool get isSubscription => document.contains(RegExp(r'.*?subscription ' + operationName));
 
   String toKey() {
     /// XXX we're assuming here that variables will be serialized in the same order.

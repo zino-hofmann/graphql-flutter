@@ -1,15 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:meta/meta.dart';
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
-
+import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
+import 'package:graphql_flutter/src/link/http/http_config.dart';
 import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
-import 'package:graphql_flutter/src/link/http/http_config.dart';
-import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
+import 'package:http/http.dart';
+import 'package:http_parser/http_parser.dart';
+import 'package:meta/meta.dart';
+import 'package:rxdart/rxdart.dart';
 
 class HttpLink extends Link {
   HttpLink({
@@ -24,6 +24,11 @@ class HttpLink extends Link {
             Operation operation, [
             NextLink forward,
           ]) {
+            if (operation.isSubscription) {
+              if (forward == null) return Observable.error(Exception('This link does not support subscriptions.'));
+              return forward(operation);
+            }
+
             final Client fetcher = fetch ?? Client();
 
             final HttpConfig linkConfig = HttpConfig(
@@ -50,8 +55,7 @@ class HttpLink extends Link {
               );
             }
 
-            final HttpOptionsAndBody httpOptionsAndBody =
-                _selectHttpOptionsAndBody(
+            final HttpOptionsAndBody httpOptionsAndBody = _selectHttpOptionsAndBody(
               operation,
               fallbackHttpConfig,
               linkConfig,
@@ -221,8 +225,7 @@ FetchResult _parseResponse(Response response) {
 /// The default fallback encoding is set to UTF-8 according to the IETF RFC4627 standard
 /// which specifies the application/json media type:
 ///   "JSON text SHALL be encoded in Unicode. The default encoding is UTF-8."
-Encoding _determineEncodingFromResponse(Response response,
-    [Encoding fallback = utf8]) {
+Encoding _determineEncodingFromResponse(Response response, [Encoding fallback = utf8]) {
   final String contentType = response.headers['content-type'];
 
   if (contentType == null) {

@@ -1,3 +1,4 @@
+import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
@@ -69,7 +70,7 @@ class QueryOptions extends BaseOptions {
         );
 
   /// The time interval (in milliseconds) on which this query should be
-  /// refetched from the server.
+  /// re-fetched from the server.
   int pollInterval;
 }
 
@@ -143,33 +144,6 @@ class WatchQueryOptions extends QueryOptions {
     }
 
     // compare variables last, because maps take more time
-    return _areDifferentVariables(a.variables, b.variables);
-  }
-
-  bool _areDifferentVariables(
-    Map<String, dynamic> a,
-    Map<String, dynamic> b,
-  ) {
-    if (a == null && b == null) {
-      return false;
-    }
-
-    if (a == null || b == null) {
-      return true;
-    }
-
-    if (a.length != b.length) {
-      return true;
-    }
-
-    bool areDifferent = false;
-
-    a.forEach((String key, dynamic value) {
-      if ((!b.containsKey(key)) || b[key] != value) {
-        areDifferent = true;
-      }
-    });
-
-    return areDifferent;
+    return areDifferentVariables(a.variables, b.variables);
   }
 }

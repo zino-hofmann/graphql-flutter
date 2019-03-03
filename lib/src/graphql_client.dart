@@ -1,14 +1,14 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
-import 'package:graphql_flutter/src/core/query_manager.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/core/observable_query.dart';
-import 'package:graphql_flutter/src/core/query_options.dart';
-
-import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
+import 'package:graphql_flutter/src/core/observable_query.dart';
+import 'package:graphql_flutter/src/core/query_manager.dart';
+import 'package:graphql_flutter/src/core/query_options.dart';
+import 'package:graphql_flutter/src/core/query_result.dart';
+import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql_flutter/src/link/link.dart';
+import 'package:graphql_flutter/src/link/operation.dart';
+import 'package:meta/meta.dart';
 
 /// The link is a [Link] over which GraphQL documents will be resolved into a [FetchResult].
 /// The cache is the initial [Cache] to use in the data store.
@@ -50,10 +50,9 @@ class GraphQLClient {
     return queryManager.mutate(options);
   }
 
-  /// This subscribes to a GraphQL subscription according to the options specified and returns an
+  /// This subscribes to a GraphQL subscription according to the options specified and returns a
   /// [Stream] which either emits received data or an error.
-  Stream<dynamic> subscribe(dynamic options) {
-    // TODO: merge the subscription client with the new client
-    return const Stream<dynamic>.empty();
+  Stream<FetchResult> subscribe(Operation operation) {
+    return execute(link: link, operation: operation);
   }
 }
