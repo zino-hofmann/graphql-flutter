@@ -47,7 +47,7 @@ class Client {
 
   Map<String, String> get headers => {
         'Authorization': 'Bearer $apiToken',
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json; charset=utf-8',
       };
 
   InMemoryCache get cache => this._cache;
@@ -73,7 +73,8 @@ class Client {
       );
     }
 
-    final Map<String, dynamic> jsonResponse = json.decode(response.body);
+    final Map<String, dynamic> jsonResponse =
+        json.decode(utf8.decode(response.bodyBytes));
 
     if (jsonResponse['errors'] != null && jsonResponse['errors'].length > 0) {
       throw GQLException(
