@@ -4,10 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/src/client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
+typedef void GetQueryResult();
 typedef Widget QueryBuilder({
   @required bool loading,
   Map<String, dynamic> data,
   Exception error,
+  GetQueryResult runQuery
 });
 
 class Query extends StatefulWidget {
@@ -160,6 +162,7 @@ class QueryState extends State<Query> {
       loading: loading,
       error: error,
       data: data,
+      runQuery: getQueryResult
     );
   }
 }
