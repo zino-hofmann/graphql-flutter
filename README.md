@@ -136,6 +136,7 @@ Query(
     bool loading,
     var data,
     Exception error,
+    runQuery
   }) {
     if (error != null) {
       return Text(error.toString());
