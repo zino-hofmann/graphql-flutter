@@ -192,9 +192,11 @@ class QueryManager {
     List<GraphQLError> errors;
 
     if (fetchResult.errors != null) {
-      errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
-        (dynamic rawError) => GraphQLError.fromJSON(rawError),
-      ));
+      errors = List<GraphQLError>.from(
+        fetchResult.errors
+          .where((error) => error != null)
+          .map<GraphQLError>((dynamic rawError) => GraphQLError.fromJSON(rawError))
+      );
     }
 
     return QueryResult(
