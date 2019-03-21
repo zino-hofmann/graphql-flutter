@@ -145,7 +145,7 @@ class QueryManager {
       try {
         errorMessage = error.message;
       } catch (e) {
-        throw e;
+        throw error;
       }
 
       final GraphQLError graphQLError = GraphQLError(
