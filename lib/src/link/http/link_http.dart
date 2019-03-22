@@ -207,7 +207,8 @@ FetchResult _parseResponse(Response response) {
 
   if (jsonResponse['errors'] != null) {
     fetchResult.errors = jsonResponse['errors']
-      .where((error) => error != null);
+      .where((error) => error != null)
+      .toList();
   }
 
   if (jsonResponse['data'] != null) {
