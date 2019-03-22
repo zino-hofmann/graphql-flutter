@@ -120,8 +120,8 @@ class InMemoryCache implements Cache {
             .transform(
               const LineSplitter(),
             )) {
-          final List<dynamic> keyAndValue = json.decode(line);
-          storedHashMap[keyAndValue[0]] = keyAndValue[1];
+          final List<dynamic> keyAndValue = json.decode(line) as List<dynamic>;
+          storedHashMap[keyAndValue[0] as String] = keyAndValue[1];
         }
       }
 
