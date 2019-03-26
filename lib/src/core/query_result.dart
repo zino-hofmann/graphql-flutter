@@ -7,7 +7,9 @@ class QueryResult {
     this.loading,
     this.stale,
     this.optimistic = false,
-  });
+  }) : timestamp = DateTime.now();
+
+  DateTime timestamp;
 
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;

@@ -85,7 +85,6 @@ class HttpLink extends Link {
                 final BaseRequest request = await _prepareRequest(
                     uri, httpHeadersAndBody.body, httpHeaders);
 
-<<<<<<< HEAD
                 response = await fetcher.send(request);
 
                 operation.setContext(<String, StreamedResponse>{
@@ -93,9 +92,6 @@ class HttpLink extends Link {
                 });
                 final FetchResult parsedResponse =
                     await _parseResponse(response);
-=======
-                final FetchResult parsedResponse = _parseResponse(response);
->>>>>>> don't hmm
 
                 controller.add(parsedResponse);
               } catch (error) {

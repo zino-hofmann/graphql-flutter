@@ -20,7 +20,7 @@ typedef MutationBuilder = Widget Function(
   QueryResult result,
 );
 
-typedef OnMutationCompleted = void Function(QueryResult result);
+typedef OnMutationCompleted = void Function(dynamic data);
 typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
@@ -81,14 +81,43 @@ class MutationState extends State<Mutation> {
     }
   }
 
-  OnData get update {
+  void onCompleted(QueryResult result) {
+    if (!result.loading && !result.optimistic) {
+      widget.onCompleted(result.data);
+    }
+  }
+
+  void _optimisticUpdate(QueryResult result) {
     final Cache cache = client.cache;
     final String mutationId = observableQuery.queryId;
+    if (cache is OptimisticCache) {
+      cache.addOptimisiticPatch(mutationId, (Cache cache) {
+        widget.update(cache, result);
+        return cache;
+      });
+    } else {
+      // TODO better error
+      assert(cache is OptimisticCache,
+          "can't optimisticly update non-optimistic cache");
+    }
+  }
+
+  void _cleanupIfOptimistic(QueryResult result) {
+    final Cache cache = client.cache;
+    final String mutationId = observableQuery.queryId;
+    if (cache is OptimisticCache && !result.loading && !result.optimistic) {
+      cache.removeOptimisticPatch(mutationId);
+    }
+  }
+
+  OnData get update {
     if (widget.update != null) {
       void updateOnData(QueryResult result) {
-        widget.update(cache, result);
-        if (cache is OptimisticCache) {
-          cache.removeOptimisticPatch(mutationId);
+        if (result.optimistic) {
+          return _optimisticUpdate(result);
+        } else {
+          widget.update(client.cache, result);
+          _cleanupIfOptimistic(result);
         }
       }
 
@@ -97,32 +126,23 @@ class MutationState extends State<Mutation> {
     return null;
   }
 
+  // callbacks will be called against each result in the stream,
+  // which should then rebroadcast queries with the appropriate optimism
   Iterable<OnData> get callbacks {
-    return <OnData>[widget.onCompleted, update].where(notNull);
+    return <OnData>[onCompleted, update].where(notNull);
   }
 
-  // TODO not sure if we're properly caching results without update callbacks
+  // TODO not properly caching results without update callbacks
+  // TODO should handle mutations with normalizable optimistic results
+  // without update
   /// handles optimistic updates
   void handleOptimism(Object optimisticResult) {
-    final Cache cache = client.cache;
-    final String mutationId = observableQuery.queryId;
-    if (optimisticResult != null &&
-        widget.update != null &&
-        cache is OptimisticCache) {
-      cache.addOptimisiticPatch(mutationId, (Cache cache) {
-        widget.update(
-          cache,
-          QueryResult(
-            loading: true,
-            optimistic: true,
-            data: optimisticResult,
-          ),
-        );
-        return cache;
-      });
-      observableQuery.queryManager.rebroadcastQueries(
+    if (client.cache is OptimisticCache && optimisticResult != null) {
+      observableQuery.addResult(QueryResult(
+        loading: false,
         optimistic: true,
-      );
+        data: optimisticResult,
+      ));
     }
   }
 

@@ -84,6 +84,8 @@ class QueryManager {
             data: cachedData,
           );
 
+          // we're rebroadcasting from cache,
+          // so don't override optimism
           queryResult = _mapFetchResultToQueryResult(
             fetchResult,
             loading: false,
@@ -140,6 +142,7 @@ class QueryManager {
       queryResult = _mapFetchResultToQueryResult(
         fetchResult,
         loading: false,
+        optimistic: false,
       );
     } catch (error) {
       String errorMessage;

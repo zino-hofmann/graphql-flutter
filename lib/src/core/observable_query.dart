@@ -38,9 +38,7 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      // @todo Set literal is only supported from Dart 2.2 we are running Dart 2.0
-      // ignore: prefer_collection_literals
-      Set<StreamSubscription<QueryResult>>();
+      <StreamSubscription<QueryResult>>{};
 
   QueryResult previousResult;
 
@@ -62,6 +60,7 @@ class ObservableQuery {
         return true;
 
       case QueryLifecycle.UNEXECUTED: // this might be ok
+      case QueryLifecycle.CLOSED:
       case QueryLifecycle.SIDE_EFFECTS_PENDING:
       case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
         return false;
@@ -93,10 +92,17 @@ class ObservableQuery {
   /// copying `loading` and `optimistic`
   /// from the `previousResult` if they aren't set.
   void addResult(QueryResult result) {
+    // don't overwrite results due to some async/optimism issue
+    if (previousResult != null &&
+        previousResult.timestamp.isAfter(result.timestamp)) {
+      return null;
+    }
+
     if (previousResult != null) {
       result.loading ??= previousResult.loading;
       result.optimistic ??= previousResult.optimistic;
     }
+
     previousResult = result;
     controller.add(result);
   }
@@ -113,14 +119,16 @@ class ObservableQuery {
 
         if (!result.loading) {
           callbacks.forEach(handle);
-          queryManager.rebroadcastQueries(optimistic: false);
-          subscription.cancel();
-          _onDataSubscriptions.remove(subscription);
+          queryManager.rebroadcastQueries(optimistic: result.optimistic);
+          if (!result.optimistic) {
+            subscription.cancel();
+            _onDataSubscriptions.remove(subscription);
 
-          if (_onDataSubscriptions.isEmpty) {
-            if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
-              lifecycle = QueryLifecycle.COMPLETED;
-              close();
+            if (_onDataSubscriptions.isEmpty) {
+              if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+                lifecycle = QueryLifecycle.COMPLETED;
+                close();
+              }
             }
           }
         }
