@@ -2,20 +2,36 @@ container:
   image: cirrusci/flutter:latest
 
 test_task:
+
+  test_client_script:
   # pub_cache:
   #   folder: $HOME/.pub-cache
   #   fingerprint_script: cat pubspec.lock
   #   populate_script: pub get
-  pub_script: flutter packages get # later when we seperate graphql_client and graphql_flutter, we can change this
-  format_script: dartfmt **/*.dart -n --set-exit-if-changed
+  - cd packages/graphql_client
+  - pub get
+  - dartfmt -n --set-exit-if-changed .
   # analyze_script: dartanalyzer --fatal-infos .
-  publishable_script: pub publish --dry-run
+  # publishable_script: pub publish --dry-run # @todo error `line 1, column 1 of example/lib/main.dart: This package doesn't depend on flutter.`
+  - pub global activate coverage
+  - dart --enable-vm-service=8111 --pause-isolates-on-exit test/* &
+  - pub global run coverage:collect_coverage --port=8111 --out=coverage.json --wait-paused --resume-isolates
+  - pub global run coverage:format_coverage --lcov --in=coverage.json --out=lcov.info --packages=.packages --report-on=lib
+
+  test_widget_script:
+  # pub_cache:
+  #   folder: $HOME/.pub-cache
+  #   fingerprint_script: cat pubspec.lock
+  #   populate_script: pub get
+  - cd packages/graphql_flutter
+  - flutter packages get
+  - flutter format -n --set-exit-if-changed .
+  - flutter analyze .
+  # publishable_script: pub publish --dry-run # @todo re-enable this after publishing graphql_client
+  - flutter test --coverage
+  - bash <(curl -s https://codecov.io/bash)
+
   environment:
     CODECOV_TOKEN: ENCRYPTED[fa57a1dda8bca6ad45ef10043f632b68b7824b60c634415f741a847788c1a44ae9374155e3af3346fb9b6d72bac0e1d3]
-  test_script:
-  # - pub global activate coverage
-  # - dart --enable-vm-service=8111 --pause-isolates-on-exit test/* &
-  # - pub global run coverage:collect_coverage --port=8111 --out=coverage.json --wait-paused --resume-isolates
-  # - pub global run coverage:format_coverage --lcov --in=coverage.json --out=lcov.info --packages=.packages --report-on=lib
-  - flutter test --coverage
+  coverage_script:
   - bash <(curl -s https://codecov.io/bash)
