@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart';
@@ -25,6 +26,8 @@ class HttpLink extends Link {
     Map<String, dynamic> credentials,
     Map<String, dynamic> fetchOptions,
   }) : super(
+          // @todo possibly this is a bug in dart analyzer
+          // ignore: undefined_named_parameter
           request: (
             Operation operation, [
             NextLink forward,
@@ -105,7 +108,7 @@ Map<String, File> _getFileMap(
 }) {
   currentMap ??= <String, File>{};
   if (body is Map<String, dynamic>) {
-    final entries = body.entries;
+    final Iterable<MapEntry<String, dynamic>> entries = body.entries;
     for (MapEntry<String, dynamic> element in entries) {
       currentMap.addAll(_getFileMap(
         element.value,
@@ -154,18 +157,17 @@ Future<BaseRequest> _prepareRequest(
     return object.toJson();
   });
 
-  // @todo fileMap.keys.toList() and fileMap.values.toList() same order????
-  final Map<String, List<String>> adasd =
-      {}; // fileMap.keys.toList().asMap().map((int index, String filePath) => MapEntry(index.toString(),[filePath]));
-  final List<MultipartFile> fileList = [];
+  final Map<String, List<String>> fileMapping = <String, List<String>>{};
+  final List<MultipartFile> fileList = <MultipartFile>[];
 
-  final fEn = fileMap.entries.toList(growable: false);
+  final List<MapEntry<String, File>> fileMapEntries =
+      fileMap.entries.toList(growable: false);
 
-  for (int i = 0; i < fEn.length; i++) {
-    final MapEntry<String, File> entry = fEn[i];
+  for (int i = 0; i < fileMapEntries.length; i++) {
+    final MapEntry<String, File> entry = fileMapEntries[i];
     final String indexString = i.toString();
-    adasd.addAll({
-      indexString: [entry.key]
+    fileMapping.addAll(<String, List<String>>{
+      indexString: <String>[entry.key],
     });
     final File f = entry.value;
     final String fileName = basename(f.path);
@@ -178,9 +180,7 @@ Future<BaseRequest> _prepareRequest(
     ));
   }
 
-  final rfieldsmap = json.encode(adasd);
-
-  r.fields['map'] = rfieldsmap;
+  r.fields['map'] = json.encode(fileMapping);
 
   r.files.addAll(fileList);
   return r;
@@ -286,7 +286,7 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
   try {
     final Encoding encoding = _determineEncodingFromResponse(response);
     // @todo limit bodyBytes
-    final reponseByte = await response.stream.toBytes();
+    final Uint8List reponseByte = await response.stream.toBytes();
     final String decodedBody = encoding.decode(reponseByte);
 
     final Map<String, dynamic> jsonResponse =

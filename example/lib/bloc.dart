@@ -22,7 +22,7 @@ class Bloc {
     _toggleStarSubject.listen((Repo t) async {
       _toggleStarLoadingSubject.add(true);
       // @todo handle error
-      final r = await _mutateToggleStar(t);
+      final QueryResult _ = await _mutateToggleStar(t);
 
       _repoSubject.add(_repoSubject.value.map((Repo e) {
         if (e.id != t.id) {
@@ -67,7 +67,7 @@ class Bloc {
     link: _link,
   );
 
-  Future<void> _mutateToggleStar(Repo repo) async {
+  Future<QueryResult> _mutateToggleStar(Repo repo) async {
     final MutationOptions _options = MutationOptions(
       document:
           repo.viewerHasStarred ? mutations.removeStar : mutations.addStar,
