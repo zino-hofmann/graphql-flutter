@@ -1,12 +1,9 @@
 import 'package:rxdart/subjects.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './mutations/mutations.dart' as mutations;
-import './queries/readRepositories.dart' as queries;
-
-
-const String YOUR_PERSONAL_ACCESS_TOKEN =
-    '';
+import '../config.dart' show YOUR_PERSONAL_ACCESS_TOKEN;
+import '../graphql_operation/mutations/mutations.dart' as mutations;
+import '../graphql_operation/queries/readRepositories.dart' as queries;
 
 class Repo {
   const Repo({this.id, this.name, this.viewerHasStarred});
