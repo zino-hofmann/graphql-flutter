@@ -1,4 +1,4 @@
-# GraphQL Flutter
+# GraphQL Flutter <!-- omit in toc -->
 
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
@@ -10,7 +10,7 @@
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-## Table of Contents
+## Table of Contents <!-- omit in toc -->
 
 - [About this project](#about-this-project)
 - [Installation](#installation)
@@ -23,6 +23,7 @@
   - [Mutations](#mutations)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
   - [GraphQL Consumer](#graphql-consumer)
+  - [Graphql Upload](#graphql-upload)
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
@@ -411,7 +412,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ```
 
-### Graphql Consumer
+### GraphQL Consumer
 
 You can always access the client directly from the `GraphQLProvider` but to make it even easier you can also use the `GraphQLConsumer` widget.
 
@@ -431,6 +432,38 @@ You can always access the client directly from the `GraphQLProvider` but to make
   ...
 ```
 
+### Graphql Upload
+
+We support GraphQL Upload spec as proposed at
+https://github.com/jaydenseric/graphql-multipart-request-spec
+
+```grapql
+mutation($files: [Upload!]!) {
+  multipleUpload(files: $files) {
+    id
+    filename
+    mimetype
+    path
+  }
+}
+```
+
+```dart
+import 'dart:io' show File;
+
+// ...
+
+String filePath = '/aboslute/path/to/file.ext';
+final QueryResult r = await graphQLClientClient.mutate(
+  MutationOptions(
+    document: uploadMutation,
+    variables: {
+      'files': [File(filePath)],
+    },
+  )
+);
+```
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
@@ -443,6 +476,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Query polling           |    ✅    |
 | In memory cache         |    ✅    |
 | Offline cache sync      |    ✅    |
+| GraphQL pload           |    ✅    |
 | Optimistic results      |    🔜    |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
