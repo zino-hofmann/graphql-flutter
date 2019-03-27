@@ -1,70 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './mutations/mutations.dart' as mutations;
-import './queries/readRepositories.dart' as queries;
-
-const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
+import 'bloc.dart' show Bloc, Repo;
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HttpLink httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
-    );
-
-    final AuthLink authLink = AuthLink(
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-    );
-
-    final Link link = authLink.concat(httpLink);
-
-    final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
-      GraphQLClient(
-        cache: NormalizedInMemoryCache(
-          dataIdFromObject: typenameDataIdFromObject,
-        ),
-        link: link,
+    return MaterialApp(
+      title: 'GraphQL Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
-    );
-
-    return GraphQLProvider(
-      client: client,
-      child: CacheProvider(
-        child: MaterialApp(
-          title: 'GraphQL Flutter Demo',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          home: const MyHomePage(title: 'GraphQL Flutter Home Page'),
-        ),
-      ),
+      home: MyHomePage(title: 'GraphQL Flutter Home Page'),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({
+  MyHomePage({
     Key key,
     this.title,
-  }) : super(key: key);
+  })  : bloc = Bloc(),
+        super(key: key);
 
   final String title;
+  final Bloc bloc;
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState(bloc);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int nRepositories = 50;
-
-  void changeQuery(String number) {
-    setState(() {
-      nRepositories = int.parse(number) ?? 50;
-    });
-  }
+  _MyHomePageState(this.bloc);
+  final Bloc bloc;
 
   @override
   Widget build(BuildContext context) {
@@ -83,36 +52,31 @@ class _MyHomePageState extends State<MyHomePage> {
                 labelText: 'Number of repositories (default 50)',
               ),
               keyboardType: TextInputType.number,
-              onSubmitted: changeQuery,
+              onChanged: (String n) =>
+                  bloc.updateNumberOfRepoSink.add(int.parse(n)),
             ),
-            Query(
-              options: QueryOptions(
-                document: queries.readRepositories,
-                variables: <String, dynamic>{
-                  'nRepositories': nRepositories,
-                },
-                pollInterval: 4,
-              ),
-              builder: (QueryResult result) {
-                if (result.loading) {
+            StreamBuilder<List<Repo>>(
+              stream: bloc.repoStream,
+              builder: (BuildContext context,
+                  AsyncSnapshot<List<Repo>> snapshot) {
+                if (snapshot.hasError) {
+                  return Text('\nErrors: \n  ' +
+                      (snapshot.error as List<dynamic>).join(',\n  '));
+                }
+                if (snapshot.data == null) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
 
-                if (result.hasErrors) {
-                  return Text('\nErrors: \n  ' + result.errors.join(',\n  '));
-                }
-
-                // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<dynamic> repositories =
-                    result.data['viewer']['repositories']['nodes'] as List<dynamic>;
+                final List<Repo> repositories = snapshot.data;
 
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
                     itemBuilder: (BuildContext context, int index) =>
-                        StarrableRepository(repository: repositories[index] as Map<String, Object>),
+                        StarrableRepository(
+                            repository: repositories[index], bloc: bloc),
                   ),
                 );
               },
@@ -124,22 +88,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class StarrableRepository extends StatefulWidget {
+class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
     Key key,
     @required this.repository,
+    @required this.bloc,
   }) : super(key: key);
 
-  final Map<String, Object> repository;
-
-  @override
-  StarrableRepositoryState createState() {
-    return StarrableRepositoryState();
-  }
-}
-
-class StarrableRepositoryState extends State<StarrableRepository> {
-  bool loading = false;
+  final Bloc bloc;
+  final Repo repository;
 
   Map<String, Object> extractRepositoryData(Map<String, Object> data) {
     final Map<String, Object> action = data['action'] as Map<String, Object>;
@@ -151,74 +108,28 @@ class StarrableRepositoryState extends State<StarrableRepository> {
     return action['starrable'] as Map<String, Object>;
   }
 
-  bool get viewerHasStarred => widget.repository['viewerHasStarred'] as bool;
+  bool get viewerHasStarred => repository.viewerHasStarred;
 
   @override
   Widget build(BuildContext context) {
-    final bool starred = loading ? !viewerHasStarred : viewerHasStarred;
-
-    return Mutation(
-      key: Key(starred.toString()),
-      options: MutationOptions(
-        document: starred ? mutations.removeStar : mutations.addStar,
-      ),
-      builder: (RunMutation toggleStar, QueryResult result) {
+    return StreamBuilder<bool>(
+      stream: bloc.toggleStarLoadingStream,
+      initialData: false,
+      builder: (BuildContext context, AsyncSnapshot<bool> result) {
+        final bool loading = result.data;
         return ListTile(
-          leading: starred
+          leading: viewerHasStarred
               ? const Icon(
                   Icons.star,
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
           trailing: loading ? const CircularProgressIndicator() : null,
-          title: Text(widget.repository['name'] as String),
+          title: Text(repository.name),
           onTap: () {
-            // optimistic ui updates are not implemented yet,
-            // so we track loading manually
-            setState(() {
-              loading = true;
-            });
-            toggleStar(<String, dynamic>{
-              'starrableId': widget.repository['id'],
-            });
+            bloc.toggleStarSink.add(repository);
           },
         );
-      },
-      update: (Cache cache, QueryResult result) {
-        if (result.hasErrors) {
-          print(result.errors);
-        } else {
-          final Map<String, Object> updated =
-              Map<String, Object>.from(widget.repository)
-                ..addAll(extractRepositoryData(result.data as Map<String, Object>));
-
-          cache.write(typenameDataIdFromObject(updated), updated);
-        }
-      },
-      onCompleted: (QueryResult result) {
-        showDialog<AlertDialog>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(
-                extractRepositoryData(result.data as Map<String, Object>)['viewerHasStarred'] as bool
-                    ? 'Thanks for your star!'
-                    : 'Sorry you changed your mind!',
-              ),
-              actions: <Widget>[
-                SimpleDialogOption(
-                  child: const Text('Dismiss'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
-            );
-          },
-        );
-        setState(() {
-          loading = false;
-        });
       },
     );
   }
