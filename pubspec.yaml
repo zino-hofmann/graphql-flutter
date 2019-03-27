@@ -4,6 +4,7 @@ version: 1.0.0-beta.1+1
 authors:
   - Eus Dima <eus@zinoapp.com>
   - Zino Hofmann <zino@zinoapp.com>
+  - TruongSinh Tran-Nguyen <i@truongsinh.pro>
 homepage: https://github.com/zino-app/graphql-flutter/tree/next
 
 dependencies:
