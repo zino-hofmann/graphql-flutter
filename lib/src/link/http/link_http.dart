@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:http/http.dart';
@@ -15,7 +16,9 @@ class HttpLink extends Link {
   HttpLink({
     @required String uri,
     bool includeExtensions,
-    Client fetch,
+
+    /// pass on customized httpClient, especially handy for mocking and testing
+    Client httpClient,
     Map<String, String> headers,
     Map<String, dynamic> credentials,
     Map<String, dynamic> fetchOptions,
@@ -24,7 +27,7 @@ class HttpLink extends Link {
             Operation operation, [
             NextLink forward,
           ]) {
-            final Client fetcher = fetch ?? Client();
+            final Client fetcher = httpClient ?? Client();
 
             final HttpConfig linkConfig = HttpConfig(
               http: HttpQueryOptions(
@@ -59,26 +62,26 @@ class HttpLink extends Link {
             );
 
             final Map<String, dynamic> options = httpOptionsAndBody.options;
-            final Map<String, String> httpHeaders = options['headers'] as Map<String, String>;
+            final Map<String, String> httpHeaders =
+                options['headers'] as Map<String, String>;
 
             StreamController<FetchResult> controller;
 
             Future<void> onListen() async {
-              Response response;
+              StreamedResponse response;
 
               try {
-                // TODO: support multiple http methods
-                response = await fetcher.post(
-                  uri,
-                  headers: httpHeaders,
-                  body: httpOptionsAndBody.body,
-                );
 
-                operation.setContext(<String, Response>{
+                Request r = Request('post', Uri.parse(uri))
+                ..headers.addAll(httpHeaders)
+                ;
+                r.body = httpOptionsAndBody.body as String;
+                response = await fetcher.send(r);
+
+                operation.setContext(<String, StreamedResponse>{
                   'response': response,
                 });
-
-                final FetchResult parsedResponse = _parseResponse(response);
+                final FetchResult parsedResponse = await _parseResponse(response);
 
                 controller.add(parsedResponse);
               } catch (error) {
@@ -184,36 +187,51 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
 
   return HttpOptionsAndBody(
     options: options,
-    body: json.encode(body),
+    body: encodeBody(body),
   );
 }
 
-FetchResult _parseResponse(Response response) {
+dynamic encodeBody(dynamic body) {
+  final encodedBody = json.encode(body, toEncodable: (dynamic object) {
+    if(object is File){
+      return null;
+    }
+    return object.toJson();
+  });
+  return encodedBody;
+}
+
+Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final int statusCode = response.statusCode;
   final String reasonPhrase = response.reasonPhrase;
 
-  /* TODO this discards a lot of useful info in development */
-  if (statusCode < 200 || statusCode >= 400) {
-    throw ClientException(
-      'Network Error: $statusCode $reasonPhrase',
-    );
+  try {
+    final Encoding encoding = _determineEncodingFromResponse(response);
+    // @todo limit bodyBytes
+    final String decodedBody = encoding.decode(await response.stream.toBytes());
+
+    final Map<String, dynamic> jsonResponse =
+        json.decode(decodedBody) as Map<String, dynamic>;
+    final FetchResult fetchResult = FetchResult();
+
+    if (jsonResponse['errors'] != null) {
+      fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
+    }
+
+    if (jsonResponse['data'] != null) {
+      fetchResult.data = jsonResponse['data'];
+    }
+
+    return fetchResult;
+  } catch (e) {
+    // @todo get body as well;
+    // final String decodedBody = encoding.decode(response.bodyBytes);
+    if (statusCode < 200 || statusCode >= 400) {
+      throw ClientException(
+        'Network Error: $statusCode $reasonPhrase',
+      );
+    }
   }
-
-  final Encoding encoding = _determineEncodingFromResponse(response);
-  final String decodedBody = encoding.decode(response.bodyBytes);
-
-  final Map<String, dynamic> jsonResponse = json.decode(decodedBody) as Map<String, dynamic>;
-  final FetchResult fetchResult = FetchResult();
-
-  if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
-  }
-
-  if (jsonResponse['data'] != null) {
-    fetchResult.data = jsonResponse['data'];
-  }
-
-  return fetchResult;
 }
 
 /// Returns the charset encoding for the given response.
@@ -221,7 +239,7 @@ FetchResult _parseResponse(Response response) {
 /// The default fallback encoding is set to UTF-8 according to the IETF RFC4627 standard
 /// which specifies the application/json media type:
 ///   "JSON text SHALL be encoded in Unicode. The default encoding is UTF-8."
-Encoding _determineEncodingFromResponse(Response response,
+Encoding _determineEncodingFromResponse(BaseResponse response,
     [Encoding fallback = utf8]) {
   final String contentType = response.headers['content-type'];
 
