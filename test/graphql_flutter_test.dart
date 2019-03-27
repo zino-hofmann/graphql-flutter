@@ -105,7 +105,7 @@ void main() {
 
           final List<int> bytes = utf8.encode(body);
           final Stream<List<int>> stream =
-              Stream<List<int>>.fromIterable([bytes]);
+              Stream<List<int>>.fromIterable(<List<int>>[bytes]);
 
           final http.StreamedResponse r = http.StreamedResponse(stream, 200);
 
@@ -228,7 +228,7 @@ void main() {
           String boundary, List<File> files) async {
         final List<Function> expectContinuationList = (() {
           int i = 0;
-          return [
+          return <Function>[
             // ExpectString
             (Uint8List actual, String expected) => expect(
                 String.fromCharCodes(actual.sublist(i, i += expected.length)),

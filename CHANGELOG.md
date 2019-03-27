@@ -1,8 +1,11 @@
-## [1.0.0-beta.1] - February 16 2019
+## [1.0.0-beta.1+1] - February 16 2019
 
 We are finally in BETA. This means we're one step closer to our first stable release.
 
 Thanks to all the contributes.
+
+Support GraphQL Upload spec as proposed at
+https://github.com/jaydenseric/graphql-multipart-request-spec
 
 ### What's changed?
 

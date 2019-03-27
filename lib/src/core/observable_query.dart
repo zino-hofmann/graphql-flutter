@@ -38,7 +38,9 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      <StreamSubscription<QueryResult>>{};
+      // @todo Set literal is only supported from Dart 2.2 we are running Dart 2.0
+      // ignore: prefer_collection_literals
+      Set<StreamSubscription<QueryResult>>();
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
