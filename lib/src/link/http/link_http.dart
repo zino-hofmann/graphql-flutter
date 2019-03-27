@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:path/path.dart';
+import 'package:mime/mime.dart';
 
 import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
@@ -53,7 +55,7 @@ class HttpLink extends Link {
               );
             }
 
-            final HttpOptionsAndBody httpOptionsAndBody =
+            final HttpHeadersAndBody httpHeadersAndBody =
                 _selectHttpOptionsAndBody(
               operation,
               fallbackHttpConfig,
@@ -61,9 +63,7 @@ class HttpLink extends Link {
               contextConfig,
             );
 
-            final Map<String, dynamic> options = httpOptionsAndBody.options;
-            final Map<String, String> httpHeaders =
-                options['headers'] as Map<String, String>;
+            final Map<String, String> httpHeaders = httpHeadersAndBody.headers;
 
             StreamController<FetchResult> controller;
 
@@ -71,17 +71,17 @@ class HttpLink extends Link {
               StreamedResponse response;
 
               try {
+                // httpOptionsAndBody.body as String
+                final BaseRequest request = await _prepareRequest(
+                    uri, httpHeadersAndBody.body, httpHeaders);
 
-                Request r = Request('post', Uri.parse(uri))
-                ..headers.addAll(httpHeaders)
-                ;
-                r.body = httpOptionsAndBody.body as String;
-                response = await fetcher.send(r);
+                response = await fetcher.send(request);
 
                 operation.setContext(<String, StreamedResponse>{
                   'response': response,
                 });
-                final FetchResult parsedResponse = await _parseResponse(response);
+                final FetchResult parsedResponse =
+                    await _parseResponse(response);
 
                 controller.add(parsedResponse);
               } catch (error) {
@@ -98,7 +98,95 @@ class HttpLink extends Link {
         );
 }
 
-HttpOptionsAndBody _selectHttpOptionsAndBody(
+Map<String, File> _getFileMap(
+  dynamic body, {
+  Map<String, File> currentMap,
+  List<String> currentPath = const <String>[],
+}) {
+  currentMap ??= <String, File>{};
+  if (body is Map<String, dynamic>) {
+    final entries = body.entries;
+    for (MapEntry<String, dynamic> element in entries) {
+      currentMap.addAll(_getFileMap(
+        element.value,
+        currentMap: currentMap,
+        currentPath: List<String>.from(currentPath)..add(element.key),
+      ));
+    }
+    return currentMap;
+  }
+  if (body is List<dynamic>) {
+    for (int i = 0; i < body.length; i++) {
+      currentMap.addAll(_getFileMap(
+        body[i],
+        currentMap: currentMap,
+        currentPath: List<String>.from(currentPath)..add(i.toString()),
+      ));
+    }
+    return currentMap;
+  }
+  if (body is File) {
+    return currentMap..addAll(<String, File>{currentPath.join('.'): body});
+  }
+  // else should only be either String, num, null; NOTHING else
+  return currentMap;
+}
+
+Future<BaseRequest> _prepareRequest(
+  String url,
+  Map<String, dynamic> body,
+  Map<String, String> httpHeaders,
+) async {
+  final Map<String, File> fileMap = _getFileMap(body);
+  if (fileMap.isEmpty) {
+    final Request r = Request('post', Uri.parse(url));
+    r.headers.addAll(httpHeaders);
+    r.body = json.encode(body);
+    return r;
+  }
+
+  final MultipartRequest r = MultipartRequest('post', Uri.parse(url));
+  r.headers.addAll(httpHeaders);
+  r.fields['operations'] = json.encode(body, toEncodable: (dynamic object) {
+    if (object is File) {
+      return null;
+    }
+    return object.toJson();
+  });
+
+  // @todo fileMap.keys.toList() and fileMap.values.toList() same order????
+  final Map<String, List<String>> adasd =
+      {}; // fileMap.keys.toList().asMap().map((int index, String filePath) => MapEntry(index.toString(),[filePath]));
+  final List<MultipartFile> fileList = [];
+
+  final fEn = fileMap.entries.toList(growable: false);
+
+  for (int i = 0; i < fEn.length; i++) {
+    final MapEntry<String, File> entry = fEn[i];
+    final String indexString = i.toString();
+    adasd.addAll({
+      indexString: [entry.key]
+    });
+    final File f = entry.value;
+    final String fileName = basename(f.path);
+    fileList.add(MultipartFile(
+      indexString,
+      f.openRead(),
+      await f.length(),
+      contentType: MediaType.parse(lookupMimeType(fileName)),
+      filename: fileName,
+    ));
+  }
+
+  final rfieldsmap = json.encode(adasd);
+
+  r.fields['map'] = rfieldsmap;
+
+  r.files.addAll(fileList);
+  return r;
+}
+
+HttpHeadersAndBody _selectHttpOptionsAndBody(
   Operation operation,
   HttpConfig fallbackConfig, [
   HttpConfig linkConfig,
@@ -112,7 +200,7 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
 
   // http options
 
-  // initialze with fallback http options
+  // initialize with fallback http options
   http.addAll(fallbackConfig.http);
 
   // inject the configured http options
@@ -127,7 +215,7 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
 
   // options
 
-  // initialze with fallback options
+  // initialize with fallback options
   options.addAll(fallbackConfig.options);
 
   // inject the configured options
@@ -185,20 +273,10 @@ HttpOptionsAndBody _selectHttpOptionsAndBody(
     body['query'] = operation.document;
   }
 
-  return HttpOptionsAndBody(
-    options: options,
-    body: encodeBody(body),
+  return HttpHeadersAndBody(
+    headers: options['headers'] as Map<String, String>,
+    body: body,
   );
-}
-
-dynamic encodeBody(dynamic body) {
-  final encodedBody = json.encode(body, toEncodable: (dynamic object) {
-    if(object is File){
-      return null;
-    }
-    return object.toJson();
-  });
-  return encodedBody;
 }
 
 Future<FetchResult> _parseResponse(StreamedResponse response) async {
@@ -208,7 +286,8 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
   try {
     final Encoding encoding = _determineEncodingFromResponse(response);
     // @todo limit bodyBytes
-    final String decodedBody = encoding.decode(await response.stream.toBytes());
+    final reponseByte = await response.stream.toBytes();
+    final String decodedBody = encoding.decode(reponseByte);
 
     final Map<String, dynamic> jsonResponse =
         json.decode(decodedBody) as Map<String, dynamic>;
@@ -231,6 +310,7 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
         'Network Error: $statusCode $reasonPhrase',
       );
     }
+    rethrow;
   }
 }
 
