@@ -142,7 +142,12 @@ void main() {
       });
 //    test('failed query because of network', {});
 //    test('failed query because of because of error response', {});
-//    test('failed query because of because of invalid response', {});
+//    test('failed query because of because of invalid response', () {
+//      String responseBody =
+//          '{\"message\":\"Bad credentials\",\"documentation_url\":\"https://developer.github.com/v4\"}';
+//      int responseCode = 401;
+//    });
+//    test('partially success query with some errors', {});
     });
     group('mutation', () {
       test('successful mutation', () async {
@@ -357,5 +362,11 @@ void main() {
         },
       ]);
     });
+
+//    test('upload fail error response', () {
+//      const String responseBody =
+//          r'{"errors":[{"message":"Variable \"$files\" of required type \"[Upload!]!\" was not provided.","locations":[{"line":1,"column":14}],"extensions":{"code":"INTERNAL_SERVER_ERROR","exception":{"stacktrace":["GraphQLError: Variable \"$files\" of required type \"[Upload!]!\" was not provided.","    at getVariableValues (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/values.js:76:21)","    at buildExecutionContext (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/execute.js:196:63)","    at executeImpl (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/execute.js:70:20)","    at Object.execute (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/execute.js:62:35)","    at /Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:195:36","    at Generator.next (<anonymous>)","    at /Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:7:71","    at new Promise (<anonymous>)","    at __awaiter (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:3:12)","    at execute (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:179:20)","    at Object.<anonymous> (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:131:35)","    at Generator.next (<anonymous>)","    at fulfilled (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:4:58)","    at process._tickCallback (internal/process/next_tick.js:68:7)"]}}}]';
+//      const int statusCode = 400;
+//    });
   });
 }

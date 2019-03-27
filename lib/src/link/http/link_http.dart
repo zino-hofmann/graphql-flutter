@@ -281,37 +281,34 @@ HttpHeadersAndBody _selectHttpOptionsAndBody(
 
 Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final int statusCode = response.statusCode;
-  final String reasonPhrase = response.reasonPhrase;
 
-  try {
-    final Encoding encoding = _determineEncodingFromResponse(response);
-    // @todo limit bodyBytes
-    final Uint8List reponseByte = await response.stream.toBytes();
-    final String decodedBody = encoding.decode(reponseByte);
+  final Encoding encoding = _determineEncodingFromResponse(response);
+  // @todo limit bodyBytes
+  final Uint8List responseByte = await response.stream.toBytes();
+  final String decodedBody = encoding.decode(responseByte);
 
-    final Map<String, dynamic> jsonResponse =
-        json.decode(decodedBody) as Map<String, dynamic>;
-    final FetchResult fetchResult = FetchResult();
+  final Map<String, dynamic> jsonResponse =
+      json.decode(decodedBody) as Map<String, dynamic>;
+  final FetchResult fetchResult = FetchResult();
 
-    if (jsonResponse['errors'] != null) {
-      fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
-    }
+  if (jsonResponse['errors'] != null) {
+    fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
+  }
 
-    if (jsonResponse['data'] != null) {
-      fetchResult.data = jsonResponse['data'];
-    }
+  if (jsonResponse['data'] != null) {
+    fetchResult.data = jsonResponse['data'];
+  }
 
-    return fetchResult;
-  } catch (e) {
-    // @todo get body as well;
-    // final String decodedBody = encoding.decode(response.bodyBytes);
+  if (fetchResult.data == null && fetchResult.errors == null) {
     if (statusCode < 200 || statusCode >= 400) {
       throw ClientException(
-        'Network Error: $statusCode $reasonPhrase',
+        'Network Error: $statusCode $decodedBody',
       );
     }
-    rethrow;
+    throw ClientException('Invalid response body: $decodedBody');
   }
+
+  return fetchResult;
 }
 
 /// Returns the charset encoding for the given response.
