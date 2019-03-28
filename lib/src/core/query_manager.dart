@@ -119,11 +119,8 @@ class QueryManager {
       ).first;
 
       // save the data from fetchResult to the cache
-      if (
-          // should never cache a mutation
-          !(options is MutationOptions) &&
-              fetchResult.data != null &&
-              options.fetchPolicy != FetchPolicy.noCache) {
+      if (fetchResult.data != null &&
+          options.fetchPolicy != FetchPolicy.noCache) {
         cache.write(
           operation.toKey(),
           fetchResult.data,
