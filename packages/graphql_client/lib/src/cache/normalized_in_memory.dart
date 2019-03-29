@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:meta/meta.dart';
 import 'package:graphql_client/src/utilities/traverse.dart';
 import 'package:graphql_client/src/cache/in_memory.dart';
@@ -17,8 +18,10 @@ class NormalizationException implements Exception {
 abstract class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
+    @required Future<Directory> storageDirectory,
     String prefix = '@cache/reference',
-  }) : _prefix = prefix;
+  })  : _prefix = prefix,
+        super(storageDirectory: storageDirectory);
 
   DataIdFromObject dataIdFromObject;
   String _prefix;

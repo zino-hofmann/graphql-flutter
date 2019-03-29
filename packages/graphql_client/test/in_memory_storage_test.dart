@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io' show Directory;
 import 'package:test/test.dart';
 import 'package:graphql_client/src/cache/in_memory.dart';
-import 'package:graphql_client/src/cache/in_memory_vm.dart';
 
 const String aKey = 'aKey';
 const String bKey = 'bKey';
@@ -40,14 +39,14 @@ final Map<String, Object> eData = <String, Object>{
   }
 };
 
-final Directory customStorageDirectory =
-    Directory.systemTemp.createTempSync('file_test_');
+final Future<Directory> storageDirectory =
+    Directory.systemTemp.createTemp('file_test_');
 
 void main() {
   group('Normalizes writes', () {
     test('.write .read round trip', () async {
-      final InMemoryCache cache = InMemoryCacheVM(
-        customStorageDirectory: customStorageDirectory,
+      final InMemoryCache cache = InMemoryCache(
+        storageDirectory: storageDirectory,
       );
       cache.write(aKey, aData);
       await cache.save();
@@ -57,8 +56,8 @@ void main() {
     });
 
     test('saving concurrently wont error', () async {
-      final InMemoryCache cache = InMemoryCacheVM(
-        customStorageDirectory: customStorageDirectory,
+      final InMemoryCache cache = InMemoryCache(
+        storageDirectory: storageDirectory,
       );
       cache.write(aKey, aData);
       cache.write(bKey, bData);

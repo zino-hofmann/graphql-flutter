@@ -6,15 +6,22 @@ import 'package:meta/meta.dart';
 
 import 'package:graphql_client/src/cache/cache.dart';
 
-abstract class InMemoryCache implements Cache {
+class InMemoryCache implements Cache {
   InMemoryCache({
-    this.customStorageDirectory,
+    @required this.storageDirectory,
   });
 
   /// A directory to be used for storage.
-  /// This is used for testing, on regular usage
-  /// 'path_provider' will provide the storage directory.
-  final Directory customStorageDirectory;
+  ///
+  /// See also:
+  ///
+  /// - [InMemoryCacheVM], which use [Directory.systemTemp]
+  /// to provide the storage directory
+  ///
+  /// - [InMemoryCacheFlutter] from `graphql_flutter` which use
+  /// `path_provider`'s [getApplicationDocumentsDirectory]
+  /// to provide the storage directory
+  final Future<Directory> storageDirectory;
 
   HashMap<String, dynamic> _inMemoryCache = HashMap<String, dynamic>();
   bool _writingToStorage = false;
@@ -62,18 +69,8 @@ abstract class InMemoryCache implements Cache {
   }
 
   Future<String> get _localStoragePath async {
-    if (customStorageDirectory != null) {
-      // Used for testing
-      return customStorageDirectory.path;
-    }
-
-    final Directory directory = await temporaryDirectory;
-
-    return directory.path;
+    return (await storageDirectory).path;
   }
-
-  @protected
-  Future<Directory> get temporaryDirectory;
 
   Future<File> get _localStorageFile async {
     final String path = await _localStoragePath;
