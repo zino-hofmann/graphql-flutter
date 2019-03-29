@@ -40,6 +40,7 @@ class InMemoryCache implements Cache {
         value != null &&
         value is Map) {
       // Avoid overriding a superset with a subset of a field (#155)
+      // this means deletions must be done by explicitly returning a field as null
       _inMemoryCache[key] = deeplyMergeLeft(<Map<String, dynamic>>[
         _inMemoryCache[key],
         value,
