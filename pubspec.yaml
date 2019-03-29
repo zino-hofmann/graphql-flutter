@@ -17,9 +17,10 @@ dependencies:
   graphql_parser: ^1.1.1
 
 dev_dependencies:
+  perfectionist: ^2.0.0
   flutter_test:
     sdk: flutter
   test: ^1.3.0
 
 environment:
-  sdk: ">=2.0.0 <3.0.0"
+  sdk: ">=2.2.0 <3.0.0"

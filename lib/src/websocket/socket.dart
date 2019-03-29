@@ -9,12 +9,13 @@ import '../../graphql_flutter.dart';
 class GraphQLSocket {
   GraphQLSocket(this._socket) {
     _socket
-        .map<Map<String, dynamic>>((dynamic message) => json.decode(message))
+        .map<Map<String, dynamic>>((dynamic message) =>
+            json.decode(message as String) as Map<String, dynamic>)
         .listen(
       (Map<String, dynamic> message) {
-        final String type = message['type'] ?? 'unknown';
+        final String type = message['type'] as String ?? 'unknown';
         final dynamic payload = message['payload'] ?? <String, dynamic>{};
-        final String id = message['id'] ?? 'none';
+        final String id = message['id'] as String ?? 'none';
 
         switch (type) {
           case MessageTypes.GQL_CONNECTION_ACK:

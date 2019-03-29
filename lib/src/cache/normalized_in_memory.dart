@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/utilities/traverse.dart';
 import 'package:graphql_flutter/src/cache/in_memory.dart';
 
-typedef String DataIdFromObject(Object node);
+typedef DataIdFromObject = String Function(Object node);
 
 class NormalizationException implements Exception {
   NormalizationException(this.cause, this.overflowError, this.value);
@@ -25,7 +25,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
 
   Object _dereference(Object node) {
     if (node is List && node.length == 2 && node[0] == _prefix) {
-      return read(node[1]);
+      return read(node[1] as String);
     }
 
     return null;
@@ -72,7 +72,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   */
   @override
   void write(String key, Object value) {
-    final Object normalized = traverseValues(value, _normalize);
+    final Object normalized = traverseValues(value as Map<String, dynamic>, _normalize);
     super.write(key, normalized);
   }
 }

@@ -8,7 +8,7 @@ import 'package:graphql_flutter/src/core/query_result.dart';
 
 import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
-typedef void OnData(QueryResult result);
+typedef OnData = void Function(QueryResult result);
 
 enum QueryLifecycle {
   UNEXECUTED,
@@ -38,7 +38,7 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      Set<StreamSubscription<QueryResult>>();
+      <StreamSubscription<QueryResult>>{};
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
@@ -139,7 +139,6 @@ class ObservableQuery {
   Future<void> close({bool force = false, bool fromManager = false}) async {
     if (lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING && !force) {
       lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
-      return null;
     }
 
     if (!fromManager) {

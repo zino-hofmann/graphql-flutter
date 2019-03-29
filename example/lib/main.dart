@@ -106,13 +106,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
                 final List<dynamic> repositories =
-                    result.data['viewer']['repositories']['nodes'];
+                    result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
                     itemBuilder: (BuildContext context, int index) =>
-                        StarrableRepository(repository: repositories[index]),
+                        StarrableRepository(repository: repositories[index] as Map<String, Object>),
                   ),
                 );
               },
@@ -134,7 +134,7 @@ class StarrableRepository extends StatefulWidget {
 
   @override
   StarrableRepositoryState createState() {
-    return new StarrableRepositoryState();
+    return StarrableRepositoryState();
   }
 }
 
@@ -142,16 +142,16 @@ class StarrableRepositoryState extends State<StarrableRepository> {
   bool loading = false;
 
   Map<String, Object> extractRepositoryData(Map<String, Object> data) {
-    final Map<String, Object> action = data['action'];
+    final Map<String, Object> action = data['action'] as Map<String, Object>;
 
     if (action == null) {
       return null;
     }
 
-    return action['starrable'];
+    return action['starrable'] as Map<String, Object>;
   }
 
-  bool get viewerHasStarred => widget.repository['viewerHasStarred'];
+  bool get viewerHasStarred => widget.repository['viewerHasStarred'] as bool;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +171,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
                 )
               : const Icon(Icons.star_border),
           trailing: loading ? const CircularProgressIndicator() : null,
-          title: Text(widget.repository['name']),
+          title: Text(widget.repository['name'] as String),
           onTap: () {
             // optimistic ui updates are not implemented yet,
             // so we track loading manually
@@ -190,7 +190,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
         } else {
           final Map<String, Object> updated =
               Map<String, Object>.from(widget.repository)
-                ..addAll(extractRepositoryData(result.data));
+                ..addAll(extractRepositoryData(result.data as Map<String, Object>));
 
           cache.write(typenameDataIdFromObject(updated), updated);
         }
@@ -201,7 +201,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(
-                extractRepositoryData(result.data)['viewerHasStarred']
+                extractRepositoryData(result.data as Map<String, Object>)['viewerHasStarred'] as bool
                     ? 'Thanks for your star!'
                     : 'Sorry you changed your mind!',
               ),

@@ -140,7 +140,7 @@ class QueryManager {
     } catch (error) {
       // TODO some dart errors break this
       final GraphQLError graphQLError = GraphQLError(
-        message: error.message,
+        message: error.message as String,
       );
 
       if (queryResult != null) {

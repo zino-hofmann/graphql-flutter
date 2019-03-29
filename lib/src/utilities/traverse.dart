@@ -1,4 +1,4 @@
-typedef Object Transform(Object node);
+typedef Transform = Object Function(Object node);
 
 Map<String, Object> traverseValues(
   Map<String, Object> node,
