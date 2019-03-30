@@ -36,13 +36,13 @@ class InMemoryCache implements Cache {
   @override
   void write(String key, dynamic value) {
     if (_inMemoryCache.containsKey(key) &&
-        _inMemoryCache[key] is Map &&
+        _inMemoryCache[key] is Map<String, dynamic> &&
         value != null &&
-        value is Map) {
+        value is Map<String, dynamic>) {
       // Avoid overriding a superset with a subset of a field (#155)
       // this means deletions must be done by explicitly returning a field as null
       _inMemoryCache[key] = deeplyMergeLeft(<Map<String, dynamic>>[
-        _inMemoryCache[key],
+        _inMemoryCache[key] as Map<String, dynamic>,
         value,
       ]);
     } else {

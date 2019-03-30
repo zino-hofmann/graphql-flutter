@@ -42,8 +42,8 @@ class _MyHomePageState extends State<GraphQLBlocPatternScreen> {
             ),
             StreamBuilder<List<Repo>>(
               stream: bloc.repoStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<Repo>> snapshot) {
+              builder:
+                  (BuildContext context, AsyncSnapshot<List<Repo>> snapshot) {
                 if (snapshot.hasError) {
                   return Text('\nErrors: \n  ' +
                       (snapshot.error as List<dynamic>).join(',\n  '));
@@ -97,11 +97,11 @@ class StarrableRepository extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<bool>(
+    return StreamBuilder<String>(
       stream: bloc.toggleStarLoadingStream,
-      initialData: false,
-      builder: (BuildContext context, AsyncSnapshot<bool> result) {
-        final bool loading = result.data;
+      initialData: null,
+      builder: (BuildContext context, AsyncSnapshot<String> result) {
+        final bool loading = repository.id == result.data;
         return ListTile(
           leading: viewerHasStarred
               ? const Icon(

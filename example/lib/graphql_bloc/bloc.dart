@@ -20,7 +20,7 @@ class Bloc {
     _queryRepo();
     _updateNumberOfRepo.listen((int n) async => _queryRepo(nRepositories: n));
     _toggleStarSubject.listen((Repo t) async {
-      _toggleStarLoadingSubject.add(true);
+      _toggleStarLoadingSubject.add(t.id);
       // @todo handle error
       final QueryResult _ = await _mutateToggleStar(t);
 
@@ -31,7 +31,7 @@ class Bloc {
         return Repo(
             id: t.id, name: t.name, viewerHasStarred: !t.viewerHasStarred);
       }).toList());
-      _toggleStarLoadingSubject.add(false);
+      _toggleStarLoadingSubject.add(null);
     });
   }
 
@@ -42,9 +42,12 @@ class Bloc {
   final ReplaySubject<Repo> _toggleStarSubject = ReplaySubject<Repo>();
   Sink<Repo> get toggleStarSink => _toggleStarSubject;
 
-  final BehaviorSubject<bool> _toggleStarLoadingSubject =
-      BehaviorSubject<bool>();
-  Stream<bool> get toggleStarLoadingStream => _toggleStarLoadingSubject.stream;
+  /// The repo currently loading, if any
+  final BehaviorSubject<String> _toggleStarLoadingSubject =
+      BehaviorSubject<String>();
+
+  Stream<String> get toggleStarLoadingStream =>
+      _toggleStarLoadingSubject.stream;
 
   final BehaviorSubject<int> _updateNumberOfRepo = BehaviorSubject<int>();
 
@@ -122,58 +125,3 @@ class Bloc {
         .toList());
   }
 }
-
-/**
- *
- *
-    key: Key(starred.toString()),
-    options: MutationOptions(
-    document: starred ? mutations.removeStar : mutations.addStar,
-
-    builder: (RunMutation toggleStar, QueryResult result) {
-
-
-    toggleStar(<String, dynamic>{
-    'starrableId': widget.repository['id'],
-    });
-    ),
-
-
-
-    update: (Cache cache, QueryResult result) {
-    if (result.hasErrors) {
-    print(result.errors);
-    } else {
-    final Map<String, Object> updated =
-    Map<String, Object>.from(widget.repository)
-    ..addAll(extractRepositoryData(result.data as Map<String, Object>));
-
-    cache.write(typenameDataIdFromObject(updated), updated);
-    }
-    },
-    onCompleted: (QueryResult result) {
-    showDialog<AlertDialog>(
-    context: context,
-    builder: (BuildContext context) {
-    return AlertDialog(
-    title: Text(
-    extractRepositoryData(result.data as Map<String, Object>)['viewerHasStarred'] as bool
-    ? 'Thanks for your star!'
-    : 'Sorry you changed your mind!',
-    ),
-    actions: <Widget>[
-    SimpleDialogOption(
-    child: const Text('Dismiss'),
-    onPressed: () {
-    Navigator.of(context).pop();
-    },
-    )
-    ],
-    );
-    },
-    );
-    setState(() {
-    loading = false;
-    });
-    },
- */

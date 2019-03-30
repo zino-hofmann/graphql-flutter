@@ -3,25 +3,12 @@ import 'dart:convert' show json;
 import 'dart:io' show File;
 
 class Operation {
-  factory Operation({
-    String document,
-    Map<String, dynamic> variables,
-    String operationName,
-    Map<String, dynamic> extensions,
-  }) =>
-      Operation._(
-        document: document,
-        variables: SplayTreeMap<String, dynamic>.of(variables),
-        operationName: operationName,
-        extensions: extensions,
-      );
-
-  Operation._({
+  Operation({
     this.document,
-    this.variables,
+    Map<String, dynamic> variables,
     this.operationName,
     this.extensions,
-  });
+  }) : this.variables = SplayTreeMap<String, dynamic>.of(variables);
 
   final String document;
   final SplayTreeMap<String, dynamic> variables;

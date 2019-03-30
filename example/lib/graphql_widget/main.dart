@@ -210,7 +210,7 @@ class StarrableRepositoryState extends State<StarrableRepository> {
               ),
               actions: <Widget>[
                 SimpleDialogOption(
-                  child: const Text('Dismiss'),
+                  child: const Text('DISMISS'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
