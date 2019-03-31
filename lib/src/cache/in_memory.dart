@@ -113,6 +113,10 @@ class InMemoryCache implements Cache {
     return;
   }
 
+  /// Attempts to read saved state from the file cache `_localStorageFile`.
+  ///
+  /// Will return the current in-memory cache if writing,
+  /// or an empty map on failure
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     if (_writingToStorage) {
       return _inMemoryCache;
