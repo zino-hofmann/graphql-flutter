@@ -51,6 +51,32 @@ class ObservableQuery {
   Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
 
+  bool get _isRefetchSafe {
+    switch (lifecycle) {
+      case QueryLifecycle.COMPLETED:
+      case QueryLifecycle.POLLING:
+      case QueryLifecycle.POLLING_STOPPED:
+        return true;
+
+      case QueryLifecycle.PENDING:
+      case QueryLifecycle.CLOSED:
+      case QueryLifecycle.UNEXECUTED:
+      case QueryLifecycle.SIDE_EFFECTS_PENDING:
+      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+        return false;
+    }
+    return false;
+  }
+
+  /// Attempts to refetch, returning `true` if successful
+  bool refetch() {
+    if (_isRefetchSafe) {
+      scheduler.refetchQuery(queryId);
+      return true;
+    }
+    return false;
+  }
+
   bool get isRebroadcastSafe {
     switch (lifecycle) {
       case QueryLifecycle.PENDING:
