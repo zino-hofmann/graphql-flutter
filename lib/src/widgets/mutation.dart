@@ -15,8 +15,8 @@ typedef MutationBuilder = Widget Function(
   QueryResult result,
 );
 
-typedef void OnMutationCompleted(QueryResult result);
-typedef void OnMutationUpdate(Cache cache, QueryResult result);
+typedef OnMutationCompleted = void Function(QueryResult result);
+typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].

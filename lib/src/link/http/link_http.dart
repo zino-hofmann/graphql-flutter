@@ -42,11 +42,11 @@ class HttpLink extends Link {
               // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
               contextConfig = HttpConfig(
                 http: HttpQueryOptions(
-                  includeExtensions: context['includeExtensions'],
+                  includeExtensions: context['includeExtensions'] as bool,
                 ),
-                options: context['fetchOptions'],
-                credentials: context['credentials'],
-                headers: context['headers'],
+                options: context['fetchOptions'] as Map<String, dynamic>,
+                credentials: context['credentials'] as Map<String, dynamic>,
+                headers: context['headers'] as Map<String, String>,
               );
             }
 
@@ -59,7 +59,7 @@ class HttpLink extends Link {
             );
 
             final Map<String, dynamic> options = httpOptionsAndBody.options;
-            final Map<String, String> httpHeaders = options['headers'];
+            final Map<String, String> httpHeaders = options['headers'] as Map<String, String>;
 
             StreamController<FetchResult> controller;
 
@@ -200,13 +200,13 @@ FetchResult _parseResponse(Response response) {
   }
 
   final Encoding encoding = _determineEncodingFromResponse(response);
-  final dynamic decodedBody = encoding.decode(response.bodyBytes);
+  final String decodedBody = encoding.decode(response.bodyBytes);
 
-  final Map<String, dynamic> jsonResponse = json.decode(decodedBody);
+  final Map<String, dynamic> jsonResponse = json.decode(decodedBody) as Map<String, dynamic>;
   final FetchResult fetchResult = FetchResult();
 
   if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'];
+    fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
   }
 
   if (jsonResponse['data'] != null) {
@@ -229,7 +229,7 @@ Encoding _determineEncodingFromResponse(Response response,
     return fallback;
   }
 
-  final MediaType mediaType = new MediaType.parse(contentType);
+  final MediaType mediaType = MediaType.parse(contentType);
   final String charset = mediaType.parameters['charset'];
 
   if (charset == null) {

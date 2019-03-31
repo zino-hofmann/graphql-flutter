@@ -31,6 +31,10 @@ final Map<String, Object> rawOperationData = <String, Object>{
       },
       'bField': <String, Object>{'field': true}
     },
+    'd': <String, Object>{
+      'id': 9,
+      'dField': <String, Object>{'field': true}
+    },
   },
   'aField': <String, Object>{'field': false}
 };
@@ -62,6 +66,10 @@ final Map<String, Object> updatedCOperationData = <String, Object>{
       'c': updatedCValue,
       'bField': <String, Object>{'field': true}
     },
+    'd': <String, Object>{
+      'id': 9,
+      'dField': <String, Object>{'field': true}
+    },
   },
   'aField': <String, Object>{'field': false}
 };
@@ -80,6 +88,9 @@ final Map<String, Object> subsetAValue = <String, Object>{
         'value': 8,
       }
     ],
+    'd': <String, Object>{
+      'id': 10,
+    },
   },
 };
 
@@ -102,6 +113,10 @@ final Map<String, Object> updatedSubsetOperationData = <String, Object>{
       'id': 5,
       'c': updatedCValue,
       'bField': <String, Object>{'field': true}
+    },
+    'd': <String, Object>{
+      'id': 10,
+      'dField': <String, Object>{'field': true}
     },
   },
   'aField': <String, Object>{'field': false}

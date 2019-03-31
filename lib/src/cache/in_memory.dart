@@ -6,6 +6,8 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 
 import 'package:graphql_flutter/src/cache/cache.dart';
+import 'package:graphql_flutter/src/utilities/helpers.dart'
+    show deeplyMergeLeft;
 
 class InMemoryCache implements Cache {
   InMemoryCache({
@@ -38,7 +40,11 @@ class InMemoryCache implements Cache {
         value != null &&
         value is Map) {
       // Avoid overriding a superset with a subset of a field (#155)
-      _inMemoryCache[key].addAll(value);
+      // this means deletions must be done by explicitly returning a field as null
+      _inMemoryCache[key] = deeplyMergeLeft(<Map<String, dynamic>>[
+        _inMemoryCache[key],
+        value,
+      ]);
     } else {
       _inMemoryCache[key] = value;
     }
@@ -120,8 +126,8 @@ class InMemoryCache implements Cache {
             .transform(
               const LineSplitter(),
             )) {
-          final List<dynamic> keyAndValue = json.decode(line);
-          storedHashMap[keyAndValue[0]] = keyAndValue[1];
+          final List<dynamic> keyAndValue = json.decode(line) as List<dynamic>;
+          storedHashMap[keyAndValue[0] as String] = keyAndValue[1];
         }
       }
 
