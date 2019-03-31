@@ -126,37 +126,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
-            Subscription<Map<String, dynamic>>(
-              'test',
-              queries.testSubscription,
-              builder: (
-                      {bool loading,
-                      Map<String, dynamic> payload,
-                      dynamic error}) =>
-                  loading ? const Text('Loading...') : Text(payload.toString()),
-            ),
-            Subscription<Map<String, dynamic>>(
-              'test',
-              queries.testSubscription,
-              builder: (
-                      {bool loading,
-                      Map<String, dynamic> payload,
-                      dynamic error}) =>
-                  loading
-                      ? const Text('Loading2...')
-                      : Text(payload.toString()),
-            ),
-            Subscription<Map<String, dynamic>>(
-              'test',
-              queries.testSubscription,
-              builder: (
-                      {bool loading,
-                      Map<String, dynamic> payload,
-                      dynamic error}) =>
-                  loading
-                      ? const Text('Loading3...')
-                      : Text(payload.toString()),
-            )
+            Subscription<Map<String, dynamic>>('test', queries.testSubscription,
+                builder: ({
+              bool loading,
+              Map<String, dynamic> payload,
+              dynamic error,
+            }) {
+              return loading
+                  ? const Text('Loading...')
+                  : Text(payload.toString());
+            }),
           ],
         ),
       ),
