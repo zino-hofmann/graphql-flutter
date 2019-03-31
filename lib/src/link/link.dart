@@ -34,4 +34,5 @@ class Link {
   Link concat(Link next) => _concat(this, next);
 }
 
-Stream<FetchResult> execute({Link link, Operation operation}) => link.request(operation);
+Stream<FetchResult> execute({Link link, Operation operation}) =>
+    link.request(operation);

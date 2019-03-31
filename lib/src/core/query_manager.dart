@@ -138,9 +138,18 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(fetchResult);
     } catch (error) {
-      // TODO some dart errors break this
+      String errorMessage;
+
+      // not all errors thrown above are GraphQL errors and should not
+      // show an error related to being unable to access 'message'...
+      try {
+        errorMessage = error.message;
+      } catch (e) {
+        throw error;
+      }
+
       final GraphQLError graphQLError = GraphQLError(
-        message: error.message,
+        message: errorMessage,
       );
 
       if (queryResult != null) {

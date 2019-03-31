@@ -27,16 +27,16 @@ class GraphQLError {
 
   /// Constructs a [GraphQLError] from a JSON map.
   GraphQLError.fromJSON(this.data)
-      : message = data['message'],
+      : message = data['message'] as String,
         locations = data['locations'] is List<Map<String, int>>
             ? List<Location>.from(
-                (data['locations']).map<Location>(
+                (data['locations'] as List<Map<String, int>>).map<Location>(
                   (Map<String, int> location) => Location.fromJSON(location),
                 ),
               )
             : null,
-        path = data['path'],
-        extensions = data['extensions'];
+        path = data['path'] as List<dynamic>,
+        extensions = data['extensions'] as Map<String, dynamic>;
 
   /// The message of the error.
   final dynamic data;

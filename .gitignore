@@ -20,3 +20,7 @@ ios/Runner/GeneratedPluginRegistrant.*
 
 
 example/lib/local.dart
+
+# Coverage
+coverage.json
+coverage/*

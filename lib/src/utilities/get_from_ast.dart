@@ -16,7 +16,7 @@ String getOperationName(String rawDoc) {
     final OperationDefinitionContext definition = doc.definitions.lastWhere(
       (DefinitionContext context) => context is OperationDefinitionContext,
       orElse: () => null,
-    );
+    ) as OperationDefinitionContext;
 
     if (definition != null) {
       if (definition.name != null) {

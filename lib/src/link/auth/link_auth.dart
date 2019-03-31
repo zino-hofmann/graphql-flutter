@@ -4,7 +4,7 @@ import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 
-typedef GetToken = Future<String> Function();
+typedef GetToken = FutureOr<String> Function();
 
 class AuthLink extends Link {
   AuthLink({
