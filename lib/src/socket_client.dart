@@ -4,8 +4,7 @@ import 'dart:io';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_flutter/src/websocket/messages.dart';
-import 'package:rxdart/src/observables/observable.dart';
-import 'package:rxdart/subjects.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
 
 class SocketClientConfig {

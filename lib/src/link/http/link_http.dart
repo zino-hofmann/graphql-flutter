@@ -34,10 +34,9 @@ class HttpLink extends Link {
             NextLink forward,
           ]) {
             if (operation.isSubscription) {
-              if (forward == null)
-                return Observable<Exception>.error(
-                  Exception('This link does not support subscriptions.'),
-                );
+              if (forward == null) {
+                throw Exception('This link does not support subscriptions.');
+              }
               return forward(operation);
             }
 

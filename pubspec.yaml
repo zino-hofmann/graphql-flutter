@@ -18,10 +18,9 @@ dependencies:
   path_provider: ^0.5.0
   uuid: ^2.0.0
   graphql_parser: ^1.1.1
-  rxdart: ^0.20.0
+  rxdart: ^0.21.0
 
 dev_dependencies:
-  rxdart: ^0.21.0 # for `example/` only to please pub publish --dry-run
   perfectionist: ^2.0.0
   mockito: ^4.0.0
   flutter_test:
