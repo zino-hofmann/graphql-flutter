@@ -12,3 +12,12 @@ const String readRepositories = r'''
     }
   }
 ''';
+
+const String testSubscription = r'''
+		subscription test {
+	    deviceChanged(id: 2) {
+        id
+        name
+      }
+		}
+''';

@@ -29,6 +29,8 @@ class Operation {
     return result;
   }
 
+  bool get isSubscription => document.contains(RegExp(r'.*?subscription ' + operationName));
+
   String toKey() {
     /// SplayTreeMap is always sorted
     final String encodedVariables =

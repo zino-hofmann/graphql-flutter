@@ -1,19 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:graphql_flutter/src/graphql_client.dart';
+import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql_flutter/src/link/operation.dart';
+import 'package:graphql_flutter/src/utilities/helpers.dart';
+import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-import '../socket_client.dart';
 import '../websocket/messages.dart';
 
 typedef OnSubscriptionCompleted = void Function();
 
-typedef SubscriptionBuilder = Widget Function({
+typedef SubscriptionBuilder<T> = Widget Function({
   final bool loading,
-  final dynamic payload,
+  final T payload,
   final dynamic error,
 });
 
-class Subscription extends StatefulWidget {
+class Subscription<T> extends StatefulWidget {
   const Subscription(
     this.operationName,
     this.query, {
@@ -26,55 +30,77 @@ class Subscription extends StatefulWidget {
 
   final String operationName;
   final String query;
-  final dynamic variables;
-  final SubscriptionBuilder builder;
+  final Map<String, dynamic> variables;
+  final SubscriptionBuilder<T> builder;
   final OnSubscriptionCompleted onCompleted;
-  final dynamic initial;
+  final T initial;
 
   @override
-  _SubscriptionState createState() => _SubscriptionState();
+  _SubscriptionState<T> createState() => _SubscriptionState<T>();
 }
 
-class _SubscriptionState extends State<Subscription> {
+class _SubscriptionState<T> extends State<Subscription<T>> {
   bool _loading = true;
-  dynamic _data;
+  T _data;
   dynamic _error;
+  StreamSubscription<FetchResult> _subscription;
 
-  bool _alive = true;
+  void _initSubscription() {
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    final Operation operation = Operation(
+        document: widget.query,
+        variables: widget.variables,
+        operationName: widget.operationName);
+
+    final Stream<FetchResult> stream = client.subscribe(operation);
+
+    if (_subscription == null) {
+      // Set the initial value for the first time.
+      if (widget.initial != null) {
+        setState(() {
+          _loading = true;
+          _data = widget.initial;
+          _error = null;
+        });
+      }
+    }
+
+    _subscription?.cancel();
+    _subscription = stream.listen(
+      _onData,
+      onError: _onError,
+      onDone: _onDone,
+    );
+  }
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _initSubscription();
+  }
 
-    final Stream<SubscriptionData> stream = socketClient.subscribe(
-        SubscriptionRequest(
-            widget.operationName, widget.query, widget.variables));
+  @override
+  void didUpdateWidget(Subscription<T> oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-    stream.takeWhile((SubscriptionData message) => _alive).listen(
-          _onData,
-          onError: _onError,
-          onDone: _onDone,
-        );
-
-    if (widget.initial != null) {
-      setState(() {
-        _loading = true;
-        _data = widget.initial;
-        _error = null;
-      });
+    if (widget.query != oldWidget.query ||
+        widget.operationName != oldWidget.operationName ||
+        areDifferentVariables(widget.variables, oldWidget.variables)) {
+      _initSubscription();
     }
   }
 
   @override
   void dispose() {
-    _alive = false;
+    _subscription?.cancel();
     super.dispose();
   }
 
-  void _onData(final SubscriptionData message) {
+  void _onData(final FetchResult message) {
     setState(() {
       _loading = false;
-      _data = message.data;
+      _data = message.data as T;
       _error = message.errors;
     });
   }

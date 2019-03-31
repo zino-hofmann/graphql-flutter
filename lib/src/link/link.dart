@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql_flutter/src/link/operation.dart';
 
 typedef NextLink = Stream<FetchResult> Function(
   Operation operation,
@@ -27,20 +27,12 @@ Link _concat(
 }
 
 class Link {
-  Link({
-    this.request,
-  });
+  Link({this.request});
 
-  final RequestHandler request;
+  RequestHandler request;
 
-  Link concat(Link next) {
-    return _concat(this, next);
-  }
+  Link concat(Link next) => _concat(this, next);
 }
 
-Stream<FetchResult> execute({
-  Link link,
-  Operation operation,
-}) {
-  return link.request(operation);
-}
+Stream<FetchResult> execute({Link link, Operation operation}) =>
+    link.request(operation);

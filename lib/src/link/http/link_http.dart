@@ -12,8 +12,9 @@ import 'package:mime/mime.dart';
 import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
-import 'package:graphql_flutter/src/link/http/http_config.dart';
 import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
+import 'package:graphql_flutter/src/link/http/http_config.dart';
+import 'package:rxdart/rxdart.dart';
 
 class HttpLink extends Link {
   HttpLink({
@@ -32,6 +33,13 @@ class HttpLink extends Link {
             Operation operation, [
             NextLink forward,
           ]) {
+            if (operation.isSubscription) {
+              if (forward == null) {
+                throw Exception('This link does not support subscriptions.');
+              }
+              return forward(operation);
+            }
+
             final Client fetcher = httpClient ?? Client();
 
             final HttpConfig linkConfig = HttpConfig(

@@ -20,7 +20,14 @@ class GraphQLWidgetScreen extends StatelessWidget {
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    final Link link = authLink.concat(httpLink as Link);
+    final WebSocketLink websocketLink = WebSocketLink(
+      url: 'ws://localhost:8080/ws/graphql',
+      config: SocketClientConfig(
+          autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+    );
+
+    // TODO don't think we have to cast here, maybe covariant
+    final Link link = authLink.concat(httpLink as Link).concat(websocketLink);
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
@@ -119,6 +126,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
+            Subscription<Map<String, dynamic>>('test', queries.testSubscription,
+                builder: ({
+              bool loading,
+              Map<String, dynamic> payload,
+              dynamic error,
+            }) {
+              return loading
+                  ? const Text('Loading...')
+                  : Text(payload.toString());
+            }),
           ],
         ),
       ),
