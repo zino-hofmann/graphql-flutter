@@ -143,7 +143,7 @@ class QueryManager {
       // not all errors thrown above are GraphQL errors and should not
       // show an error related to being unable to access 'message'...
       try {
-        errorMessage = error.message;
+        errorMessage = error.message as String;
       } catch (e) {
         throw error;
       }

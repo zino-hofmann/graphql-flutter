@@ -30,7 +30,7 @@ class Subscription<T> extends StatefulWidget {
 
   final String operationName;
   final String query;
-  final dynamic variables;
+  final Map<String, dynamic> variables;
   final SubscriptionBuilder<T> builder;
   final OnSubscriptionCompleted onCompleted;
   final T initial;
@@ -48,7 +48,10 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   void _initSubscription() {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
-    final Operation operation = Operation(document: widget.query, variables: widget.variables, operationName: widget.operationName);
+    final Operation operation = Operation(
+        document: widget.query,
+        variables: widget.variables,
+        operationName: widget.operationName);
 
     final Stream<FetchResult> stream = client.subscribe(operation);
 
@@ -97,7 +100,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   void _onData(final FetchResult message) {
     setState(() {
       _loading = false;
-      _data = message.data;
+      _data = message.data as T;
       _error = message.errors;
     });
   }
