@@ -20,6 +20,7 @@ enum QueryLifecycle {
 
   // right now only Mutations ever become completed
   COMPLETED,
+  CLOSED
 }
 
 class ObservableQuery {
@@ -38,7 +39,9 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      <StreamSubscription<QueryResult>>{};
+      // @todo Set literal is only supported from Dart 2.2 we are running Dart 2.0
+      // ignore: prefer_collection_literals
+      Set<StreamSubscription<QueryResult>>();
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
@@ -59,7 +62,7 @@ class ObservableQuery {
     queryManager.fetchQuery(queryId, options);
 
     // if onData callbacks have been registered,
-    // they should be waited on by default
+    // they are waited on by default
     lifecycle = _onDataSubscriptions.isNotEmpty
         ? QueryLifecycle.SIDE_EFFECTS_PENDING
         : QueryLifecycle.PENDING;
@@ -136,11 +139,23 @@ class ObservableQuery {
     options.variables = variables;
   }
 
-  Future<void> close({bool force = false, bool fromManager = false}) async {
+  /// Closes the query or mutation, or else queues it for closing.
+  ///
+  /// To preserve Mutation side effects, `close` checks the `lifecycle`,
+  /// queuing the stream for closing if  `lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING`.
+  /// You can override this check with `force: true`.
+  ///
+  /// Returns a `FutureOr` of the resultant lifecycle
+  /// (`QueryLifecycle.SIDE_EFFECTS_BLOCKING | QueryLifecycle.CLOSED`)
+  FutureOr<QueryLifecycle> close(
+      {bool force = false, bool fromManager = false}) async {
     if (lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING && !force) {
       lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
+      // stop closing because we're waiting on something
+      return lifecycle;
     }
 
+    // `fromManager` is used by the query manager when it wants to close a query to avoid infinite loops
     if (!fromManager) {
       queryManager.closeQuery(this, fromQuery: true);
     }
@@ -151,5 +166,8 @@ class ObservableQuery {
 
     stopPolling();
     await controller.close();
+
+    lifecycle = QueryLifecycle.CLOSED;
+    return QueryLifecycle.CLOSED;
   }
 }

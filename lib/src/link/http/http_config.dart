@@ -32,12 +32,12 @@ class HttpConfig {
   Map<String, String> headers;
 }
 
-class HttpOptionsAndBody {
-  HttpOptionsAndBody({
-    this.options,
+class HttpHeadersAndBody {
+  HttpHeadersAndBody({
+    this.headers,
     this.body,
   });
 
-  final Map<String, dynamic> options;
-  final String body;
+  final Map<String, String> headers;
+  final Map<String, dynamic> body;
 }

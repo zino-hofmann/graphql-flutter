@@ -35,7 +35,7 @@ class InMemoryCache implements Cache {
   @override
   void write(String key, dynamic value) {
     if (_inMemoryCache.containsKey(key) &&
-        _inMemoryCache[key] is Map &&
+        _inMemoryCache[key] is Map<String, dynamic> &&
         value != null &&
         value is Map<String, dynamic>) {
       // Avoid overriding a superset with a subset of a field (#155)

@@ -1,21 +1,23 @@
-import 'dart:convert';
+import 'dart:collection' show SplayTreeMap;
+import 'dart:convert' show json;
+import 'dart:io' show File;
 
 class Operation {
   Operation({
     this.document,
-    this.variables,
+    Map<String, dynamic> variables,
     this.operationName,
     this.extensions,
-  });
+  }) : this.variables = SplayTreeMap<String, dynamic>.of(variables);
 
   final String document;
-  final Map<String, dynamic> variables;
+  final SplayTreeMap<String, dynamic> variables;
   final String operationName;
   final Map<String, dynamic> extensions;
 
   final Map<String, dynamic> _context = <String, dynamic>{};
 
-  /// Sets the context of an opration by merging the new context with the old one.
+  /// Sets the context of an operation by merging the new context with the old one.
   void setContext(Map<String, dynamic> next) {
     _context.addAll(next);
   }
@@ -28,9 +30,14 @@ class Operation {
   }
 
   String toKey() {
-    /// XXX we're assuming here that variables will be serialized in the same order.
-    /// that might not always be true
-    final String encodedVariables = json.encode(variables);
+    /// SplayTreeMap is always sorted
+    final String encodedVariables =
+        json.encode(variables, toEncodable: (dynamic object) {
+      if (object is File) {
+        return object.path;
+      }
+      return object;
+    });
 
     return '$document|$encodedVariables|$operationName';
   }

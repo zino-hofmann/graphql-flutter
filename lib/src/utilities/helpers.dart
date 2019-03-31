@@ -10,8 +10,11 @@ Map<String, dynamic> _recursivelyAddAll(
     if (target.containsKey(key) &&
         target[key] is Map &&
         value != null &&
-        value is Map) {
-      _recursivelyAddAll(target[key], value);
+        value is Map<String, dynamic>) {
+      _recursivelyAddAll(
+        target[key] as Map<String, dynamic>,
+        value,
+      );
     } else {
       target[key] = value;
     }

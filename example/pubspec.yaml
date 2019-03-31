@@ -5,6 +5,7 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^0.1.2
+  rxdart: ^0.21.0
   graphql_flutter:
     path: ..
 
