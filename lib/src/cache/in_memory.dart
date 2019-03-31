@@ -101,7 +101,6 @@ class InMemoryCache implements Cache {
         sink.writeln(json.encode(<dynamic>[key, value]));
       });
 
-      // before calling sink.close() we should call sink.flush()
       await sink.flush();
       await sink.close();
 
@@ -116,15 +115,6 @@ class InMemoryCache implements Cache {
 
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     if (_writingToStorage) {
-      // On android the app will fire 'inactive' and then 'restored'
-      // when it is restored. Then, while this is reading it may read
-      // incomplete data because the writer may be writing data.
-      // And if it is writing the file was overwritten anyway, so we don't
-      // have what to read and best hope that the data we have in memory
-      // is the correct one.
-      // TODO: should we call save when the app enters inactive (why?)
-      // When the app is 'cold-started' then save won't be called and
-      // restore will run ok.
       return _inMemoryCache;
     }
     try {
