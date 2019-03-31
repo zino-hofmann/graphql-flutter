@@ -8,8 +8,11 @@ import '../graphql_operation/queries/readRepositories.dart' as queries;
 /// to make the example work
 import '../local.dart' show YOUR_PERSONAL_ACCESS_TOKEN;
 
+final bool ENABLE_WEBSOCKETS = false;
+
 class GraphQLWidgetScreen extends StatelessWidget {
   const GraphQLWidgetScreen() : super();
+
   @override
   Widget build(BuildContext context) {
     final HttpLink httpLink = HttpLink(
@@ -20,14 +23,17 @@ class GraphQLWidgetScreen extends StatelessWidget {
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    final WebSocketLink websocketLink = WebSocketLink(
-      url: 'ws://localhost:8080/ws/graphql',
-      config: SocketClientConfig(
-          autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-    );
-
     // TODO don't think we have to cast here, maybe covariant
-    final Link link = authLink.concat(httpLink as Link).concat(websocketLink);
+    Link link = authLink.concat(httpLink as Link);
+    if (ENABLE_WEBSOCKETS) {
+      final WebSocketLink websocketLink = WebSocketLink(
+        url: 'ws://localhost:8080/ws/graphql',
+        config: SocketClientConfig(
+            autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+      );
+
+      link = link.concat(websocketLink);
+    }
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
@@ -95,7 +101,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 pollInterval: 4,
               ),
-              builder: (QueryResult result) {
+              builder: (QueryResult result, {VoidCallback refetch}) {
                 if (result.loading) {
                   return const Center(
                     child: CircularProgressIndicator(),
@@ -126,16 +132,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 );
               },
             ),
-            Subscription<Map<String, dynamic>>('test', queries.testSubscription,
-                builder: ({
-              bool loading,
-              Map<String, dynamic> payload,
-              dynamic error,
-            }) {
-              return loading
-                  ? const Text('Loading...')
-                  : Text(payload.toString());
-            }),
+            ENABLE_WEBSOCKETS
+                ? Subscription<Map<String, dynamic>>(
+                    'test', queries.testSubscription, builder: ({
+                    bool loading,
+                    Map<String, dynamic> payload,
+                    dynamic error,
+                  }) {
+                    return loading
+                        ? const Text('Loading...')
+                        : Text(payload.toString());
+                  })
+                : const Text(''),
           ],
         ),
       ),
@@ -209,13 +217,13 @@ class StarrableRepository extends StatelessWidget {
           cache.write(typenameDataIdFromObject(updated), updated);
         }
       },
-      onCompleted: (QueryResult result) {
+      onCompleted: (dynamic resultData) {
         showDialog<AlertDialog>(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(
-                extractRepositoryData(result.data)['viewerHasStarred'] as bool
+                extractRepositoryData(resultData)['viewerHasStarred'] as bool
                     ? 'Thanks for your star!'
                     : 'Sorry you changed your mind!',
               ),
