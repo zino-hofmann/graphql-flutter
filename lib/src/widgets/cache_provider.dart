@@ -49,6 +49,9 @@ class _CacheProviderState extends State<CacheProvider>
     assert(client != null);
 
     switch (state) {
+      // TODO: from @degroote22 in #175: reconsider saving on `inactive`
+      // When the app is 'cold-started', save won't be called and
+      // restore will run ok.
       case AppLifecycleState.inactive:
         client.cache?.save();
         break;

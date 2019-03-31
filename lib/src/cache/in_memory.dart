@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
-
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart'
     show deeplyMergeLeft;
@@ -38,11 +37,11 @@ class InMemoryCache implements Cache {
     if (_inMemoryCache.containsKey(key) &&
         _inMemoryCache[key] is Map &&
         value != null &&
-        value is Map) {
+        value is Map<String, dynamic>) {
       // Avoid overriding a superset with a subset of a field (#155)
       // this means deletions must be done by explicitly returning a field as null
       _inMemoryCache[key] = deeplyMergeLeft(<Map<String, dynamic>>[
-        _inMemoryCache[key],
+        _inMemoryCache[key] as Map<String, dynamic>,
         value,
       ]);
     } else {
@@ -102,6 +101,7 @@ class InMemoryCache implements Cache {
         sink.writeln(json.encode(<dynamic>[key, value]));
       });
 
+      await sink.flush();
       await sink.close();
 
       _writingToStorage = false;
@@ -113,7 +113,14 @@ class InMemoryCache implements Cache {
     return;
   }
 
+  /// Attempts to read saved state from the file cache `_localStorageFile`.
+  ///
+  /// Will return the current in-memory cache if writing,
+  /// or an empty map on failure
   Future<HashMap<String, dynamic>> _readFromStorage() async {
+    if (_writingToStorage) {
+      return _inMemoryCache;
+    }
     try {
       final File file = await _localStorageFile;
       final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
