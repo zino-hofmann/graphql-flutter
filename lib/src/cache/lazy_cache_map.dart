@@ -1,5 +1,5 @@
 import 'dart:core';
-import 'dart:core';
+
 import 'package:meta/meta.dart';
 
 typedef Dereference = Object Function(Object node);

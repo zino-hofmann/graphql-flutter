@@ -301,7 +301,8 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final FetchResult fetchResult = FetchResult();
 
   if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
+    fetchResult.errors =
+        (jsonResponse['errors'] as List<dynamic>).where(notNull).toList();
   }
 
   if (jsonResponse['data'] != null) {

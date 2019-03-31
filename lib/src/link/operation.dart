@@ -6,7 +6,11 @@ class Operation extends RawOperationData {
     @required String document,
     Map<String, dynamic> variables,
     this.extensions,
-  }) : super(document: document, variables: variables);
+    String operationName,
+  }) : super(
+            document: document,
+            variables: variables,
+            operationName: operationName);
 
   factory Operation.fromOptions(RawOperationData options) {
     return Operation(

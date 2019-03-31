@@ -49,9 +49,10 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
     final Operation operation = Operation(
-        document: widget.query,
-        variables: widget.variables,
-        operationName: widget.operationName);
+      document: widget.query,
+      variables: widget.variables,
+      operationName: widget.operationName,
+    );
 
     final Stream<FetchResult> stream = client.subscribe(operation);
 

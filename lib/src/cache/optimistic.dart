@@ -1,4 +1,5 @@
 import 'dart:collection';
+
 import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
@@ -18,7 +19,7 @@ class OptimisticProxy implements Cache {
 
   Object _dereference(Object node) {
     if (node is List && node.length == 2 && node[0] == cache.prefix) {
-      return read(node[1]);
+      return read(node[1] as String);
     }
 
     return null;
@@ -28,7 +29,7 @@ class OptimisticProxy implements Cache {
   dynamic read(String key) {
     if (data.containsKey(key)) {
       final Object value = data[key];
-      return value is Map
+      return value is Map<String, Object>
           ? LazyMap(data: value, dereference: _dereference)
           : value;
     }
@@ -49,7 +50,7 @@ class OptimisticProxy implements Cache {
   void reset() {}
 }
 
-typedef Cache CacheTransform(Cache proxy);
+typedef CacheTransform = Cache Function(Cache proxy);
 
 class OptimisticCache extends NormalizedInMemoryCache {
   @protected
@@ -69,7 +70,9 @@ class OptimisticCache extends NormalizedInMemoryCache {
       if (patch.data.containsKey(key)) {
         final Object patchData = patch.data[key];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
-          value = patchData..addAll(value is LazyMap ? value.data : value);
+          value = patchData
+            ..addAll(
+                value is LazyMap ? value.data : value as Map<String, Object>);
         } else {
           // Overwrite if not mergable
           value = patchData;
@@ -85,7 +88,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
     String addId,
     CacheTransform transform,
   ) {
-    final OptimisticProxy patch = transform(_proxy);
+    final OptimisticProxy patch = transform(_proxy) as OptimisticProxy;
     optimisticPatches.add(OptimisticPatch(addId, patch.data));
   }
 

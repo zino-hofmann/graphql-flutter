@@ -7,11 +7,11 @@ import './lazy_cache_map.dart';
 typedef DataIdFromObject = String Function(Object node);
 
 class NormalizationException implements Exception {
+  NormalizationException(this.cause, this.overflowError, this.value);
+
   StackOverflowError overflowError;
   String cause;
   Object value;
-
-  NormalizationException(this.cause, this.overflowError, this.value);
 
   String get message => cause;
 }
@@ -19,14 +19,14 @@ class NormalizationException implements Exception {
 typedef Normalizer = List<String> Function(Object node);
 
 class NormalizedInMemoryCache extends InMemoryCache {
-  DataIdFromObject dataIdFromObject;
-
-  String prefix;
-
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
     this.prefix = '@cache/reference',
   });
+
+  DataIdFromObject dataIdFromObject;
+
+  String prefix;
 
   bool _isReference(Object node) =>
       node is List && node.length == 2 && node[0] == prefix;

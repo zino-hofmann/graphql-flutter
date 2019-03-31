@@ -10,7 +10,9 @@ class RawOperationData {
   RawOperationData({
     @required this.document,
     Map<String, dynamic> variables,
-  }) : this.variables = SplayTreeMap<String, dynamic>.of(
+    String operationName,
+  })  : _operationName = operationName,
+        this.variables = SplayTreeMap<String, dynamic>.of(
           variables ?? const <String, dynamic>{},
         );
 
