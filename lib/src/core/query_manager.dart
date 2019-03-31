@@ -64,7 +64,7 @@ class QueryManager {
   ) async {
     final ObservableQuery observableQuery = getQuery(queryId);
     // create a new operation to fetch
-    final Operation operation = Operation.fromOptions(observableQuery.options);
+    final Operation operation = Operation.fromOptions(options);
 
     FetchResult fetchResult;
     QueryResult queryResult;

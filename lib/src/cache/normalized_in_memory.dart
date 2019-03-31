@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/utilities/traverse.dart';
+import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:graphql_flutter/src/cache/in_memory.dart';
 
 import './lazy_cache_map.dart';
@@ -121,7 +122,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
     final Object existing = into[key];
     into[key] =
         (existing is Map<String, Object> && normalized is Map<String, Object>)
-            ? (existing..addAll(normalized))
+            ? deeplyMergeLeft(<Map<String, Object>>[existing, normalized])
             : normalized;
   }
 
