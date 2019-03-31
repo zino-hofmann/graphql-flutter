@@ -103,7 +103,7 @@ Query(
 -    var data,
 -    String error,
 -  }) {
-+  builder: (QueryResult result, { VoidCallback refetch }) {
++  builder: (QueryResult result) {
 -    if (error != '') {
 -      return Text(error);
 +    if (result.errors != null) {

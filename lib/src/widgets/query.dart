@@ -7,10 +7,7 @@ import 'package:graphql_flutter/src/core/query_result.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef QueryBuilder = Widget Function(
-  QueryResult result, {
-  VoidCallback refetch,
-});
+typedef QueryBuilder = Widget Function(QueryResult result);
 
 /// Builds a [Query] widget based on the a given set of [QueryOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
@@ -90,10 +87,7 @@ class QueryState extends State<Query> {
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
-        return widget?.builder(
-          snapshot.data,
-          refetch: observableQuery.refetch,
-        );
+        return widget?.builder(snapshot.data);
       },
     );
   }

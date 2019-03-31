@@ -57,12 +57,10 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    intervalQueries[interval].forEach(refetchQuery);
-  }
-
-  void refetchQuery(String queryId) {
-    final WatchQueryOptions options = registeredQueries[queryId];
-    queryManager.fetchQuery(queryId, options);
+    for (String queryId in intervalQueries[interval]) {
+      final WatchQueryOptions options = registeredQueries[queryId];
+      queryManager.fetchQuery(queryId, options);
+    }
   }
 
   void startPollingQuery(
