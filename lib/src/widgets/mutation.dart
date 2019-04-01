@@ -171,6 +171,7 @@ class MutationState extends State<Mutation> {
       key: Key(observableQuery?.options?.toKey()),
       initialData: QueryResult(
         loading: false,
+        optimistic: false,
       ),
       stream: observableQuery?.stream,
       builder: (

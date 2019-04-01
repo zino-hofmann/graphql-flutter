@@ -178,10 +178,8 @@ class StarrableRepository extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Mutation(
-      options: MutationOptions(
-        document: starred ? mutations.removeStar : mutations.addStar,
-      ),
+    return ToggleStarMutation(
+      starred: starred,
       builder: (RunMutation toggleStar, QueryResult result) {
         return ListTile(
           leading: starred
@@ -233,6 +231,50 @@ class StarrableRepository extends StatelessWidget {
                 )
               ],
             );
+          },
+        );
+      },
+    );
+  }
+}
+
+// TODO it is probably better to mark optimistic results as optimistic on read
+// if they have a slice of data from an optimistic patch in the cache
+class ToggleStarMutation extends StatelessWidget {
+  const ToggleStarMutation({
+    @required this.starred,
+    @required this.builder,
+    this.update,
+    this.onCompleted,
+  });
+
+  final bool starred;
+  final MutationBuilder builder;
+  final OnMutationUpdate update;
+  final OnMutationCompleted onCompleted;
+
+  @override
+  Widget build(BuildContext context) {
+    return Mutation(
+      update: update,
+      onCompleted: onCompleted,
+      options: MutationOptions(
+        document: mutations.removeStar,
+      ),
+      builder: (RunMutation removeStar, QueryResult addResult) {
+        return Mutation(
+          update: update,
+          onCompleted: onCompleted,
+          options: MutationOptions(
+            document: mutations.addStar,
+          ),
+          builder: (RunMutation addStar, QueryResult removeResult) {
+            final QueryResult result = starred
+                ? removeResult.withDependencyOn(addResult)
+                : addResult.withDependencyOn(removeResult);
+            print([result.loading, result.optimistic]);
+            final RunMutation toggleStar = starred ? removeStar : addStar;
+            return builder(toggleStar, result);
           },
         );
       },
