@@ -147,7 +147,7 @@ class ObservableQuery {
         if (!result.loading) {
           callbacks.forEach(handle);
 
-          queryManager.rebroadcastQueries(optimistic: result.optimistic);
+          queryManager.rebroadcastQueries();
           if (!result.optimistic) {
             subscription.cancel();
             _onDataSubscriptions.remove(subscription);

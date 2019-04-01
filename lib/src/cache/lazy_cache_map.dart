@@ -4,6 +4,8 @@ import 'package:meta/meta.dart';
 
 typedef Dereference = Object Function(Object node);
 
+enum CacheState { OPTIMISTIC }
+
 /// A simple immutable map that lazily dereferences from the cache
 /// The only available methods are simple read-based operations,
 /// such as `[]()`, `containsKey`, and `values`
@@ -22,10 +24,16 @@ class LazyMap implements Map<String, Object> {
   LazyMap({
     @required Map<String, Object> data,
     @required Dereference dereference,
+    CacheState cacheState,
   })  : _data = data is LazyMap ? data.data : data,
-        _dereference = dereference;
+        _dereference = dereference,
+        this.cacheState =
+            cacheState ?? (data is LazyMap ? data.cacheState : null);
 
   Dereference _dereference;
+
+  final CacheState cacheState;
+  bool get isOptimistic => cacheState == CacheState.OPTIMISTIC;
 
   final Map<String, Object> _data;
   Map<String, Object> get data => _data;

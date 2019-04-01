@@ -31,7 +31,11 @@ class OptimisticProxy implements Cache {
     if (data.containsKey(key)) {
       final Object value = data[key];
       return value is Map<String, Object>
-          ? LazyMap(data: value, dereference: _dereference)
+          ? LazyMap(
+              data: value,
+              dereference: _dereference,
+              cacheState: CacheState.OPTIMISTIC,
+            )
           : value;
     }
     return cache.read(key);
@@ -67,6 +71,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
   @override
   dynamic read(String key) {
     Object value = super.read(key);
+    CacheState cacheState;
     for (OptimisticPatch patch in optimisticPatches) {
       if (patch.data.containsKey(key)) {
         final Object patchData = patch.data[key];
@@ -75,13 +80,16 @@ class OptimisticCache extends NormalizedInMemoryCache {
             value as Map<String, Object>,
             patchData,
           ]);
+          cacheState = CacheState.OPTIMISTIC;
         } else {
           // Overwrite if not mergable
           value = patchData;
         }
       }
     }
-    return value is Map<String, Object> ? lazilyDenormalized(value) : value;
+    return value is Map<String, Object>
+        ? lazilyDenormalized(value, cacheState)
+        : value;
   }
 
   OptimisticProxy get _proxy => OptimisticProxy(this);

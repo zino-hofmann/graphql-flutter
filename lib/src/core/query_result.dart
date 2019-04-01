@@ -34,16 +34,4 @@ class QueryResult {
       errors = <GraphQLError>[graphQLError];
     }
   }
-
-  QueryResult withDependencyOn(QueryResult dependency) {
-    print(dependency.optimistic);
-    return QueryResult(
-      data: data,
-      errors: errors,
-      loading: loading,
-      stale: stale,
-      optimistic:
-          (dependency.optimistic == true) ? dependency.optimistic : optimistic,
-    )..timestamp = timestamp;
-  }
 }

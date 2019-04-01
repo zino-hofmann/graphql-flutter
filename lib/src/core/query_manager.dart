@@ -187,7 +187,7 @@ class QueryManager {
   ///
   /// rebroadcast queries inherit `optimistic`
   /// from the triggering state-change
-  void rebroadcastQueries({bool optimistic}) {
+  void rebroadcastQueries() {
     for (ObservableQuery query in queries.values) {
       if (query.isRebroadcastSafe) {
         final dynamic cachedData = cache.read(query.options.toKey());
@@ -195,7 +195,6 @@ class QueryManager {
           query.addResult(
             _mapFetchResultToQueryResult(
               FetchResult(data: cachedData),
-              optimistic: optimistic,
             ),
           );
         }

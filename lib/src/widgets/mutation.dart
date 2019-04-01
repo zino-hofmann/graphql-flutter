@@ -102,22 +102,30 @@ class MutationState extends State<Mutation> {
     }
   }
 
-  void _cleanupIfOptimistic(QueryResult result) {
+  // we have to be careful to collect cleanup information
+  // (`mutationId`) __before__ registering callbacks, so that
+  // the mutation side effects get properly decoupled
+  // from the UI layer.
+  // TODO this callbacks approach can be improved upon
+  OnData get _cleanupIfOptimistic {
     final Cache cache = client.cache;
     final String mutationId = observableQuery.queryId;
-    if (cache is OptimisticCache && !result.loading && !result.optimistic) {
-      cache.removeOptimisticPatch(mutationId);
-    }
+    return (QueryResult result) {
+      if (cache is OptimisticCache && !result.loading && !result.optimistic) {
+        cache.removeOptimisticPatch(mutationId);
+      }
+    };
   }
 
   OnData get update {
     if (widget.update != null) {
+      final OnData cleanup = _cleanupIfOptimistic;
       void updateOnData(QueryResult result) {
         if (result.optimistic) {
           return _optimisticUpdate(result);
         } else {
           widget.update(client.cache, result);
-          _cleanupIfOptimistic(result);
+          cleanup(result);
         }
       }
 

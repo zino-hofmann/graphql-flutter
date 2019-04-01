@@ -66,7 +66,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int nRepositories = 1;
+  int nRepositories = 50;
 
   void changeQuery(String number) {
     setState(() {
@@ -118,16 +118,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<dynamic> repositories = result.data['viewer']
-                    ['repositories']['nodes'] as List<dynamic>;
+                final List<LazyMap> repositories = (result.data['viewer']
+                        ['repositories']['nodes'] as List<dynamic>)
+                    .cast<LazyMap>();
 
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                        StarrableRepository(
-                            repository:
-                                repositories[index] as Map<String, Object>),
+                    itemBuilder: (BuildContext context, int index) {
+                      return StarrableRepository(
+                          repository: repositories[index]);
+                    },
                   ),
                 );
               },
@@ -169,6 +170,7 @@ class StarrableRepository extends StatelessWidget {
   }
 
   bool get starred => repository['viewerHasStarred'] as bool;
+  bool get optimistic => (repository as LazyMap).isOptimistic;
 
   Map<String, dynamic> get expectedResult => <String, dynamic>{
         'action': <String, dynamic>{
@@ -178,8 +180,10 @@ class StarrableRepository extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ToggleStarMutation(
-      starred: starred,
+    return Mutation(
+      options: MutationOptions(
+        document: starred ? mutations.removeStar : mutations.addStar,
+      ),
       builder: (RunMutation toggleStar, QueryResult result) {
         return ListTile(
           leading: starred
@@ -188,7 +192,7 @@ class StarrableRepository extends StatelessWidget {
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
-          trailing: result.loading || result.optimistic
+          trailing: result.loading || optimistic
               ? const CircularProgressIndicator()
               : null,
           title: Text(repository['name'] as String),
@@ -204,7 +208,7 @@ class StarrableRepository extends StatelessWidget {
       },
       update: (Cache cache, QueryResult result) {
         if (result.hasErrors) {
-          print(result.errors);
+          print(['optimistic', result.errors]);
         } else {
           final Map<String, Object> updated =
               Map<String, Object>.from(repository)
@@ -231,50 +235,6 @@ class StarrableRepository extends StatelessWidget {
                 )
               ],
             );
-          },
-        );
-      },
-    );
-  }
-}
-
-// TODO it is probably better to mark optimistic results as optimistic on read
-// if they have a slice of data from an optimistic patch in the cache
-class ToggleStarMutation extends StatelessWidget {
-  const ToggleStarMutation({
-    @required this.starred,
-    @required this.builder,
-    this.update,
-    this.onCompleted,
-  });
-
-  final bool starred;
-  final MutationBuilder builder;
-  final OnMutationUpdate update;
-  final OnMutationCompleted onCompleted;
-
-  @override
-  Widget build(BuildContext context) {
-    return Mutation(
-      update: update,
-      onCompleted: onCompleted,
-      options: MutationOptions(
-        document: mutations.removeStar,
-      ),
-      builder: (RunMutation removeStar, QueryResult addResult) {
-        return Mutation(
-          update: update,
-          onCompleted: onCompleted,
-          options: MutationOptions(
-            document: mutations.addStar,
-          ),
-          builder: (RunMutation addStar, QueryResult removeResult) {
-            final QueryResult result = starred
-                ? removeResult.withDependencyOn(addResult)
-                : addResult.withDependencyOn(removeResult);
-            print([result.loading, result.optimistic]);
-            final RunMutation toggleStar = starred ? removeStar : addStar;
-            return builder(toggleStar, result);
           },
         );
       },
