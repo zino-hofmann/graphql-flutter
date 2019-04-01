@@ -148,7 +148,7 @@ class MutationState extends State<Mutation> {
 
   void runMutation(Map<String, dynamic> variables, {Object optimisticResult}) {
     observableQuery
-      ..setVariables(variables)
+      ..variables = variables
       ..onData(callbacks) // add callbacks to observable
       ..addResult(QueryResult(loading: true))
       ..fetchResults();
@@ -165,6 +165,10 @@ class MutationState extends State<Mutation> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
+      // we give the stream builder a key so that
+      // toggling mutations at the same place in the tree,
+      // such as is done in the example, won't result in bugs
+      key: Key(observableQuery?.options?.toKey()),
       initialData: QueryResult(
         loading: false,
       ),

@@ -115,15 +115,19 @@ class NormalizedInMemoryCache extends InMemoryCache {
     Map<String, Object> into, [
     Normalizer normalizer,
   ]) {
-    // writing non-map data to the store is allowed
-    final Object normalized = value is Map<String, Object>
-        ? traverseValues(value, normalizer ?? _normalizerFor(into))
-        : value;
-    final Object existing = into[key];
-    into[key] =
-        (existing is Map<String, Object> && normalized is Map<String, Object>)
-            ? deeplyMergeLeft(<Map<String, Object>>[existing, normalized])
-            : normalized;
+    if (value is Map<String, Object>) {
+      final Object existing = into[key];
+      final Map<String, Object> merged = (existing is Map<String, Object>)
+          ? deeplyMergeLeft(<Map<String, Object>>[existing, value])
+          : value;
+
+      // normalized the merged value
+      into[key] = traverseValues(merged, normalizer ?? _normalizerFor(into));
+    } else {
+      // writing non-map data to the store is allowed,
+      // but there is no merging strategy
+      into[key] = value;
+    }
   }
 
   /// Writes included objects to store,

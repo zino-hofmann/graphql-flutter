@@ -15,6 +15,7 @@ class QueryResult {
   dynamic data;
   List<GraphQLError> errors;
   bool loading;
+  // TODO not sure what this is for
   bool stale;
   bool optimistic;
 

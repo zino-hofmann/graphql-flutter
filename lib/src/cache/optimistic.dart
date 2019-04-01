@@ -3,6 +3,7 @@ import 'dart:collection';
 import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
+import 'package:graphql_flutter/src/utilities/helpers.dart';
 
 import './lazy_cache_map.dart';
 
@@ -53,13 +54,13 @@ class OptimisticProxy implements Cache {
 typedef CacheTransform = Cache Function(Cache proxy);
 
 class OptimisticCache extends NormalizedInMemoryCache {
-  @protected
-  List<OptimisticPatch> optimisticPatches = <OptimisticPatch>[];
-
   OptimisticCache({
     @required DataIdFromObject dataIdFromObject,
     String prefix = '@cache/reference',
   }) : super(dataIdFromObject: dataIdFromObject, prefix: prefix);
+
+  @protected
+  List<OptimisticPatch> optimisticPatches = <OptimisticPatch>[];
 
   /// Reads and dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
@@ -70,9 +71,10 @@ class OptimisticCache extends NormalizedInMemoryCache {
       if (patch.data.containsKey(key)) {
         final Object patchData = patch.data[key];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
-          value = patchData
-            ..addAll(
-                value is LazyMap ? value.data : value as Map<String, Object>);
+          value = deeplyMergeLeft(<Map<String, Object>>[
+            value as Map<String, Object>,
+            patchData,
+          ]);
         } else {
           // Overwrite if not mergable
           value = patchData;

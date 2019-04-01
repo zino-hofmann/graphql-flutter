@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import './graphql_bloc/main.dart' show GraphQLBlocPatternScreen;
-import './graphql_widget/main.dart' show GraphQLWidgetScreen;
+import 'package:app/graphql_bloc/main.dart' show GraphQLBlocPatternScreen;
+import 'package:app/graphql_widget/main.dart' show GraphQLWidgetScreen;
 
 void main() => runApp(
       MaterialApp(

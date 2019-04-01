@@ -121,7 +121,7 @@ class ObservableQuery {
     // don't overwrite results due to some async/optimism issue
     if (previousResult != null &&
         previousResult.timestamp.isAfter(result.timestamp)) {
-      return null;
+      return;
     }
 
     if (previousResult != null) {
@@ -130,6 +130,7 @@ class ObservableQuery {
     }
 
     previousResult = result;
+
     controller.add(result);
   }
 
@@ -145,6 +146,7 @@ class ObservableQuery {
 
         if (!result.loading) {
           callbacks.forEach(handle);
+
           queryManager.rebroadcastQueries(optimistic: result.optimistic);
           if (!result.optimistic) {
             subscription.cancel();
@@ -189,7 +191,7 @@ class ObservableQuery {
     }
   }
 
-  void setVariables(Map<String, dynamic> variables) {
+  set variables(Map<String, dynamic> variables) {
     options.variables = variables;
   }
 
@@ -201,8 +203,10 @@ class ObservableQuery {
   ///
   /// Returns a `FutureOr` of the resultant lifecycle
   /// (`QueryLifecycle.SIDE_EFFECTS_BLOCKING | QueryLifecycle.CLOSED`)
-  FutureOr<QueryLifecycle> close(
-      {bool force = false, bool fromManager = false}) async {
+  FutureOr<QueryLifecycle> close({
+    bool force = false,
+    bool fromManager = false,
+  }) async {
     if (lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING && !force) {
       lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
       // stop closing because we're waiting on something
@@ -219,6 +223,7 @@ class ObservableQuery {
     }
 
     stopPolling();
+
     await controller.close();
 
     lifecycle = QueryLifecycle.CLOSED;

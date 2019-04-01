@@ -66,7 +66,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int nRepositories = 50;
+  int nRepositories = 1;
 
   void changeQuery(String number) {
     setState(() {
@@ -99,7 +99,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
-                pollInterval: 4,
+                //pollInterval: 10,
               ),
               builder: (QueryResult result, {VoidCallback refetch}) {
                 if (result.loading) {
@@ -170,14 +170,9 @@ class StarrableRepository extends StatelessWidget {
 
   bool get starred => repository['viewerHasStarred'] as bool;
 
-  bool get loading => repository['_loading'] == true;
-
   Map<String, dynamic> get expectedResult => <String, dynamic>{
         'action': <String, dynamic>{
-          'starrable': <String, dynamic>{
-            'viewerHasStarred': !starred,
-            '_loading': true
-          }
+          'starrable': <String, dynamic>{'viewerHasStarred': !starred}
         }
       };
 
@@ -195,7 +190,9 @@ class StarrableRepository extends StatelessWidget {
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
-          trailing: loading ? const CircularProgressIndicator() : null,
+          trailing: result.loading || result.optimistic
+              ? const CircularProgressIndicator()
+              : null,
           title: Text(repository['name'] as String),
           onTap: () {
             toggleStar(

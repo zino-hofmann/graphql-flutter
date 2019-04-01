@@ -92,9 +92,7 @@ class QueryManager {
           );
 
           // add the cache result to an observable query if it exists
-          if (observableQuery != null) {
-            observableQuery.addResult(queryResult);
-          }
+          observableQuery?.addResult(queryResult);
 
           if (options.fetchPolicy == FetchPolicy.cacheFirst ||
               options.fetchPolicy == FetchPolicy.cacheOnly) {
@@ -185,7 +183,10 @@ class QueryManager {
     return null;
   }
 
-  /// push changed data from cache to query streams
+  /// Push changed data from cache to query streams
+  ///
+  /// rebroadcast queries inherit `optimistic`
+  /// from the triggering state-change
   void rebroadcastQueries({bool optimistic}) {
     for (ObservableQuery query in queries.values) {
       if (query.isRebroadcastSafe) {
