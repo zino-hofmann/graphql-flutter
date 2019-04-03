@@ -29,7 +29,9 @@ class Operation {
     return result;
   }
 
-  bool get isSubscription => document.contains(RegExp(r'.*?subscription ' + operationName));
+  bool get isSubscription =>
+      operationName != null &&
+      document.contains(RegExp(r'.*?subscription ' + operationName));
 
   String toKey() {
     /// SplayTreeMap is always sorted
