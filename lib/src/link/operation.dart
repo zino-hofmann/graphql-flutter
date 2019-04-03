@@ -8,7 +8,8 @@ class Operation {
     Map<String, dynamic> variables,
     this.operationName,
     this.extensions,
-  }) : this.variables = SplayTreeMap<String, dynamic>.of(variables);
+  }) : this.variables =
+            SplayTreeMap<String, dynamic>.of(variables ?? <String, dynamic>{});
 
   final String document;
   final SplayTreeMap<String, dynamic> variables;
