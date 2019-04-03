@@ -19,6 +19,7 @@
   - [GraphQL Provider](#graphql-provider)
   - [Offline Cache](#offline-cache)
     - [Normalization](#normalization)
+    - [Optimism](#optimism)
   - [Queries](#queries)
   - [Mutations](#mutations)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
@@ -241,7 +242,7 @@ class MyApp extends StatelessWidget {
 
 #### Normalization
 
-To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache`:
+To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache` or `OptimisticCache`:
 
 ```dart
 ValueNotifier<GraphQLClient> client = ValueNotifier(
@@ -269,6 +270,14 @@ String typenameDataIdFromObject(Object object) {
 
 However note that **`graphql-flutter` does not inject \_\_typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
 
+Unlike apollo, we don't have a real client side document parser and resolver, so **operations leveraging normalization can have additional fields not specified in the query**. There are a couple ideas for constraining this (leveraging `json_serializable`, or just implementing the resolver), but for now, the normalized cache uses a [`LazyMap`](lib/src/cache/lazy_cache_map.dart), which wraps underlying data with a lazy denormalizer to allow for cyclical references. It has the same API as a normal `HashMap`, but is currently a bit hard to debug with, as a descriptive debug representation is currently unavailable.
+
+#### Optimism
+The `OptimisticCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(Cache cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache. You can tell which entities in the cache are optimistic through the `.isOptimistic` flag on `LazyMap`, though note that **this is only the case for optimistic entities and not their containing operations/maps**.
+
+`QueryResults` also have an `optimistic` flag, but I would recommend looking at the data itself, as many situations make it unusable (such as toggling mutations like in the example below). [Mutation usage examples](#mutations-with-optimism)
+
+
 ### Queries
 
 Creating a query is as simple as creating a multiline string:
@@ -286,15 +295,13 @@ String readRepositories = """
       }
     }
   }
-"""
-    .replaceAll('\n', ' ');
+""";
 ```
 
 In your widget:
 
 ```dart
-...
-
+// ...
 Query(
   options: QueryOptions(
     document: readRepositories, // this is the query string you just created
@@ -303,7 +310,8 @@ Query(
     },
     pollInterval: 10,
   ),
-  builder: (QueryResult result) {
+  // Just like in apollo refetch() could be used to manually trigger a refetch
+  builder: (QueryResult result, { VoidCallback refetch }) {
     if (result.errors != null) {
       return Text(result.errors.toString());
     }
@@ -324,8 +332,7 @@ Query(
     });
   },
 );
-
-...
+// ...
 ```
 
 ### Mutations
@@ -341,8 +348,7 @@ String addStar = """
       }
     }
   }
-"""
-    .replaceAll('\n', ' ');
+""";
 ```
 
 The syntax for mutations is fairly similar to that of a query. The only diffence is that the first argument of the builder function is a mutation function. Just call it to trigger the mutations (Yeah we deliberately stole this from react-apollo.)
@@ -366,9 +372,104 @@ Mutation(
       child: Icon(Icons.star),
     );
   },
+  // you can update the cache based on results
+  update: (Cache cache, QueryResult result) {
+    return cache;
+  },
+  // or do something with the result.data on completion
+  onCompleted: (dynamic resultData) {
+    print(resultData);
+  },
 );
 
 ...
+```
+
+#### Mutations with optimism
+If you're using an [OptimisticCache](#optimism), you can provide an `optimisticResult`:
+```dart
+...
+FlutterWidget(
+  onTap: () {
+    toggleStar(
+      { 'starrableId': repository['id'] },
+      optimisticResult: {
+        'action': {
+          'starrable': {'viewerHasStarred': !starred}
+        }
+      },
+    );
+  },
+)
+...
+```
+With a bit more context (taken from **[the complete mutation example `StarrableRepository`](example/lib/graphql_widget/main.dart)**):
+```dart
+// bool get starred => repository['viewerHasStarred'] as bool;
+// bool get optimistic => (repository as LazyMap).isOptimistic;
+Mutation(
+  options: MutationOptions(
+    document: starred ? mutations.removeStar : mutations.addStar,
+  ),
+  builder: (RunMutation toggleStar, QueryResult result) {
+    return ListTile(
+      leading: starred
+          ? const Icon(
+              Icons.star,
+              color: Colors.amber,
+            )
+          : const Icon(Icons.star_border),
+      trailing: result.loading || optimistic
+          ? const CircularProgressIndicator()
+          : null,
+      title: Text(repository['name'] as String),
+      onTap: () {
+        toggleStar(
+          { 'starrableId': repository['id'] },
+          optimisticResult: {
+            'action': {
+              'starrable': {'viewerHasStarred': !starred}
+            }
+          },
+        );
+      },
+    );
+  },
+  // will be called for both optimistic and final results
+  update: (Cache cache, QueryResult result) {
+    if (result.hasErrors) {
+      print(['optimistic', result.errors]);
+    } else {
+      final Map<String, Object> updated =
+          Map<String, Object>.from(repository)
+            ..addAll(extractRepositoryData(result.data));
+      cache.write(typenameDataIdFromObject(updated), updated);
+    }
+  },
+  // will only be called for final result
+  onCompleted: (dynamic resultData) {
+    showDialog<AlertDialog>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(
+            extractRepositoryData(resultData)['viewerHasStarred'] as bool
+                ? 'Thanks for your star!'
+                : 'Sorry you changed your mind!',
+          ),
+          actions: <Widget>[
+            SimpleDialogOption(
+              child: const Text('Dismiss'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );
+  },
+);
 ```
 
 ### Subscriptions (Experimental)
@@ -477,7 +578,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 | In memory cache         |    ✅    |
 | Offline cache sync      |    ✅    |
 | GraphQL pload           |    ✅    |
-| Optimistic results      |    🔜    |
+| Optimistic results      |    ✅    |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 
