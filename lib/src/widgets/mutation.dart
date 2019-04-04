@@ -81,10 +81,15 @@ class MutationState extends State<Mutation> {
     }
   }
 
-  void onCompleted(QueryResult result) {
-    if (!result.loading && !result.optimistic) {
-      widget.onCompleted(result.data);
+  OnData get onCompleted {
+    if (widget.onCompleted != null) {
+      return (QueryResult result) {
+        if (!result.loading && !result.optimistic) {
+          widget.onCompleted(result.data);
+        }
+      };
     }
+    return null;
   }
 
   void _optimisticUpdate(QueryResult result) {
