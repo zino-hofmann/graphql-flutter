@@ -208,7 +208,7 @@ class StarrableRepository extends StatelessWidget {
       },
       update: (Cache cache, QueryResult result) {
         if (result.hasErrors) {
-          print(['optimistic', result.errors]);
+          print(result.errors);
         } else {
           final Map<String, Object> updated =
               Map<String, Object>.from(repository)
