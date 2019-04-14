@@ -228,7 +228,7 @@ class StarrableRepository extends StatelessWidget {
               ),
               actions: <Widget>[
                 SimpleDialogOption(
-                  child: const Text('Dismiss'),
+                  child: const Text('DISMISS'),
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
