@@ -67,12 +67,9 @@ class QueryScheduler {
     WatchQueryOptions options,
     String queryId,
   ) {
-    registeredQueries[queryId] = options;
+    assert(options.pollInterval != null && options.pollInterval > 0);
 
-    // if interval is 0, then polling should be disabled
-    if (options.pollInterval == 0) {
-      return;
-    }
+    registeredQueries[queryId] = options;
 
     final Duration interval = Duration(
       seconds: options.pollInterval,
