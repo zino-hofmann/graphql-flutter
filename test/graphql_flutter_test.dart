@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io' show File, Platform;
 import 'dart:typed_data' show Uint8List;
 
-import 'package:path/path.dart' show dirname, join;
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class MockHttpClient extends Mock implements http.Client {}

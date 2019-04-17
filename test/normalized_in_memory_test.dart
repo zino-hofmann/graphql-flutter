@@ -1,4 +1,5 @@
 import 'package:test/test.dart';
+
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
 import 'package:graphql_flutter/src/cache/lazy_cache_map.dart';
 

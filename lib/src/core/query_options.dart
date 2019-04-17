@@ -1,5 +1,6 @@
-import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
+
+import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:graphql_flutter/src/core/raw_operation_data.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
