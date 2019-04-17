@@ -1,11 +1,11 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
+
+import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
-import 'package:graphql_flutter/src/utilities/helpers.dart';
-
-import './lazy_cache_map.dart';
+import 'package:graphql_flutter/src/cache/lazy_cache_map.dart';
 
 class OptimisticPatch extends Object {
   OptimisticPatch(this.id, this.data);

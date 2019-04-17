@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
+
 import 'package:graphql_flutter/src/utilities/traverse.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:graphql_flutter/src/cache/in_memory.dart';
-
-import './lazy_cache_map.dart';
+import 'package:graphql_flutter/src/cache/lazy_cache_map.dart';
 
 typedef DataIdFromObject = String Function(Object node);
 

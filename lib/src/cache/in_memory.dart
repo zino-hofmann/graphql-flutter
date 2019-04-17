@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:meta/meta.dart';
 import 'package:path_provider/path_provider.dart';
+
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart'
     show deeplyMergeLeft;
@@ -125,7 +126,7 @@ class InMemoryCache implements Cache {
     }
     try {
       final File file = await _localStorageFile;
-      final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
+      final storedHashMap = HashMap<String, dynamic>();
 
       if (file.existsSync()) {
         final Stream<List<int>> inputStream = file.openRead();
