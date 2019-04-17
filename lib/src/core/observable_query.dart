@@ -67,7 +67,7 @@ class ObservableQuery {
         ? QueryLifecycle.SIDE_EFFECTS_PENDING
         : QueryLifecycle.PENDING;
 
-    if (options.pollInterval != null) {
+    if (options.pollInterval != null && options.pollInterval > 0) {
       startPolling(options.pollInterval);
     }
   }

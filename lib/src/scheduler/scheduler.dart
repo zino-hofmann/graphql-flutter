@@ -67,6 +67,8 @@ class QueryScheduler {
     WatchQueryOptions options,
     String queryId,
   ) {
+    assert(options.pollInterval != null && options.pollInterval > 0);
+
     registeredQueries[queryId] = options;
 
     final Duration interval = Duration(
