@@ -270,13 +270,13 @@ String typenameDataIdFromObject(Object object) {
 
 However note that **`graphql-flutter` does not inject \_\_typename into operations** the way apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
 
-Unlike apollo, we don't have a real client side document parser and resolver, so **operations leveraging normalization can have additional fields not specified in the query**. There are a couple ideas for constraining this (leveraging `json_serializable`, or just implementing the resolver), but for now, the normalized cache uses a [`LazyMap`](lib/src/cache/lazy_cache_map.dart), which wraps underlying data with a lazy denormalizer to allow for cyclical references. It has the same API as a normal `HashMap`, but is currently a bit hard to debug with, as a descriptive debug representation is currently unavailable.
+Unlike apollo, we don't have a real client side document parser and resolver, so **operations leveraging normalization can have additional fields not specified in the query**. There are a couple ideas for constraining this (leveraging `json_serializable`, or just implementing the resolver), but for now, the normalized cache uses a [`LazyCacheMap`](lib/src/cache/lazy_cache_map.dart), which wraps underlying data with a lazy denormalizer to allow for cyclical references. It has the same API as a normal `HashMap`, but is currently a bit hard to debug with, as a descriptive debug representation is currently unavailable.
 
 #### Optimism
-The `OptimisticCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(Cache cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache. You can tell which entities in the cache are optimistic through the `.isOptimistic` flag on `LazyMap`, though note that **this is only the case for optimistic entities and not their containing operations/maps**.
+
+The `OptimisticCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(Cache cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache. You can tell which entities in the cache are optimistic through the `.isOptimistic` flag on `LazyCacheMap`, though note that **this is only the case for optimistic entities and not their containing operations/maps**.
 
 `QueryResults` also have an `optimistic` flag, but I would recommend looking at the data itself, as many situations make it unusable (such as toggling mutations like in the example below). [Mutation usage examples](#mutations-with-optimism)
-
 
 ### Queries
 
@@ -386,7 +386,9 @@ Mutation(
 ```
 
 #### Mutations with optimism
+
 If you're using an [OptimisticCache](#optimism), you can provide an `optimisticResult`:
+
 ```dart
 ...
 FlutterWidget(
@@ -403,10 +405,12 @@ FlutterWidget(
 )
 ...
 ```
+
 With a bit more context (taken from **[the complete mutation example `StarrableRepository`](example/lib/graphql_widget/main.dart)**):
+
 ```dart
 // bool get starred => repository['viewerHasStarred'] as bool;
-// bool get optimistic => (repository as LazyMap).isOptimistic;
+// bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 Mutation(
   options: MutationOptions(
     document: starred ? mutations.removeStar : mutations.addStar,

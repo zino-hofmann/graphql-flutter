@@ -178,9 +178,9 @@ void main() {
     );
     test('lazily reads cyclical references', () {
       cache.write(rawOperationKey, cyclicalOperationData);
-      final LazyMap a = cache.read('A/1') as LazyMap;
+      final LazyCacheMap a = cache.read('A/1') as LazyCacheMap;
       expect(a.data, equals(cyclicalNormalizedA));
-      final LazyMap b = a['b'] as LazyMap;
+      final LazyCacheMap b = a['b'] as LazyCacheMap;
       expect(b.data, equals(cyclicalNormalizedB));
     });
   });

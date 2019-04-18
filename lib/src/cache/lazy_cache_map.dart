@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
@@ -6,47 +7,68 @@ typedef Dereference = Object Function(Object node);
 
 enum CacheState { OPTIMISTIC }
 
-/// A simple immutable map that lazily dereferences from the cache
-/// The only available methods are simple read-based operations,
-/// such as `[]()`, `containsKey`, and `values`
-/// All mutation methods are invalid:
-/// * `[]=`
-/// * `addAll`
-/// * `addEntries`
-/// * `clear`
-/// * `remove`
-/// * `removeWhere`
-/// * `update`
-/// * `updateAll`
-/// * `putIfAbsent`
-/// As well as `cast`
-class LazyMap implements Map<String, Object> {
-  LazyMap({
-    @required Map<String, Object> data,
+/// A [LazyDereferencingMap] into the cache with added `cacheState` information
+class LazyCacheMap extends LazyDereferencingMap {
+  LazyCacheMap(
+    Map<String, Object> data, {
     @required Dereference dereference,
     CacheState cacheState,
-  })  : _data = data is LazyMap ? data.data : data,
-        _dereference = dereference,
-        this.cacheState =
-            cacheState ?? (data is LazyMap ? data.cacheState : null);
-
-  Dereference _dereference;
+  })  : this.cacheState =
+            cacheState ?? (data is LazyCacheMap ? data.cacheState : null),
+        super(data, dereference: dereference);
 
   final CacheState cacheState;
   bool get isOptimistic => cacheState == CacheState.OPTIMISTIC;
 
+  @override
+  Object getValue(Object value) {
+    final Object result = _dereference(value) ?? value;
+    if (result is List) {
+      return result.map(getValue).toList();
+    }
+    if (result is Map<String, Object>) {
+      return LazyCacheMap(
+        result,
+        dereference: _dereference,
+      );
+    }
+    return result;
+  }
+}
+
+Object unwrap(Object possibleLazyMap) => possibleLazyMap is LazyDereferencingMap
+    ? possibleLazyMap.data
+    : possibleLazyMap;
+
+/// A simple map wrapper that lazily dereferences using `dereference`
+///
+/// Wrapper that calls `dereference(value)` for each value before returning,
+/// replacing that `value` with the result if not `null`.
+@immutable
+class LazyDereferencingMap implements Map<String, Object> {
+  LazyDereferencingMap(
+    Map<String, Object> data, {
+    @required Dereference dereference,
+  })  : _data = unwrap(data) as Map<String, Object>,
+        _dereference = dereference;
+
+  final Dereference _dereference;
+
   final Map<String, Object> _data;
+
+  /// get the warpped `Map` without dereferencing
   Map<String, Object> get data => _data;
 
-  Object _getValue(Object value) {
+  @protected
+  Object getValue(Object value) {
     final Object result = _dereference(value) ?? value;
     // TODO maybe this should be encapsulated in a LazyList or something
     if (result is List) {
-      return result.map(_getValue).toList();
+      return result.map(getValue).toList();
     }
     if (result is Map<String, Object>) {
-      return LazyMap(
-        data: result,
+      return LazyDereferencingMap(
+        result,
         dereference: _dereference,
       );
     }
@@ -54,13 +76,9 @@ class LazyMap implements Map<String, Object> {
   }
 
   @override
-  Object operator [](Object key) {
-    return _getValue(data[key]);
-  }
+  Object operator [](Object key) => getValue(data[key]);
 
-  Object get(Object key) {
-    return _getValue(data[key]);
-  }
+  Object get(Object key) => getValue(data[key]);
 
   @override
   bool containsKey(Object key) => data.containsKey(key);
@@ -72,7 +90,7 @@ class LazyMap implements Map<String, Object> {
   Iterable<MapEntry<String, Object>> get entries => data.entries
       .map((MapEntry<String, Object> entry) => MapEntry<String, Object>(
             entry.key,
-            _getValue(entry.value),
+            getValue(entry.value),
           ));
 
   @override
@@ -107,20 +125,53 @@ class LazyMap implements Map<String, Object> {
   }
 
   @override
-  Iterable<Object> get values => data.values.map(_getValue);
+  Iterable<Object> get values => data.values.map(getValue);
 
   @override
+  void operator []=(String key, Object value) {
+    data[key] = unwrap(value);
+  }
 
-  /// All mutation methods are invalid:
-  /// * `[]=`
-  /// * `addAll`
-  /// * `addEntries`
-  /// * `clear`
-  /// * `remove`
-  /// * `removeWhere`
-  /// * `update`
-  /// * `updateAll`
-  /// * `putIfAbsent`
-  /// As well as `cast`
-  void noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+  @override
+  void addAll(Map<String, Object> other) {
+    data.addAll(unwrap(other) as Map<String, Object>);
+  }
+
+  @override
+  void addEntries(Iterable<MapEntry<String, Object>> entries) {
+    data.addEntries(entries);
+  }
+
+  @override
+  void clear() {
+    data.clear();
+  }
+
+  @override
+  Object remove(Object key) => getValue(data.remove(key));
+
+  @override
+  void removeWhere(bool test(String key, Object value)) {
+    data.removeWhere(test);
+  }
+
+  /// This operation is not supported by a [LazyUnmodifiableMapView].
+  @override
+  Object putIfAbsent(String key, Object ifAbsent()) =>
+      getValue(data.putIfAbsent(key, ifAbsent));
+
+  /// This operation is not supported by a [LazyUnmodifiableMapView].
+  @override
+  Object update(String key, Object update(Object value), {Object ifAbsent()}) =>
+      getValue(data.update(key, update, ifAbsent: ifAbsent));
+
+  @override
+  void updateAll(Object update(String key, Object value)) {
+    data.updateAll(update);
+  }
+
+  @override
+  Map<K, V> cast<K, V>() {
+    throw UnsupportedError('Cannot cast a lazy cache map map');
+  }
 }

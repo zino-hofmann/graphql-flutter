@@ -92,45 +92,42 @@ class MutationState extends State<Mutation> {
     return null;
   }
 
+  /// The optimistic cache layer id `update` will write to
+  /// is a "child patch" of the default optimistic patch
+  /// created by the query manager
+  String get _patchId => '${observableQuery.queryId}.update';
+
+  /// apply the user's
   void _optimisticUpdate(QueryResult result) {
     final Cache cache = client.cache;
-    final String mutationId = observableQuery.queryId;
-    if (cache is OptimisticCache) {
-      cache.addOptimisiticPatch(mutationId, (Cache cache) {
-        widget.update(cache, result);
-        return cache;
-      });
-    } else {
-      // TODO better error
-      assert(cache is OptimisticCache,
-          "can't optimisticly update non-optimistic cache");
-    }
+    final String patchId = _patchId;
+    // this is also done in query_manager, but better safe than sorry
+    assert(cache is OptimisticCache,
+        "can't optimisticly update non-optimistic cache");
+    (cache as OptimisticCache).addOptimisiticPatch(patchId, (Cache cache) {
+      widget.update(cache, result);
+      return cache;
+    });
   }
 
-  // we have to be careful to collect cleanup information
-  // (`mutationId`) __before__ registering callbacks, so that
-  // the mutation side effects get properly decoupled
-  // from the UI layer.
-  // TODO this callbacks approach can be improved upon
-  OnData get _cleanupIfOptimistic {
-    final Cache cache = client.cache;
-    final String mutationId = observableQuery.queryId;
-    return (QueryResult result) {
-      if (cache is OptimisticCache && !result.loading && !result.optimistic) {
-        cache.removeOptimisticPatch(mutationId);
-      }
-    };
-  }
-
+  // optimistic patches will be cleaned up by the query_manager
+  // cleanup is handled by heirarchical optimism -
+  // as in, because our patch id is prefixed with '${observableQuery.queryId}.',
+  // it will be discarded along with the observableQuery.queryId patch
+  // TODO this results in an implicit coupling with the patch id system
   OnData get update {
     if (widget.update != null) {
-      final OnData cleanup = _cleanupIfOptimistic;
+      // dereference all variables that might be needed if the widget is disposed
+      final Cache cache = client.cache;
+      final OnMutationUpdate widgetUpdate = widget.update;
+      final OnData optimisticUpdate = _optimisticUpdate;
+
+      // wrap update logic to handle optimism
       void updateOnData(QueryResult result) {
         if (result.optimistic) {
-          return _optimisticUpdate(result);
+          return optimisticUpdate(result);
         } else {
-          widget.update(client.cache, result);
-          cleanup(result);
+          widgetUpdate(cache, result);
         }
       }
 
@@ -145,28 +142,13 @@ class MutationState extends State<Mutation> {
     return <OnData>[onCompleted, update].where(notNull);
   }
 
-  // TODO not properly caching results without update callbacks
-  // TODO should handle mutations with normalizable optimistic results
-  // without update
-  /// handles optimistic updates
-  void handleOptimism(Object optimisticResult) {
-    if (client.cache is OptimisticCache && optimisticResult != null) {
-      observableQuery.addResult(QueryResult(
-        loading: false,
-        optimistic: true,
-        data: optimisticResult,
-      ));
-    }
-  }
-
   void runMutation(Map<String, dynamic> variables, {Object optimisticResult}) {
     observableQuery
       ..variables = variables
+      ..options.optimisticResult = optimisticResult
       ..onData(callbacks) // add callbacks to observable
       ..addResult(QueryResult(loading: true))
       ..fetchResults();
-
-    handleOptimism(optimisticResult);
   }
 
   @override

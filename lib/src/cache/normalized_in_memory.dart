@@ -40,12 +40,12 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return null;
   }
 
-  LazyMap lazilyDenormalized(
+  LazyCacheMap lazilyDenormalized(
     Map<String, Object> data, [
     CacheState cacheState,
   ]) {
-    return LazyMap(
-      data: data,
+    return LazyCacheMap(
+      data,
       dereference: _dereference,
       cacheState: cacheState,
     );

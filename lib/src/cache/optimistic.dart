@@ -31,8 +31,8 @@ class OptimisticProxy implements Cache {
     if (data.containsKey(key)) {
       final Object value = data[key];
       return value is Map<String, Object>
-          ? LazyMap(
-              data: value,
+          ? LazyCacheMap(
+              value,
               dereference: _dereference,
               cacheState: CacheState.OPTIMISTIC,
             )
@@ -94,17 +94,62 @@ class OptimisticCache extends NormalizedInMemoryCache {
 
   OptimisticProxy get _proxy => OptimisticProxy(this);
 
+  String _parentPatchId(String id) {
+    final List<String> parts = id.split('.');
+    if (parts.length > 1) {
+      return parts.first;
+    }
+    return null;
+  }
+
+  bool _patchExistsFor(String id) =>
+      optimisticPatches.firstWhere((OptimisticPatch patch) => patch.id == id,
+          orElse: () => null) !=
+      null;
+
+  /// avoid race conditions from slow updates
+  ///
+  /// if a server result is returned before an optimistic update is finished,
+  /// that update is discarded
+  bool _safeToAdd(String id) {
+    final String parentId = _parentPatchId(id);
+    return parentId == null || _patchExistsFor(parentId);
+  }
+
+  /// Add a given patch using the given [transform]
+  ///
+  /// 1 level of hierarchical optimism is supported:
+  /// * if a patch has the id `$queryId.child`, it will be removed with `$queryId`
+  /// * if the update somehow fails to complete before the root response is removed,
+  ///   It will still be called, but the result will not be added.
+  ///
+  /// This allows for multiple optimistic treatments of a query,
+  /// without having to tightly couple optimistic changes
   void addOptimisiticPatch(
     String addId,
     CacheTransform transform,
   ) {
     final OptimisticProxy patch = transform(_proxy) as OptimisticProxy;
-    optimisticPatches.add(OptimisticPatch(addId, patch.data));
+    if (_safeToAdd(addId)) {
+      optimisticPatches.add(OptimisticPatch(addId, patch.data));
+    }
   }
 
+  /// Remove a given patch from the list
+  ///
+  /// This will also remove all "nested" patches, such as `$queryId.update`
+  /// This allows for hierarchical optimism that is automatically cleaned up
+  /// without having to tightly couple optimistic changes
   void removeOptimisticPatch(String removeId) {
     optimisticPatches.removeWhere(
-      (OptimisticPatch patch) => patch.id == removeId,
+      (OptimisticPatch patch) =>
+          patch.id == removeId || _parentPatchId(patch.id) == removeId,
     );
+
+    print([
+      optimisticPatches.length,
+      optimisticPatches.map((p) => p.id),
+      removeId
+    ]);
   }
 }
