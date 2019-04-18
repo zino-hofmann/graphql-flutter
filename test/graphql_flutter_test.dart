@@ -2,10 +2,11 @@ import 'dart:convert';
 import 'dart:io' show File, Platform;
 import 'dart:typed_data' show Uint8List;
 
-import 'package:path/path.dart' show dirname, join;
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
@@ -253,8 +254,9 @@ void main() {
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
             '\r\ncontent-disposition: form-data; name="operations"\r\n\r\n');
+        // operationName of unamed operations is "UNNAMED/" +  document.hashCode.toString()
         expectContinuationString(bodyBytes,
-            r'{"operationName":null,"variables":{"files":[null,null]},"query":"    mutation($files: [Upload!]!) {\n      multipleUpload(files: $files) {\n        id\n        filename\n        mimetype\n        path\n      }\n    }\n    "}');
+            r'{"operationName":"UNNAMED/596708007","variables":{"files":[null,null]},"query":"    mutation($files: [Upload!]!) {\n      multipleUpload(files: $files) {\n        id\n        filename\n        mimetype\n        path\n      }\n    }\n    "}');
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,

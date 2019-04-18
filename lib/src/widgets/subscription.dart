@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+
 import 'package:graphql_flutter/src/graphql_client.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
-
-import '../websocket/messages.dart';
+import 'package:graphql_flutter/src/websocket/messages.dart';
 
 typedef OnSubscriptionCompleted = void Function();
 
@@ -49,9 +49,10 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
     final Operation operation = Operation(
-        document: widget.query,
-        variables: widget.variables,
-        operationName: widget.operationName);
+      document: widget.query,
+      variables: widget.variables,
+      operationName: widget.operationName,
+    );
 
     final Stream<FetchResult> stream = client.subscribe(operation);
 

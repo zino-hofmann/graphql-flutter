@@ -1,10 +1,14 @@
 class FetchResult {
   FetchResult({
+    this.statusCode,
+    this.reasonPhrase,
     this.errors,
     this.data,
     this.extensions,
     this.context,
   });
+  int statusCode;
+  String reasonPhrase;
 
   List<dynamic> errors;
 

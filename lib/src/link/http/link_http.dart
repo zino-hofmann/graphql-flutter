@@ -9,12 +9,12 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 import 'package:mime/mime.dart';
 
+import 'package:graphql_flutter/src/utilities/helpers.dart' show notNull;
 import 'package:graphql_flutter/src/link/link.dart';
 import 'package:graphql_flutter/src/link/operation.dart';
 import 'package:graphql_flutter/src/link/fetch_result.dart';
 import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
 import 'package:graphql_flutter/src/link/http/http_config.dart';
-import 'package:rxdart/rxdart.dart';
 
 class HttpLink extends Link {
   HttpLink({
@@ -96,6 +96,7 @@ class HttpLink extends Link {
 
                 controller.add(parsedResponse);
               } catch (error) {
+                print(<dynamic>[error.runtimeType, error]);
                 controller.addError(error);
               }
 
@@ -300,7 +301,8 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final FetchResult fetchResult = FetchResult();
 
   if (jsonResponse['errors'] != null) {
-    fetchResult.errors = jsonResponse['errors'] as List<dynamic>;
+    fetchResult.errors =
+        (jsonResponse['errors'] as List<dynamic>).where(notNull).toList();
   }
 
   if (jsonResponse['data'] != null) {

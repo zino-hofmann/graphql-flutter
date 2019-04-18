@@ -5,7 +5,6 @@ import 'package:meta/meta.dart';
 import 'package:graphql_flutter/src/core/query_manager.dart';
 import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
-
 import 'package:graphql_flutter/src/scheduler/scheduler.dart';
 
 typedef OnData = void Function(QueryResult result);
@@ -39,9 +38,9 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      // @todo Set literal is only supported from Dart 2.2 we are running Dart 2.0
-      // ignore: prefer_collection_literals
-      Set<StreamSubscription<QueryResult>>();
+      <StreamSubscription<QueryResult>>{};
+
+  QueryResult previousResult;
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
@@ -51,6 +50,49 @@ class ObservableQuery {
 
   Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
+
+  bool get _isRefetchSafe {
+    switch (lifecycle) {
+      case QueryLifecycle.COMPLETED:
+      case QueryLifecycle.POLLING:
+      case QueryLifecycle.POLLING_STOPPED:
+        return true;
+
+      case QueryLifecycle.PENDING:
+      case QueryLifecycle.CLOSED:
+      case QueryLifecycle.UNEXECUTED:
+      case QueryLifecycle.SIDE_EFFECTS_PENDING:
+      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+        return false;
+    }
+    return false;
+  }
+
+  /// Attempts to refetch, returning `true` if successful
+  bool refetch() {
+    if (_isRefetchSafe) {
+      scheduler.refetchQuery(queryId);
+      return true;
+    }
+    return false;
+  }
+
+  bool get isRebroadcastSafe {
+    switch (lifecycle) {
+      case QueryLifecycle.PENDING:
+      case QueryLifecycle.COMPLETED:
+      case QueryLifecycle.POLLING:
+      case QueryLifecycle.POLLING_STOPPED:
+        return true;
+
+      case QueryLifecycle.UNEXECUTED: // this might be ok
+      case QueryLifecycle.CLOSED:
+      case QueryLifecycle.SIDE_EFFECTS_PENDING:
+      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+        return false;
+    }
+    return false;
+  }
 
   void onListen() {
     if (options.fetchResults) {
@@ -72,26 +114,44 @@ class ObservableQuery {
     }
   }
 
-  void sendLoading() {
-    controller.add(
-      QueryResult(
-        loading: true,
-      ),
-    );
+  /// add a result to the stream,
+  /// copying `loading` and `optimistic`
+  /// from the `previousResult` if they aren't set.
+  void addResult(QueryResult result) {
+    // don't overwrite results due to some async/optimism issue
+    if (previousResult != null &&
+        previousResult.timestamp.isAfter(result.timestamp)) {
+      return;
+    }
+
+    if (previousResult != null) {
+      result.loading ??= previousResult.loading;
+      result.optimistic ??= previousResult.optimistic;
+    }
+
+    previousResult = result;
+
+    controller.add(result);
   }
 
   // most mutation behavior happens here
+  /// call any registered callbacks, then rebroadcast queries
+  /// incase the underlying data has changed
   void onData(Iterable<OnData> callbacks) {
-    if (callbacks != null && callbacks.isNotEmpty) {
-      StreamSubscription<QueryResult> subscription;
+    callbacks ??= const <OnData>[];
+    StreamSubscription<QueryResult> subscription;
 
-      subscription = stream.listen((QueryResult result) {
-        void handle(OnData callback) {
-          callback(result);
-        }
+    subscription = stream.listen((QueryResult result) {
+      void handle(OnData callback) {
+        callback(result);
+      }
 
-        if (!result.loading) {
-          callbacks.forEach(handle);
+      if (!result.loading) {
+        callbacks.forEach(handle);
+
+        queryManager.rebroadcastQueries();
+
+        if (!result.optimistic) {
           subscription.cancel();
           _onDataSubscriptions.remove(subscription);
 
@@ -100,14 +160,12 @@ class ObservableQuery {
               lifecycle = QueryLifecycle.COMPLETED;
               close();
             }
-
-            lifecycle = QueryLifecycle.COMPLETED;
           }
         }
-      });
+      }
+    });
 
-      _onDataSubscriptions.add(subscription);
-    }
+    _onDataSubscriptions.add(subscription);
   }
 
   void startPolling(int pollInterval) {
@@ -135,7 +193,7 @@ class ObservableQuery {
     }
   }
 
-  void setVariables(Map<String, dynamic> variables) {
+  set variables(Map<String, dynamic> variables) {
     options.variables = variables;
   }
 
@@ -147,8 +205,10 @@ class ObservableQuery {
   ///
   /// Returns a `FutureOr` of the resultant lifecycle
   /// (`QueryLifecycle.SIDE_EFFECTS_BLOCKING | QueryLifecycle.CLOSED`)
-  FutureOr<QueryLifecycle> close(
-      {bool force = false, bool fromManager = false}) async {
+  FutureOr<QueryLifecycle> close({
+    bool force = false,
+    bool fromManager = false,
+  }) async {
     if (lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING && !force) {
       lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
       // stop closing because we're waiting on something
@@ -165,6 +225,7 @@ class ObservableQuery {
     }
 
     stopPolling();
+
     await controller.close();
 
     lifecycle = QueryLifecycle.CLOSED;

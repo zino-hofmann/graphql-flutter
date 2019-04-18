@@ -6,13 +6,18 @@ class QueryResult {
     this.errors,
     this.loading,
     this.stale,
-  });
+    this.optimistic = false,
+  }) : timestamp = DateTime.now();
+
+  DateTime timestamp;
 
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;
   List<GraphQLError> errors;
   bool loading;
+  // TODO not sure what this is for
   bool stale;
+  bool optimistic;
 
   bool get hasErrors {
     if (errors == null) {

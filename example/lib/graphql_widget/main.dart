@@ -8,8 +8,11 @@ import '../graphql_operation/queries/readRepositories.dart' as queries;
 /// to make the example work
 import '../local.dart' show YOUR_PERSONAL_ACCESS_TOKEN;
 
+final bool ENABLE_WEBSOCKETS = false;
+
 class GraphQLWidgetScreen extends StatelessWidget {
   const GraphQLWidgetScreen() : super();
+
   @override
   Widget build(BuildContext context) {
     final HttpLink httpLink = HttpLink(
@@ -20,18 +23,21 @@ class GraphQLWidgetScreen extends StatelessWidget {
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    final WebSocketLink websocketLink = WebSocketLink(
-      url: 'ws://localhost:8080/ws/graphql',
-      config: SocketClientConfig(
-          autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-    );
-
     // TODO don't think we have to cast here, maybe covariant
-    final Link link = authLink.concat(httpLink as Link).concat(websocketLink);
+    Link link = authLink.concat(httpLink as Link);
+    if (ENABLE_WEBSOCKETS) {
+      final WebSocketLink websocketLink = WebSocketLink(
+        url: 'ws://localhost:8080/ws/graphql',
+        config: SocketClientConfig(
+            autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
+      );
+
+      link = link.concat(websocketLink);
+    }
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: NormalizedInMemoryCache(
+        cache: OptimisticCache(
           dataIdFromObject: typenameDataIdFromObject,
         ),
         link: link,
@@ -93,9 +99,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
-                pollInterval: 4,
+                //pollInterval: 10,
               ),
-              builder: (QueryResult result) {
+              builder: (QueryResult result, {VoidCallback refetch}) {
                 if (result.loading) {
                   return const Center(
                     child: CircularProgressIndicator(),
@@ -111,31 +117,35 @@ class _MyHomePageState extends State<MyHomePage> {
                       'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
                 }
 
+                print(result.data is LazyCacheMap);
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<dynamic> repositories = result.data['viewer']
-                    ['repositories']['nodes'] as List<dynamic>;
+                final List<LazyCacheMap> repositories = (result.data['viewer']
+                        ['repositories']['nodes'] as List<dynamic>)
+                    .cast<LazyCacheMap>();
 
                 return Expanded(
                   child: ListView.builder(
                     itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                        StarrableRepository(
-                            repository:
-                                repositories[index] as Map<String, Object>),
+                    itemBuilder: (BuildContext context, int index) {
+                      return StarrableRepository(
+                          repository: repositories[index]);
+                    },
                   ),
                 );
               },
             ),
-            Subscription<Map<String, dynamic>>('test', queries.testSubscription,
-                builder: ({
-              bool loading,
-              Map<String, dynamic> payload,
-              dynamic error,
-            }) {
-              return loading
-                  ? const Text('Loading...')
-                  : Text(payload.toString());
-            }),
+            ENABLE_WEBSOCKETS
+                ? Subscription<Map<String, dynamic>>(
+                    'test', queries.testSubscription, builder: ({
+                    bool loading,
+                    Map<String, dynamic> payload,
+                    dynamic error,
+                  }) {
+                    return loading
+                        ? const Text('Loading...')
+                        : Text(payload.toString());
+                  })
+                : const Text(''),
           ],
         ),
       ),
@@ -143,7 +153,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class StarrableRepository extends StatefulWidget {
+class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
     Key key,
     @required this.repository,
@@ -151,37 +161,32 @@ class StarrableRepository extends StatefulWidget {
 
   final Map<String, Object> repository;
 
-  @override
-  StarrableRepositoryState createState() {
-    return StarrableRepositoryState();
-  }
-}
-
-class StarrableRepositoryState extends State<StarrableRepository> {
-  bool loading = false;
-
-  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
-    final Map<String, Object> action = data['action'] as Map<String, Object>;
-
+  Map<String, Object> extractRepositoryData(Object data) {
+    final Map<String, Object> action =
+        (data as Map<String, Object>)['action'] as Map<String, Object>;
     if (action == null) {
       return null;
     }
-
     return action['starrable'] as Map<String, Object>;
   }
 
-  bool get viewerHasStarred => widget.repository['viewerHasStarred'] as bool;
+  bool get starred => repository['viewerHasStarred'] as bool;
+  bool get optimistic => (repository as LazyCacheMap).isOptimistic;
+
+  Map<String, dynamic> get expectedResult => <String, dynamic>{
+        'action': <String, dynamic>{
+          'starrable': <String, dynamic>{'viewerHasStarred': !starred}
+        }
+      };
 
   @override
   Widget build(BuildContext context) {
-    final bool starred = loading ? !viewerHasStarred : viewerHasStarred;
-
     return Mutation(
-      key: Key(starred.toString()),
       options: MutationOptions(
         document: starred ? mutations.removeStar : mutations.addStar,
       ),
       builder: (RunMutation toggleStar, QueryResult result) {
+        print([result.loading, optimistic]);
         return ListTile(
           leading: starred
               ? const Icon(
@@ -189,17 +194,17 @@ class StarrableRepositoryState extends State<StarrableRepository> {
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
-          trailing: loading ? const CircularProgressIndicator() : null,
-          title: Text(widget.repository['name'] as String),
+          trailing: result.loading || optimistic
+              ? const CircularProgressIndicator()
+              : null,
+          title: Text(repository['name'] as String),
           onTap: () {
-            // optimistic ui updates are not implemented yet,
-            // so we track loading manually
-            setState(() {
-              loading = true;
-            });
-            toggleStar(<String, dynamic>{
-              'starrableId': widget.repository['id'],
-            });
+            toggleStar(
+              <String, dynamic>{
+                'starrableId': repository['id'],
+              },
+              optimisticResult: expectedResult,
+            );
           },
         );
       },
@@ -207,21 +212,20 @@ class StarrableRepositoryState extends State<StarrableRepository> {
         if (result.hasErrors) {
           print(result.errors);
         } else {
-          final Map<String, Object> updated = Map<String, Object>.from(
-              widget.repository)
-            ..addAll(extractRepositoryData(result.data as Map<String, Object>));
-
+          final Map<String, Object> updated =
+              Map<String, Object>.from(repository)
+                ..addAll(extractRepositoryData(result.data));
           cache.write(typenameDataIdFromObject(updated), updated);
+          print(cache.read(typenameDataIdFromObject(updated)).isOptimistic);
         }
       },
-      onCompleted: (QueryResult result) {
+      onCompleted: (dynamic resultData) {
         showDialog<AlertDialog>(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text(
-                extractRepositoryData(result.data as Map<String, Object>)[
-                        'viewerHasStarred'] as bool
+                extractRepositoryData(resultData)['viewerHasStarred'] as bool
                     ? 'Thanks for your star!'
                     : 'Sorry you changed your mind!',
               ),
@@ -236,9 +240,6 @@ class StarrableRepositoryState extends State<StarrableRepository> {
             );
           },
         );
-        setState(() {
-          loading = false;
-        });
       },
     );
   }

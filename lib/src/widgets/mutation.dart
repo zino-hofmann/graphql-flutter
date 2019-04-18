@@ -6,16 +6,21 @@ import 'package:graphql_flutter/src/core/query_options.dart';
 import 'package:graphql_flutter/src/core/query_result.dart';
 import 'package:graphql_flutter/src/cache/cache.dart';
 import 'package:graphql_flutter/src/utilities/helpers.dart';
+import 'package:graphql_flutter/src/cache/optimistic.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef RunMutation = void Function(Map<String, dynamic> variables);
+typedef RunMutation = void Function(
+  Map<String, dynamic> variables, {
+  Object optimisticResult,
+});
+
 typedef MutationBuilder = Widget Function(
   RunMutation runMutation,
   QueryResult result,
 );
 
-typedef OnMutationCompleted = void Function(QueryResult result);
+typedef OnMutationCompleted = void Function(dynamic data);
 typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
@@ -76,12 +81,54 @@ class MutationState extends State<Mutation> {
     }
   }
 
-  OnData get update {
-    // fallback client in case widget has been disposed of
+  OnData get onCompleted {
+    if (widget.onCompleted != null) {
+      return (QueryResult result) {
+        if (!result.loading && !result.optimistic) {
+          widget.onCompleted(result.data);
+        }
+      };
+    }
+    return null;
+  }
+
+  /// The optimistic cache layer id `update` will write to
+  /// is a "child patch" of the default optimistic patch
+  /// created by the query manager
+  String get _patchId => '${observableQuery.queryId}.update';
+
+  /// apply the user's
+  void _optimisticUpdate(QueryResult result) {
     final Cache cache = client.cache;
+    final String patchId = _patchId;
+    // this is also done in query_manager, but better safe than sorry
+    assert(cache is OptimisticCache,
+        "can't optimisticly update non-optimistic cache");
+    (cache as OptimisticCache).addOptimisiticPatch(patchId, (Cache cache) {
+      widget.update(cache, result);
+      return cache;
+    });
+  }
+
+  // optimistic patches will be cleaned up by the query_manager
+  // cleanup is handled by heirarchical optimism -
+  // as in, because our patch id is prefixed with '${observableQuery.queryId}.',
+  // it will be discarded along with the observableQuery.queryId patch
+  // TODO this results in an implicit coupling with the patch id system
+  OnData get update {
     if (widget.update != null) {
+      // dereference all variables that might be needed if the widget is disposed
+      final Cache cache = client.cache;
+      final OnMutationUpdate widgetUpdate = widget.update;
+      final OnData optimisticUpdate = _optimisticUpdate;
+
+      // wrap update logic to handle optimism
       void updateOnData(QueryResult result) {
-        widget.update(client?.cache ?? cache, result);
+        if (result.optimistic) {
+          return optimisticUpdate(result);
+        } else {
+          widgetUpdate(cache, result);
+        }
       }
 
       return updateOnData;
@@ -89,15 +136,19 @@ class MutationState extends State<Mutation> {
     return null;
   }
 
-  Iterable<OnData> get callbacks {
-    return <OnData>[widget.onCompleted, update].where(notNull);
-  }
+  // callbacks will be called against each result in the stream,
+  // which should then rebroadcast queries with the appropriate optimism
+  Iterable<OnData> get callbacks =>
+      <OnData>[onCompleted, update].where(notNull);
 
-  void runMutation(Map<String, dynamic> variables) => observableQuery
-    ..setVariables(variables)
-    ..onData(callbacks) // add callbacks to observable
-    ..sendLoading()
-    ..fetchResults();
+  void runMutation(Map<String, dynamic> variables, {Object optimisticResult}) {
+    observableQuery
+      ..variables = variables
+      ..options.optimisticResult = optimisticResult
+      ..onData(callbacks) // add callbacks to observable
+      ..addResult(QueryResult(loading: true))
+      ..fetchResults();
+  }
 
   @override
   void dispose() {
@@ -108,8 +159,13 @@ class MutationState extends State<Mutation> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
+      // we give the stream builder a key so that
+      // toggling mutations at the same place in the tree,
+      // such as is done in the example, won't result in bugs
+      key: Key(observableQuery?.options?.toKey()),
       initialData: QueryResult(
         loading: false,
+        optimistic: false,
       ),
       stream: observableQuery?.stream,
       builder: (

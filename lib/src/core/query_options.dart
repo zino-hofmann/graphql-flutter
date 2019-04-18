@@ -1,5 +1,7 @@
-import 'package:graphql_flutter/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
+
+import 'package:graphql_flutter/src/utilities/helpers.dart';
+import 'package:graphql_flutter/src/core/raw_operation_data.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
@@ -15,6 +17,17 @@ enum FetchPolicy {
   networkOnly,
 }
 
+// TODO investigate the relationship between optimistic results
+// and policy in flutter
+bool shouldRespondEagerlyFromCache(FetchPolicy fetchPolicy) =>
+    fetchPolicy == FetchPolicy.cacheFirst ||
+    fetchPolicy == FetchPolicy.cacheAndNetwork ||
+    fetchPolicy == FetchPolicy.cacheOnly;
+
+bool shouldStopAtCache(FetchPolicy fetchPolicy) =>
+    fetchPolicy == FetchPolicy.cacheFirst ||
+    fetchPolicy == FetchPolicy.cacheOnly;
+
 /// [ErrorPolicy] determines the level of events for errors in the execution result. The options are:
 /// - none (default): any errors from the request are treated like runtime errors and the observable is stopped.
 /// - ignore: errors from the request do not stop the observable, but also don't call `next`.
@@ -26,21 +39,18 @@ enum ErrorPolicy {
 }
 
 /// Base options.
-class BaseOptions {
+class BaseOptions extends RawOperationData {
   BaseOptions({
-    @required this.document,
-    this.variables,
+    @required String document,
+    Map<String, dynamic> variables,
     this.fetchPolicy,
     this.errorPolicy,
     this.context,
-  });
+    this.optimisticResult,
+  }) : super(document: document, variables: variables);
 
-  /// A GraphQL document that consists of a single query to be sent down to the server.
-  String document;
-
-  /// A map going from variable name to variable value, where the variables are used
-  /// within the GraphQL query.
-  Map<String, dynamic> variables;
+  /// An optimistic result to eagerly add to the operation stream
+  Object optimisticResult;
 
   /// Specifies the [FetchPolicy] to be used.
   FetchPolicy fetchPolicy;
@@ -59,6 +69,7 @@ class QueryOptions extends BaseOptions {
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
+    Object optimisticResult,
     this.pollInterval,
     Map<String, dynamic> context,
   }) : super(
@@ -67,6 +78,7 @@ class QueryOptions extends BaseOptions {
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           context: context,
+          optimisticResult: optimisticResult,
         );
 
   /// The time interval (in milliseconds) on which this query should be
@@ -98,6 +110,7 @@ class WatchQueryOptions extends QueryOptions {
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
+    Object optimisticResult,
     int pollInterval,
     this.fetchResults,
     Map<String, dynamic> context,
@@ -108,6 +121,7 @@ class WatchQueryOptions extends QueryOptions {
           errorPolicy: errorPolicy,
           pollInterval: pollInterval,
           context: context,
+          optimisticResult: optimisticResult,
         );
 
   /// Whether or not to fetch result.

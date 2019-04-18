@@ -18,7 +18,7 @@ class Location {
 /// A GraphQL error (returned by a GraphQL server).
 class GraphQLError {
   GraphQLError({
-    this.data,
+    this.raw,
     this.message,
     this.locations,
     this.path,
@@ -26,20 +26,20 @@ class GraphQLError {
   });
 
   /// Constructs a [GraphQLError] from a JSON map.
-  GraphQLError.fromJSON(this.data)
-      : message = data['message'] as String,
-        locations = data['locations'] is List<Map<String, int>>
+  GraphQLError.fromJSON(this.raw)
+      : message = raw['message'] as String,
+        locations = raw['locations'] is List<Map<String, int>>
             ? List<Location>.from(
-                (data['locations'] as List<Map<String, int>>).map<Location>(
+                (raw['locations'] as List<Map<String, int>>).map<Location>(
                   (Map<String, int> location) => Location.fromJSON(location),
                 ),
               )
             : null,
-        path = data['path'] as List<dynamic>,
-        extensions = data['extensions'] as Map<String, dynamic>;
+        path = raw['path'] as List<dynamic>,
+        extensions = raw['extensions'] as Map<String, dynamic>;
 
   /// The message of the error.
-  final dynamic data;
+  final dynamic raw;
 
   /// The message of the error.
   final String message;
