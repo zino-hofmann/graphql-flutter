@@ -138,9 +138,8 @@ class MutationState extends State<Mutation> {
 
   // callbacks will be called against each result in the stream,
   // which should then rebroadcast queries with the appropriate optimism
-  Iterable<OnData> get callbacks {
-    return <OnData>[onCompleted, update].where(notNull);
-  }
+  Iterable<OnData> get callbacks =>
+      <OnData>[onCompleted, update].where(notNull);
 
   void runMutation(Map<String, dynamic> variables, {Object optimisticResult}) {
     observableQuery

@@ -135,35 +135,37 @@ class ObservableQuery {
   }
 
   // most mutation behavior happens here
+  /// call any registered callbacks, then rebroadcast queries
+  /// incase the underlying data has changed
   void onData(Iterable<OnData> callbacks) {
-    if (callbacks != null && callbacks.isNotEmpty) {
-      StreamSubscription<QueryResult> subscription;
+    callbacks ??= const <OnData>[];
+    StreamSubscription<QueryResult> subscription;
 
-      subscription = stream.listen((QueryResult result) {
-        void handle(OnData callback) {
-          callback(result);
-        }
+    subscription = stream.listen((QueryResult result) {
+      void handle(OnData callback) {
+        callback(result);
+      }
 
-        if (!result.loading) {
-          callbacks.forEach(handle);
+      if (!result.loading) {
+        callbacks.forEach(handle);
 
-          queryManager.rebroadcastQueries();
-          if (!result.optimistic) {
-            subscription.cancel();
-            _onDataSubscriptions.remove(subscription);
+        queryManager.rebroadcastQueries();
 
-            if (_onDataSubscriptions.isEmpty) {
-              if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
-                lifecycle = QueryLifecycle.COMPLETED;
-                close();
-              }
+        if (!result.optimistic) {
+          subscription.cancel();
+          _onDataSubscriptions.remove(subscription);
+
+          if (_onDataSubscriptions.isEmpty) {
+            if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
+              lifecycle = QueryLifecycle.COMPLETED;
+              close();
             }
           }
         }
-      });
+      }
+    });
 
-      _onDataSubscriptions.add(subscription);
-    }
+    _onDataSubscriptions.add(subscription);
   }
 
   void startPolling(int pollInterval) {
