@@ -13,7 +13,7 @@ class RawOperationData {
     Map<String, dynamic> variables,
     String operationName,
   })  : _operationName = operationName,
-        this.variables = SplayTreeMap<String, dynamic>.of(
+        variables = SplayTreeMap<String, dynamic>.of(
           variables ?? const <String, dynamic>{},
         );
 

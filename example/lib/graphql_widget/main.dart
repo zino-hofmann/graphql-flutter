@@ -4,11 +4,9 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 
-/// Create a ../local.dart file with YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>'
-/// to make the example work
-import '../local.dart' show YOUR_PERSONAL_ACCESS_TOKEN;
+const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
 
-final bool ENABLE_WEBSOCKETS = false;
+const bool ENABLE_WEBSOCKETS = false;
 
 class GraphQLWidgetScreen extends StatelessWidget {
   const GraphQLWidgetScreen() : super();
@@ -186,7 +184,7 @@ class StarrableRepository extends StatelessWidget {
         document: starred ? mutations.removeStar : mutations.addStar,
       ),
       builder: (RunMutation toggleStar, QueryResult result) {
-        print([result.loading, optimistic]);
+        print(<bool>[result.loading, optimistic]);
         return ListTile(
           leading: starred
               ? const Icon(

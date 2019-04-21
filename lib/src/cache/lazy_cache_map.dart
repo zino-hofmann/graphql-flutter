@@ -1,5 +1,4 @@
 import 'dart:core';
-import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
@@ -13,7 +12,7 @@ class LazyCacheMap extends LazyDereferencingMap {
     Map<String, Object> data, {
     @required Dereference dereference,
     CacheState cacheState,
-  })  : this.cacheState =
+  })  : cacheState =
             cacheState ?? (data is LazyCacheMap ? data.cacheState : null),
         super(data, dereference: dereference);
 
