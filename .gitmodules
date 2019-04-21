@@ -1,0 +1,3 @@
+[submodule "example/server"]
+	path = example/server
+	url = https://github.com/jaydenseric/apollo-upload-examples.git

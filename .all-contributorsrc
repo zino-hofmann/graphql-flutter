@@ -119,6 +119,62 @@
       "contributions": [
         "bug"
       ]
+    },
+    {
+      "login": "lordgreg",
+      "name": "Gregor",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/480546?v=4",
+      "profile": "https://github.com/lordgreg",
+      "contributions": [
+        "bug",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "kolja-esders",
+      "name": "Kolja Esders",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/5159563?v=4",
+      "profile": "https://github.com/kolja-esders",
+      "contributions": [
+        "bug",
+        "code",
+        "ideas"
+      ]
+    },
+    {
+      "login": "micimize",
+      "name": "Michael Joseph Rosenthal",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8343799?v=4",
+      "profile": "https://github.com/micimize",
+      "contributions": [
+        "bug",
+        "code",
+        "doc",
+        "example",
+        "ideas",
+        "test"
+      ]
+    },
+    {
+      "login": "Igor1201",
+      "name": "Igor Borges",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/735858?v=4",
+      "profile": "http://borges.me/",
+      "contributions": [
+        "bug",
+        "code"
+      ]
+    },
+    {
+      "login": "rafaelring",
+      "name": "Rafael Ring",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6992724?v=4",
+      "profile": "https://github.com/rafaelring",
+      "contributions": [
+        "bug",
+        "code"
+      ]
     }
   ]
 }

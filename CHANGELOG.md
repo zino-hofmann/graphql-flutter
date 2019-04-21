@@ -1,4 +1,61 @@
-## [0.9.5] - October 28 2018
+## [1.0.0-beta.1+1] - February 16 2019
+
+We are finally in BETA. This means we're one step closer to our first stable release.
+
+Thanks to all the contributes.
+
+Support GraphQL Upload spec as proposed at
+https://github.com/jaydenseric/graphql-multipart-request-spec
+
+### What's changed?
+
+We have added a brand new `Link` that handles authentication. You can drop it in like so:
+
+```dart
+final HttpLink httpLink = HttpLink(
+  uri: 'https://api.github.com/graphql',
+);
+
+final AuthLink authLink = AuthLink(
+  getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+);
+
+final Link link = authLink.concat(httpLink);
+
+GraphQLClient client = GraphQLClient(
+  cache: NormalizedInMemoryCache(
+    dataIdFromObject: typenameDataIdFromObject,
+  ),
+  link: link,
+);
+```
+
+The `getToken` function will be called right before each event gets passed to the next link. It set the `Authorization` header to the value returned by `getToken` and passes it under the `header` map to the context.
+
+#### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed decouple mutation side effects from component (#114). @micimize
+- Fixed `data == {}` was always false, instead of `data.isEmpty`. @nesger
+- Added `update(cache, result)` attribute to `Mutation`. @micimize
+- Added `NormalizationException` to handle infinite dereference StackOverflow due to user error. @micimize
+- Added the GraphQL message type `GQL_CONNECTION_KEEP_ALIVE`, so it isn't interpreted as `UnknownData` anymore. @ArneSchulze
+- Added the brand ne `AuthLink` class. @HofmannZ
+- Update example to use `NormalizedCache` / test decoupling by replacing the `Mutation` while in flight. @micimize
+- Removed closed observable queries from `QueryManager`. @micimize
+
+#### Docs
+
+- Fixed typos. @xtian
+- Added `MessageType` constant `GQL_CONNECTION_KEEP_ALIVE`. @ArneSchulze
+- Added `GraphQLSocketMessage` class `ConnectionKeepAlive`. @ArneSchulze
+- Added `Stream<ConnectionKeepAlive>` to `GraphQLSocket`. @ArneSchulze
+- Updated the example to use the new AuthLink. @HofmannZ
+
+## [1.0.0-alpha.11] - October 28 2018
 
 ### Breaking changes
 
@@ -6,14 +63,17 @@ n/a
 
 #### Fixes / Enhancements
 
-- Fixed bug when set state was called after widget was unmounted. @SirKuryaki
-- Fixed types. @HofmannZ
+- Added `NormalizedInMemoryCache` as a new cache option. @micimize
+- Fixed `Mutation` calling `onCompleted` for loading state. @rafaelring
+- Fix type annotations. @HofmannZ
+- Fixed http versions. @HofmannZ
 
 #### Docs
 
-- Fixed `Query` and `Mutation` examples on `README.md`. @SirKuryaki
+- Added docs for the new `NormalizedInMemoryCache` option. @micimize
+- Added @rafaelring as a contributor. @HofmannZ
 
-## [0.9.4] - September 10 2018
+## [1.0.0-alpha.10] - October 6 2018
 
 ### Breaking changes
 
@@ -21,11 +81,182 @@ n/a
 
 #### Fixes / Enhancements
 
-- Fixed a bug where getQueryResult was called before client could init. @HofmannZ
+- Fixed `Query` variables not updating in the query. @micimize
+- Fixed `Mutation` widget's behavior to properly set loading status. @Igor1201
+
+#### Docs
+
+- Added @micimize as a contributor. @HofmannZ
+- Added @Igor1201 as a contributor. @HofmannZ
+
+## [1.0.0-alpha.9] - September 25 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed connectivity errors not being thrown and streamed. @HofmannZ
 
 #### Docs
 
 n/a
+
+## [1.0.0-alpha.8] - September 21 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Removed an unused class. @HofmannZ
+- Formatted the query manger. @HofmannZ
+- Handle charset encoding in responses @kolja-esders
+
+#### Docs
+
+- Added some inline docs to Query widget. @HofmannZ
+- Improved the inline docs of the client. @HofmannZ
+- Update the example. @HofmannZ
+
+## [1.0.0-alpha.7] - September 14 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed a bug where getting the operation name was always returning null. @HofmannZ
+- Override the fetch policy if the default query option is used. @HofmannZ
+- Split up fetching and polling in the observable query. @HofmannZ
+- Check if the stream is closed, before adding a new event to it. @HofmannZ
+- Check if the variables have actually changed form or to null. @HofmannZ
+- Added a new getter to check if a query result has errors. @HofmannZ
+- Refactored the scheduler to only handle polling queries. @HofmannZ
+- Updated the mutation widget to use the new api in observable query. @HofmannZ
+- Resolve type cast exception when handling GraphQL errors. @kolja-esders @HofmannZ
+- Propagate GraphQL errors to caller instead of throwing network exception. @kolja-esders
+
+#### Docs
+
+n/a
+
+## [1.0.0-alpha.6] - September 10 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Updated lint options in preparation for upcoming CI checks. @HofmannZ
+
+#### Docs
+
+n/a
+
+## [1.0.0-alpha.5] - September 7 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Fixed a bug where the wrong key was selected from the context map. @HofmannZ
+- Fixed a scenario where the dispose method was calling the `close` method on the `observableQuery` class which might not have been initialised yet. @HofmannZ
+- Added the `onComplete` callback for the `Mutation` widget. @HofmannZ
+- Added the `initPayload` as an optional parameter for the `connect` method on the `SocketClient` class. @lordgreg
+
+#### Docs
+
+- Added an example of optionally overriding http options trough the context. @HofmannZ
+- Added @lordgreg as a contributor. @HofmannZ
+- Updated the example with explicit type casting. @HofmannZ
+- Updated the `Mutation` example with the new `onComplete` callback. @HofmannZ
+
+## [1.0.0-alpha.4] - September 4 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Always return something from the `read` method in the cache class. @HofmannZ
+- Only save to cache with certain fetch policies. @HofmannZ
+- Throw an error when no data from network with certain fetch policies. @HofmannZ
+- Added a document parser. @HofmannZ
+- Added operation name from document to the operation. @HofmannZ
+- Only create a new observable query if options have changed. @HofmannZ
+- Add context to the links. @HofmannZ
+- Parse context in the http link to update the config. @HofmannZ
+- Change the type of context from dynamic to Map<String, dynamic. @HofmannZ
+
+#### Docs
+
+n/a
+
+## [1.0.0-alpha.3] - September 2 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- Reverted changes to the required Dart version. @HofmannZ
+- Added missing return statsments. @HofmannZ
+
+#### Docs
+
+n/a
+
+## [1.0.0-alpha.2] - September 2 2018
+
+### Breaking changes
+
+n/a
+
+#### Fixes / Enhancements
+
+- `GraphQLClient` now reads and writes data from the `Cache` based on the provided `FetchPolicy` option. @HofmannZ
+- Implemented caching for data from `FetchResults`. @HofmannZ
+- The library now tagets Dart version `>=2.1.0-dev.0.0 <3.0.0` as recomended by Flutter `0.6.0`. @HofmannZ
+- Removed the old client from the library. @HofmannZ
+
+#### Docs
+
+- Document the new API. @HofmannZ
+- Write an upgrade guide. @HofmannZ
+- Clean up the example. @HofmannZ
+
+## [1.0.0-alpha.1] - September 2 2018
+
+### Breaking changes
+
+- Renamed `Client` to `GraphQLClient` to avoid name collision with other packages. @HofmannZ
+- Renamed `GraphqlProvider` to `GraphQLProvider` to align with new naming. @HofmannZ
+- Renamed `GraphqlConsumer` to `GraphQLConsumer` to align with new naming. @HofmannZ
+- Renamed `GQLError` to `GraphQLError` to align with new naming. @HofmannZ
+- `GraphQLClient` requires a `Link` to passed into the constructor. @HofmannZ
+- `GraphQLClient` no longer requires a `endPoint` or `apiToken` to be passed into the constructor. Instead you can provide it to the `Link`. @HofmannZ
+- The `Query` and `Mutation` widgets are now `StreamBuilders`, there the api did change slightly. @HofmannZ
+
+#### Fixes / Enhancements
+
+- Improved typing throughout the library. @HofmannZ
+- Queries are handled as streams of operations. @HofmannZ
+- Added the `HttpLink` to handle requests using http. @HofmannZ
+- `HttpLink` allows headers to be customised. @HofmannZ
+- The api allows contributors to write their own custom links. @HofmannZ
+
+#### Docs
+
+- Implement the new link system in the example. @HofmannZ
 
 ## [0.9.3] - September 5 2018
 
@@ -41,7 +272,7 @@ n/a
 
 - Update the reference to the next branch. @HofmannZ
 
-## [0.9.2] - September 2 2018
+## [0.9.2] - 2 September 2018
 
 ### Breaking changes
 

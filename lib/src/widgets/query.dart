@@ -1,165 +1,101 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
-import 'package:graphql_flutter/src/client.dart';
+
+import 'package:graphql_flutter/src/graphql_client.dart';
+import 'package:graphql_flutter/src/core/observable_query.dart';
+import 'package:graphql_flutter/src/core/query_options.dart';
+import 'package:graphql_flutter/src/core/query_result.dart';
+
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef Widget QueryBuilder({
-  @required bool loading,
-  Map<String, dynamic> data,
-  Exception error,
+typedef QueryBuilder = Widget Function(
+  QueryResult result, {
+  VoidCallback refetch,
 });
 
+/// Builds a [Query] widget based on the a given set of [QueryOptions]
+/// that streams [QueryResult]s into the [QueryBuilder].
 class Query extends StatefulWidget {
-  Query(
-    this.query, {
+  const Query({
     final Key key,
-    this.variables = const {},
+    @required this.options,
     @required this.builder,
-    this.pollInterval,
   }) : super(key: key);
 
-  final String query;
-  final Map<String, dynamic> variables;
+  final QueryOptions options;
   final QueryBuilder builder;
-  final int pollInterval;
 
   @override
   QueryState createState() => QueryState();
 }
 
 class QueryState extends State<Query> {
-  Client client;
+  ObservableQuery observableQuery;
 
-  bool loading = true;
-  Map<String, dynamic> data = {};
-  Exception error;
+  WatchQueryOptions get _options {
+    FetchPolicy fetchPolicy = widget.options.fetchPolicy;
 
-  bool initialFetch = true;
-  Duration pollInterval;
-  Timer pollTimer;
-  Map currentVariables = Map();
-
-  @override
-  void initState() {
-    super.initState();
-
-    if (widget.pollInterval is int) {
-      pollInterval = Duration(seconds: widget.pollInterval);
+    if (fetchPolicy == FetchPolicy.cacheFirst) {
+      fetchPolicy = FetchPolicy.cacheAndNetwork;
     }
+
+    return WatchQueryOptions(
+      document: widget.options.document,
+      variables: widget.options.variables,
+      fetchPolicy: fetchPolicy,
+      errorPolicy: widget.options.errorPolicy,
+      pollInterval: widget.options.pollInterval,
+      fetchResults: true,
+      context: widget.options.context,
+      optimisticResult: widget.options.optimisticResult,
+    );
+  }
+
+  void _initQuery() {
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+
+    observableQuery?.close();
+    observableQuery = client.watchQuery(_options);
   }
 
   @override
   void didChangeDependencies() {
-    /// Gets the client from the closest wrapping [GraphqlProvider].
-    client = GraphqlProvider.of(context).value;
-
     super.didChangeDependencies();
+    _initQuery();
+  }
+
+  @override
+  void didUpdateWidget(Query oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // TODO @micimize - investigate why/if this was causing issues
+    if (!observableQuery.options.areEqualTo(_options)) {
+      _initQuery();
+    }
   }
 
   @override
   void dispose() {
-    _deleteTimer();
-
+    observableQuery?.close();
     super.dispose();
   }
 
-  void _deleteTimer() {
-    if (pollTimer is Timer) {
-      pollTimer.cancel();
-      pollTimer = null;
-    }
-  }
-
-  void getQueryResult() async {
-    assert(client != null);
-
-    try {
-      final Map<String, dynamic> result = client.readQuery(
-        query: widget.query,
-        variables: widget.variables,
-      );
-
-      if (this.mounted) {
-        setState(() {
-          data = result;
-          error = null;
-          loading = false;
-        });
-      }
-    } catch (e) {
-      // Ignore, right?
-    }
-
-    try {
-      final Map<String, dynamic> result = await client.query(
-        query: widget.query,
-        variables: widget.variables,
-      );
-
-      if (this.mounted) {
-        setState(() {
-          data = result;
-          error = null;
-          loading = false;
-        });
-      }
-    } catch (e) {
-      if (data == {}) {
-        if (this.mounted) {
-          setState(() {
-            error = e;
-            loading = false;
-          });
-        }
-      }
-    }
-
-    if (pollInterval is Duration && !(pollTimer is Timer)) {
-      pollTimer = Timer.periodic(
-        pollInterval,
-        (Timer t) => getQueryResult(),
-      );
-    }
-  }
-
-  bool _areDifferentMaps(Map a, Map b) {
-    if (a.length != b.length) {
-      return true;
-    }
-
-    bool areDifferent = false;
-
-    a.forEach((key, value) {
-      if (b[key] != a[key] || (!b.containsKey(key))) {
-        areDifferent = true;
-      }
-    });
-
-    return areDifferent;
-  }
-
+  @override
   Widget build(BuildContext context) {
-    if (initialFetch) {
-      initialFetch = false;
-      currentVariables = widget.variables;
-
-      getQueryResult();
-    }
-
-    if (_areDifferentMaps(currentVariables, widget.variables)) {
-      currentVariables = widget.variables;
-
-      loading = true;
-      _deleteTimer();
-
-      getQueryResult();
-    }
-
-    return widget.builder(
-      loading: loading,
-      error: error,
-      data: data,
+    return StreamBuilder<QueryResult>(
+      initialData: QueryResult(
+        loading: true,
+      ),
+      stream: observableQuery.stream,
+      builder: (
+        BuildContext buildContext,
+        AsyncSnapshot<QueryResult> snapshot,
+      ) {
+        return widget?.builder(
+          snapshot.data,
+          refetch: observableQuery.refetch,
+        );
+      },
     );
   }
 }
