@@ -1,16 +1,16 @@
-# GraphQL Flutter <!-- omit in toc -->
+# GraphQL Flutter
 
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
 [![version][version-badge]][package-link]
 [![MIT License][license-badge]][license-link]
-[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)](#contributors)
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
 
 [![Watch on GitHub][github-watch-badge]][github-watch]
 [![Star on GitHub][github-star-badge]][github-star]
 
-## Table of Contents <!-- omit in toc -->
+## Table of Contents
 
 - [About this project](#about-this-project)
 - [Installation](#installation)
@@ -613,11 +613,11 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 [build-status-link]: https://cirrus-ci.com/github/truongsinh/dart-uuid/master
 [coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
-[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
+[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
-[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
+[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
-[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
 [prs]: http://makeapullrequest.com
 [github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=social
 [github-watch]: https://github.com/zino-app/graphql-flutter/watchers
