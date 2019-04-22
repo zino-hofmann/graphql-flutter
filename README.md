@@ -175,10 +175,12 @@ void main() {
   );
 
   final AuthLink authLink = AuthLink(
-    getToken: () => async 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
+    getToken: () async => 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
+    // OR
+    // getToken: () => 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
   );
 
-  final Link link = authLink.concat(httpLink);
+  final Link link = authLink.concat(httpLink as Link);
 
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
