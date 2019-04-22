@@ -115,7 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
                 }
 
-                print(result.data is LazyCacheMap);
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
                 final List<LazyCacheMap> repositories = (result.data['viewer']
                         ['repositories']['nodes'] as List<dynamic>)
@@ -184,7 +183,6 @@ class StarrableRepository extends StatelessWidget {
         document: starred ? mutations.removeStar : mutations.addStar,
       ),
       builder: (RunMutation toggleStar, QueryResult result) {
-        print(<bool>[result.loading, optimistic]);
         return ListTile(
           leading: starred
               ? const Icon(
@@ -214,7 +212,6 @@ class StarrableRepository extends StatelessWidget {
               Map<String, Object>.from(repository)
                 ..addAll(extractRepositoryData(result.data));
           cache.write(typenameDataIdFromObject(updated), updated);
-          print(cache.read(typenameDataIdFromObject(updated)).isOptimistic);
         }
       },
       onCompleted: (dynamic resultData) {

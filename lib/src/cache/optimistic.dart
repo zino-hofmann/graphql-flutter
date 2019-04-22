@@ -145,11 +145,5 @@ class OptimisticCache extends NormalizedInMemoryCache {
       (OptimisticPatch patch) =>
           patch.id == removeId || _parentPatchId(patch.id) == removeId,
     );
-
-    print(<dynamic>[
-      optimisticPatches.length,
-      optimisticPatches.map<String>((OptimisticPatch p) => p.id),
-      removeId
-    ]);
   }
 }
