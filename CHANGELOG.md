@@ -1,6 +1,10 @@
-## [1.0.0+2] - April 22 2019
+## [1.0.0+3] - April 23 2019
 
-Fixes for some minor linting issues, as well as a stack overflow edgecase with complex cache structures
+_Actually_ Fixes for some minor linting issues, as well as a stack overflow edgecase with complex cache structures
+
+
+#### [1.0.0+2] - April 22 2019
+
 
 ## [1.0.0+1] - April 21 2019
 
