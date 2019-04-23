@@ -1,3 +1,39 @@
+## [1.0.0+2] - April 22 2019
+
+Fixes for some minor linting issues, as well as a stack overflow edgecase with complex cache structures
+
+## [1.0.0+1] - April 21 2019
+
+Most changes here are from @micimize in #199
+
+#### Breaking changes
+
+- Broke `onCompleted` signature because it didn't match apollo's and is only called when `data` is ready.
+- Moved `_inMemoryCache` to `@protected data` for testing/override purposes (important for `OptimisticPatches`
+- Updated the example to use optimism
+- adds a `refetch` argument to the `Query` `builder`
+
+#### Fixes / Enhancements
+
+- subscription and null variable fixes from @yunyu
+- many documentation fixes and additions From @mainawycliffe
+- disable polling with 0 interval @mainawycliffe
+- Added `OptimisticCache` and related attributes to `QueryResult` (`optimistic`, `timestamp`) 
+- Added `lazy_cache_map.dart` for handling cyclical dereferences in the normalized cache
+  - added `CacheState` for tracking optimism from the perspective of normalized cache entities
+- Added `raw_operation_data.dart` to consolidate base functionality
+- Added `rebroadcastQueries` to the `QueryManager`, for use post-update, which rebroadcasts all "safe" queries that can be with updated data from the cache
+- Added `optimisticResult` management to the `QueryManager`
+- Added `optimisticResult` to `BaseOptions`, and `QueryOptions` (it is added in `runMutation` for mutations)
+- Added `optimistic` attribute `QueryResult` itself for lifecycle management. 
+
+#### Docs
+* `LazyCacheMap` usage and reasoning
+*  Optimism section. differences between `result.optimistic` and `LazyCacheMap.isOptimistic`
+* `update`, `onCompleted` usage/existence
+* `refetch` usage/existence
+
+
 ## [1.0.0-beta.1+1] - February 16 2019
 
 We are finally in BETA. This means we're one step closer to our first stable release.
