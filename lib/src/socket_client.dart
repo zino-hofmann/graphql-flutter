@@ -107,7 +107,7 @@ class SocketClient {
           .map<GraphQLSocketMessage>(_parseSocketMessage);
 
       if (config.inactivityTimeout != null) {
-        _keepAliveSubscription = _connectionKeepAlive.timeout(
+        _keepAliveSubscription = _messagesOfType<ConnectionKeepAlive>().timeout(
           config.inactivityTimeout,
           onTimeout: (EventSink<ConnectionKeepAlive> event) {
             print(
@@ -332,19 +332,13 @@ class SocketClient {
   Stream<SocketConnectionState> get connectionState =>
       _connectionStateController.stream;
 
-  Stream<ConnectionAck> get _connectionAck => _messageStream
-      .where((GraphQLSocketMessage message) => message is ConnectionAck)
-      .cast<ConnectionAck>();
-
-  Stream<ConnectionError> get _connectionError => _messageStream
-      .where((GraphQLSocketMessage message) => message is ConnectionError)
-      .cast<ConnectionError>();
-
-  Stream<ConnectionKeepAlive> get _connectionKeepAlive => _messageStream
-      .where((GraphQLSocketMessage message) => message is ConnectionKeepAlive)
-      .cast<ConnectionKeepAlive>();
-
-  Stream<UnknownData> get _unknownData => _messageStream
-      .where((GraphQLSocketMessage message) => message is UnknownData)
-      .cast<UnknownData>();
+  /// Filter `_messageStream` for messages of the given type of [GraphQLSocketMessage]
+  ///
+  /// Example usages:
+  /// `_messagesOfType<ConnectionAck>()` for init acknowledgments
+  /// `_messagesOfType<ConnectionError>()` for errors
+  /// `_messagesOfType<UnknownData>()` for unknown data messages
+  Stream<M> _messagesOfType<M extends GraphQLSocketMessage>() => _messageStream
+      .where((GraphQLSocketMessage message) => message is M)
+      .cast<M>();
 }
