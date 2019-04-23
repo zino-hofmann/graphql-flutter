@@ -35,9 +35,16 @@ class LazyCacheMap extends LazyDereferencingMap {
   }
 }
 
+/// Unwrap a given Object that could possibly be a lazy map
 Object unwrap(Object possibleLazyMap) => possibleLazyMap is LazyDereferencingMap
     ? possibleLazyMap.data
     : possibleLazyMap;
+
+/// Unwrap a given mpa that could possibly be a lazy map
+Map<String, Object> unwrapMap(Map<String, Object> possibleLazyMap) =>
+    possibleLazyMap is LazyDereferencingMap
+        ? possibleLazyMap.data
+        : possibleLazyMap;
 
 /// A simple map wrapper that lazily dereferences using `dereference`
 ///
@@ -55,7 +62,7 @@ class LazyDereferencingMap implements Map<String, Object> {
 
   final Map<String, Object> _data;
 
-  /// get the warpped `Map` without dereferencing
+  /// get the wrapped `Map` without dereferencing
   Map<String, Object> get data => _data;
 
   @protected
