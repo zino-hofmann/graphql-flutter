@@ -12,9 +12,9 @@ import 'package:graphql_flutter/src/websocket/messages.dart';
 typedef OnSubscriptionCompleted = void Function();
 
 typedef SubscriptionBuilder<T> = Widget Function({
-  final bool loading,
-  final T payload,
-  final dynamic error,
+  bool loading,
+  T payload,
+  dynamic error,
 });
 
 class Subscription<T> extends StatefulWidget {
