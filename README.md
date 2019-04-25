@@ -10,7 +10,7 @@
 [![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Watchers)](https://github.com/felangel/bloc)
 [![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/felangel/bloc)
 
-#### [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/vTT8UN) Discord channel
+#### [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC) Discord channel
 
 ## Table of Contents
 
