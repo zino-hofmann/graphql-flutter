@@ -1,3 +1,7 @@
+### [1.0.0+4] - April 23 2019
+
+Fix dart 2.3 compilation issue @mateusfsilva
+
 ## [1.0.0+3] - April 23 2019
 
 _Actually_ Fixes for some minor linting issues, as well as a stack overflow edgecase with complex cache structures
