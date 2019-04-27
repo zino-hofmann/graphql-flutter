@@ -24,7 +24,7 @@ coverage.json
 coverage/*
 
 # example config files
-# packages/graphql_flutter/example/lib/local.dart
+packages/graphql_flutter/example/lib/local.dart
 
 # example build files
 packages/graphql_flutter/example/android/.project
