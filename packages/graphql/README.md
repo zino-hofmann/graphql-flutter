@@ -1,5 +1,8 @@
-Monorepo for [`graphql/client.dart`](./packages/graphql) and [`graphql_flutter`](./packages/graphql_flutter)
+# GraphQL Client
 
+[![Build Status][build-status-badge]][build-status-link]
+[![Coverage][coverage-badge]][coverage-link]
+[![version][version-badge]][package-link]
 [![MIT License][license-badge]][license-link]
 [![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)](#contributors)
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
@@ -10,29 +13,13 @@ Monorepo for [`graphql/client.dart`](./packages/graphql) and [`graphql_flutter`]
 #### [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC) Discord channel
 
 
+## Usage
 
-## GraphQL Flutter
+```dart
+import 'package:graphql/client.dart';
+```
+Usage for the standalone client is still poorly documented
 
-[![Build Status][build-status-badge]][build-status-link]
-[![Coverage][coverage-badge]][coverage-link]
-[![version][version-badge]][package-link]
-
-## Roadmap
-
-This is currently our roadmap, please feel free to request additions/changes.
-
-| Feature                 | Progress |
-| :---------------------- | :------: |
-| Queries                 |    ✅    |
-| Mutations               |    ✅    |
-| Subscriptions           |    ✅    |
-| Query polling           |    ✅    |
-| In memory cache         |    ✅    |
-| Offline cache sync      |    ✅    |
-| GraphQL pload           |    ✅    |
-| Optimistic results      |    ✅    |
-| Modularity              |    ✅    |
-| Client state management |    🔜    |
 
 ## Contributing
 
@@ -59,7 +46,7 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 [build-status-link]: https://cirrus-ci.com/github/truongsinh/dart-uuid/master
 [coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
-[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
+[version-badge]: https://img.shields.io/pub/v/graphql.svg
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE

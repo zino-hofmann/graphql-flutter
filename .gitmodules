@@ -1,3 +1,6 @@
+# TODO This was added for testing file uploads,
+# but the file upload test in graphql/test doesn't actually depend on it
+# maybe it should just be removed?
 [submodule "example/server"]
 	path = example/server
 	url = https://github.com/jaydenseric/apollo-upload-examples.git
