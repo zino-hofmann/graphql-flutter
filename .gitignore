@@ -19,7 +19,7 @@ ios/Runner/GeneratedPluginRegistrant.*
 .flutter-plugins
 
 
-example/lib/local.dart
+packages/graphql_flutter/example/local.dart
 
 # Coverage
 coverage.json
