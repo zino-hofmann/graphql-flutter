@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io' show File, Platform;
+import 'dart:io' show File, Platform, Directory;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:test/test.dart';
@@ -7,9 +7,14 @@ import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
 
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql/client.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
+
+NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
+      dataIdFromObject: typenameDataIdFromObject,
+      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+    );
 
 void main() {
   const String readRepositories = r'''
@@ -56,9 +61,7 @@ void main() {
       link = authLink.concat(httpLink as Link);
 
       graphQLClientClient = GraphQLClient(
-        cache: NormalizedInMemoryCache(
-          dataIdFromObject: typenameDataIdFromObject,
-        ),
+        cache: getTestCache(),
         link: link,
       );
     });
@@ -222,9 +225,7 @@ void main() {
       link = authLink.concat(httpLink as Link);
 
       graphQLClientClient = GraphQLClient(
-        cache: NormalizedInMemoryCache(
-          dataIdFromObject: typenameDataIdFromObject,
-        ),
+        cache: getTestCache(),
         link: link,
       );
     });

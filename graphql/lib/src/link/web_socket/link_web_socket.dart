@@ -1,9 +1,9 @@
-import 'package:graphql_flutter/src/link/fetch_result.dart';
-import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/socket_client.dart';
-import 'package:graphql_flutter/src/utilities/helpers.dart';
-import 'package:graphql_flutter/src/websocket/messages.dart';
+import 'package:graphql/src/link/fetch_result.dart';
+import 'package:graphql/src/link/link.dart';
+import 'package:graphql/src/link/operation.dart';
+import 'package:graphql/src/socket_client.dart';
+import 'package:graphql/src/utilities/helpers.dart';
+import 'package:graphql/src/websocket/messages.dart';
 import 'package:meta/meta.dart';
 
 /// A websocket [Link] implementation to support the websocket transport.

@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/utilities/traverse.dart';
-import 'package:graphql_flutter/src/utilities/helpers.dart';
-import 'package:graphql_flutter/src/cache/in_memory.dart';
-import 'package:graphql_flutter/src/cache/lazy_cache_map.dart';
+import 'package:graphql/src/utilities/traverse.dart';
+import 'package:graphql/src/utilities/helpers.dart';
+import 'package:graphql/src/cache/in_memory.dart';
+import 'package:graphql/src/cache/lazy_cache_map.dart';
 
 typedef DataIdFromObject = String Function(Object node);
 
@@ -23,7 +23,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
     this.prefix = '@cache/reference',
-  });
+    @required StorageProvider storageProvider,
+  }) : super(storageProvider: storageProvider);
 
   DataIdFromObject dataIdFromObject;
 

@@ -9,12 +9,12 @@ import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart';
 import 'package:mime/mime.dart';
 
-import 'package:graphql_flutter/src/utilities/helpers.dart' show notNull;
-import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
-import 'package:graphql_flutter/src/link/http/fallback_http_config.dart';
-import 'package:graphql_flutter/src/link/http/http_config.dart';
+import 'package:graphql/src/utilities/helpers.dart' show notNull;
+import 'package:graphql/src/link/link.dart';
+import 'package:graphql/src/link/operation.dart';
+import 'package:graphql/src/link/fetch_result.dart';
+import 'package:graphql/src/link/http/fallback_http_config.dart';
+import 'package:graphql/src/link/http/http_config.dart';
 
 class HttpLink extends Link {
   HttpLink({

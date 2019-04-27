@@ -4,8 +4,7 @@ import 'dart:io' show File;
 
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/utilities/get_from_ast.dart'
-    show getOperationName;
+import 'package:graphql/src/utilities/get_from_ast.dart' show getOperationName;
 
 class RawOperationData {
   RawOperationData({

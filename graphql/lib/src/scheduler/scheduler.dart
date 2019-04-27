@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:graphql_flutter/src/core/query_manager.dart';
-import 'package:graphql_flutter/src/core/query_options.dart';
-import 'package:graphql_flutter/src/core/observable_query.dart';
+import 'package:graphql/src/core/query_manager.dart';
+import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/observable_query.dart';
 
 class QueryScheduler {
   QueryScheduler({

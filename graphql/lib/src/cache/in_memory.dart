@@ -4,21 +4,25 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:meta/meta.dart';
-import 'package:path_provider/path_provider.dart';
+// TODO need to think about this
+// import 'package:path_provider/path_provider.dart';
 
-import 'package:graphql_flutter/src/cache/cache.dart';
-import 'package:graphql_flutter/src/utilities/helpers.dart'
-    show deeplyMergeLeft;
+import 'package:graphql/src/cache/cache.dart';
+import 'package:graphql/src/utilities/helpers.dart' show deeplyMergeLeft;
+
+typedef StorageProvider = FutureOr<Directory> Function();
 
 class InMemoryCache implements Cache {
   InMemoryCache({
-    this.customStorageDirectory,
+    @required this.storageProvider,
   });
 
-  /// A directory to be used for storage.
+  /// A getter for the [Directory] to use for storage
   /// This is used for testing, on regular usage
-  /// 'path_provider' will provide the storage directory.
-  final Directory customStorageDirectory;
+  /// in graphlq 'path_provider' will provide the storage directory.
+  final StorageProvider storageProvider;
+
+  Directory _storage;
 
   bool _writingToStorage = false;
 
@@ -70,21 +74,9 @@ class InMemoryCache implements Cache {
     data.clear();
   }
 
-  Future<String> get _localStoragePath async {
-    if (customStorageDirectory != null) {
-      // Used for testing
-      return customStorageDirectory.path;
-    }
-
-    final Directory directory = await getApplicationDocumentsDirectory();
-
-    return directory.path;
-  }
-
-  Future<File> get _localStorageFile async {
-    final String path = await _localStoragePath;
-
-    return File('$path/cache.txt');
+  FutureOr<File> get _localStorageFile async {
+    _storage ??= await storageProvider();
+    return File('${_storage.path}/cache.txt');
   }
 
   Future<dynamic> _writeToStorage() async {

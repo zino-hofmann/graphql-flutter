@@ -1,7 +1,9 @@
+import 'dart:io' show Directory;
+
 import 'package:test/test.dart';
 
-import 'package:graphql_flutter/src/cache/normalized_in_memory.dart';
-import 'package:graphql_flutter/src/cache/lazy_cache_map.dart';
+import 'package:graphql/src/cache/normalized_in_memory.dart';
+import 'package:graphql/src/cache/lazy_cache_map.dart';
 
 List<String> reference(String key) {
   return <String>['cache/reference', key];
@@ -151,11 +153,14 @@ final Map<String, Object> cyclicalNormalizedB = <String, Object>{
   'a': <String>['@cache/reference', 'A/1'],
 };
 
+NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
+      dataIdFromObject: typenameDataIdFromObject,
+      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+    );
+
 void main() {
   group('Normalizes writes', () {
-    final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
-      dataIdFromObject: typenameDataIdFromObject,
-    );
+    final NormalizedInMemoryCache cache = getTestCache();
     test('.write .readDenormalize round trip', () {
       cache.write(rawOperationKey, rawOperationData);
       expect(cache.denormalizedRead(rawOperationKey), equals(rawOperationData));
@@ -173,9 +178,7 @@ void main() {
     });
   });
   group('Normalizes writes', () {
-    final NormalizedInMemoryCache cache = NormalizedInMemoryCache(
-      dataIdFromObject: typenameDataIdFromObject,
-    );
+    final NormalizedInMemoryCache cache = getTestCache();
     test('lazily reads cyclical references', () {
       cache.write(rawOperationKey, cyclicalOperationData);
       final LazyCacheMap a = cache.read('A/1') as LazyCacheMap;

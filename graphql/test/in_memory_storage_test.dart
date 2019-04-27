@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io' show Directory;
 import 'package:test/test.dart';
-import 'package:graphql_flutter/src/cache/in_memory.dart';
+import 'package:graphql/src/cache/in_memory.dart';
 
 const String aKey = 'aKey';
 const String bKey = 'bKey';
@@ -46,7 +46,7 @@ void main() {
   group('Normalizes writes', () {
     test('.write .read round trip', () async {
       final InMemoryCache cache = InMemoryCache(
-        customStorageDirectory: customStorageDirectory,
+        storageProvider: () => customStorageDirectory,
       );
       cache.write(aKey, aData);
       await cache.save();
@@ -57,7 +57,7 @@ void main() {
 
     test('saving concurrently wont error', () async {
       final InMemoryCache cache = InMemoryCache(
-        customStorageDirectory: customStorageDirectory,
+        storageProvider: () => customStorageDirectory,
       );
       cache.write(aKey, aData);
       cache.write(bKey, bData);

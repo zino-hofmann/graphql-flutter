@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:graphql_flutter/src/cache/cache.dart';
-import 'package:graphql_flutter/src/core/observable_query.dart';
-import 'package:graphql_flutter/src/core/query_manager.dart';
-import 'package:graphql_flutter/src/core/query_options.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
-import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
+import 'package:graphql/src/cache/cache.dart';
+import 'package:graphql/src/core/observable_query.dart';
+import 'package:graphql/src/core/query_manager.dart';
+import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/link/fetch_result.dart';
+import 'package:graphql/src/link/link.dart';
+import 'package:graphql/src/link/operation.dart';
 import 'package:meta/meta.dart';
 
 /// The link is a [Link] over which GraphQL documents will be resolved into a [FetchResult].

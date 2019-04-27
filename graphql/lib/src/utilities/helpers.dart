@@ -1,4 +1,4 @@
-import 'package:graphql_flutter/src/cache/lazy_cache_map.dart'
+import 'package:graphql/src/cache/lazy_cache_map.dart'
     show LazyDereferencingMap, unwrapMap;
 
 bool notNull(Object any) {

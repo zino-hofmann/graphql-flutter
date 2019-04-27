@@ -1,7 +1,7 @@
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/utilities/helpers.dart';
-import 'package:graphql_flutter/src/core/raw_operation_data.dart';
+import 'package:graphql/src/utilities/helpers.dart';
+import 'package:graphql/src/core/raw_operation_data.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.

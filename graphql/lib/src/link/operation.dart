@@ -1,6 +1,6 @@
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/core/raw_operation_data.dart';
+import 'package:graphql/src/core/raw_operation_data.dart';
 
 class Operation extends RawOperationData {
   Operation({

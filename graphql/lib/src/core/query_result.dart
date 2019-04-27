@@ -1,4 +1,4 @@
-import 'package:graphql_flutter/src/core/graphql_error.dart';
+import 'package:graphql/src/core/graphql_error.dart';
 
 class QueryResult {
   QueryResult({

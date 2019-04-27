@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:graphql_flutter/src/websocket/messages.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
+
+import 'package:graphql/src/websocket/messages.dart';
 
 class SocketClientConfig {
   const SocketClientConfig({

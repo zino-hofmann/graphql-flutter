@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:graphql_flutter/src/link/operation.dart';
+import 'package:graphql/src/link/operation.dart';
 
 /// These messages represent the structures used for Client-server communication
 /// in a GraphQL web-socket subscription. Each message is represented in a JSON

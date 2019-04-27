@@ -2,21 +2,21 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'package:graphql_flutter/src/core/query_options.dart';
-import 'package:graphql_flutter/src/core/query_result.dart';
-import 'package:graphql_flutter/src/core/graphql_error.dart';
-import 'package:graphql_flutter/src/core/observable_query.dart';
+import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/core/graphql_error.dart';
+import 'package:graphql/src/core/observable_query.dart';
 
-import 'package:graphql_flutter/src/scheduler/scheduler.dart';
+import 'package:graphql/src/scheduler/scheduler.dart';
 
-import 'package:graphql_flutter/src/link/link.dart';
-import 'package:graphql_flutter/src/link/operation.dart';
-import 'package:graphql_flutter/src/link/fetch_result.dart';
+import 'package:graphql/src/link/link.dart';
+import 'package:graphql/src/link/operation.dart';
+import 'package:graphql/src/link/fetch_result.dart';
 
-import 'package:graphql_flutter/src/cache/cache.dart';
-import 'package:graphql_flutter/src/cache/normalized_in_memory.dart'
+import 'package:graphql/src/cache/cache.dart';
+import 'package:graphql/src/cache/normalized_in_memory.dart'
     show NormalizedInMemoryCache;
-import 'package:graphql_flutter/src/cache/optimistic.dart' show OptimisticCache;
+import 'package:graphql/src/cache/optimistic.dart' show OptimisticCache;
 
 class QueryManager {
   QueryManager({

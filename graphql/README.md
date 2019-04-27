@@ -51,7 +51,7 @@ dependencies:
 Now inside your Dart code you can import it.
 
 ```dart
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql/graphql_flutter.dart';
 ```
 
 ## Upgrading from 0.x.x
@@ -169,7 +169,7 @@ To use the client it first needs to be initialized with an link and cache. For t
 ```dart
 ...
 
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql/graphql_flutter.dart';
 
 void main() {
   final HttpLink httpLink = HttpLink(

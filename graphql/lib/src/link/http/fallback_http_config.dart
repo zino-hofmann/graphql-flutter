@@ -1,4 +1,4 @@
-import 'package:graphql_flutter/src/link/http/http_config.dart';
+import 'package:graphql/src/link/http/http_config.dart';
 
 HttpQueryOptions defaultHttpOptions = HttpQueryOptions(
   includeQuery: true,
