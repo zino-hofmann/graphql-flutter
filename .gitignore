@@ -24,3 +24,10 @@ example/lib/local.dart
 # Coverage
 coverage.json
 coverage/*
+
+# example build files
+packages/graphql_flutter/example/android/.project
+packages/graphql_flutter/example/android/.settings/
+packages/graphql_flutter/example/android/app/.classpath
+packages/graphql_flutter/example/android/app/.project
+packages/graphql_flutter/example/android/app/.settings/
