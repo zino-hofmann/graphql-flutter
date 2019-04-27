@@ -1,0 +1,14 @@
+# This key is required. It specifies the Dart SDKs your tests will run under
+# You can provide one or more value.
+# See https://docs.travis-ci.com/user/languages/dart#choosing-dart-versions-to-test-against
+# for valid values
+dart:
+ - dev
+
+stages:
+  # Register two jobs to run under the `analyze` stage.
+  - analyze:
+    - dartanalyzer
+    - dartfmt
+  - unit_test:
+    - test

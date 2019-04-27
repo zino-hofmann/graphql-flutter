@@ -1,4 +1,4 @@
-# GraphQL Flutter
+# GraphQL Client
 
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
@@ -617,7 +617,7 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 [build-status-link]: https://cirrus-ci.com/github/truongsinh/dart-uuid/master
 [coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
-[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
+[version-badge]: https://img.shields.io/pub/v/graphql.svg
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
