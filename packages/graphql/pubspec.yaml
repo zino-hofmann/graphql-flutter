@@ -6,8 +6,7 @@ authors:
   - Zino Hofmann <zino@zinoapp.com>
   - Michael Joseph Rosenthal <rosenthalm93@gmail.com>
   - TruongSinh Tran-Nguyen <i@truongsinh.pro>
-
-homepage: https://github.com/zino-app/graphql-flutter/tree/master/graphql
+homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql
 
 dependencies:
   meta: ^1.1.6

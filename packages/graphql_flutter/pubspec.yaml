@@ -5,23 +5,17 @@ authors:
   - Eus Dima <eus@zinoapp.com>
   - Zino Hofmann <zino@zinoapp.com>
   - Michael Joseph Rosenthal <rosenthalm93@gmail.com>
-  - TruongSinh Tran-Nguyen <i@truongsinh.pro>
-homepage: https://github.com/zino-app/graphql-flutter/tree/master
+
+homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
 
 dependencies:
-  graphql:
-    path: /Users/mjr/Documents/code/libraries/graphql-flutter/graphql
+  graphql: #1.0.0+4
+    path: ../graphql
   flutter:
     sdk: flutter
   meta: ^1.1.6
-  http: ^0.12.0+2
-  mime: ^0.9.6+2
   path: ^1.6.2
-  http_parser: ^3.1.3
   path_provider: ^0.5.0+1
-  uuid: ^2.0.1
-  graphql_parser: ^1.1.3
-  rxdart: ^0.21.0
 
 dev_dependencies:
   perfectionist: ^2.0.0
