@@ -1,3 +1,10 @@
+### [1.0.1-beta] - April 27 2019
+
+We now have a (beta) stand-alone client! 
+
+For those who want to try it out, checkout the [`graphql/client.dart` 1.0.1-beta](https://pub.dartlang.org/packages/graphql/versions/1.0.1-beta).
+
+
 ### [1.0.0+4] - April 23 2019
 
 Fix dart 2.3 compilation issue @mateusfsilva
