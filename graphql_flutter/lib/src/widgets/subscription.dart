@@ -2,11 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-import 'package:graphql/src/graphql_client.dart';
-import 'package:graphql/src/link/fetch_result.dart';
-import 'package:graphql/src/link/operation.dart';
-import 'package:graphql/src/utilities/helpers.dart';
-import 'package:graphql/src/websocket/messages.dart';
+import 'package:graphql/client.dart';
+import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 

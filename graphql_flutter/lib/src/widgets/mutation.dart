@@ -1,14 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:graphql/client.dart';
-
-import 'package:graphql/src/graphql_client.dart';
-import 'package:graphql/src/core/observable_query.dart';
-import 'package:graphql/src/core/query_options.dart';
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/cache/cache.dart';
-import 'package:graphql/src/utilities/helpers.dart';
-import 'package:graphql/src/cache/optimistic.dart';
+import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
