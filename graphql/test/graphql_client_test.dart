@@ -1,3 +1,4 @@
+import 'dart:mirrors';
 import 'dart:convert';
 import 'dart:io' show File, Platform, Directory;
 import 'dart:typed_data' show Uint8List;
@@ -8,6 +9,8 @@ import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
+
+class _TestUtils {}
 
 class MockHttpClient extends Mock implements http.Client {}
 
@@ -310,9 +313,19 @@ void main() {
         return r;
       });
 
-      final String basePath = dirname(Platform.script.path);
+      final String basePath =
+          dirname((reflectClass(_TestUtils).owner as LibraryMirror).uri.path);
       final String realPath =
           basePath.endsWith('test') ? basePath : join(basePath, 'test');
+      print([
+        'what',
+        realPath,
+        'what',
+        join(
+          realPath,
+          'sample_upload.jpg',
+        )
+      ]);
       final List<File> files =
           <String>['sample_upload.jpg', 'sample_upload.mov']
               .map((String fileName) => join(
@@ -366,10 +379,22 @@ void main() {
       ]);
     });
 
-//    test('upload fail error response', () {
-//      const String responseBody =
-//          r'{"errors":[{"message":"Variable \"$files\" of required type \"[Upload!]!\" was not provided.","locations":[{"line":1,"column":14}],"extensions":{"code":"INTERNAL_SERVER_ERROR","exception":{"stacktrace":["GraphQLError: Variable \"$files\" of required type \"[Upload!]!\" was not provided.","    at getVariableValues (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/values.js:76:21)","    at buildExecutionContext (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/execute.js:196:63)","    at executeImpl (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/execute.js:70:20)","    at Object.execute (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/graphql/execution/execute.js:62:35)","    at /Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:195:36","    at Generator.next (<anonymous>)","    at /Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:7:71","    at new Promise (<anonymous>)","    at __awaiter (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:3:12)","    at execute (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:179:20)","    at Object.<anonymous> (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:131:35)","    at Generator.next (<anonymous>)","    at fulfilled (/Users/truongsinh/Dev/flutter/graphql-flutter/example/server/api/node_modules/apollo-server-core/dist/requestPipeline.js:4:58)","    at process._tickCallback (internal/process/next_tick.js:68:7)"]}}}]';
-//      const int statusCode = 400;
-//    });
+    //test('upload fail error response', () {
+    //  const String responseBody = json.encode({
+    //    "errors":[
+    //      {
+    //        "message": r'Variable "$files" of required type "[Upload!]!" was not provided.',
+    //        "locations": [{ "line" :1, "column" :14 }],
+    //        "extensions": {
+    //          "code": "INTERNAL_SERVER_ERROR",
+    //          "exception": {
+    //             "stacktrace": [ r'GraphQLError: Variable "$files" of required type "[Upload!]!" was not provided.', ... ]
+    //          }
+    //        }
+    //      }
+    //    ]
+    //  });
+    //  const int statusCode = 400;
+    //});
   });
 }
