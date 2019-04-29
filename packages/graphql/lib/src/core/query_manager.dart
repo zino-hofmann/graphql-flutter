@@ -118,6 +118,7 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(
         fetchResult,
+        options,
         loading: false,
         optimistic: false,
       );
@@ -242,6 +243,7 @@ class QueryManager {
           query.addResult(
             _mapFetchResultToQueryResult(
               FetchResult(data: cachedData),
+              query.options,
             ),
           );
         }
@@ -269,7 +271,8 @@ class QueryManager {
   }
 
   QueryResult _mapFetchResultToQueryResult(
-    FetchResult fetchResult, {
+    FetchResult fetchResult,
+    BaseOptions options, {
     bool loading,
     bool optimistic = false,
   }) {
