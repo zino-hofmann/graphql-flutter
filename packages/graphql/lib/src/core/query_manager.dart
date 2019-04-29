@@ -281,8 +281,15 @@ class QueryManager {
       ));
     }
 
+    dynamic data;
+
+    // return data is there are no errors
+    if (_shouldReturnData(fetchResult, options.errorPolicy)) {
+      data = fetchResult.data;
+    }
+
     return QueryResult(
-      data: fetchResult.data,
+      data: data,
       errors: errors,
       loading: loading,
       optimistic: optimistic,
