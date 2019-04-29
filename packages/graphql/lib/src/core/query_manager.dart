@@ -288,4 +288,32 @@ class QueryManager {
       optimistic: optimistic,
     );
   }
+
+  bool _shouldReturnError(FetchResult fetchResult, ErrorPolicy errorPolicy) {
+    // Return errors as long as there are errors and errorPolicy allows it
+    // if errorPolicy is none or all
+    if (fetchResult.errors != null &&
+        (errorPolicy != ErrorPolicy.none || errorPolicy == ErrorPolicy.all)) {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool _shouldReturnData(FetchResult fetchResult, ErrorPolicy errorPolicy) {
+    // if there are no errors, return data
+    if (fetchResult.errors == null) {
+      return true;
+    }
+
+    // if there is data and errors, return data if the error policy allows it
+    // if errorPolicy is return all or ignore errors, return data
+    if (fetchResult.errors != null &&
+        (errorPolicy == ErrorPolicy.ignore || errorPolicy == ErrorPolicy.all)) {
+      return true;
+    }
+
+    // else ignore all data and return errors alone
+    return false;
+  }
 }
