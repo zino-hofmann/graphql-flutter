@@ -280,7 +280,7 @@ class QueryManager {
 
     // check if there are errors and implement error policy
     // add errors if the [ErrorPolicy] allows to report errors i.e. it errorPolicy != ignore
-    if (_shouldReturnError(fetchResult, options.errorPolicy)) {
+    if (fetchResult.errors != null && _shouldReturnError(options.errorPolicy)) {
       errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
         (dynamic rawError) => GraphQLError.fromJSON(rawError),
       ));
@@ -301,15 +301,15 @@ class QueryManager {
     );
   }
 
-  bool _shouldReturnError(FetchResult fetchResult, ErrorPolicy errorPolicy) {
-    // Return errors as long as there are errors and errorPolicy allows it
-    // if errorPolicy is none or all
-    if (fetchResult.errors != null &&
-        (errorPolicy != ErrorPolicy.none || errorPolicy == ErrorPolicy.all)) {
+  bool _shouldReturnError(ErrorPolicy errorPolicy) {
+    switch (errorPolicy) {
+      case ErrorPolicy.ignore:
+        return false;
+      case ErrorPolicy.all:
+      case ErrorPolicy.none:
+      default:
       return true;
     }
-
-    return false;
   }
 
   bool _shouldReturnData(FetchResult fetchResult, ErrorPolicy errorPolicy) {
