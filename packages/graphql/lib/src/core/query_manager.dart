@@ -275,7 +275,9 @@ class QueryManager {
   }) {
     List<GraphQLError> errors;
 
-    if (fetchResult.errors != null) {
+    // check if there are errors and implement error policy
+    // add errors if the [ErrorPolicy] allows to report errors i.e. it errorPolicy != ignore
+    if (_shouldReturnError(fetchResult, options.errorPolicy)) {
       errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
         (dynamic rawError) => GraphQLError.fromJSON(rawError),
       ));
