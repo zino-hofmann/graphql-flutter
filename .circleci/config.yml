@@ -101,11 +101,11 @@ jobs:
             pub global activate coverage
             pub get
             pub run test_coverage
-      - run:
-          name: Code coverage (graphql_flutter)
-          command: |
-            cd packages/graphql_flutter
-            flutter test --coverage
+      # - run:
+      #     name: Code coverage (graphql_flutter)
+      #     command: |
+      #       cd packages/graphql_flutter
+      #       flutter test --coverage
       - run:
           name: Upload coverage
           command: |
