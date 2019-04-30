@@ -145,8 +145,11 @@ jobs:
           command: |
             cd packages/graphql
 
+            VERSION=${CIRCLE_TAG%"@beta"}
+            VERSION=${CIRCLE_TAG#"v"}
+
             # patch version
-            ~/yq w pubspec.yaml version ${CIRCLE_TAG%"@beta"} > patched_pubspec.yaml
+            ~/yq w pubspec.yaml version $VERSION > patched_pubspec.yaml
             rm pubspec.yaml
             mv patched_pubspec.yaml pubspec.yaml
       - run:
@@ -154,13 +157,16 @@ jobs:
           command: |
             cd packages/graphql_flutter
 
+            VERSION=${CIRCLE_TAG%"@beta"}
+            VERSION=${CIRCLE_TAG#"v"}
+
             # patch version
-            ~/yq w pubspec.yaml version ${CIRCLE_TAG%"@beta"} > patched_pubspec.yaml
+            ~/yq w pubspec.yaml version $VERSION > patched_pubspec.yaml
             rm pubspec.yaml
             mv patched_pubspec.yaml pubspec.yaml
 
             # patch graphql dependency version
-            ~/yq w pubspec.yaml dependencies.graphql ^${CIRCLE_TAG%"@beta"} > patched_pubspec.yaml
+            ~/yq w pubspec.yaml dependencies.graphql ^$VERSION > patched_pubspec.yaml
             rm pubspec.yaml
             mv patched_pubspec.yaml pubspec.yaml
       - run:
