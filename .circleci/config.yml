@@ -60,7 +60,7 @@ jobs:
           name: Install dependencies (graphql)
           command: |
             cd packages/graphql
-            flutter packages get
+            pub get
       - run:
           name: Install dependencies (graphql_flutter)
           command: |
@@ -146,7 +146,7 @@ jobs:
             cd packages/graphql
 
             # patch version
-            ~/yq w pubspec.yaml version $CIRCLE_TAG > patched_pubspec.yaml
+            ~/yq w pubspec.yaml version ${CIRCLE_TAG%"@beta"} > patched_pubspec.yaml
             rm pubspec.yaml
             mv patched_pubspec.yaml pubspec.yaml
       - run:
@@ -155,21 +155,25 @@ jobs:
             cd packages/graphql_flutter
 
             # patch version
-            ~/yq w pubspec.yaml version $CIRCLE_TAG > patched_pubspec.yaml
+            ~/yq w pubspec.yaml version ${CIRCLE_TAG%"@beta"} > patched_pubspec.yaml
             rm pubspec.yaml
             mv patched_pubspec.yaml pubspec.yaml
 
             # patch graphql dependency version
-            ~/yq w pubspec.yaml dependencies.graphql ^$CIRCLE_TAG > patched_pubspec.yaml
+            ~/yq w pubspec.yaml dependencies.graphql ^${CIRCLE_TAG%"@beta"} > patched_pubspec.yaml
             rm pubspec.yaml
             mv patched_pubspec.yaml pubspec.yaml
       - run:
           name: Bump version numbers
           command: |
+            if [[ $CIRCLE_TAG =~ ^.*@beta.*$ ]]; then BRANCH=beta; else BRANCH=master; fi 
+            git checkout $BRANCH
+
             git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
             git commit --allow-empty -m "build(Pub): Bump version numbers [skip ci]"
+
             # Push quietly to prevent showing the token in log
-            git push -q https://${GH_TOKEN}@github.com/zino-app/graphql-flutter.git
+            git push -q https://${GH_TOKEN}@github.com/zino-app/graphql-flutter.git $BRANCH
       - run:
           name: Pub deployment (graphql)
           command: |
