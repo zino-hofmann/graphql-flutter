@@ -308,7 +308,7 @@ class QueryManager {
       case ErrorPolicy.all:
       case ErrorPolicy.none:
       default:
-      return true;
+        return true;
     }
   }
 
