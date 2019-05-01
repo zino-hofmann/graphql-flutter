@@ -47,8 +47,71 @@ void query() async {
   final List<dynamic> repositories =
       result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
-  print(repositories);
-  return;
+
+// mutation example - add star to repository
+void starRepository(String repositoryID) async {
+  if (repositoryID == "") {
+    stderr.writeln("The ID of the Repository is Required!");
+    exit(2);
+  }
+
+  final GraphQLClient _client = client();
+
+  final MutationOptions options = MutationOptions(
+    document: addStar,
+    variables: <String, dynamic>{
+      'starrableId': repositoryID,
+    },
+  );
+
+  final QueryResult result = await _client.mutate(options);
+
+  if (result.hasErrors) {
+    stderr.writeln(result.errors);
+    exit(2);
+  }
+
+  final bool isStarrred =
+      result.data['action']['starrable']['viewerHasStarred'] as bool;
+
+  if (isStarrred) {
+    stdout.writeln('Thanks for your star!');
+  }
+
+  exit(0);
+}
+
+// mutation example - remove star from repository
+void removeStarFromRepository(String repositoryID) async {
+  if (repositoryID == "") {
+    stderr.writeln("The ID of the Repository is Required!");
+    exit(2);
+  }
+
+  final GraphQLClient _client = client();
+
+  final MutationOptions options = MutationOptions(
+    document: removeStar,
+    variables: <String, dynamic>{
+      'starrableId': repositoryID,
+    },
+  );
+
+  final QueryResult result = await _client.mutate(options);
+
+  if (result.hasErrors) {
+    stderr.writeln(result.errors);
+    exit(2);
+  }
+
+  final bool isStarrred =
+      result.data['action']['starrable']['viewerHasStarred'] as bool;
+
+  if (!isStarrred) {
+    stdout.writeln('Sorry you changed your mind!');
+  }
+
+  exit(0);
 }
 
 void main(List<String> arguments) {
