@@ -55,15 +55,15 @@ void query() async {
       result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
   repositories.forEach(
-      (dynamic f) => {stdout.writeln("Id: ${f['id']} Name: ${f['name']}")});
+      (dynamic f) => {stdout.writeln('Id: ${f['id']} Name: ${f['name']}')});
 
   exit(0);
 }
 
 // mutation example - add star to repository
 void starRepository(String repositoryID) async {
-  if (repositoryID == "") {
-    stderr.writeln("The ID of the Repository is Required!");
+  if (repositoryID == '') {
+    stderr.writeln('The ID of the Repository is Required!');
     exit(2);
   }
 
@@ -95,8 +95,8 @@ void starRepository(String repositoryID) async {
 
 // mutation example - remove star from repository
 void removeStarFromRepository(String repositoryID) async {
-  if (repositoryID == "") {
-    stderr.writeln("The ID of the Repository is Required!");
+  if (repositoryID == '') {
+    stderr.writeln('The ID of the Repository is Required!');
     exit(2);
   }
 
@@ -134,14 +134,13 @@ void main(List<String> arguments) {
   argResults = parser.parse(arguments);
 
   final String action = argResults['action'] as String;
+  final String id = argResults['id'] as String;
 
   switch (action) {
     case 'star':
-      final String id = argResults['id'] as String;
       starRepository(id);
       break;
     case 'unstar':
-      final String id = argResults['id'] as String;
       removeStarFromRepository(id);
       break;
     default:
