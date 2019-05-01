@@ -172,7 +172,7 @@ if (isStarrred) {
 [coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql.svg
-[package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
+[package-link]: https://pub.dartlang.org/packages/graphql/versions/1.0.1-beta.4
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
