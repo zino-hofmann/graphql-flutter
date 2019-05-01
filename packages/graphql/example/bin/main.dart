@@ -1,13 +1,19 @@
-import 'package:graphql/client.dart';
-import './graphql_operation/queries/readRepositories.dart';
-import 'package:args/args.dart';
 import 'dart:io';
+
+import 'package:args/args.dart';
+import 'package:graphql/client.dart';
+
+import './graphql_operation/mutations/mutations.dart';
+import './graphql_operation/queries/readRepositories.dart';
 
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 import './local.dart';
 
+ArgResults argResults;
+
+// client - create a graphql client
 GraphQLClient client() {
   final HttpLink _httpLink = HttpLink(
     uri: 'https://api.github.com/graphql',
@@ -25,6 +31,7 @@ GraphQLClient client() {
   );
 }
 
+// query example - fetch all your github repositories
 void query() async {
   final GraphQLClient _client = client();
 
@@ -40,13 +47,18 @@ void query() async {
   final QueryResult result = await _client.query(options);
 
   if (result.hasErrors) {
-    print(result.errors);
-    return;
+    stderr.writeln(result.errors);
+    exit(2);
   }
 
   final List<dynamic> repositories =
       result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
+  repositories.forEach(
+      (dynamic f) => {stdout.writeln("Id: ${f['id']} Name: ${f['name']}")});
+
+  exit(0);
+}
 
 // mutation example - add star to repository
 void starRepository(String repositoryID) async {
@@ -115,5 +127,25 @@ void removeStarFromRepository(String repositoryID) async {
 }
 
 void main(List<String> arguments) {
-  query();
+  final ArgParser parser = ArgParser()
+    ..addOption('action', abbr: 'a', defaultsTo: 'fetch')
+    ..addOption('id', defaultsTo: '');
+
+  argResults = parser.parse(arguments);
+
+  final String action = argResults['action'] as String;
+
+  switch (action) {
+    case 'star':
+      final String id = argResults['id'] as String;
+      starRepository(id);
+      break;
+    case 'unstar':
+      final String id = argResults['id'] as String;
+      removeStarFromRepository(id);
+      break;
+    default:
+      query();
+      break;
+  }
 }
