@@ -202,13 +202,13 @@ workflows:
             - dependencies
           filters:
             tags:
-              only: /^.*$/
+              ignore: /^.*$/
       - coverage:
           requires:
             - dependencies
           filters:
             tags:
-              only: /^.*$/
+              ignore: /^.*$/
       - release:
           requires:
             - dependencies
@@ -228,9 +228,7 @@ workflows:
                 - master
       - publish:
           requires:
-            - dependencies
-            - lint
-            - coverage        
+            - dependencies 
           filters:
             tags:
               only: /^.*$/
