@@ -99,6 +99,7 @@ final QueryOptions options = QueryOptions(
 And finally you can send the query to the server and `await` the response:
 
 ```dart
+...
 
 final QueryResult result = await _client.query(options);
 
@@ -109,6 +110,61 @@ if (result.hasErrors) {
 final List<dynamic> repositories =
     result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
+...
+```
+
+### Mutations 
+
+Creating a Matation is also similar to creating a query, with a small difference. First, start with a multiline string:
+
+```dart
+const String addStar = r'''
+  mutation AddStar($starrableId: ID!) {
+    action: addStar(input: {starrableId: $starrableId}) {
+      starrable {
+        viewerHasStarred
+      }
+    }
+  }
+''';
+```
+
+Then instead of the `QueryOptions`, for mutations we will `MutationOptions`, which is where we pass our mutation and id of the repository we are starring.
+
+```dart
+...
+
+final MutationOptions options = MutationOptions(
+  document: addStar,
+  variables: <String, dynamic>{
+    'starrableId': repositoryID,
+  },
+);
+
+...
+```
+
+And finally you can send the query to the server and `await` the response:
+
+```dart
+...
+
+final QueryResult result = await _client.mutate(options);
+
+if (result.hasErrors) {
+  print(result.errors);
+  return;
+}
+
+final bool isStarrred =
+    result.data['action']['starrable']['viewerHasStarred'] as bool;
+
+if (isStarrred) {
+  print('Thanks for your star!');
+  return;
+}
+
+...
 ```
 
 ## Contributing
