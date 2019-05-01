@@ -277,19 +277,29 @@ class QueryManager {
     bool optimistic = false,
   }) {
     List<GraphQLError> errors;
-
-    // check if there are errors and implement error policy
-    // add errors if the [ErrorPolicy] allows to report errors i.e. it errorPolicy != ignore
-    if (fetchResult.errors != null && _shouldReturnError(options.errorPolicy)) {
-      errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
-        (dynamic rawError) => GraphQLError.fromJSON(rawError),
-      ));
-    }
-
     dynamic data;
 
-    // return data is there are no errors
-    if (_shouldReturnData(fetchResult, options.errorPolicy)) {
+    // check if there are errors and implement error policy
+    // add errors if the [ErrorPolicy] allows to report errors i.e. if errorPolicy != ignore
+    if (fetchResult.errors != null && fetchResult.errors.isNotEmpty) {
+      switch (options.errorPolicy) {
+        case ErrorPolicy.all:
+          // handle both errors and data
+          errors = _errorsFromResult(fetchResult);
+          data = fetchResult.data;
+          break;
+        case ErrorPolicy.ignore:
+          // ignore errors
+          data = fetchResult.data;
+          break;
+        case ErrorPolicy.none:
+        default:
+          // TODO not actually sure if apollo even casts graphql errors in `none` mode,
+          // it's also kind of legacy
+          errors = _errorsFromResult(fetchResult);
+          break;
+      }
+    } else {
       data = fetchResult.data;
     }
 
@@ -301,31 +311,8 @@ class QueryManager {
     );
   }
 
-  bool _shouldReturnError(ErrorPolicy errorPolicy) {
-    switch (errorPolicy) {
-      case ErrorPolicy.ignore:
-        return false;
-      case ErrorPolicy.all:
-      case ErrorPolicy.none:
-      default:
-        return true;
-    }
-  }
-
-  bool _shouldReturnData(FetchResult fetchResult, ErrorPolicy errorPolicy) {
-    // if there are no errors, return data
-    if (fetchResult.errors == null) {
-      return true;
-    }
-
-    // if there is data and errors, return data if the error policy allows it
-    // if errorPolicy is return all or ignore errors, return data
-    if (fetchResult.errors != null &&
-        (errorPolicy == ErrorPolicy.ignore || errorPolicy == ErrorPolicy.all)) {
-      return true;
-    }
-
-    // else ignore all data and return errors alone
-    return false;
-  }
+  List<GraphQLError> _errorsFromResult(FetchResult fetchResult) =>
+      List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
+        (dynamic rawError) => GraphQLError.fromJSON(rawError),
+      ));
 }
