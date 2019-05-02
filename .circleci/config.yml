@@ -1,0 +1,236 @@
+version: 2.1
+aliases:
+  - &flutter_environment
+    - image: cirrusci/flutter:beta
+  - &node_environment
+    - image: circleci/node:10
+  - &restore_cache
+    keys:
+      # when lock file changes, use increasingly general patterns to restore cache
+      - pub-packages-v1-{{ checksum "packages/graphql/pubspec.lock" }}-{{ checksum "packages/graphql_flutter/pubspec.lock" }}
+      - pub-packages-v1-{{ checksum "packages/graphql/pubspec.lock" }}
+      - pub-packages-v1-
+  - &install_yaml_processor
+    name: Install yq yaml processor
+    command: |
+      sudo apt update && \
+      sudo apt install -y wget
+
+      wget https://github.com/mikefarah/yq/releases/download/2.3.0/yq_linux_amd64 -O ~/yq
+      sudo chmod +x ~/yq
+
+      sudo apt remove -y wget
+  - &graphql_from_path
+    name: Switch to graphql from path
+    command: |
+      cd packages/graphql_flutter
+
+      ~/yq w pubspec.yaml dependencies.graphql.path "../graphql" > patched_pubspec.yaml
+      rm pubspec.yaml
+      mv patched_pubspec.yaml pubspec.yaml
+  - &setup_github_bot
+    name: Setup Github bot
+    command: |
+      git config credential.helper 'cache --timeout=120'
+      git config user.email "github-bot@zinoapp.com"
+      git config user.name "Zino App (Github bot)"
+  - &setup_pub_credentials
+    name: Setup pub credentials
+    command: |
+      [[ ! -d ~/.pub-cache ]] && mkdir -p ~/.pub-cache
+
+      cat \<<EOF > ~/.pub-cache/credentials.json
+      {
+        "accessToken": ${PUB_ACCESS_TOKEN},
+        "refreshToken": ${PUB_REFRESH_TOKEN},
+        "tokenEndpoint": "https://accounts.google.com/o/oauth2/token",
+        "scopes": ["https://www.googleapis.com/auth/userinfo.email", "openid"],
+        "expiration": ${PUB_EXPIRATION},
+      }
+      EOF
+jobs:
+  dependencies:
+    docker: *flutter_environment
+    steps:
+      - checkout
+      - restore_cache: *restore_cache
+      - run: *install_yaml_processor
+      - run: *graphql_from_path
+      - run:
+          name: Install dependencies (graphql)
+          command: |
+            cd packages/graphql
+            pub get
+      - run:
+          name: Install dependencies (graphql_flutter)
+          command: |
+            cd packages/graphql_flutter
+            flutter packages get
+      - save_cache:
+          key: pub-packages-v1-{{ checksum "packages/graphql/pubspec.lock" }}-{{ checksum "packages/graphql_flutter/pubspec.lock" }}
+          paths:
+            - ~/.pub-cache
+  lint:
+    docker: *flutter_environment
+    steps:
+      - checkout
+      - restore_cache: *restore_cache
+      - run: *install_yaml_processor
+      - run: *graphql_from_path
+      - run:
+          name: Code linting (graphql)
+          command: |
+            cd packages/graphql
+            dartfmt **/*.dart -n --set-exit-if-changed
+      - run:
+          name: Code linting (graphql_flutter)
+          command: |
+            cd packages/graphql_flutter
+            dartfmt **/*.dart -n --set-exit-if-changed
+  coverage:
+    docker: *flutter_environment
+    steps:
+      - checkout
+      - restore_cache: *restore_cache
+      - run: *install_yaml_processor
+      - run: *graphql_from_path
+      - run:
+          name: Code coverage (graphql)
+          command: |
+            cd packages/graphql
+            pub global activate coverage
+            pub get
+            pub run test_coverage
+      # - run:
+      #     name: Code coverage (graphql_flutter)
+      #     command: |
+      #       cd packages/graphql_flutter
+      #       flutter test --coverage
+      - run:
+          name: Upload coverage
+          command: |
+            bash <(curl -s https://codecov.io/bash)
+  release:
+    docker: *node_environment
+    steps:
+      - checkout
+      - run:
+          name: Generate release tags
+          command: npx semantic-release@beta
+  sync_with_beta:
+    docker: *node_environment
+    steps:
+      - checkout
+      - run: *setup_github_bot
+      - run:
+          name: Sync master into beta
+          command: |
+            git checkout master
+            git pull
+            git checkout beta
+            git merge master --no-commit
+            git commit --allow-empty -m "ci(Semantic release): Sync master into beta [skip ci]"
+            # Push quietly to prevent showing the token in log
+            git push -q https://${GH_TOKEN}@github.com/zino-app/graphql-flutter.git beta
+  publish:
+    docker: *flutter_environment
+    steps:
+      - checkout
+      - restore_cache: *restore_cache
+      - run: *install_yaml_processor
+      - run: *setup_github_bot
+      - run: *setup_pub_credentials
+      - run:
+          name: Patch pubspec with version (graphql)
+          command: |
+            cd packages/graphql
+
+            VERSION=${CIRCLE_TAG%"@beta"}
+            VERSION=${VERSION#"v"}
+
+            # patch version
+            ~/yq w pubspec.yaml version $VERSION > patched_pubspec.yaml
+            rm pubspec.yaml
+            mv patched_pubspec.yaml pubspec.yaml
+      - run:
+          name: Patch pubspec with version (graphql_flutter)
+          command: |
+            cd packages/graphql_flutter
+
+            VERSION=${CIRCLE_TAG%"@beta"}
+            VERSION=${VERSION#"v"}
+
+            # patch version
+            ~/yq w pubspec.yaml version $VERSION > patched_pubspec.yaml
+            rm pubspec.yaml
+            mv patched_pubspec.yaml pubspec.yaml
+
+            # patch graphql dependency version
+            ~/yq w pubspec.yaml dependencies.graphql ^$VERSION > patched_pubspec.yaml
+            rm pubspec.yaml
+            mv patched_pubspec.yaml pubspec.yaml
+      - run:
+          name: Bump version numbers
+          command: |
+            if [[ $CIRCLE_TAG =~ ^.*@beta.*$ ]]; then BRANCH=beta; else BRANCH=master; fi 
+            git checkout $BRANCH
+
+            git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
+            git commit --allow-empty -m "build(Pub): Bump version numbers [skip ci]"
+
+            # Push quietly to prevent showing the token in log
+            git push -q https://${GH_TOKEN}@github.com/zino-app/graphql-flutter.git $BRANCH
+      - run:
+          name: Pub deployment (graphql)
+          command: |
+            cd packages/graphql
+            pub publish -f
+      - run:
+          name: Pub deployment (graphql_flutter)
+          command: |
+            cd packages/graphql
+            pub publish -f
+workflows:
+  default:
+    jobs:
+      - dependencies:
+          filters:
+            tags:
+              only: /^.*$/
+      - lint:
+          requires:
+            - dependencies
+          filters:
+            tags:
+              ignore: /^.*$/
+      - coverage:
+          requires:
+            - dependencies
+          filters:
+            tags:
+              ignore: /^.*$/
+      - release:
+          requires:
+            - dependencies
+            - lint
+            - coverage
+          filters:
+            branches:
+              only:
+                - master
+                - beta
+      - sync_with_beta:
+          requires:
+            - release
+          filters:
+            branches:
+              only:
+                - master
+      - publish:
+          requires:
+            - dependencies 
+          filters:
+            tags:
+              only: /^.*$/
+            branches:
+              ignore: /.*/
