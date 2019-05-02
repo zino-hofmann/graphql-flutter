@@ -279,8 +279,8 @@ class QueryManager {
     List<GraphQLError> errors;
     dynamic data;
 
-    // check if there are errors and implement error policy
-    // add errors if the [ErrorPolicy] allows to report errors i.e. if errorPolicy != ignore
+    // check if there are errors and apply the error policy if so
+    // in a nutshell: `ignore` swallows errors, `none` swallows data
     if (fetchResult.errors != null && fetchResult.errors.isNotEmpty) {
       switch (options.errorPolicy) {
         case ErrorPolicy.all:
