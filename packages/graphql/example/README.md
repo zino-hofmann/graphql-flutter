@@ -2,11 +2,11 @@
 
 This is a simple command line application to showcase how you can use the Dart GraphQL Client, without flutter. 
 
-To run this applications:
+To run this application:
 
 1. First clone this repository and navigate to this directory
-2. Install all dart dependancies
-3. The run the Application using the commands below:
+2. Install all dart dependencies
+3. Then run the Application using the commands below:
    
    1. **List Your Repositories**
 
@@ -14,13 +14,13 @@ To run this applications:
    pub run main.dart
    ```
 
-   1. **Star Repository**
+   2. **Star Repository**
 
    ```
    pub run main.dart -a star --id <REPOSITORY_ID_HERE>
    ```
 
-   1. **Unstar Repository**
+   3. **Unstar Repository**
 
    ```
    pub run main.dart -a unstar --id <REPOSITORY_ID_HERE>
