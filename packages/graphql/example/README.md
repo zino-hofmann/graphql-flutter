@@ -6,6 +6,11 @@ To run this application:
 
 1. First clone this repository and navigate to this directory
 2. Install all dart dependencies
+4. create a file `bin/local.dart` with the content:
+   ```dart
+   const String YOUR_PERSONAL_ACCESS_TOKEN =
+      '<YOUR_PERSONAL_ACCESS_TOKEN>';
+   ```
 3. Then run the Application using the commands below:
    
    1. **List Your Repositories**
