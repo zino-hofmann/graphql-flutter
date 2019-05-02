@@ -29,9 +29,12 @@ bool shouldStopAtCache(FetchPolicy fetchPolicy) =>
     fetchPolicy == FetchPolicy.cacheOnly;
 
 /// [ErrorPolicy] determines the level of events for errors in the execution result. The options are:
-/// - none (default): any errors from the request are treated like runtime errors and the observable is stopped.
-/// - ignore: errors from the request do not stop the observable, but also don't call `next`.
-/// - all: errors are treated like data and will notify observables.
+/// - none (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
+/// - ignore:  Ignore allows you to read any data that is returned alongside GraphQL Errors,
+///  but doesn't save the errors or report them to your UI.
+/// - all: Using the all policy is the best way to notify your users of potential issues while still showing as much data as possible from your server.
+///  It saves both data and errors into the Apollo Cache so your UI can use them.
+
 enum ErrorPolicy {
   none,
   ignore,

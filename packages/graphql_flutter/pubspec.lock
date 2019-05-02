@@ -94,7 +94,7 @@ packages:
       name: graphql
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.0.1-beta"
+    version: "1.0.1-beta.4"
   graphql_parser:
     dependency: transitive
     description:

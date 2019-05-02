@@ -118,6 +118,7 @@ class QueryManager {
 
       queryResult = _mapFetchResultToQueryResult(
         fetchResult,
+        options,
         loading: false,
         optimistic: false,
       );
@@ -242,6 +243,7 @@ class QueryManager {
           query.addResult(
             _mapFetchResultToQueryResult(
               FetchResult(data: cachedData),
+              query.options,
             ),
           );
         }
@@ -269,23 +271,48 @@ class QueryManager {
   }
 
   QueryResult _mapFetchResultToQueryResult(
-    FetchResult fetchResult, {
+    FetchResult fetchResult,
+    BaseOptions options, {
     bool loading,
     bool optimistic = false,
   }) {
     List<GraphQLError> errors;
+    dynamic data;
 
-    if (fetchResult.errors != null) {
-      errors = List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
-        (dynamic rawError) => GraphQLError.fromJSON(rawError),
-      ));
+    // check if there are errors and apply the error policy if so
+    // in a nutshell: `ignore` swallows errors, `none` swallows data
+    if (fetchResult.errors != null && fetchResult.errors.isNotEmpty) {
+      switch (options.errorPolicy) {
+        case ErrorPolicy.all:
+          // handle both errors and data
+          errors = _errorsFromResult(fetchResult);
+          data = fetchResult.data;
+          break;
+        case ErrorPolicy.ignore:
+          // ignore errors
+          data = fetchResult.data;
+          break;
+        case ErrorPolicy.none:
+        default:
+          // TODO not actually sure if apollo even casts graphql errors in `none` mode,
+          // it's also kind of legacy
+          errors = _errorsFromResult(fetchResult);
+          break;
+      }
+    } else {
+      data = fetchResult.data;
     }
 
     return QueryResult(
-      data: fetchResult.data,
+      data: data,
       errors: errors,
       loading: loading,
       optimistic: optimistic,
     );
   }
+
+  List<GraphQLError> _errorsFromResult(FetchResult fetchResult) =>
+      List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
+        (dynamic rawError) => GraphQLError.fromJSON(rawError),
+      ));
 }
