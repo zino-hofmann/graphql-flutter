@@ -54,7 +54,7 @@ final GraphQLClient _client = GraphQLClient(
 
 ```
 
-Once you have initialized a client, now you can run queries and mutations.
+Once you have initialized a client, you can run queries and mutations.
 
 
 ### Query
