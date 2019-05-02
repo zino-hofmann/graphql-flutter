@@ -4,48 +4,174 @@
 [![Coverage][coverage-badge]][coverage-link]
 [![version][version-badge]][package-link]
 [![MIT License][license-badge]][license-link]
-[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)][contributors-link]
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
 
 [![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Watchers)](https://github.com/felangel/bloc)
 [![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/felangel/bloc)
 [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC)
 
-## Usage
+## Installation 
+
+First, depend on this package:
+
+```yaml
+dependencies:
+  graphql: ^1.0.1-beta
+```
+
+And then import it inside your dart code:
 
 ```dart
 import 'package:graphql/client.dart';
 ```
 
-Usage for the standalone client is still poorly documented
+## Usage
 
-## Contributing
+To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized. 
 
-Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
+In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatinate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `InMemoryCache`.
 
-## Contributors
+```dart
+...
 
-This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
+final HttpLink _httpLink = HttpLink(
+    uri: 'https://api.github.com/graphql',
+);
 
-Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
+final AuthLink _authLink = AuthLink(
+    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+);
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-| [<img src="https://avatars2.githubusercontent.com/u/4757453?v=4" width="100px;"/><br /><sub><b>Eustatiu Dima</b></sub>](http://eusdima.com)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Aeusdima "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=eusdima "Documentation") [💡](#example-eusdima "Examples") [🤔](#ideas-eusdima "Ideas, Planning, & Feedback") [👀](#review-eusdima "Reviewed Pull Requests") | [<img src="https://avatars3.githubusercontent.com/u/17142193?v=4" width="100px;"/><br /><sub><b>Zino Hofmann</b></sub>](https://github.com/HofmannZ)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3AHofmannZ "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=HofmannZ "Documentation") [💡](#example-HofmannZ "Examples") [🤔](#ideas-HofmannZ "Ideas, Planning, & Feedback") [🚇](#infra-HofmannZ "Infrastructure (Hosting, Build-Tools, etc)") [👀](#review-HofmannZ "Reviewed Pull Requests") | [<img src="https://avatars2.githubusercontent.com/u/15068096?v=4" width="100px;"/><br /><sub><b>Harkirat Saluja</b></sub>](https://github.com/jinxac)<br />[📖](https://github.com/zino-app/graphql-flutter/commits?author=jinxac "Documentation") [🤔](#ideas-jinxac "Ideas, Planning, & Feedback") | [<img src="https://avatars3.githubusercontent.com/u/5178217?v=4" width="100px;"/><br /><sub><b>Chris Muthig</b></sub>](https://github.com/camuthig)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=camuthig "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=camuthig "Documentation") [💡](#example-camuthig "Examples") [🤔](#ideas-camuthig "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/7611406?v=4" width="100px;"/><br /><sub><b>Cal Pratt</b></sub>](http://stackoverflow.com/users/3280538/flkes)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Acal-pratt "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=cal-pratt "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=cal-pratt "Documentation") [💡](#example-cal-pratt "Examples") [🤔](#ideas-cal-pratt "Ideas, Planning, & Feedback") | [<img src="https://avatars0.githubusercontent.com/u/9830761?v=4" width="100px;"/><br /><sub><b>Miroslav Valkovic-Madjer</b></sub>](http://madjer.info)<br />[💻](https://github.com/zino-app/graphql-flutter/commits?author=mmadjer "Code") | [<img src="https://avatars2.githubusercontent.com/u/4523129?v=4" width="100px;"/><br /><sub><b>Aleksandar Faraj</b></sub>](https://github.com/AleksandarFaraj)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3AAleksandarFaraj "Bug reports") |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| [<img src="https://avatars0.githubusercontent.com/u/403029?v=4" width="100px;"/><br /><sub><b>Arnaud Delcasse</b></sub>](https://www.scity.coop)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Aadelcasse "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=adelcasse "Code") | [<img src="https://avatars0.githubusercontent.com/u/959931?v=4" width="100px;"/><br /><sub><b>Dustin Graham</b></sub>](https://github.com/dustin-graham)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Adustin-graham "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=dustin-graham "Code") | [<img src="https://avatars3.githubusercontent.com/u/1375034?v=4" width="100px;"/><br /><sub><b>Fábio Carneiro</b></sub>](https://github.com/fabiocarneiro)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Afabiocarneiro "Bug reports") | [<img src="https://avatars0.githubusercontent.com/u/480546?v=4" width="100px;"/><br /><sub><b>Gregor</b></sub>](https://github.com/lordgreg)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Alordgreg "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=lordgreg "Code") [🤔](#ideas-lordgreg "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/5159563?v=4" width="100px;"/><br /><sub><b>Kolja Esders</b></sub>](https://github.com/kolja-esders)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Akolja-esders "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=kolja-esders "Code") [🤔](#ideas-kolja-esders "Ideas, Planning, & Feedback") | [<img src="https://avatars1.githubusercontent.com/u/8343799?v=4" width="100px;"/><br /><sub><b>Michael Joseph Rosenthal</b></sub>](https://github.com/micimize)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Amicimize "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=micimize "Code") [📖](https://github.com/zino-app/graphql-flutter/commits?author=micimize "Documentation") [💡](#example-micimize "Examples") [🤔](#ideas-micimize "Ideas, Planning, & Feedback") [⚠️](https://github.com/zino-app/graphql-flutter/commits?author=micimize "Tests") | [<img src="https://avatars2.githubusercontent.com/u/735858?v=4" width="100px;"/><br /><sub><b>Igor Borges</b></sub>](http://borges.me/)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3AIgor1201 "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=Igor1201 "Code") |
-| [<img src="https://avatars1.githubusercontent.com/u/6992724?v=4" width="100px;"/><br /><sub><b>Rafael Ring</b></sub>](https://github.com/rafaelring)<br />[🐛](https://github.com/zino-app/graphql-flutter/issues?q=author%3Arafaelring "Bug reports") [💻](https://github.com/zino-app/graphql-flutter/commits?author=rafaelring "Code") |
+final Link _link = _authLink.concat(_httpLink as Link);
 
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+final GraphQLClient _client = GraphQLClient(
+        cache: InMemoryCache(),
+        link: _link,
+    );
 
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
+...
+
+```
+
+Once you have initialized a client, you can run queries and mutations.
+
+
+### Query
+
+Creating a query is as simple as creating a multiline string:
+
+```dart
+const String readRepositories = r'''
+  query ReadRepositories($nRepositories: Int!) {
+    viewer {
+      repositories(last: $nRepositories) {
+        nodes {
+          __typename
+          id
+          name
+          viewerHasStarred
+        }
+      }
+    }
+  }
+''';
+```
+
+Then create a `QueryOptions` object with the query string as the document and pass any variables necessary. 
+
+In our case, we need pass `nRepositories` variable and the document name is `readRepositories`. 
+
+```dart
+
+const int nRepositories = 50;
+
+final QueryOptions options = QueryOptions(
+    document: readRepositories,
+    variables: <String, dynamic>{
+        'nRepositories': nRepositories,
+    },
+);
+
+```
+
+And finally you can send the query to the server and `await` the response:
+
+```dart
+...
+
+final QueryResult result = await _client.query(options);
+
+if (result.hasErrors) {
+    print(result.errors);
+}
+
+final List<dynamic> repositories =
+    result.data['viewer']['repositories']['nodes'] as List<dynamic>;
+
+...
+```
+
+### Mutations 
+
+Creating a Matation is also similar to creating a query, with a small difference. First, start with a multiline string:
+
+```dart
+const String addStar = r'''
+  mutation AddStar($starrableId: ID!) {
+    action: addStar(input: {starrableId: $starrableId}) {
+      starrable {
+        viewerHasStarred
+      }
+    }
+  }
+''';
+```
+
+Then instead of the `QueryOptions`, for mutations we will `MutationOptions`, which is where we pass our mutation and id of the repository we are starring.
+
+```dart
+...
+
+final MutationOptions options = MutationOptions(
+  document: addStar,
+  variables: <String, dynamic>{
+    'starrableId': repositoryID,
+  },
+);
+
+...
+```
+
+And finally you can send the query to the server and `await` the response:
+
+```dart
+...
+
+final QueryResult result = await _client.mutate(options);
+
+if (result.hasErrors) {
+  print(result.errors);
+  return;
+}
+
+final bool isStarrred =
+    result.data['action']['starrable']['viewerHasStarred'] as bool;
+
+if (isStarrred) {
+  print('Thanks for your star!');
+  return;
+}
+
+...
+```
 
 [build-status-badge]: https://api.cirrus-ci.com/github/truongsinh/graphql-flutter.svg
 [build-status-link]: https://cirrus-ci.com/github/truongsinh/dart-uuid/master
 [coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql.svg
-[package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
+[package-link]: https://pub.dartlang.org/packages/graphql/versions/1.0.1-beta.4
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
@@ -54,3 +180,4 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 [github-watch]: https://github.com/zino-app/graphql-flutter/watchers
 [github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=social
 [github-star]: https://github.com/zino-app/graphql-flutter/stargazers
+[contributors-link]: https://github.com/zino-app/graphql-flutter#contributors
