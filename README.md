@@ -11,7 +11,22 @@
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
 
-Monorepo for [`graphql/client.dart`](./packages/graphql) and [`graphql_flutter`](./packages/graphql_flutter)
+## About this project
+
+GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data usage. And to the programer: requests are arguable, they have the same structure as the request.
+
+This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performance client.
+
+The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
+
+## Packages
+
+This is a Monorepo which contains the following packages:
+
+| Package                                         | Pub                                              |
+| :---------------------------------------------- | :----------------------------------------------- |
+| [`graphql/client.dart`](graphql)                | [![version][version-badge]][package-link-client] |
+| [`graphql_flutter`](./packages/graphql_flutter) | [![version][version-badge]][package-link]        |
 
 ## Roadmap
 
@@ -56,7 +71,8 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 [coverage-badge]: https://codecov.io/gh/zino-app/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
-[package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
+[package-link]: https://pub.dartlang.org/packages/graphql_flutter
+[package-link-client]: https://pub.dartlang.org/packages/graphql/versions/1.0.1-beta.4
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
