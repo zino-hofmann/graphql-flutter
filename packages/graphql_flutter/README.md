@@ -1,4 +1,4 @@
-# GraphQL Flutter
+# GraphQL Flutter <!-- omit in toc -->
 
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
@@ -12,11 +12,9 @@
 
 #### [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC) Discord channel
 
-## Table of Contents
+## Table of Contents <!-- omit in toc -->
 
-- [About this project](#about-this-project)
 - [Installation](#installation)
-- [Upgrading from 0.x.x](./UPGRADE_GUIDE.md) (separate doc)
 - [Usage](#usage)
   - [GraphQL Provider](#graphql-provider)
   - [Offline Cache](#offline-cache)
@@ -24,6 +22,7 @@
     - [Optimism](#optimism)
   - [Queries](#queries)
   - [Mutations](#mutations)
+    - [Mutations with optimism](#mutations-with-optimism)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
   - [GraphQL Consumer](#graphql-consumer)
   - [Graphql Upload](#graphql-upload)
@@ -38,7 +37,7 @@ dependencies:
   graphql_flutter: ^1.0.0
 ```
 
-Now inside your Dart code you can import it.
+Then, inside your Dart code you can import it.
 
 ```dart
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -46,7 +45,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 ## Usage
 
-__If you're upgrading from 0.x.x__, checkout out the [Upgrade guide](./UPGRADE_GUIDE.md)
+**If you're upgrading from 0.x.x**, checkout out the [Upgrade guide](./UPGRADE_GUIDE.md)
 
 To use the client it first needs to be initialized with an link and cache. For this example we will be using an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can concatenate the `AuthLink`, it resolves the credentials using a future, so you can authenticate asynchronously.
 
@@ -483,7 +482,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 [coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
-[package-link]: https://pub.dartlang.org/packages/graphql_flutter/versions/1.0.0-alpha.3
+[package-link]: https://pub.dartlang.org/packages/graphql_flutter
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
