@@ -6,6 +6,8 @@
 [![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/zino-app/graphql-flutter)
 [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC)
 
+#### [![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC) Discord channel
+
 ## GraphQL Flutter
 
 [![Build Status][build-status-badge]][build-status-link]
@@ -23,10 +25,10 @@ The project took inspiration from the [Apollo GraphQL client](https://github.com
 
 This is a Monorepo which contains the following packages:
 
-| Package                                         | Pub                                              |
-| :---------------------------------------------- | :----------------------------------------------- |
-| [`graphql/client.dart`](graphql)                | [![version][version-badge]][package-link-client] |
-| [`graphql_flutter`](./packages/graphql_flutter) | [![version][version-badge]][package-link]        |
+| Package                                       | Pub                                              |
+| :-------------------------------------------- | :----------------------------------------------- |
+| [graphql/client.dart](./packages/graphql)     | [![version][version-badge]][package-link-client] |
+| [graphql_flutter](./packages/graphql_flutter) | [![version][version-badge]][package-link]        |
 
 ## Roadmap
 
