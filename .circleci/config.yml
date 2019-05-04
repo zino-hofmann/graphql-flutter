@@ -188,7 +188,7 @@ jobs:
       - run:
           name: Pub deployment (graphql_flutter)
           command: |
-            cd packages/graphql
+            cd packages/graphql_flutter
             pub publish -f
 workflows:
   default:
