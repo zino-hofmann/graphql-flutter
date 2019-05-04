@@ -45,7 +45,7 @@ aliases:
         "refreshToken": ${PUB_REFRESH_TOKEN},
         "tokenEndpoint": "https://accounts.google.com/o/oauth2/token",
         "scopes": ["https://www.googleapis.com/auth/userinfo.email", "openid"],
-        "expiration": ${PUB_EXPIRATION},
+        "expiration": ${PUB_EXPIRATION}
       }
       EOF
 jobs:
