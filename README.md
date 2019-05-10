@@ -33,7 +33,7 @@
 
 ## About this project
 
-GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data usage. And to the programer: requests are arguable, they have the same structure as the request.
+GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data usage. And to the programmer: requests are arguable, they have the same structure as the request.
 
 This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performance client.
 
@@ -149,7 +149,7 @@ Mutation(
 +  ) {
     return FloatingActionButton(
       onPressed: () => runMutation({
-        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+        'starrableId': <A_STARRABLE_REPOSITORY_ID>,
       }),
       tooltip: 'Star',
       child: Icon(Icons.star),
@@ -357,7 +357,7 @@ String addStar = """
 """;
 ```
 
-The syntax for mutations is fairly similar to that of a query. The only diffence is that the first argument of the builder function is a mutation function. Just call it to trigger the mutations (Yeah we deliberately stole this from react-apollo.)
+The syntax for mutations is fairly similar to that of a query. The only difference is that the first argument of the builder function is a mutation function. Just call it to trigger the mutations (Yeah we deliberately stole this from react-apollo.)
 
 ```dart
 ...
@@ -372,7 +372,7 @@ Mutation(
   ) {
     return FloatingActionButton(
       onPressed: () => runMutation({
-        'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+        'starrableId': <A_STARRABLE_REPOSITORY_ID>,
       }),
       tooltip: 'Star',
       child: Icon(Icons.star),
@@ -564,7 +564,7 @@ import 'dart:io' show File;
 
 // ...
 
-String filePath = '/aboslute/path/to/file.ext';
+String filePath = '/absolute/path/to/file.ext';
 final QueryResult r = await graphQLClientClient.mutate(
   MutationOptions(
     document: uploadMutation,
