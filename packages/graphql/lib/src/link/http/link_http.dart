@@ -26,88 +26,98 @@ class HttpLink extends Link {
     Map<String, String> headers,
     Map<String, dynamic> credentials,
     Map<String, dynamic> fetchOptions,
-  }) : super(
-          // @todo possibly this is a bug in dart analyzer
-          // ignore: undefined_named_parameter
-          request: (
-            Operation operation, [
-            NextLink forward,
-          ]) {
-            if (operation.isSubscription) {
-              if (forward == null) {
-                throw Exception('This link does not support subscriptions.');
-              }
-              return forward(operation);
-            }
+  })  : _uri = uri,
+        _includeExtensions = includeExtensions,
+        _httpClient = httpClient,
+        _headers = headers,
+        _credentials = credentials,
+        _fetchOptions = fetchOptions;
 
-            final Client fetcher = httpClient ?? Client();
+  String _uri;
+  bool _includeExtensions;
 
-            final HttpConfig linkConfig = HttpConfig(
-              http: HttpQueryOptions(
-                includeExtensions: includeExtensions,
-              ),
-              options: fetchOptions,
-              credentials: credentials,
-              headers: headers,
-            );
+  /// pass on customized httpClient, especially handy for mocking and testing
+  Client _httpClient;
+  Map<String, String> _headers;
+  Map<String, dynamic> _credentials;
+  Map<String, dynamic> _fetchOptions;
 
-            final Map<String, dynamic> context = operation.getContext();
-            HttpConfig contextConfig;
+  Stream<FetchResult> request(
+    Operation operation, [
+    NextLink forward,
+  ]) {
+    if (operation.isSubscription) {
+      if (forward == null) {
+        throw Exception('This link does not support subscriptions.');
+      }
+      return forward(operation);
+    }
 
-            if (context != null) {
-              // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
-              contextConfig = HttpConfig(
-                http: HttpQueryOptions(
-                  includeExtensions: context['includeExtensions'] as bool,
-                ),
-                options: context['fetchOptions'] as Map<String, dynamic>,
-                credentials: context['credentials'] as Map<String, dynamic>,
-                headers: context['headers'] as Map<String, String>,
-              );
-            }
+    final Client fetcher = _httpClient ?? Client();
 
-            final HttpHeadersAndBody httpHeadersAndBody =
-                _selectHttpOptionsAndBody(
-              operation,
-              fallbackHttpConfig,
-              linkConfig,
-              contextConfig,
-            );
+    final HttpConfig linkConfig = HttpConfig(
+      http: HttpQueryOptions(
+        includeExtensions: _includeExtensions,
+      ),
+      options: _fetchOptions,
+      credentials: _credentials,
+      headers: _headers,
+    );
 
-            final Map<String, String> httpHeaders = httpHeadersAndBody.headers;
+    final Map<String, dynamic> context = operation.getContext();
+    HttpConfig contextConfig;
 
-            StreamController<FetchResult> controller;
+    if (context != null) {
+      // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
+      contextConfig = HttpConfig(
+        http: HttpQueryOptions(
+          includeExtensions: context['includeExtensions'] as bool,
+        ),
+        options: context['fetchOptions'] as Map<String, dynamic>,
+        credentials: context['credentials'] as Map<String, dynamic>,
+        headers: context['headers'] as Map<String, String>,
+      );
+    }
 
-            Future<void> onListen() async {
-              StreamedResponse response;
+    final HttpHeadersAndBody httpHeadersAndBody = _selectHttpOptionsAndBody(
+      operation,
+      fallbackHttpConfig,
+      linkConfig,
+      contextConfig,
+    );
 
-              try {
-                // httpOptionsAndBody.body as String
-                final BaseRequest request = await _prepareRequest(
-                    uri, httpHeadersAndBody.body, httpHeaders);
+    final Map<String, String> httpHeaders = httpHeadersAndBody.headers;
 
-                response = await fetcher.send(request);
+    StreamController<FetchResult> controller;
 
-                operation.setContext(<String, StreamedResponse>{
-                  'response': response,
-                });
-                final FetchResult parsedResponse =
-                    await _parseResponse(response);
+    Future<void> onListen() async {
+      StreamedResponse response;
 
-                controller.add(parsedResponse);
-              } catch (error) {
-                print(<dynamic>[error.runtimeType, error]);
-                controller.addError(error);
-              }
+      try {
+        // httpOptionsAndBody.body as String
+        final BaseRequest request =
+            await _prepareRequest(_uri, httpHeadersAndBody.body, httpHeaders);
 
-              await controller.close();
-            }
+        response = await fetcher.send(request);
 
-            controller = StreamController<FetchResult>(onListen: onListen);
+        operation.setContext(<String, StreamedResponse>{
+          'response': response,
+        });
+        final FetchResult parsedResponse = await _parseResponse(response);
 
-            return controller.stream;
-          },
-        );
+        controller.add(parsedResponse);
+      } catch (error) {
+        print(<dynamic>[error.runtimeType, error]);
+        controller.addError(error);
+      }
+
+      await controller.close();
+    }
+
+    controller = StreamController<FetchResult>(onListen: onListen);
+
+    return controller.stream;
+  }
 }
 
 Map<String, File> _getFileMap(

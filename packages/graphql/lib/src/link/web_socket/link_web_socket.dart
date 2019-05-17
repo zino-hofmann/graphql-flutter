@@ -1,10 +1,11 @@
+import 'package:meta/meta.dart';
+
 import 'package:graphql/src/link/fetch_result.dart';
 import 'package:graphql/src/link/link.dart';
 import 'package:graphql/src/link/operation.dart';
 import 'package:graphql/src/socket_client.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/websocket/messages.dart';
-import 'package:meta/meta.dart';
 
 /// A websocket [Link] implementation to support the websocket transport.
 /// It supports subscriptions, query and mutation operations as well.
@@ -21,14 +22,12 @@ import 'package:meta/meta.dart';
 /// If you'd like to connect to the socket server instantly, call the [connectOrReconnect] method after creating this [WebSocketLink] instance.
 class WebSocketLink extends Link {
   /// Creates a new [WebSocketLink] instance with the specified config.
-  WebSocketLink(
-      {@required this.url,
-      this.headers,
-      this.reconnectOnHeaderChange = true,
-      this.config = const SocketClientConfig()})
-      : super() {
-    request = _doOperation;
-  }
+  WebSocketLink({
+    @required this.url,
+    this.headers,
+    this.reconnectOnHeaderChange = true,
+    this.config = const SocketClientConfig(),
+  });
 
   final String url;
   final Map<String, dynamic> headers;
@@ -38,7 +37,7 @@ class WebSocketLink extends Link {
   // cannot be final because we're changing the instance upon a header change.
   SocketClient _socketClient;
 
-  Stream<FetchResult> _doOperation(Operation operation, [NextLink forward]) {
+  Stream<FetchResult> request(Operation operation, [NextLink forward]) {
     final Map<String, dynamic> concatHeaders = <String, dynamic>{};
     final Map<String, dynamic> context = operation.getContext();
     if (context != null && context.containsKey('headers'))

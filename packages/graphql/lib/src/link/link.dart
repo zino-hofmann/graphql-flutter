@@ -12,26 +12,42 @@ typedef RequestHandler = Stream<FetchResult> Function(
   NextLink forward,
 ]);
 
-Link _concat(
-  Link first,
-  Link second,
-) {
-  return Link(request: (
-    Operation operation, [
-    NextLink forward,
-  ]) {
-    return first.request(operation, (Operation op) {
-      return second.request(op, forward);
-    });
-  });
+abstract class Link {
+  static Link from(List<Link> links) => links.reduce(
+        (first, next) => first.concat(next),
+      );
+
+  static Link fromHandler(RequestHandler handler) =>
+      _RequestHandlerLink(handler);
+
+  Stream<FetchResult> request(Operation operation, [NextLink forward]);
+
+  Link concat(Link next) => _ConcatLink(this, next);
 }
 
-class Link {
-  Link({this.request});
+class _RequestHandlerLink extends Link {
+  _RequestHandlerLink(this._handler);
 
-  RequestHandler request;
+  RequestHandler _handler;
 
-  Link concat(Link next) => _concat(this, next);
+  @override
+  Stream<FetchResult> request(Operation operation, [NextLink forward]) {
+    return _handler(operation, forward);
+  }
+}
+
+class _ConcatLink extends Link {
+  _ConcatLink(this._first, this._second);
+
+  Link _first;
+  Link _second;
+
+  Stream<FetchResult> request(Operation operation, [NextLink forward]) {
+    return _first.request(
+      operation,
+      (Operation operation) => _second.request(operation, forward),
+    );
+  }
 }
 
 Stream<FetchResult> execute({Link link, Operation operation}) =>
