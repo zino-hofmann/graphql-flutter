@@ -9,7 +9,7 @@ Some class names have been renamed:
 - Renamed `GraphqlConsumer` to `GraphQLConsumer`
 - Renamed `GQLError` to `GraphQLError`
 
-We changed the way the client handles requests, it now uses a `Link` to execute queries rather then depend on the http package. We've currently only implemented the `HttpLink`, just drop it in like so:
+We changed the way the client handles requests, it now uses a `Link` to execute queries rather than depend on the http package. We've currently only implemented the `HttpLink`, just drop it in like so:
 
 ```diff
 void main() {
@@ -33,7 +33,7 @@ void main() {
 }
 ```
 
-We have made a load of changes how queries and mutations work under the hood. To allow for these changes we had to make some small changes to the API of the `Query` and `Mutation` widgets.
+We have made a load of changes in how queries and mutations work under the hood. To allow for these changes we had to make some small changes to the API of the `Query` and `Mutation` widgets.
 
 ```diff
 Query(

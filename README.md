@@ -13,9 +13,9 @@
 
 ## About this project
 
-GraphQL brings many benefits, both to the client: devices will need less requests, and therefore reduce data usage. And to the programer: requests are arguable, they have the same structure as the request.
+GraphQL brings many benefits, both to the client: devices will need fewer requests, and therefore reduce data usage. And to the programmer: requests are arguable, they have the same structure as the request.
 
-This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high performance client.
+This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high-performance client.
 
 The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
@@ -40,7 +40,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Query polling           |    ✅    |
 | In memory cache         |    ✅    |
 | Offline cache sync      |    ✅    |
-| GraphQL pload           |    ✅    |
+| GraphQL Upload           |    ✅    |
 | Optimistic results      |    ✅    |
 | Modularity              |    ✅    |
 | Client state management |    🔜    |
