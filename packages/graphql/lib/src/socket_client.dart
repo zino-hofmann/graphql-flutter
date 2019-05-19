@@ -15,6 +15,7 @@ class SocketClientConfig {
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.compression = CompressionOptions.compressionDefault,
     this.initPayload,
+    @deprecated this.legacyInitPayload,
   });
 
   /// Whether to reconnect to the server after detecting connection loss.
@@ -39,8 +40,24 @@ class SocketClientConfig {
 
   final CompressionOptions compression;
 
-  /// The initial payload that will be sent to the server upon connection. Can be null.
-  final Map<String, String> initPayload;
+  /// The initial payload that will be sent to the server upon connection.
+  /// Can be null, but must be a valid json structure if provided.
+  final dynamic initPayload;
+
+  final Map<String, dynamic> legacyInitPayload;
+
+  InitOperation get initOperation {
+    if (legacyInitPayload != null) {
+      print(
+        'WARNING: Using a legacyInitPayload which will be removed soon. '
+        'If you need this particular payload serialization behavior, '
+        'please comment on this issue with details on your usecase: '
+        'https://github.com/zino-app/graphql-flutter/pull/277',
+      );
+      return LegacyInitOperation(legacyInitPayload);
+    }
+    return InitOperation(initPayload);
+  }
 }
 
 enum SocketConnectionState { NOT_CONNECTED, CONNECTING, CONNECTED }
@@ -100,7 +117,7 @@ class SocketClient {
           compression: config.compression);
       _connectionStateController.value = SocketConnectionState.CONNECTED;
       print('Connected to websocket.');
-      _write(InitOperation(config.initPayload));
+      _write(config.initOperation);
 
       _messageStream = _socket
           .asBroadcastStream()
