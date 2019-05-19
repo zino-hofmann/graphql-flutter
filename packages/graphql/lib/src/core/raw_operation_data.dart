@@ -24,14 +24,20 @@ class RawOperationData {
   Map<String, dynamic> variables;
 
   String _operationName;
+  String _documentIdentifier;
 
   /// The last operation name appearing in the contained document.
   String get operationName {
     // XXX there is a bug in the `graphql_parser` package, where this result might be
     // null event though the operation name is present in the document
     _operationName ??= getOperationName(document);
-    _operationName ??= 'UNNAMED/' + document.hashCode.toString();
     return _operationName;
+  }
+
+  String get _identifier {
+    _documentIdentifier ??=
+        operationName ?? 'UNNAMED/' + document.hashCode.toString();
+    return _documentIdentifier;
   }
 
   String toKey() {
@@ -44,6 +50,6 @@ class RawOperationData {
       return object;
     });
 
-    return '$document|$encodedVariables|$operationName';
+    return '$document|$encodedVariables|$_identifier';
   }
 }

@@ -91,9 +91,9 @@ packages:
   graphql:
     dependency: "direct main"
     description:
-      name: graphql
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "../graphql"
+      relative: true
+    source: path
     version: "1.0.1-beta.7"
   graphql_parser:
     dependency: transitive
