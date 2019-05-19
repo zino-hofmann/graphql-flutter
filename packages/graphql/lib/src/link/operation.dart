@@ -36,7 +36,6 @@ class Operation extends RawOperationData {
     return result;
   }
 
-  // operationName should never be null, but leaving this check in anyways
   bool get isSubscription =>
       operationName != null &&
       document.contains(RegExp(r'.*?subscription ' + operationName));

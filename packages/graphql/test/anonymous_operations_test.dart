@@ -1,3 +1,4 @@
+// copy/pasted from ./graphql_client_test.dart
 import 'dart:typed_data' show Uint8List;
 
 import 'package:test/test.dart';
@@ -11,10 +12,9 @@ import './helpers.dart';
 class MockHttpClient extends Mock implements http.Client {}
 
 void main() {
-  const String readRepositories = r'''
-  query ReadRepositories($nRepositories: Int!) {
+  const String readRepositories = r'''{
     viewer {
-      repositories(last: $nRepositories) {
+      repositories(last: 42) {
         nodes {
           __typename
           id
@@ -26,9 +26,8 @@ void main() {
   }
 ''';
 
-  const String addStar = r'''
-  mutation AddStar($starrableId: ID!) {
-    action: addStar(input: {starrableId: $starrableId}) {
+  const String addStar = r'''mutation {
+    action: addStar(input: {starrableId: "some_repo"}) {
       starrable {
         viewerHasStarred
       }
@@ -63,9 +62,7 @@ void main() {
       test('successful query', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
           document: readRepositories,
-          variables: <String, dynamic>{
-            'nRepositories': 42,
-          },
+          variables: <String, dynamic>{},
         );
         when(
           mockHttpClient.send(any),
@@ -117,7 +114,7 @@ void main() {
           },
         );
         expect(await capt.finalize().bytesToString(),
-            r'{"operationName":"ReadRepositories","variables":{"nRepositories":42},"query":"  query ReadRepositories($nRepositories: Int!) {\n    viewer {\n      repositories(last: $nRepositories) {\n        nodes {\n          __typename\n          id\n          name\n          viewerHasStarred\n        }\n      }\n    }\n  }\n"}');
+            r'{"operationName":null,"variables":{},"query":"{\n    viewer {\n      repositories(last: 42) {\n        nodes {\n          __typename\n          id\n          name\n          viewerHasStarred\n        }\n      }\n    }\n  }\n"}');
 
         expect(r.errors, isNull);
         expect(r.data, isNotNull);
@@ -163,7 +160,7 @@ void main() {
           },
         );
         expect(await request.finalize().bytesToString(),
-            r'{"operationName":"AddStar","variables":{},"query":"  mutation AddStar($starrableId: ID!) {\n    action: addStar(input: {starrableId: $starrableId}) {\n      starrable {\n        viewerHasStarred\n      }\n    }\n  }\n"}');
+            r'{"operationName":null,"variables":{},"query":"mutation {\n    action: addStar(input: {starrableId: \"some_repo\"}) {\n      starrable {\n        viewerHasStarred\n      }\n    }\n  }\n"}');
 
         expect(response.errors, isNull);
         expect(response.data, isNotNull);
