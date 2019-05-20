@@ -1,17 +1,17 @@
 # GraphQL Client
 
-[![Build Status][build-status-badge]][build-status-link]
-[![Coverage][coverage-badge]][coverage-link]
-[![version][version-badge]][package-link]
 [![MIT License][license-badge]][license-link]
-[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)][contributors-link]
+[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)](#contributors)
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
+[![Discord](https://img.shields.io/discord/559455668810153989.svg)](https://discord.gg/tXTtBfC)
+[![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&label=Watchers)](https://github.com/zino-app/graphql-flutter)
+[![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&label=Stars)](https://github.com/zino-app/graphql-flutter)
 
-[![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Watchers)](https://github.com/felangel/bloc)
-[![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/felangel/bloc)
-[![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC)
+[![Coverage][coverage-badge]][coverage-link]
+[![Build Status][build-status-badge]][build-status-link]
+[![version][version-badge]][package-link]
 
-## Installation 
+## Installation
 
 First, depend on this package:
 
@@ -28,7 +28,7 @@ import 'package:graphql/client.dart';
 
 ## Usage
 
-To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized. 
+To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
 
 In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatinate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `InMemoryCache`.
 
@@ -56,7 +56,6 @@ final GraphQLClient _client = GraphQLClient(
 
 Once you have initialized a client, you can run queries and mutations.
 
-
 ### Query
 
 Creating a query is as simple as creating a multiline string:
@@ -78,9 +77,9 @@ const String readRepositories = r'''
 ''';
 ```
 
-Then create a `QueryOptions` object with the query string as the document and pass any variables necessary. 
+Then create a `QueryOptions` object with the query string as the document and pass any variables necessary.
 
-In our case, we need pass `nRepositories` variable and the document name is `readRepositories`. 
+In our case, we need pass `nRepositories` variable and the document name is `readRepositories`.
 
 ```dart
 
@@ -112,7 +111,7 @@ final List<dynamic> repositories =
 ...
 ```
 
-### Mutations 
+### Mutations
 
 Creating a Matation is also similar to creating a query, with a small difference. First, start with a multiline string:
 
@@ -166,12 +165,12 @@ if (isStarrred) {
 ...
 ```
 
-[build-status-badge]: https://api.cirrus-ci.com/github/truongsinh/graphql-flutter.svg
-[build-status-link]: https://cirrus-ci.com/github/truongsinh/dart-uuid/master
-[coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
-[coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
+[build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg
+[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
+[coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg
+[coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql.svg
-[package-link]: https://pub.dartlang.org/packages/graphql/versions/1.0.1-beta.4
+[package-link]: https://pub.dartlang.org/packages/graphql
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
