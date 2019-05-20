@@ -101,7 +101,6 @@ class ObservableQuery {
   }
 
   void fetchResults() {
-    print(['fetching', queryId]);
     queryManager.fetchQuery(queryId, options);
 
     // if onData callbacks have been registered,

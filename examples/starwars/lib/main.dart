@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import './client_provider.dart';
-import './episode.dart';
+import './episode/episode_page.dart';
 
 const String GRAPHQL_ENDPOINT = 'http://127.0.0.1:3000/graphql';
 
@@ -31,11 +31,11 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  Episode currentEpisode = Episode.EMPIRE;
+  int _selectedIndex = 0;
 
-  void _selectEpisode(Episode ep) {
+  void _navigateTo(int index) {
     setState(() {
-      currentEpisode = ep;
+      _selectedIndex = index;
     });
   }
 
@@ -45,22 +45,15 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            EpisodeSelect(
-              selected: currentEpisode,
-              onSelect: _selectEpisode,
-            ),
-            Text(
-              'Hero for this episode:',
-            ),
-            HeroForEpisode(
-              episode: currentEpisode,
-            )
-          ],
-        ),
+      body: _selectedIndex == 1 ? Text('') : EpisodePage(),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          EpisodePage.navItem,
+          EpisodePage.navItem,
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.amber[800],
+        onTap: _navigateTo,
       ),
     );
   }

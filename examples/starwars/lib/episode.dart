@@ -2,41 +2,41 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-/// The episodes in the Star Wars trilogy
-enum Episode {
-  NEWHOPE,
-  EMPIRE,
-  JEDI,
+class EpisodePage extends StatefulWidget {
+  @override
+  _EpisodePageState createState() => _EpisodePageState();
 }
 
-String episodeToJson(Episode e) {
-  switch (e) {
-    case Episode.NEWHOPE:
-      return 'NEWHOPE';
-    case Episode.EMPIRE:
-      return 'EMPIRE';
-    case Episode.JEDI:
-      return 'JEDI';
-    default:
-      return null;
+class _EpisodePageState extends State<EpisodePage> {
+  Episode currentEpisode = Episode.EMPIRE;
+
+  void _selectEpisode(Episode ep) {
+    setState(() {
+      currentEpisode = ep;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          EpisodeSelect(
+            selected: currentEpisode,
+            onSelect: _selectEpisode,
+          ),
+          const Text(
+            'Hero for this episode:',
+          ),
+          HeroForEpisode(
+            episode: currentEpisode,
+          )
+        ],
+      ),
+    );
   }
 }
-
-Episode episodeFromJson(String e) {
-  switch (e) {
-    case 'NEWHOPE':
-      return Episode.NEWHOPE;
-    case 'EMPIRE':
-      return Episode.EMPIRE;
-    case 'JEDI':
-      return Episode.JEDI;
-    default:
-      return null;
-  }
-}
-
-String format(DateTime date) =>
-    '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
 // TODO this uses inline fragments and those are broken
 class HeroForEpisode extends StatelessWidget {
@@ -64,7 +64,7 @@ class HeroForEpisode extends StatelessWidget {
           }
         ''',
         variables: <String, String>{
-          'ep': episodeToJson(episode),
+          'ep': _episodeToJson(episode),
         },
       ),
       builder: (QueryResult result, {BoolCallback refetch}) {
@@ -119,4 +119,37 @@ class EpisodeSelect extends StatelessWidget {
 
 String getPrettyJSONString(Object jsonObject) {
   return const JsonEncoder.withIndent('  ').convert(jsonObject);
+}
+
+/// The episodes in the Star Wars trilogy
+enum Episode {
+  NEWHOPE,
+  EMPIRE,
+  JEDI,
+}
+
+String _episodeToJson(Episode e) {
+  switch (e) {
+    case Episode.NEWHOPE:
+      return 'NEWHOPE';
+    case Episode.EMPIRE:
+      return 'EMPIRE';
+    case Episode.JEDI:
+      return 'JEDI';
+    default:
+      return null;
+  }
+}
+
+Episode _episodeFromJson(String e) {
+  switch (e) {
+    case 'NEWHOPE':
+      return Episode.NEWHOPE;
+    case 'EMPIRE':
+      return Episode.EMPIRE;
+    case 'JEDI':
+      return Episode.JEDI;
+    default:
+      return null;
+  }
 }
