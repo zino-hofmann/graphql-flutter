@@ -9,7 +9,6 @@ today! As a contributor, here are the guidelines we would like you to follow:
 - [Submission Guidelines](#submit)
 - [Coding Rules](#rules)
 - [Commit Message Guidelines](#commit)
-- [Signing the CLA](#cla)
 
 ## <a name="question"></a> Got a Question or Problem?
 
