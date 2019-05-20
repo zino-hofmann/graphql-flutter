@@ -70,7 +70,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 4. Make your changes in a new git branch:
 
    ```shell
-   git checkout -b my-fix-branch master
+   git checkout -b my-fix-branch beta
    ```
 
 5. Create your patch, **including appropriate test cases**.
@@ -99,7 +99,7 @@ git push origin my-fix-branch
   - Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
 
     ```shell
-    git rebase master -i
+    git rebase beta -i
     git push -f
     ```
 
@@ -116,10 +116,10 @@ from the main (upstream) repository:
   git push origin --delete my-fix-branch
   ```
 
-- Check out the master branch:
+- Check out the beta branch:
 
   ```shell
-  git checkout master -f
+  git checkout beta -f
   ```
 
 - Delete the local branch:
@@ -128,10 +128,10 @@ from the main (upstream) repository:
   git branch -D my-fix-branch
   ```
 
-- Update your master with the latest upstream version:
+- Update your beta with the latest upstream version:
 
   ```shell
-  git pull --ff upstream master
+  git pull --ff upstream beta
   ```
 
 ## <a name="rules"></a> Coding Rules
