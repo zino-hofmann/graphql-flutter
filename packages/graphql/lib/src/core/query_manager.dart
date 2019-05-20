@@ -142,6 +142,11 @@ class QueryManager {
     return queryResult;
   }
 
+  void refetchQuery(String queryId) {
+    final WatchQueryOptions options = queries[queryId].options;
+    fetchQuery(queryId, options);
+  }
+
   ObservableQuery getQuery(String queryId) {
     if (queries.containsKey(queryId)) {
       return queries[queryId];

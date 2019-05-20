@@ -94,7 +94,7 @@ packages:
       path: "../graphql"
       relative: true
     source: path
-    version: "1.0.1-beta.7"
+    version: "1.0.1-beta.8"
   graphql_parser:
     dependency: transitive
     description:

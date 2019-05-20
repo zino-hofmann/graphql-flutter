@@ -1,0 +1,29 @@
+name: starwars_app
+description: An example graphql_flutter application utilizing graphql_starwars_test_server
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+  rxdart: ^0.22.0
+  graphql_flutter: #^1.0.1-beta.8
+    path: ../../packages/graphql_flutter
+  graphql: #^1.0.1-beta.8
+    path: ../../packages/graphql
+  graphql_starwars_test_server:
+    path: /Users/mjr/Documents/code/libraries/angel-starwars-server
+
+dev_dependencies:
+  perfectionist: ^2.0.0
+  flutter_test:
+    sdk: flutter
+  test: ^1.5.1
+
+flutter:
+  uses-material-design: true
+
+dependency_overrides:
+  graphql_flutter:
+    path: ../../packages/graphql_flutter
+  graphql:
+    path: ../../packages/graphql
