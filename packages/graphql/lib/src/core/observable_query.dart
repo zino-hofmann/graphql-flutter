@@ -221,7 +221,7 @@ class ObservableQuery {
     }
 
     for (StreamSubscription<QueryResult> subscription in _onDataSubscriptions) {
-      subscription.cancel();
+      await subscription.cancel();
     }
 
     stopPolling();
