@@ -49,7 +49,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "1.0.1-beta.4"
+    version: "1.0.1-beta.8"
   graphql_parser:
     dependency: transitive
     description:
