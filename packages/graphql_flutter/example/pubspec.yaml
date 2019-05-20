@@ -1,0 +1,19 @@
+name: app
+description: A new Flutter project.
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^0.1.2
+  rxdart: ^0.22.0
+  graphql_flutter:
+    path: ..
+
+dev_dependencies:
+  perfectionist: ^2.0.0
+  flutter_test:
+    sdk: flutter
+  test: ^1.5.1
+
+flutter:
+  uses-material-design: true
