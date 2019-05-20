@@ -24,7 +24,6 @@ class RawOperationData {
   Map<String, dynamic> variables;
 
   String _operationName;
-  String _documentIdentifier;
 
   /// The last operation name appearing in the contained document.
   String get operationName {
@@ -34,6 +33,10 @@ class RawOperationData {
     return _operationName;
   }
 
+  String _documentIdentifier;
+
+  /// The client identifier for this operation,
+  // TODO remove $document from key? A bit redundant, though that's not the worst thing
   String get _identifier {
     _documentIdentifier ??=
         operationName ?? 'UNNAMED/' + document.hashCode.toString();

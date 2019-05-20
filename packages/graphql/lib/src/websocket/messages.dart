@@ -52,7 +52,26 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
 class InitOperation extends GraphQLSocketMessage {
   InitOperation(this.payload) : super(MessageTypes.GQL_CONNECTION_INIT);
 
-  final Map<String, String> payload;
+  final dynamic payload;
+
+  @override
+  dynamic toJson() {
+    final Map<String, dynamic> jsonMap = <String, dynamic>{};
+    jsonMap['type'] = type;
+
+    if (payload != null) {
+      jsonMap['payload'] = payload;
+    }
+
+    return jsonMap;
+  }
+}
+
+@deprecated
+
+/// The old implementation of [InitOperation]
+class LegacyInitOperation extends InitOperation {
+  LegacyInitOperation(dynamic payload) : super(payload);
 
   @override
   dynamic toJson() {
