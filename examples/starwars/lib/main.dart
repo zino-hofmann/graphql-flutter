@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import './client_provider.dart';
 import './episode/episode_page.dart';
+import './reviews/review_page.dart';
 
 const String GRAPHQL_ENDPOINT = 'http://127.0.0.1:3000/graphql';
+const String SUBSCRIPTION_ENDPOINT = 'ws://127.0.0.1:3000/subscriptions';
 
 void main() => runApp(MyApp());
 
@@ -11,12 +13,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClientProvider(
       uri: GRAPHQL_ENDPOINT,
+      subscriptionUri: SUBSCRIPTION_ENDPOINT,
       child: MaterialApp(
         title: 'Graphql Starwas Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: MyHomePage(title: 'Graphql Starwas Demo Home Page'),
+        home: MyHomePage(title: 'Graphql Starwars Demo'),
       ),
     );
   }
@@ -45,11 +48,11 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: _selectedIndex == 1 ? Text('') : EpisodePage(),
+      body: _selectedIndex == 1 ? ReviewsPage() : EpisodePage(),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           EpisodePage.navItem,
-          EpisodePage.navItem,
+          ReviewsPage.navItem,
         ],
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.amber[800],
