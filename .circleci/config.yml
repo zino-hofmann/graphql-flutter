@@ -16,7 +16,7 @@ aliases:
       sudo apt update && \
       sudo apt install -y wget
 
-      wget https://github.com/mikefarah/yq/releases/download/2.3.0/yq_linux_amd64 -O ~/yq
+      wget https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64 -O ~/yq
       sudo chmod +x ~/yq
 
       sudo apt remove -y wget
@@ -176,6 +176,7 @@ jobs:
             git checkout $BRANCH
 
             git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
+            git add packages/graphql/pubspec.lock packages/graphql_flutter/pubspec.lock
             git commit --allow-empty -m "build(Pub): Bump version numbers [skip ci]"
 
             # Push quietly to prevent showing the token in log

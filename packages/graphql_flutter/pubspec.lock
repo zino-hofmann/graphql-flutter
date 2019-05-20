@@ -7,7 +7,7 @@ packages:
       name: analyzer
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.36.2"
+    version: "0.36.3"
   args:
     dependency: transitive
     description:
@@ -80,7 +80,7 @@ packages:
       name: front_end
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.1.17"
+    version: "0.1.18"
   glob:
     dependency: transitive
     description:
@@ -91,9 +91,9 @@ packages:
   graphql:
     dependency: "direct main"
     description:
-      path: "../graphql"
-      relative: true
-    source: path
+      name: graphql
+      url: "https://pub.dartlang.org"
+    source: hosted
     version: "1.0.1-beta.8"
   graphql_parser:
     dependency: transitive
@@ -157,7 +157,7 @@ packages:
       name: kernel
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.3.17"
+    version: "0.3.18"
   matcher:
     dependency: transitive
     description:
@@ -400,7 +400,7 @@ packages:
       name: vm_service_client
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.6+1"
+    version: "0.2.6+2"
   watcher:
     dependency: transitive
     description:

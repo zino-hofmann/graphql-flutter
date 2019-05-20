@@ -66,13 +66,13 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
-[build-status-badge]: https://circleci.com/gh/zino-app/graphql-flutter/tree/beta.svg?style=svg
-[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter/tree/beta
-[coverage-badge]: https://codecov.io/gh/zino-app/graphql-flutter/branch/beta/graph/badge.svg
+[build-status-badge]: https://circleci.com/gh/zino-app/graphql-flutter/tree/master.svg?style=svg
+[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter/tree/master
+[coverage-badge]: https://codecov.io/gh/zino-app/graphql-flutter/branch/master/graph/badge.svg
 [coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter
-[package-link-client]: https://pub.dartlang.org/packages/graphql/versions/1.0.1-beta.7
+[package-link-client]: https://pub.dartlang.org/packages/graphql/versions/1.0.1
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
