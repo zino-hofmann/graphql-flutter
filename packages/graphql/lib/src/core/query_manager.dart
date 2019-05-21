@@ -132,8 +132,9 @@ class QueryManager {
 
     // cleanup optimistic results
     cleanupOptimisticResults(queryId);
-    if (cache is NormalizedInMemoryCache) {
-      // normalize results
+    if (options.fetchPolicy != FetchPolicy.noCache &&
+        cache is NormalizedInMemoryCache) {
+      // normalize results if previously written
       queryResult.data = cache.read(operation.toKey());
     }
 
