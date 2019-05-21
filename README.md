@@ -1,11 +1,15 @@
 [![MIT License][license-badge]][license-link]
 [![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)](#contributors)
 [![PRs Welcome][prs-badge]](http://makeapullrequest.com)
-[![Discord](https://img.shields.io/discord/559455668810153989.svg)](https://discord.gg/tXTtBfC)
-[![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&label=Watchers)](https://github.com/zino-app/graphql-flutter)
-[![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&label=Stars)](https://github.com/zino-app/graphql-flutter)
 
-# GraphQL Flutter
+[![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Watchers)](https://github.com/zino-app/graphql-flutter)
+[![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/zino-app/graphql-flutter)
+[![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC)
+
+## GraphQL Flutter
+
+[![Build Status][build-status-badge]][build-status-link]
+[![Coverage][coverage-badge]][coverage-link]
 
 ## About this project
 
@@ -16,9 +20,6 @@ This project combines the benefits of GraphQL with the benefits of `Streams` in 
 The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
 ## Packages
-
-[![Coverage][coverage-badge]][coverage-link]
-[![Build Status][build-status-badge]][build-status-link]
 
 This is a Monorepo which contains the following packages:
 
@@ -39,7 +40,7 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Query polling           |    ✅    |
 | In memory cache         |    ✅    |
 | Offline cache sync      |    ✅    |
-| GraphQL Upload          |    ✅    |
+| GraphQL Upload           |    ✅    |
 | Optimistic results      |    ✅    |
 | Modularity              |    ✅    |
 | Client state management |    🔜    |
