@@ -173,14 +173,14 @@ packages:
       path: "../../packages/graphql"
       relative: true
     source: path
-    version: "1.0.1-beta.8"
+    version: "1.0.1"
   graphql_flutter:
     dependency: "direct main"
     description:
       path: "../../packages/graphql_flutter"
       relative: true
     source: path
-    version: "1.0.1-beta.8"
+    version: "1.0.1"
   graphql_parser:
     dependency: transitive
     description:

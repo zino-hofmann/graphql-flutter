@@ -5,3 +5,4 @@ FLUTTER_TARGET=/Users/mjr/Documents/code/libraries/graphql-flutter/examples/star
 FLUTTER_BUILD_DIR=build
 SYMROOT=${SOURCE_ROOT}/../build/ios
 FLUTTER_FRAMEWORK_DIR=/Users/mjr/flutter/bin/cache/artifacts/engine/ios
+TRACK_WIDGET_CREATION=true

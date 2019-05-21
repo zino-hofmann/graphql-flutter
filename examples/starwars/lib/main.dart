@@ -1,10 +1,18 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import './client_provider.dart';
 import './episode/episode_page.dart';
 import './reviews/review_page.dart';
 
-const String GRAPHQL_ENDPOINT = 'http://127.0.0.1:3000/graphql';
-const String SUBSCRIPTION_ENDPOINT = 'ws://127.0.0.1:3000/subscriptions';
+String get host {
+  if (Platform.isAndroid)
+    return '10.0.2.2';
+  else // for iOS simulator
+    return 'localhost';
+}
+
+final String GRAPHQL_ENDPOINT = 'http://$host:3000/graphql';
+final String SUBSCRIPTION_ENDPOINT = 'ws://$host:3000/subscriptions';
 
 void main() => runApp(MyApp());
 
