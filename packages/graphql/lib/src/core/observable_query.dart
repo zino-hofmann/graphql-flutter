@@ -26,16 +26,16 @@ class ObservableQuery {
   ObservableQuery({
     @required this.queryManager,
     @required this.options,
-  })  : queryId = queryManager.generateQueryId().toString(),
-        scheduler = queryManager.scheduler {
+  }) : queryId = queryManager.generateQueryId().toString() {
     controller = StreamController<QueryResult>.broadcast(
       onListen: onListen,
     );
   }
 
   final String queryId;
-  final QueryScheduler scheduler;
   final QueryManager queryManager;
+
+  QueryScheduler get scheduler => queryManager.scheduler;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
       <StreamSubscription<QueryResult>>{};
@@ -71,7 +71,7 @@ class ObservableQuery {
   /// Attempts to refetch, returning `true` if successful
   bool refetch() {
     if (_isRefetchSafe) {
-      scheduler.refetchQuery(queryId);
+      queryManager.refetchQuery(queryId);
       return true;
     }
     return false;
@@ -127,6 +127,10 @@ class ObservableQuery {
     if (previousResult != null) {
       result.loading ??= previousResult.loading;
       result.optimistic ??= previousResult.optimistic;
+    }
+
+    if (lifecycle == QueryLifecycle.PENDING && result.optimistic != true) {
+      lifecycle = QueryLifecycle.COMPLETED;
     }
 
     previousResult = result;

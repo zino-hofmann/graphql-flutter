@@ -116,7 +116,7 @@ class QueryManager {
         );
       }
 
-      queryResult = _mapFetchResultToQueryResult(
+      queryResult = mapFetchResultToQueryResult(
         fetchResult,
         options,
         loading: false,
@@ -141,6 +141,11 @@ class QueryManager {
     addQueryResult(queryId, queryResult);
 
     return queryResult;
+  }
+
+  void refetchQuery(String queryId) {
+    final WatchQueryOptions options = queries[queryId].options;
+    fetchQuery(queryId, options);
   }
 
   ObservableQuery getQuery(String queryId) {
@@ -242,7 +247,7 @@ class QueryManager {
         final dynamic cachedData = cache.read(query.options.toKey());
         if (cachedData != null) {
           query.addResult(
-            _mapFetchResultToQueryResult(
+            mapFetchResultToQueryResult(
               FetchResult(data: cachedData),
               query.options,
             ),
@@ -271,7 +276,7 @@ class QueryManager {
     return requestId;
   }
 
-  QueryResult _mapFetchResultToQueryResult(
+  QueryResult mapFetchResultToQueryResult(
     FetchResult fetchResult,
     BaseOptions options, {
     bool loading,
