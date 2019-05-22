@@ -12,7 +12,7 @@ today! As a contributor, here are the guidelines we would like you to follow:
 
 ## <a name="question"></a> Got a Question or Problem?
 
-Do not open issues for general support questions as we want to keep GitHub issues for bug reports and feature requests. You've got much better chances of getting your question answered on [Stack Overflow][stackoverflow] where the questions should be tagged with tag `flutter`.
+Do not open issues for general support questions as we want to keep GitHub issues for bug reports and feature requests. You've got much better chances of getting your question answered on [Stack Overflow][stackoverflow] where the questions should be tagged with tags `flutter` and `graphql`.
 
 Stack Overflow is a much better place to ask questions since:
 
@@ -199,7 +199,7 @@ Must be one of the following:
 
 ### Scope
 
-The scope should be the name of the npm package affected (as perceived by the person reading the changelog generated from commit messages.
+The scope should be the name of the package affected (as perceived by the person reading the changelog generated from commit messages.
 
 The following is the list of supported scopes:
 
@@ -232,4 +232,4 @@ reference GitHub issues that this commit **Closes**.
 [github]: https://github.com/zino-app/graphql-flutter
 [discord]: https://discord.gg/tXTtBfC
 [dart-style-guide]: https://dart.dev/guides/language/effective-dart/style
-[stackoverflow]: http://stackoverflow.com/questions/tagged/flutter
+[stackoverflow]: https://stackoverflow.com/questions/tagged/flutter+graphql
