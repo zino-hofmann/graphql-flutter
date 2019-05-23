@@ -171,7 +171,7 @@ Creating a query is as simple as creating a multiline string:
 
 ```dart
 String readRepositories = """
-  query ReadRepositories(\$nRepositories) {
+  query ReadRepositories(\$nRepositories: Int!) {
     viewer {
       repositories(last: \$nRepositories) {
         nodes {
