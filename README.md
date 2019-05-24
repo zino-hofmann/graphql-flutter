@@ -40,14 +40,14 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Query polling           |    ✅    |
 | In memory cache         |    ✅    |
 | Offline cache sync      |    ✅    |
-| GraphQL Upload           |    ✅    |
+| GraphQL Upload          |    ✅    |
 | Optimistic results      |    ✅    |
 | Modularity              |    ✅    |
 | Client state management |    🔜    |
 
 ## Contributing
 
-Feel free to open a PR with any suggestions! We'll be actively working on the library ourselves.
+To contribute, please see the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## Contributors
 
