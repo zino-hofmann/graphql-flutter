@@ -5,9 +5,11 @@ import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
+typedef BoolCallback = bool Function();
+
 typedef QueryBuilder = Widget Function(
   QueryResult result, {
-  VoidCallback refetch,
+  BoolCallback refetch,
 });
 
 /// Builds a [Query] widget based on the a given set of [QueryOptions]

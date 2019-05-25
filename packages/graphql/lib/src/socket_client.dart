@@ -139,10 +139,10 @@ class SocketClient {
 
       _messageSubscription = _messageStream.listen(
           (dynamic data) {
-            print('data: $data');
+            // print('data: $data');
           },
           onDone: () {
-            print('done');
+            // print('done');
             onConnectionLost();
           },
           cancelOnError: true,
