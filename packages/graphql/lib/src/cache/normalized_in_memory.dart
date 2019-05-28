@@ -65,7 +65,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   /// *WARNING* if your system allows cyclical references, this will break
   dynamic denormalizedRead(String key) {
     try {
-      return traverse(super.read(key), _denormalizingDereference);
+      return Traversal(_denormalizingDereference).traverse(super.read(key));
     } catch (error) {
       if (error is StackOverflowError) {
         throw NormalizationException(
@@ -90,11 +90,11 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return value is Map<String, Object> ? lazilyDenormalized(value) : value;
   }
 
+  // get a normalizer for a given target map
   Normalizer _normalizerFor(Map<String, Object> into) {
     List<String> normalizer(Object node) {
       final String dataId = dataIdFromObject(node);
       if (dataId != null) {
-        writeInto(dataId, node, into, normalizer);
         return <String>[prefix, dataId];
       }
       return null;
@@ -103,10 +103,10 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return normalizer;
   }
 
+  // [_normalizerFor] for this cache's data
   List<String> _normalize(Object node) {
     final String dataId = dataIdFromObject(node);
     if (dataId != null) {
-      writeInto(dataId, node, data, _normalize);
       return <String>[prefix, dataId];
     }
     return null;
@@ -120,14 +120,15 @@ class NormalizedInMemoryCache extends InMemoryCache {
     Map<String, Object> into, [
     Normalizer normalizer,
   ]) {
+    normalizer ??= _normalizerFor(into);
     if (value is Map<String, Object>) {
-      final Object existing = into[key];
-      final Map<String, Object> merged = (existing is Map<String, Object>)
-          ? deeplyMergeLeft(<Map<String, Object>>[existing, value])
-          : value;
-
+      final Map<String, Object> merged = _mergedWithExisting(into, key, value);
+      final Traversal traversal = Traversal(
+        normalizer,
+        transformSideEffect: _traversingWriteInto(into),
+      );
       // normalized the merged value
-      into[key] = traverseValues(merged, normalizer ?? _normalizerFor(into));
+      into[key] = traversal.traverseValues(merged);
     } else {
       // writing non-map data to the store is allowed,
       // but there is no merging strategy
@@ -150,4 +151,35 @@ String typenameDataIdFromObject(Object object) {
     return "${object['__typename']}/${object['id']}";
   }
   return null;
+}
+
+/// Writing side effect for traverse
+///
+/// Essentially, we avoid problems with cyclical objects by
+/// tracking seen nodes in the [Traversal],
+/// and we pass this as a side effect to take advantage of that tracking
+SideEffect _traversingWriteInto(Map<String, Object> into) {
+  void sideEffect(Object ref, Object value, Traversal traversal) {
+    final String key = (ref as List<String>)[1];
+    if (value is Map<String, Object>) {
+      final Map<String, Object> merged = _mergedWithExisting(into, key, value);
+      into[key] = traversal.traverseValues(merged);
+    } else {
+      // writing non-map data to the store is allowed,
+      // but there is no merging strategy
+      into[key] = value;
+      return;
+    }
+  }
+
+  return sideEffect;
+}
+
+/// get the given value merged with any pre-existing map with the same key
+Map<String, Object> _mergedWithExisting(
+    Map<String, Object> into, String key, Map<String, Object> value) {
+  final Object existing = into[key];
+  return (existing is Map<String, Object>)
+      ? deeplyMergeLeft(<Map<String, Object>>[existing, value])
+      : value;
 }

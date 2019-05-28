@@ -2,7 +2,9 @@ import 'dart:io' show Directory;
 
 import 'package:test/test.dart';
 
-import 'package:graphql/src/cache/normalized_in_memory.dart';
+import 'package:graphql/src/cache/normalized_in_memory.dart'
+    show typenameDataIdFromObject;
+import 'package:graphql/src/cache/optimistic.dart';
 import 'package:graphql/src/cache/lazy_cache_map.dart';
 
 List<String> reference(String key) {
@@ -126,38 +128,7 @@ final Map<String, Object> updatedSubsetOperationData = <String, Object>{
   'aField': <String, Object>{'field': false}
 };
 
-final Map<String, Object> cyclicalOperationData = <String, Object>{
-  'a': <String, Object>{
-    '__typename': 'A',
-    'id': 1,
-    'b': <String, Object>{
-      '__typename': 'B',
-      'id': 5,
-      'as': [
-        <String, Object>{
-          '__typename': 'A',
-          'id': 1,
-        },
-      ]
-    },
-  },
-};
-
-final Map<String, Object> cyclicalNormalizedA = <String, Object>{
-  '__typename': 'A',
-  'id': 1,
-  'b': <String>['@cache/reference', 'B/5'],
-};
-
-final Map<String, Object> cyclicalNormalizedB = <String, Object>{
-  '__typename': 'B',
-  'id': 5,
-  'as': [
-    <String>['@cache/reference', 'A/1']
-  ],
-};
-
-Map<String, Object> get cyclicalObjOperationData {
+Map<String, Object> get cyclicalOperationData {
   Map<String, Object> a;
   Map<String, Object> b;
   a = {
@@ -173,13 +144,13 @@ Map<String, Object> get cyclicalObjOperationData {
   return {'a': a};
 }
 
-final Map<String, Object> cyclicalObjNormalizedA = <String, Object>{
+final Map<String, Object> cyclicalNormalizedA = <String, Object>{
   '__typename': 'A',
   'id': 1,
   'b': <String>['@cache/reference', 'B/5'],
 };
 
-final Map<String, Object> cyclicalObjNormalizedB = <String, Object>{
+final Map<String, Object> cyclicalNormalizedB = <String, Object>{
   '__typename': 'B',
   'id': 5,
   'as': [
@@ -187,32 +158,14 @@ final Map<String, Object> cyclicalObjNormalizedB = <String, Object>{
   ],
 };
 
-NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
+OptimisticCache getTestCache() => OptimisticCache(
       dataIdFromObject: typenameDataIdFromObject,
       storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
     );
 
 void main() {
   group('Normalizes writes', () {
-    final NormalizedInMemoryCache cache = getTestCache();
-    test('.write .readDenormalize round trip', () {
-      cache.write(rawOperationKey, rawOperationData);
-      expect(cache.denormalizedRead(rawOperationKey), equals(rawOperationData));
-    });
-    test('updating nested data changes top level operation', () {
-      cache.write('C/6', updatedCValue);
-      expect(
-        cache.denormalizedRead(rawOperationKey),
-        equals(updatedCOperationData),
-      );
-    });
-    test('updating subset query does not override superset query', () {
-      cache.write('anotherUnrelatedKey', subsetAValue);
-      expect(cache.read(rawOperationKey), equals(updatedSubsetOperationData));
-    });
-  });
-  group('Normalizes writes', () {
-    final NormalizedInMemoryCache cache = getTestCache();
+    final OptimisticCache cache = getTestCache();
     test('lazily reads cyclical references', () {
       cache.write(rawOperationKey, cyclicalOperationData);
       final LazyCacheMap a = cache.read('A/1') as LazyCacheMap;
@@ -222,14 +175,41 @@ void main() {
     });
   });
 
-  group('Handles Object/pointer self-references/cycles', () {
-    final NormalizedInMemoryCache cache = getTestCache();
+  group('Normalizes writes optimistically', () {
+    final OptimisticCache cache = getTestCache();
     test('lazily reads cyclical references', () {
-      cache.write(rawOperationKey, cyclicalObjOperationData);
+      cache.addOptimisiticPatch(rawOperationKey,
+          (cache) => cache..write(rawOperationKey, cyclicalOperationData));
       final LazyCacheMap a = cache.read('A/1') as LazyCacheMap;
-      expect(a.data, equals(cyclicalObjNormalizedA));
+      expect(a.data, equals(cyclicalNormalizedA));
       final LazyCacheMap b = a['b'] as LazyCacheMap;
-      expect(b.data, equals(cyclicalObjNormalizedB));
+      expect(b.data, equals(cyclicalNormalizedB));
+    });
+  });
+
+  group('Optimistic writes', () {
+    final OptimisticCache cache = getTestCache();
+    test('.addOptimisiticPatch .readDenormalize round trip', () {
+      cache.addOptimisiticPatch(
+        rawOperationKey,
+        (cache) => cache..write(rawOperationKey, rawOperationData),
+      );
+      expect(cache.denormalizedRead(rawOperationKey), equals(rawOperationData));
+    });
+    test('updating nested data changes top level optimistic operation', () {
+      cache.addOptimisiticPatch(
+        '$rawOperationKey.C',
+        (cache) => cache..write('C/6', updatedCValue),
+      );
+      expect(
+        cache.denormalizedRead(rawOperationKey),
+        equals(updatedCOperationData),
+      );
+    });
+    test('removing optimistic patch clears results', () {
+      cache.removeOptimisticPatch(rawOperationKey);
+      expect(cache.read(rawOperationKey), equals(null));
+      expect(cache.read('C/6'), equals(null));
     });
   });
 }
