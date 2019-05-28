@@ -65,7 +65,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   /// *WARNING* if your system allows cyclical references, this will break
   dynamic denormalizedRead(String key) {
     try {
-      return Traversal(_denormalizingDereference).traverse(super.read(key));
+      return Traversal(_denormalizingDereference).traverse(read(key));
     } catch (error) {
       if (error is StackOverflowError) {
         throw NormalizationException(
