@@ -16,7 +16,7 @@ class GraphQLProvider extends StatefulWidget {
     final _InheritedGraphQLProvider inheritedGraphqlProvider =
         _InheritedGraphQLProvider.of(context);
 
-    return inheritedGraphqlProvider.client;
+    return inheritedGraphqlProvider?.client;
   }
 
   @override
