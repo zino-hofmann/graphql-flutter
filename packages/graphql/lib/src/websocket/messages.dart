@@ -70,6 +70,8 @@ class InitOperation extends GraphQLSocketMessage {
 @deprecated
 
 /// The old implementation of [InitOperation]
+// @todo please review this ignore rule
+// ignore: deprecated_member_use_from_same_package
 class LegacyInitOperation extends InitOperation {
   LegacyInitOperation(dynamic payload) : super(payload);
 

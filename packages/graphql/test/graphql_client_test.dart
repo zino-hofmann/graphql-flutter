@@ -1,5 +1,3 @@
-import 'dart:typed_data' show Uint8List;
-
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
