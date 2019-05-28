@@ -175,6 +175,160 @@
         "bug",
         "code"
       ]
+    },
+    {
+      "login": "truongsinh",
+      "name": "TruongSinh Tran-Nguyen",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/358585?v=4",
+      "profile": "http://truongsinh.pro",
+      "contributions": [
+        "code",
+        "content",
+        "doc",
+        "example",
+        "ideas",
+        "infra",
+        "test",
+        "tutorial"
+      ]
+    },
+    {
+      "login": "mainawycliffe",
+      "name": "Maina Wycliffe",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/12270550?v=4",
+      "profile": "https://codinglatte.com",
+      "contributions": [
+        "code",
+        "doc",
+        "example"
+      ]
+    },
+    {
+      "login": "degroote22",
+      "name": "Lucas de Ávila Martins",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/12750442?v=4",
+      "profile": "https://github.com/degroote22",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "szantogab",
+      "name": "szantogab",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/2809091?v=4",
+      "profile": "https://github.com/szantogab",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "dbrb",
+      "name": "dbrb",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/1658994?v=4",
+      "profile": "https://github.com/dbrb",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "yunyu",
+      "name": "Yunyu Lin",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/8008350?v=4",
+      "profile": "https://yunyul.in/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ammaratef45",
+      "name": "Ammar Atef",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/13663221?v=4",
+      "profile": "https://zerosonessoftware.blogspot.com/",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "SirKuryaki",
+      "name": "Ariel Carbonaro",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/6807077?v=4",
+      "profile": "http://dev4mobile.blogspot.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "ArneSchulze",
+      "name": "ArneSchulze",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/32508820?v=4",
+      "profile": "https://github.com/ArneSchulze",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "xtian",
+      "name": "Christian Wesselhoeft",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/602654?v=4",
+      "profile": "https://xtian.us",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "JarrodCColburn",
+      "name": "JarrodCColburn",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/16673615?v=4",
+      "profile": "https://github.com/JarrodCColburn",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mwalkerwells",
+      "name": "M. Walker Wells",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/16157429?v=4",
+      "profile": "http://mwalkerwells.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "mateusfsilva",
+      "name": "Mateus Gustavo de Freitas e Silva",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/3394090?v=4",
+      "profile": "https://mateusfsilva.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "pleopardi",
+      "name": "pleopardi",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/22129342?v=4",
+      "profile": "https://github.com/pleopardi",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "smkhalsa",
+      "name": "Sat Mandir S. Khalsa",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/6362903?v=4",
+      "profile": "http://www.satkhalsa.com",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "nitishk72",
+      "name": "Nitish Kumar Singh",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/15886737?v=4",
+      "profile": "https://www.youtube.com/c/NitishKumarSingh",
+      "contributions": [
+        "code"
+      ]
     }
-  ]
+  ],
+  "commitConvention": "none"
 }
