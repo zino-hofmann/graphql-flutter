@@ -198,7 +198,9 @@
       "avatar_url": "https://avatars2.githubusercontent.com/u/12270550?v=4",
       "profile": "https://codinglatte.com",
       "contributions": [
-        "code"
+        "code",
+        "doc",
+        "example"
       ]
     },
     {
