@@ -45,7 +45,7 @@ class HeroForEpisode extends StatelessWidget {
           children: <Widget>[
             Text(getPrettyJSONString(result.data)),
             RaisedButton(
-              onPressed: () => print(refetch()),
+              onPressed: refetch,
               child: const Text('REFETCH'),
             ),
           ],
