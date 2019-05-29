@@ -17,7 +17,6 @@ enum QueryLifecycle {
   SIDE_EFFECTS_PENDING,
   SIDE_EFFECTS_BLOCKING,
 
-  // right now only Mutations ever become completed
   COMPLETED,
   CLOSED
 }

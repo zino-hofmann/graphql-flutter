@@ -82,7 +82,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
       if (patch.data.containsKey(key)) {
         final Object patchData = patch.data[key];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
-          value = deeplyMergeLeft(<Map<String, Object>>[
+          value = deeplyMergeLeft([
             value as Map<String, Object>,
             patchData,
           ]);

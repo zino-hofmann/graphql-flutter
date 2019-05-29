@@ -23,6 +23,6 @@ dev_dependencies:
   test: ^1.5.3
 environment:
   sdk: '>=2.2.0 <3.0.0'
-dependency_overrides:
-  graphql:
-    path: ../graphql
+# dependency_overrides:
+#  graphql:
+#    path: ../graphql
