@@ -93,7 +93,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   // get a normalizer for a given target map
   Normalizer _normalizerFor(Map<String, Object> into) {
     List<String> normalizer(Object node) {
-      final String dataId = dataIdFromObject(node);
+      final dataId = dataIdFromObject(node);
       if (dataId != null) {
         return <String>[prefix, dataId];
       }
@@ -122,7 +122,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   ]) {
     normalizer ??= _normalizerFor(into);
     if (value is Map<String, Object>) {
-      final Map<String, Object> merged = _mergedWithExisting(into, key, value);
+      final merged = _mergedWithExisting(into, key, value);
       final Traversal traversal = Traversal(
         normalizer,
         transformSideEffect: _traversingWriteInto(into),
@@ -162,7 +162,7 @@ SideEffect _traversingWriteInto(Map<String, Object> into) {
   void sideEffect(Object ref, Object value, Traversal traversal) {
     final String key = (ref as List<String>)[1];
     if (value is Map<String, Object>) {
-      final Map<String, Object> merged = _mergedWithExisting(into, key, value);
+      final merged = _mergedWithExisting(into, key, value);
       into[key] = traversal.traverseValues(merged);
     } else {
       // writing non-map data to the store is allowed,
@@ -178,8 +178,8 @@ SideEffect _traversingWriteInto(Map<String, Object> into) {
 /// get the given value merged with any pre-existing map with the same key
 Map<String, Object> _mergedWithExisting(
     Map<String, Object> into, String key, Map<String, Object> value) {
-  final Object existing = into[key];
+  final existing = into[key];
   return (existing is Map<String, Object>)
-      ? deeplyMergeLeft(<Map<String, Object>>[existing, value])
+      ? deeplyMergeLeft([existing, value])
       : value;
 }

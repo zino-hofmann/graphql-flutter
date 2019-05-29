@@ -71,6 +71,5 @@ Map<String, dynamic> deeplyMergeLeft(
   Iterable<Map<String, dynamic>> maps,
 ) {
   // prepend an empty literal for functional immutability
-  return (<Map<String, dynamic>>[<String, dynamic>{}]..addAll(maps))
-      .reduce(_recursivelyAddAll);
+  return (<Map<String, dynamic>>[{}]..addAll(maps)).reduce(_recursivelyAddAll);
 }

@@ -173,13 +173,13 @@ Map<String, Object> get cyclicalObjOperationData {
   return {'a': a};
 }
 
-final Map<String, Object> cyclicalObjNormalizedA = <String, Object>{
+final Map<String, Object> cyclicalObjNormalizedA = {
   '__typename': 'A',
   'id': 1,
   'b': <String>['@cache/reference', 'B/5'],
 };
 
-final Map<String, Object> cyclicalObjNormalizedB = <String, Object>{
+final Map<String, Object> cyclicalObjNormalizedB = {
   '__typename': 'B',
   'id': 5,
   'as': [
