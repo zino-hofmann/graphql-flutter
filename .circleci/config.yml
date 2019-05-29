@@ -78,15 +78,17 @@ jobs:
       - run: *install_yaml_processor
       - run: *graphql_from_path
       - run:
-          name: Code linting (graphql)
+          name: Code formating and analyzing (graphql)
           command: |
             cd packages/graphql
             dartfmt **/*.dart -n --set-exit-if-changed
+            flutter analyze
       - run:
-          name: Code linting (graphql_flutter)
+          name: Code formating and analyzing (graphql_flutter)
           command: |
             cd packages/graphql_flutter
             dartfmt **/*.dart -n --set-exit-if-changed
+            flutter analyze
   coverage:
     docker: *flutter_environment
     steps:

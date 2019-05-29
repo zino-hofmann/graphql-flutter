@@ -16,7 +16,7 @@ dependencies:
   path_provider: ^1.1.0
   rxdart: ^0.22.0
 dev_dependencies:
-  perfectionist: ^2.0.0
+  pedantic: "<=1.7.99"
   mockito: ^4.0.0
   flutter_test:
     sdk: flutter

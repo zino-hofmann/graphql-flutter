@@ -15,6 +15,8 @@ class SocketClientConfig {
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.compression = CompressionOptions.compressionDefault,
     this.initPayload,
+    // @todo please review this ignore rule
+    // ignore: deprecated_member_use_from_same_package
     @deprecated this.legacyInitPayload,
   });
 
@@ -50,10 +52,12 @@ class SocketClientConfig {
     if (legacyInitPayload != null) {
       print(
         'WARNING: Using a legacyInitPayload which will be removed soon. '
-        'If you need this particular payload serialization behavior, '
-        'please comment on this issue with details on your usecase: '
-        'https://github.com/zino-app/graphql-flutter/pull/277',
+            'If you need this particular payload serialization behavior, '
+            'please comment on this issue with details on your usecase: '
+            'https://github.com/zino-app/graphql-flutter/pull/277',
       );
+      // @todo please review this ignore rule
+      // ignore: deprecated_member_use_from_same_package
       return LegacyInitOperation(legacyInitPayload);
     }
     return InitOperation(initPayload);
@@ -164,8 +168,10 @@ class SocketClient {
       return;
     }
 
-    if (_connectionStateController.value != SocketConnectionState.NOT_CONNECTED)
+    if (_connectionStateController.value !=
+        SocketConnectionState.NOT_CONNECTED) {
       _connectionStateController.value = SocketConnectionState.NOT_CONNECTED;
+    }
 
     if (config.autoReconnect && !_connectionStateController.isClosed) {
       if (config.delayBetweenReconnectionAttempts != null) {

@@ -1,12 +1,9 @@
 // This
 import 'dart:mirrors';
 import 'dart:convert';
-import 'dart:io' show File, Platform, Directory;
-import 'dart:typed_data' show Uint8List;
+import 'dart:io' show File, Directory;
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
 
