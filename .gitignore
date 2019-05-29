@@ -32,5 +32,5 @@ packages/graphql_flutter/example/android/app/.classpath
 packages/graphql_flutter/example/android/app/.project
 packages/graphql_flutter/example/android/app/.settings/
 
-packages/graphql/example/android/
-packages/graphql/example/ios/
+packages/graphql/example/android
+packages/graphql/example/ios
