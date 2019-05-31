@@ -173,6 +173,8 @@ void main() {
           'path': './uploads/5Ea18qlMur-sample_upload.mov'
         },
       ]);
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:mirrors"),
     });
 
     //test('upload fail error response', () {
