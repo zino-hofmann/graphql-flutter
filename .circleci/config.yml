@@ -7,8 +7,8 @@ aliases:
   - &restore_cache
     keys:
       # when lock file changes, use increasingly general patterns to restore cache
-      - pub-packages-v1-{{ checksum "packages/graphql/pubspec.lock" }}-{{ checksum "packages/graphql_flutter/pubspec.lock" }}
-      - pub-packages-v1-{{ checksum "packages/graphql/pubspec.lock" }}
+      - pub-packages-v1-{{ checksum "packages/graphql/pubspec.yaml" }}-{{ checksum "packages/graphql_flutter/pubspec.yaml" }}
+      - pub-packages-v1-{{ checksum "packages/graphql/pubspec.yaml" }}
       - pub-packages-v1-
   - &install_yaml_processor
     name: Install yq yaml processor
@@ -67,7 +67,7 @@ jobs:
             cd packages/graphql_flutter
             flutter packages get
       - save_cache:
-          key: pub-packages-v1-{{ checksum "packages/graphql/pubspec.lock" }}-{{ checksum "packages/graphql_flutter/pubspec.lock" }}
+          key: pub-packages-v1-{{ checksum "packages/graphql/pubspec.yaml" }}-{{ checksum "packages/graphql_flutter/pubspec.yaml" }}
           paths:
             - ~/.pub-cache
   lint:
@@ -179,7 +179,6 @@ jobs:
             git checkout $BRANCH
 
             git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
-            git add packages/graphql/pubspec.lock packages/graphql_flutter/pubspec.lock
             git commit --allow-empty -m "build(Pub): Bump version numbers [skip ci]"
 
             # Push quietly to prevent showing the token in log
