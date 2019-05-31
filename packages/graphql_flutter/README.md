@@ -473,10 +473,10 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 
-[build-status-badge]: https://api.cirrus-ci.com/github/truongsinh/graphql-flutter.svg
-[build-status-link]: https://cirrus-ci.com/github/truongsinh/dart-uuid/master
-[coverage-badge]: https://codecov.io/gh/truongsinh/graphql-flutter/branch/master/graph/badge.svg
-[coverage-link]: https://codecov.io/gh/truongsinh/graphql-flutter
+[build-status-badge]: https://circleci.com/gh/zino-app/graphql-flutter/tree/master.svg?style=svg
+[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter/
+[coverage-badge]: https://codecov.io/gh/zino-app/graphql-flutter/branch/master/graph/badge.svg
+[coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
