@@ -1,0 +1,19 @@
+[config]
+exclude-merge-commits=true
+check-summary-length=true
+summary-length=50
+
+[matchers]
+all="(?:revert|ci|docs|feat|fix|perf|refactor|style|test)\\(.*?\\): .*?\n(?:\n?(?:\\* |  ).*?\n)*"
+
+[examples]
+a_simple_commit="""
+[revert|ci|docs|feat|fix|perf|refactor|style|test](module): A commit message
+"""
+an_extended_commit="""
+[revert|ci|docs|feat|fix|perf|refactor|style|test](module): A commit message
+
+Extended commit message
+
+BREAKING CHANGE: Reason why it broke
+"""

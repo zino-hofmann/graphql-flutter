@@ -49,6 +49,19 @@ aliases:
       }
       EOF
 jobs:
+  commits:
+    docker: *flutter_environment
+    steps:
+      - checkout
+      - run:
+          name: Get gommit binary
+          command: |
+            mkdir ~/bin
+            wget -O ~/bin/gommit https://github.com/antham/gommit/releases/download/v2.0.0/gommit_linux_386 && chmod 777 ~/bin/gommit
+      - run:
+          name: Run gommit
+          command: |
+            if [ $CIRCLE_BRANCH != 'beta' ]; then ~/bin/gommit check range $(git rev-parse origin/beta) $CIRCLE_BRANCH ; fi
   dependencies:
     docker: *flutter_environment
     steps:
@@ -196,7 +209,13 @@ jobs:
 workflows:
   default:
     jobs:
+      - commits:
+          filters:
+            tags:
+              only: /^.*$/
       - dependencies:
+          requires:
+            - commits
           filters:
             tags:
               only: /^.*$/
