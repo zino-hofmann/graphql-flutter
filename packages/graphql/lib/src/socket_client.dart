@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'package:websocket/websocket.dart' show WebSocket, WebSocketStatus;
 
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid/uuid.dart';
@@ -13,7 +13,6 @@ class SocketClientConfig {
     this.queryAndMutationTimeout = const Duration(seconds: 10),
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
-    this.compression = CompressionOptions.compressionDefault,
     this.initPayload,
     // @todo please review this ignore rule
     // ignore: deprecated_member_use_from_same_package
@@ -40,8 +39,6 @@ class SocketClientConfig {
   // If null, no timeout is applied, although not recommended.
   final Duration queryAndMutationTimeout;
 
-  final CompressionOptions compression;
-
   /// The initial payload that will be sent to the server upon connection.
   /// Can be null, but must be a valid json structure if provided.
   final dynamic initPayload;
@@ -52,9 +49,9 @@ class SocketClientConfig {
     if (legacyInitPayload != null) {
       print(
         'WARNING: Using a legacyInitPayload which will be removed soon. '
-            'If you need this particular payload serialization behavior, '
-            'please comment on this issue with details on your usecase: '
-            'https://github.com/zino-app/graphql-flutter/pull/277',
+        'If you need this particular payload serialization behavior, '
+        'please comment on this issue with details on your usecase: '
+        'https://github.com/zino-app/graphql-flutter/pull/277',
       );
       // @todo please review this ignore rule
       // ignore: deprecated_member_use_from_same_package
@@ -118,12 +115,13 @@ class SocketClient {
       _socket = await WebSocket.connect(url,
           protocols: protocols,
           headers: headers,
-          compression: config.compression);
+          );
       _connectionStateController.value = SocketConnectionState.CONNECTED;
       print('Connected to websocket.');
       _write(config.initOperation);
 
       _messageStream = _socket
+          .stream
           .asBroadcastStream()
           .map<GraphQLSocketMessage>(_parseSocketMessage);
 
@@ -154,11 +152,14 @@ class SocketClient {
             print('error: $e');
           });
     } catch (e) {
-      onConnectionLost();
+      onConnectionLost(e);
     }
   }
 
-  void onConnectionLost() {
+  void onConnectionLost([e]) {
+    if(e != null) {
+      print('There was an error causing connection lost: $e');
+    }
     print('Disconnected from websocket.');
     _reconnectTimer?.cancel();
     _keepAliveSubscription?.cancel();
@@ -199,10 +200,12 @@ class SocketClient {
   Future<void> dispose() async {
     print('Disposing socket client..');
     _reconnectTimer?.cancel();
-    await _socket?.close();
-    await _keepAliveSubscription?.cancel();
-    await _messageSubscription?.cancel();
-    await _connectionStateController?.close();
+    await Future.wait([
+      _socket?.close(),
+      _keepAliveSubscription?.cancel(),
+      _messageSubscription?.cancel(),
+      _connectionStateController?.close(),
+    ]);
   }
 
   static GraphQLSocketMessage _parseSocketMessage(dynamic message) {

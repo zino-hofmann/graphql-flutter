@@ -17,6 +17,7 @@ dependencies:
   uuid: ^2.0.1
   graphql_parser: ^1.1.3
   rxdart: ^0.22.0
+  websocket: ^0.0.2
 dev_dependencies:
   pedantic: <=1.7.99
   mockito: ^4.0.0
