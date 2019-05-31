@@ -53,6 +53,8 @@ void main() {
       cache.reset();
       await cache.restore();
       expect(cache.read(aKey), equals(aData));
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:io (see #295)")
     });
 
     test('saving concurrently wont error', () async {
@@ -81,6 +83,8 @@ void main() {
       expect(cache.read(cKey), equals(cData));
       expect(cache.read(dKey), equals(dData));
       expect(cache.read(eKey), equals(eData));
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:io (see #295)")
     });
   });
 }
