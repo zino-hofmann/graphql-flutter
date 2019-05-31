@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show Directory, File, IOSink, FileSystemException;
 
 import 'package:meta/meta.dart';
 // TODO need to think about this
