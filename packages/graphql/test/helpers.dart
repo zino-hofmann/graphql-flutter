@@ -1,5 +1,3 @@
-// This
-import 'dart:mirrors';
 import 'dart:convert';
 import 'dart:io' show File, Directory;
 
@@ -23,18 +21,4 @@ http.StreamedResponse simpleResponse({@required String body, int status}) {
 
   return r;
 }
-
-class _TestUtils {
-  static String _path;
-
-  static String get path {
-    if (_path == null) {
-      final String basePath =
-          dirname((reflectClass(_TestUtils).owner as LibraryMirror).uri.path);
-      _path = basePath.endsWith('test') ? basePath : join(basePath, 'test');
-    }
-    return _path;
-  }
-}
-
-File tempFile(String fileName) => File(join(_TestUtils.path, fileName));
+File tempFile(String fileName) => File(join(Directory.current.path, fileName));
