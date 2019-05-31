@@ -11,7 +11,7 @@ import 'package:graphql/client.dart';
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => Directory.systemTemp.createTemp('file_test_'),
     );
 
 http.StreamedResponse simpleResponse({@required String body, int status}) {
