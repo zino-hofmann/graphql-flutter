@@ -2,7 +2,6 @@ import 'package:graphql/src/link/fetch_result.dart';
 import 'package:graphql/src/link/link.dart';
 import 'package:graphql/src/link/operation.dart';
 import 'package:graphql/src/socket_client.dart';
-import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/websocket/messages.dart';
 import 'package:meta/meta.dart';
 
@@ -23,7 +22,6 @@ class WebSocketLink extends Link {
   /// Creates a new [WebSocketLink] instance with the specified config.
   WebSocketLink(
       {@required this.url,
-      this.headers,
       this.reconnectOnHeaderChange = true,
       this.config = const SocketClientConfig()})
       : super() {
@@ -31,7 +29,6 @@ class WebSocketLink extends Link {
   }
 
   final String url;
-  final Map<String, dynamic> headers;
   final bool reconnectOnHeaderChange;
   final SocketClientConfig config;
 
@@ -44,17 +41,8 @@ class WebSocketLink extends Link {
     if (context != null && context.containsKey('headers')) {
       concatHeaders.addAll(context['headers'] as Map<String, dynamic>);
     }
-    if (headers != null) {
-      concatHeaders.addAll(headers);
-    }
 
-    if (_socketClient == null ||
-        (reconnectOnHeaderChange &&
-            areDifferentVariables(_socketClient.headers, concatHeaders))) {
-      if (_socketClient != null) {
-        print(
-            'Creating a new socket client, because the headers have changed..');
-      }
+    if (_socketClient == null) {
       connectOrReconnect(headers: concatHeaders);
     }
 
@@ -70,7 +58,7 @@ class WebSocketLink extends Link {
   void connectOrReconnect({Map<String, dynamic> headers}) {
     _socketClient?.dispose();
     _socketClient =
-        SocketClient(url, headers: headers ?? this.headers, config: config);
+        SocketClient(url, config: config);
   }
 
   /// Disposes the underlying socket client explicitly. Only use this, if you want to disconnect from

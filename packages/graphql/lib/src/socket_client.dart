@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
+import 'package:meta/meta.dart';
 import 'package:websocket/websocket.dart' show WebSocket, WebSocketStatus;
 
 import 'package:rxdart/rxdart.dart';
-import 'package:uuid/uuid.dart';
+import 'package:uuid_enhanced/uuid.dart';
 
 import 'package:graphql/src/websocket/messages.dart';
 
@@ -77,24 +79,24 @@ class SocketClient {
     this.protocols = const <String>[
       'graphql-ws',
     ],
-    this.headers = const <String, String>{
-      'content-type': 'application/json',
-    },
     this.config = const SocketClientConfig(),
+    @visibleForTesting
+    this.randomBytesForUuid,
   }) {
     _connect();
   }
 
-  final Uuid _uuid = Uuid();
+  Uint8List randomBytesForUuid;
   final String url;
   final SocketClientConfig config;
   final Iterable<String> protocols;
-  final Map<String, dynamic> headers;
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
 
   Timer _reconnectTimer;
   WebSocket _socket;
+  @visibleForTesting
+  WebSocket get socket => _socket;
   Stream<GraphQLSocketMessage> _messageStream;
 
   StreamSubscription<ConnectionKeepAlive> _keepAliveSubscription;
@@ -114,7 +116,6 @@ class SocketClient {
     try {
       _socket = await WebSocket.connect(url,
           protocols: protocols,
-          headers: headers,
           );
       _connectionStateController.value = SocketConnectionState.CONNECTED;
       print('Connected to websocket.');
@@ -122,7 +123,6 @@ class SocketClient {
 
       _messageStream = _socket
           .stream
-          .asBroadcastStream()
           .map<GraphQLSocketMessage>(_parseSocketMessage);
 
       if (config.inactivityTimeout != null) {
@@ -256,7 +256,7 @@ class SocketClient {
   /// In case of socket disconnection, the returned stream will be closed.
   Stream<SubscriptionData> subscribe(
       final SubscriptionRequest payload, final bool waitForConnection) {
-    final String id = _uuid.v4();
+    final String id = Uuid.randomUuid(random: randomBytesForUuid).toString();
     final StreamController<SubscriptionData> response =
         StreamController<SubscriptionData>();
     StreamSubscription<SocketConnectionState> sub;
