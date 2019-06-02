@@ -1,17 +1,17 @@
-// This
-import 'dart:mirrors';
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show File, Directory;
+import 'dart:typed_data' show Uint8List;
 
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
+import 'package:graphql/src/utilities/file.dart' show File;
+import 'package:path/path.dart';
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => null,
     );
 
 http.StreamedResponse simpleResponse({@required String body, int status}) {
@@ -24,17 +24,16 @@ http.StreamedResponse simpleResponse({@required String body, int status}) {
   return r;
 }
 
-class _TestUtils {
-  static String _path;
+File tempFile(String fileName) => File.fromPath(join('test', fileName));
 
-  static String get path {
-    if (_path == null) {
-      final String basePath =
-          dirname((reflectClass(_TestUtils).owner as LibraryMirror).uri.path);
-      _path = basePath.endsWith('test') ? basePath : join(basePath, 'test');
-    }
-    return _path;
-  }
+/// Collects the data of this stream in a [Uint8List].
+Future<Uint8List> toBytes(Stream<List<int>> stream) {
+  var completer = new Completer<Uint8List>();
+  var sink = new ByteConversionSink.withCallback(
+      (bytes) => completer.complete(new Uint8List.fromList(bytes)));
+  stream.listen(sink.add,
+      onError: completer.completeError,
+      onDone: sink.close,
+      cancelOnError: true);
+  return completer.future;
 }
-
-File tempFile(String fileName) => File(join(_TestUtils.path, fileName));

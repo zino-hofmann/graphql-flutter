@@ -1,4 +1,3 @@
-import 'dart:io' show File, Directory;
 import 'dart:typed_data' show Uint8List;
 
 import 'package:test/test.dart';
@@ -6,6 +5,7 @@ import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
+import 'package:graphql/src/utilities/file.dart';
 
 import './helpers.dart';
 
@@ -13,7 +13,7 @@ class MockHttpClient extends Mock implements http.Client {}
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => null,
     );
 
 void main() {
@@ -89,12 +89,12 @@ void main() {
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
             '\r\ncontent-type: image/jpeg\r\ncontent-disposition: form-data; name="0"; filename="sample_upload.jpg"\r\n\r\n');
-        expectContinuationBytes(bodyBytes, await files[0].readAsBytes());
+        expectContinuationBytes(bodyBytes, await toBytes(files[0].openRead()));
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
             '\r\ncontent-type: video/quicktime\r\ncontent-disposition: form-data; name="1"; filename="sample_upload.mov"\r\n\r\n');
-        expectContinuationBytes(bodyBytes, await files[1].readAsBytes());
+        expectContinuationBytes(bodyBytes, await toBytes(files[1].openRead()));
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes, '--\r\n');

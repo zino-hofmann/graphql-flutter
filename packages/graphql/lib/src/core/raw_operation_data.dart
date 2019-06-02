@@ -1,10 +1,10 @@
 import 'dart:collection' show SplayTreeMap;
 import 'dart:convert' show json;
-import 'dart:io' show File;
 
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/get_from_ast.dart' show getOperationName;
+import 'package:graphql/src/utilities/file.dart' show File;
 
 class RawOperationData {
   RawOperationData({

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
@@ -15,6 +14,7 @@ import 'package:graphql/src/link/operation.dart';
 import 'package:graphql/src/link/fetch_result.dart';
 import 'package:graphql/src/link/http/fallback_http_config.dart';
 import 'package:graphql/src/link/http/http_config.dart';
+import 'package:graphql/src/utilities/file.dart' show File;
 
 class HttpLink extends Link {
   HttpLink({
