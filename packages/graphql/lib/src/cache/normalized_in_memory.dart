@@ -23,8 +23,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
     this.prefix = '@cache/reference',
-    @required StorageProvider storageProvider,
-  }) : super(storageProvider: storageProvider);
+  });
 
   DataIdFromObject dataIdFromObject;
 

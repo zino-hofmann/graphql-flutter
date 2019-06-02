@@ -8,7 +8,6 @@ import 'package:graphql/client.dart';
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => null,
     );
 
 http.StreamedResponse simpleResponse({@required String body, int status}) {

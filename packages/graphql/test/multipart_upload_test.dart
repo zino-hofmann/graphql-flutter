@@ -11,7 +11,6 @@ class MockHttpClient extends Mock implements http.Client {}
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => null,
     );
 
 void main() {

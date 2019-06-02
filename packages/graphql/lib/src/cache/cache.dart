@@ -6,7 +6,7 @@ abstract class Cache {
     dynamic value,
   ) {}
 
-  void save() {}
+  Future<void> save() async {}
 
   void restore() {}
 

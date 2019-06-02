@@ -28,7 +28,7 @@ GraphQLClient client() {
   final Link _link = _authLink.concat(_httpLink);
 
   return GraphQLClient(
-    cache: InMemoryCache(storageProvider: null),
+    cache: InMemoryCache(),
     link: _link,
   );
 }

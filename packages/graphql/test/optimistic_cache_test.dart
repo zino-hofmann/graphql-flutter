@@ -1,5 +1,3 @@
-import 'dart:io' show Directory;
-
 import 'package:test/test.dart';
 
 import 'package:graphql/src/cache/normalized_in_memory.dart'
@@ -160,7 +158,6 @@ final Map<String, Object> cyclicalNormalizedB = <String, Object>{
 
 OptimisticCache getTestCache() => OptimisticCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTemp('file_test_'),
     );
 
 void main() {
