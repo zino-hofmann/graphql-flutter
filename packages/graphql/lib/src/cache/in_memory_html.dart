@@ -10,7 +10,14 @@ import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/utilities/helpers.dart' show deeplyMergeLeft;
 
 class InMemoryCache implements Cache {
-  String masterKey = 'graphql_in_memory';
+  InMemoryCache({
+    this.storagePrefix = '',
+  }) {
+    masterKey = storagePrefix ?? '' + '_graphql_cache';
+  }
+
+  final String storagePrefix;
+  String masterKey;
 
   @protected
   HashMap<String, dynamic> data = HashMap<String, dynamic>();

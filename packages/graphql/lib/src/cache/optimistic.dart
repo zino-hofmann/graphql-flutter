@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -61,9 +62,11 @@ class OptimisticCache extends NormalizedInMemoryCache {
   OptimisticCache({
     @required DataIdFromObject dataIdFromObject,
     String prefix = '@cache/reference',
+    FutureOr<String> storagePrefix,
   }) : super(
           dataIdFromObject: dataIdFromObject,
           prefix: prefix,
+          storagePrefix: storagePrefix,
         );
 
   @protected

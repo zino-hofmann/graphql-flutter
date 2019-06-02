@@ -10,9 +10,16 @@ import 'package:meta/meta.dart';
 
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/utilities/helpers.dart' show deeplyMergeLeft;
+import 'package:path/path.dart';
 
 
 class InMemoryCache implements Cache {
+
+  InMemoryCache({
+    this.storagePrefix = '',
+  });
+  
+  final FutureOr<String> storagePrefix;
 
   bool _writingToStorage = false;
 
@@ -65,7 +72,7 @@ class InMemoryCache implements Cache {
   }
 
   FutureOr<File> get _localStorageFile async {
-    return File('cache.txt');
+    return File(join(await storagePrefix, 'cache.txt'));
   }
 
   Future<dynamic> _writeToStorage() async {

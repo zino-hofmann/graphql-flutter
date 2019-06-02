@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/traverse.dart';
@@ -23,7 +25,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
   NormalizedInMemoryCache({
     @required this.dataIdFromObject,
     this.prefix = '@cache/reference',
-  });
+    FutureOr<String> storagePrefix,
+  }) : super(storagePrefix: storagePrefix);
 
   DataIdFromObject dataIdFromObject;
 
