@@ -64,7 +64,7 @@ class Bloc {
     getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
   );
 
-  static final Link _link = _authLink.concat(_httpLink as Link);
+  static final Link _link = _authLink.concat(_httpLink);
 
   static final GraphQLClient _client = GraphQLClient(
     cache: NormalizedInMemoryCache(

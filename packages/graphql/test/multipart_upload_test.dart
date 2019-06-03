@@ -1,6 +1,4 @@
-import 'dart:io' show File, Directory;
-import 'dart:typed_data' show Uint8List;
-
+import 'package:http_parser/http_parser.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -13,7 +11,7 @@ class MockHttpClient extends Mock implements http.Client {}
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => null,
     );
 
 void main() {
@@ -45,7 +43,7 @@ void main() {
         getToken: () async => 'Bearer my-special-bearer-token',
       );
 
-      link = authLink.concat(httpLink as Link);
+      link = authLink.concat(httpLink);
 
       graphQLClientClient = GraphQLClient(
         cache: getTestCache(),
@@ -54,17 +52,17 @@ void main() {
     });
 
     test('upload success', () async {
-      Future<void> expectUploadBody(http.ByteStream bodyBytesStream,
-          String boundary, List<File> files) async {
+      Future<void> expectUploadBody(
+          http.ByteStream bodyBytesStream, String boundary) async {
         final List<Function> expectContinuationList = (() {
           int i = 0;
           return <Function>[
             // ExpectString
-            (Uint8List actual, String expected) => expect(
+            (List<int> actual, String expected) => expect(
                 String.fromCharCodes(actual.sublist(i, i += expected.length)),
                 expected),
             // ExpectBytes
-            (Uint8List actual, Uint8List expected) =>
+            (List<int> actual, List<int> expected) =>
                 expect(actual.sublist(i, i += expected.length), expected),
             // Expect final length
             (int expectedLength) => expect(i, expectedLength),
@@ -73,7 +71,7 @@ void main() {
         final Function expectContinuationString = expectContinuationList[0];
         final Function expectContinuationBytes = expectContinuationList[1];
         final Function expectContinuationLength = expectContinuationList[2];
-        final Uint8List bodyBytes = await bodyBytesStream.toBytes();
+        final bodyBytes = await bodyBytesStream.toBytes();
         expectContinuationString(bodyBytes, '--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
@@ -89,12 +87,12 @@ void main() {
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
             '\r\ncontent-type: image/jpeg\r\ncontent-disposition: form-data; name="0"; filename="sample_upload.jpg"\r\n\r\n');
-        expectContinuationBytes(bodyBytes, await files[0].readAsBytes());
+        expectContinuationBytes(bodyBytes, [0, 1, 254, 255]);
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
-            '\r\ncontent-type: video/quicktime\r\ncontent-disposition: form-data; name="1"; filename="sample_upload.mov"\r\n\r\n');
-        expectContinuationBytes(bodyBytes, await files[1].readAsBytes());
+            '\r\ncontent-type: text/plain; charset=utf-8\r\ncontent-disposition: form-data; name="1"; filename="sample_upload.txt"\r\n\r\n');
+        expectContinuationString(bodyBytes, 'just plain text');
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes, '--\r\n');
@@ -116,9 +114,9 @@ void main() {
       },
       {
         "id": "5Ea18qlMur",
-        "filename": "sample_upload.mov",
-        "mimetype": "video/quicktime",
-        "path": "./uploads/5Ea18qlMur-sample_upload.mov"
+        "filename": "sample_upload.txt",
+        "mimetype": "text/plain",
+        "path": "./uploads/5Ea18qlMur-sample_upload.txt"
       }
     ]
   }
@@ -126,15 +124,23 @@ void main() {
         ''');
       });
 
-      final List<File> files = <String>[
-        'sample_upload.jpg',
-        'sample_upload.mov'
-      ].map((String fileName) => tempFile(fileName)).toList();
-
       final MutationOptions _options = MutationOptions(
         document: uploadMutation,
         variables: <String, dynamic>{
-          'files': files,
+          'files': [
+            http.MultipartFile.fromBytes(
+              '',
+              [0, 1, 254, 255],
+              filename: 'sample_upload.jpg',
+              contentType: MediaType('image', 'jpeg'),
+            ),
+            http.MultipartFile.fromString(
+              '',
+              'just plain text',
+              filename: 'sample_upload.txt',
+              contentType: MediaType('text', 'plain'),
+            ),
+          ],
         },
       );
       final QueryResult r = await graphQLClientClient.mutate(_options);
@@ -153,7 +159,7 @@ void main() {
       final List<String> contentTypeStringSplit =
           request.headers['content-type'].split('; boundary=');
       expect(contentTypeStringSplit[0], 'multipart/form-data');
-      await expectUploadBody(bodyBytes, contentTypeStringSplit[1], files);
+      await expectUploadBody(bodyBytes, contentTypeStringSplit[1]);
 
       final List<Map<String, dynamic>> multipleUpload =
           (r.data['multipleUpload'] as List<dynamic>)
@@ -168,13 +174,11 @@ void main() {
         },
         <String, String>{
           'id': '5Ea18qlMur',
-          'filename': 'sample_upload.mov',
-          'mimetype': 'video/quicktime',
-          'path': './uploads/5Ea18qlMur-sample_upload.mov'
+          'filename': 'sample_upload.txt',
+          'mimetype': 'text/plain',
+          'path': './uploads/5Ea18qlMur-sample_upload.txt'
         },
       ]);
-    }, onPlatform: {
-      "browser": Skip("Browser does not support dart:mirrors"),
     });
 
     //test('upload fail error response', () {
