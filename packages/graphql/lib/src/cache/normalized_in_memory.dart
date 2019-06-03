@@ -5,7 +5,7 @@ import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 import 'package:graphql/src/cache/lazy_cache_map.dart';
 
-typedef DataIdFromObject = String Function(Object node);
+export 'package:graphql/src/utilities/helpers.dart' show DataIdFromObject;
 
 class NormalizationException implements Exception {
   NormalizationException(this.cause, this.overflowError, this.value);

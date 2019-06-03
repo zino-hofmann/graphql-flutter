@@ -1,6 +1,8 @@
 import 'package:graphql/src/cache/lazy_cache_map.dart'
     show LazyDereferencingMap, unwrapMap;
 
+typedef DataIdFromObject = String Function(Object node);
+
 bool notNull(Object any) {
   return any != null;
 }
