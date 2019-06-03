@@ -10,7 +10,7 @@ dependencies:
     path: ..
 
 dev_dependencies:
-  perfectionist: ^2.0.0
+  pedantic: "<=1.7.99"
   flutter_test:
     sdk: flutter
   test: ^1.5.1

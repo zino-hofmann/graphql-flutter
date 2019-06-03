@@ -17,7 +17,7 @@ class GraphQLConsumer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     /// Gets the client from the closest wrapping [GraphQLProvider].
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final GraphQLClient client = GraphQLProvider.of(context)?.value;
     assert(client != null);
 
     return builder(client);

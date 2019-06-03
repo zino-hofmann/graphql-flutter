@@ -53,6 +53,63 @@ void main() {
       cache.reset();
       await cache.restore();
       expect(cache.read(aKey), equals(aData));
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:io (see #295)")
+    });
+
+    test('.write avoids overriding a superset with a subset of a field (#155)',
+        () async {
+      final InMemoryCache cache = InMemoryCache(
+        storageProvider: () => customStorageDirectory,
+      );
+      cache.write(aKey, aData);
+
+      final Map<String, Object> anotherAData = <String, Object>{
+        'a': <String, Object>{
+          'key': 'val',
+        },
+      };
+      cache.write(aKey, anotherAData);
+
+      await cache.save();
+      cache.reset();
+      await cache.restore();
+      expect(
+        cache.read(aKey),
+        equals(<String, Object>{
+          'a': {'__typename': 'A', 'key': 'val'}
+        }),
+      );
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:io (see #295)")
+    });
+
+    test('.write does not mutate input', () async {
+      final InMemoryCache cache = InMemoryCache(
+        storageProvider: () => customStorageDirectory,
+      );
+      cache.write(aKey, aData);
+      final Map<String, Object> anotherAData = <String, Object>{
+        'a': <String, Object>{
+          'key': 'val',
+        },
+      };
+      cache.write(aKey, anotherAData);
+
+      expect(
+        aData,
+        equals(<String, Object>{
+          'a': {'__typename': 'A'}
+        }),
+      );
+      expect(
+        anotherAData,
+        equals(<String, Object>{
+          'a': {'key': 'val'}
+        }),
+      );
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:io (see #295)")
     });
 
     test('saving concurrently wont error', () async {
@@ -81,6 +138,8 @@ void main() {
       expect(cache.read(cKey), equals(cData));
       expect(cache.read(dKey), equals(dData));
       expect(cache.read(eKey), equals(eData));
+    }, onPlatform: {
+      "browser": Skip("Browser does not support dart:io (see #295)")
     });
   });
 }

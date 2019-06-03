@@ -41,8 +41,9 @@ class WebSocketLink extends Link {
   Stream<FetchResult> _doOperation(Operation operation, [NextLink forward]) {
     final Map<String, dynamic> concatHeaders = <String, dynamic>{};
     final Map<String, dynamic> context = operation.getContext();
-    if (context != null && context.containsKey('headers'))
+    if (context != null && context.containsKey('headers')) {
       concatHeaders.addAll(context['headers'] as Map<String, dynamic>);
+    }
     if (headers != null) {
       concatHeaders.addAll(headers);
     }
@@ -50,9 +51,10 @@ class WebSocketLink extends Link {
     if (_socketClient == null ||
         (reconnectOnHeaderChange &&
             areDifferentVariables(_socketClient.headers, concatHeaders))) {
-      if (_socketClient != null)
+      if (_socketClient != null) {
         print(
             'Creating a new socket client, because the headers have changed..');
+      }
       connectOrReconnect(headers: concatHeaders);
     }
 
