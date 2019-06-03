@@ -155,6 +155,13 @@ String typenameDataIdFromObject(Object object) {
 }
 ```
 
+or just
+
+```dart
+DataIdFromObject typenameDataIdFromObject = compositData();
+```
+For detailed usage of compositData,you can look at the source code.
+
 However, note that **`graphql-flutter` does not inject \_\_typename into operations** the way Apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
 
 Unlike Apollo, we don't have a real client-side document parser and resolver, so **operations leveraging normalization can have additional fields not specified in the query**. There are a couple of ideas for constraining this (leveraging `json_serializable`, or just implementing the resolver), but for now, the normalized cache uses a [`LazyCacheMap`](lib/src/cache/lazy_cache_map.dart), which wraps underlying data with a lazy denormalizer to allow for cyclical references. It has the same API as a normal `HashMap`, but is currently a bit hard to debug with, as a descriptive debug representation is currently unavailable.
