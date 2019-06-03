@@ -5,7 +5,7 @@ import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 import 'package:graphql/src/cache/lazy_cache_map.dart';
 
-export 'package:graphql/src/utilities/helpers.dart' show DataIdFromObject;
+export 'package:graphql/src/utilities/helpers.dart' show DataIdFromObject,compositData;
 
 class NormalizationException implements Exception {
   NormalizationException(this.cause, this.overflowError, this.value);
@@ -143,11 +143,4 @@ class NormalizedInMemoryCache extends InMemoryCache {
   }
 }
 
-String typenameDataIdFromObject(Object object) {
-  if (object is Map<String, Object> &&
-      object.containsKey('__typename') &&
-      object.containsKey('id')) {
-    return "${object['__typename']}/${object['id']}";
-  }
-  return null;
-}
+DataIdFromObject typenameDataIdFromObject = compositData();
