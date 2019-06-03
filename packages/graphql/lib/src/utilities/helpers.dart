@@ -112,8 +112,7 @@ Map<String, dynamic> deeplyMergeLeft(
 /// ```
 DataIdFromObject compositData([ List<String> keys= DEFAULT_KEYS,  String seperator = DEFAULT_SEPERATOR ]) {
   return (Object object) {
-    if (objectIsCanComposit(object, keys)) 
-      return datasToString(keys, object as Map<String, Object>, seperator);
+    if (objectIsCanComposit(object, keys)) return datasToString(keys, object as Map<String, Object>, seperator);
     return null;
   };
 }
