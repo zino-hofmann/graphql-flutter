@@ -120,7 +120,7 @@ class InMemoryCache implements Cache {
       final File file = await _localStorageFile;
       final HashMap<String, dynamic> storedHashMap = HashMap<String, dynamic>();
 
-      if (file.existsSync()) {
+      if (await file.exists()) {
         final Stream<List<int>> inputStream = file.openRead();
 
         await for (String line in inputStream

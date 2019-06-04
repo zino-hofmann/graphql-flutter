@@ -160,7 +160,7 @@ final Map<String, Object> cyclicalNormalizedB = <String, Object>{
 
 OptimisticCache getTestCache() => OptimisticCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => Directory.systemTemp.createTemp('file_test_'),
     );
 
 void main() {

@@ -13,7 +13,7 @@ class MockHttpClient extends Mock implements http.Client {}
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => Directory.systemTemp.createTemp('file_test_'),
     );
 
 void main() {

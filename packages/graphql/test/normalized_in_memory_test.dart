@@ -189,7 +189,7 @@ final Map<String, Object> cyclicalObjNormalizedB = {
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
+      storageProvider: () => Directory.systemTemp.createTemp('file_test_'),
     );
 
 void main() {
