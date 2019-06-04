@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io' show Directory;
+import 'dart:io' show Directory, FileSystemException;
 import 'package:test/test.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 
@@ -39,8 +39,8 @@ final Map<String, Object> eData = <String, Object>{
   }
 };
 
-final Directory customStorageDirectory =
-    Directory.systemTemp.createTempSync('file_test_');
+final Future<Directory> customStorageDirectory =
+    Directory.systemTemp.createTemp('file_test_');
 
 void main() {
   group('Normalizes writes', () {
@@ -142,4 +142,27 @@ void main() {
       "browser": Skip("Browser does not support dart:io (see #295)")
     });
   });
+
+  group('Exception handling', () {
+    test('FileSystemException', overridePrint((List<String> log) async {
+      final InMemoryCache cache = InMemoryCache(
+        storageProvider: () {
+          throw FileSystemException();
+        },
+      );
+      await cache.restore();
+      expect(
+        log,
+        ['Can\'t read file from storage, returning an empty HashMap.'],
+      );
+    }));
+  });
 }
+
+overridePrint(testFn(List<String> log)) => () {
+      final log = <String>[];
+      final spec = new ZoneSpecification(print: (_, __, ___, String msg) {
+        log.add(msg);
+      });
+      return Zone.current.fork(specification: spec).run(() => testFn(log));
+    };
