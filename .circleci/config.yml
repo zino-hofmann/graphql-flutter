@@ -1,7 +1,7 @@
 version: 2.1
 aliases:
   - &flutter_environment
-    - image: cirrusci/flutter:beta
+    - image: cirrusci/flutter:latest-web
   - &node_environment
     - image: circleci/node:10
   - &restore_cache
@@ -97,11 +97,12 @@ jobs:
       - run: *install_yaml_processor
       - run: *graphql_from_path
       - run:
-          name: Code coverage (graphql)
+          name: Code coverage (graphql, vm only)
           command: |
             cd packages/graphql
             pub global activate coverage
             pub get
+            pub run test test -p chromium
             pub run test_coverage
       - run:
           name: Code coverage (graphql_flutter)
