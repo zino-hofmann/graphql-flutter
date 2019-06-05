@@ -102,6 +102,8 @@ jobs:
             cd packages/graphql
             pub global activate coverage
             pub get
+            # warm-up dart2js, this is a dirty workaround
+            dart2js test/websocket_test.dart
             pub run test test -p chromium
             pub run test_coverage
       - run:
