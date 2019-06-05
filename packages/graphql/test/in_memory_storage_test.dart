@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:test/test.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 
+import 'helpers.dart';
+
 const String aKey = 'aKey';
 const String bKey = 'bKey';
 const String cKey = 'cKey';

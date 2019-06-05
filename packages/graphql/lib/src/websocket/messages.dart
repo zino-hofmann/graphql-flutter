@@ -189,6 +189,13 @@ class SubscriptionData extends GraphQLSocketMessage {
         'data': data,
         'errors': errors,
       };
+
+  @override
+  int get hashCode => toJson().hashCode;
+
+  @override
+  bool operator ==(dynamic other) =>
+      other is SubscriptionData && jsonEncode(other) == jsonEncode(this);
 }
 
 /// Errors sent from the server to the client if the subscription operation was
