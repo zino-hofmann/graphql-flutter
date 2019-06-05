@@ -2,6 +2,7 @@ import 'package:graphql/src/link/fetch_result.dart';
 import 'package:graphql/src/link/link.dart';
 import 'package:graphql/src/link/operation.dart';
 import 'package:graphql/src/socket_client.dart';
+import 'package:graphql/src/utilities/platform.dart' show isHtml;
 import 'package:graphql/src/websocket/messages.dart';
 import 'package:meta/meta.dart';
 
@@ -22,13 +23,32 @@ class WebSocketLink extends Link {
   /// Creates a new [WebSocketLink] instance with the specified config.
   WebSocketLink(
       {@required this.url,
+      @deprecated
+      // ignore: deprecated_member_use_from_same_package
+      this.headers,
       this.reconnectOnHeaderChange = true,
       this.config = const SocketClientConfig()})
       : super() {
+    if (headers != null) {
+      assert(
+        !isHtml,
+        'Cannot set websocket headers with dart:html websockets. '
+        'If these are for authentication, another approach must be used, '
+        'such as initPayload.',
+      );
+      print(
+        'WARNING: Using direct websocket headers which will be removed soon, '
+        'as it is incompatable with dart:html. '
+        'If you need this direct header access, '
+        'please comment on this PR with details on your usecase: '
+        'https://github.com/zino-app/graphql-flutter/pull/323',
+      );
+    }
     request = _doOperation;
   }
 
   final String url;
+  final Map<String, dynamic> headers;
   final bool reconnectOnHeaderChange;
   final SocketClientConfig config;
 
@@ -40,6 +60,10 @@ class WebSocketLink extends Link {
     final Map<String, dynamic> context = operation.getContext();
     if (context != null && context.containsKey('headers')) {
       concatHeaders.addAll(context['headers'] as Map<String, dynamic>);
+    }
+    // @todo deprecated
+    if (headers != null) {
+      concatHeaders.addAll(headers);
     }
 
     if (_socketClient == null) {
@@ -57,8 +81,7 @@ class WebSocketLink extends Link {
   /// Connects or reconnects to the server with the specified headers.
   void connectOrReconnect({Map<String, dynamic> headers}) {
     _socketClient?.dispose();
-    _socketClient =
-        SocketClient(url, config: config);
+    _socketClient = SocketClient(url, config: config);
   }
 
   /// Disposes the underlying socket client explicitly. Only use this, if you want to disconnect from

@@ -1,4 +1,5 @@
 // This
+import 'dart:async';
 import 'dart:mirrors';
 import 'dart:convert';
 import 'dart:io' show File, Directory;
@@ -8,6 +9,14 @@ import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
+
+overridePrint(testFn(List<String> log)) => () {
+      final log = <String>[];
+      final spec = new ZoneSpecification(print: (_, __, ___, String msg) {
+        log.add(msg);
+      });
+      return Zone.current.fork(specification: spec).run(() => testFn(log));
+    };
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,

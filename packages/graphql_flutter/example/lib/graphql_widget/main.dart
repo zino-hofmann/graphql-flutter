@@ -26,7 +26,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    Link link = authLink.concat(httpLink);
+    Link link = authLink.concat(httpLink as Link);
     if (ENABLE_WEBSOCKETS) {
       final WebSocketLink websocketLink = WebSocketLink(
         url: 'ws://localhost:8080/ws/graphql',

@@ -3,6 +3,8 @@ import 'dart:io' show Directory, FileSystemException;
 import 'package:test/test.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 
+import 'helpers.dart';
+
 const String aKey = 'aKey';
 const String bKey = 'bKey';
 const String cKey = 'cKey';
@@ -158,11 +160,3 @@ void main() {
     }));
   });
 }
-
-overridePrint(testFn(List<String> log)) => () {
-      final log = <String>[];
-      final spec = new ZoneSpecification(print: (_, __, ___, String msg) {
-        log.add(msg);
-      });
-      return Zone.current.fork(specification: spec).run(() => testFn(log));
-    };
