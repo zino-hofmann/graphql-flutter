@@ -27,7 +27,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
     );
 
     // TODO don't think we have to cast here, maybe covariant
-    Link link = authLink.concat(httpLink as Link);
+    Link link = authLink.concat(httpLink);
     if (ENABLE_WEBSOCKETS) {
       final WebSocketLink websocketLink = WebSocketLink(
         url: 'ws://localhost:8080/ws/graphql',

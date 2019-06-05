@@ -25,10 +25,10 @@ GraphQLClient client() {
     getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
   );
 
-  final Link _link = _authLink.concat(_httpLink as Link);
+  final Link _link = _authLink.concat(_httpLink);
 
   return GraphQLClient(
-    cache: InMemoryCache(storageProvider: null),
+    cache: InMemoryCache(),
     link: _link,
   );
 }

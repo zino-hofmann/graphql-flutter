@@ -48,7 +48,7 @@ void main() {
         getToken: () async => 'Bearer my-special-bearer-token',
       );
 
-      link = authLink.concat(httpLink as Link);
+      link = authLink.concat(httpLink);
 
       graphQLClientClient = GraphQLClient(
         cache: getTestCache(),
