@@ -8,6 +8,7 @@ import 'helpers.dart';
 void main() {
   group('Link Websocket', () {
     test('simple connection', overridePrint((List<String> log) {
+      // ignore: deprecated_member_use_from_same_package
       WebSocketLink(
         url: 'ws://echo.websocket.org',
         // ignore: deprecated_member_use_from_same_package

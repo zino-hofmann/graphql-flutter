@@ -14,8 +14,10 @@ void main() {
   group(
     'SocketClient',
     () {
+      // ignore: deprecated_member_use_from_same_package
       SocketClient socketClient;
       setUp(() {
+        // ignore: deprecated_member_use_from_same_package
         socketClient = SocketClient(
           'ws://echo.websocket.org',
           protocols: null,

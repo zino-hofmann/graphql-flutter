@@ -102,7 +102,6 @@ jobs:
             cd packages/graphql
             pub global activate coverage
             pub get
-            dart2js test/websocket_test.dart
             pub run test_coverage
             # cannot `run pub run test test/.test_coverage.dart -p chromium`
             # it randomly fails compiling some dart files to js
