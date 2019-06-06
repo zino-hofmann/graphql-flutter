@@ -26,7 +26,6 @@ class GraphQLWidgetScreen extends StatelessWidget {
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    // TODO don't think we have to cast here, maybe covariant
     Link link = authLink.concat(httpLink);
     if (ENABLE_WEBSOCKETS) {
       final WebSocketLink websocketLink = WebSocketLink(

@@ -67,27 +67,6 @@ class InitOperation extends GraphQLSocketMessage {
   }
 }
 
-@deprecated
-
-/// The old implementation of [InitOperation]
-// @todo please review this ignore rule
-// ignore: deprecated_member_use_from_same_package
-class LegacyInitOperation extends InitOperation {
-  LegacyInitOperation(dynamic payload) : super(payload);
-
-  @override
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> jsonMap = <String, dynamic>{};
-    jsonMap['type'] = type;
-
-    if (payload != null) {
-      jsonMap['payload'] = json.encode(payload);
-    }
-
-    return jsonMap;
-  }
-}
-
 /// Represent the payload used during a Start query operation.
 /// The operationName should match one of the top level query definitions
 /// defined in the query provided. Additional variables can be provided
@@ -189,6 +168,13 @@ class SubscriptionData extends GraphQLSocketMessage {
         'data': data,
         'errors': errors,
       };
+
+  @override
+  int get hashCode => toJson().hashCode;
+
+  @override
+  bool operator ==(dynamic other) =>
+      other is SubscriptionData && jsonEncode(other) == jsonEncode(this);
 }
 
 /// Errors sent from the server to the client if the subscription operation was
