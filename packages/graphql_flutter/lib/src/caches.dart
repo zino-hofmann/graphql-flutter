@@ -6,8 +6,8 @@ import 'package:path_provider/path_provider.dart'
 
 import 'package:graphql/client.dart' as client;
 
-final FutureOr<String> flutterStoragePrefix = (() async =>
-    (await getApplicationDocumentsDirectory()).path)();
+final FutureOr<String> flutterStoragePrefix =
+    (() async => (await getApplicationDocumentsDirectory()).path)();
 
 class InMemoryCache extends client.InMemoryCache {
   InMemoryCache() : super(storagePrefix: flutterStoragePrefix);
