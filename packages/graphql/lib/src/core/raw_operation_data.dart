@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/get_from_ast.dart' show getOperationName;
-import 'package:graphql/src/link/http//link_http_helper_deprecated_stub.dart'
+import 'package:graphql/src/link/http/link_http_helper_deprecated_stub.dart'
     if (dart.library.io) 'package:graphql/src/link/http/link_http_helper_deprecated_io.dart';
 
 class RawOperationData {
