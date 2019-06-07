@@ -117,7 +117,9 @@ jobs:
           name: Upload coverage
           command: |
             bash <(curl -s https://codecov.io/bash) -F graphql_flutter
+            bash <(curl -s https://codecov.io/bash) -F graphql_flutter -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_flutter
             bash <(curl -s https://codecov.io/bash) -F graphql_client
+            bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
   release:
     docker: *node_environment
     steps:
