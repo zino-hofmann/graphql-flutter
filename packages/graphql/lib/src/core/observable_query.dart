@@ -26,10 +26,17 @@ class ObservableQuery {
     @required this.queryManager,
     @required this.options,
   }) : queryId = queryManager.generateQueryId().toString() {
+    if (options.eagerlyFetchResults) {
+      _lastestWasEagerlyFetched = true;
+      fetchResults();
+    }
     controller = StreamController<QueryResult>.broadcast(
       onListen: onListen,
     );
   }
+
+  // set to true when eagerly fetched to prevent back-to-back queries
+  bool _lastestWasEagerlyFetched = false;
 
   final String queryId;
   final QueryManager queryManager;
@@ -95,6 +102,10 @@ class ObservableQuery {
   }
 
   void onListen() {
+    if (_lastestWasEagerlyFetched) {
+      _lastestWasEagerlyFetched = false;
+      return;
+    }
     if (options.fetchResults) {
       fetchResults();
     }
@@ -138,7 +149,9 @@ class ObservableQuery {
 
     latestResult = result;
 
-    controller.add(result);
+    if (!controller.isClosed) {
+      controller.add(result);
+    }
   }
 
   // most mutation behavior happens here
