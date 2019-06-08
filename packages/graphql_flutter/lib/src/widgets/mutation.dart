@@ -92,7 +92,7 @@ class MutationState extends State<Mutation> {
   /// created by the query manager
   String get _patchId => '${observableQuery.queryId}.update';
 
-  /// apply the user's
+  /// apply the user's patch
   void _optimisticUpdate(QueryResult result) {
     final Cache cache = client.cache;
     final String patchId = _patchId;
@@ -136,14 +136,18 @@ class MutationState extends State<Mutation> {
   Iterable<OnData> get callbacks =>
       <OnData>[onCompleted, update].where(notNull);
 
-  void runMutation(Map<String, dynamic> variables, {Object optimisticResult}) {
-    observableQuery
-      ..variables = variables
-      ..options.optimisticResult = optimisticResult
-      ..onData(callbacks) // add callbacks to observable
-      ..addResult(QueryResult(loading: true))
-      ..fetchResults();
-  }
+  /// Run the mutation with the given `variables` and `optimisticResult`,
+  /// returning a [MultiSourceResult] for handling both the eager and network results
+  MultiSourceResult runMutation(
+    Map<String, dynamic> variables, {
+    Object optimisticResult,
+  }) =>
+      (observableQuery
+            ..variables = variables
+            ..options.optimisticResult = optimisticResult
+            ..onData(callbacks) // add callbacks to observable
+          )
+          .fetchResults();
 
   @override
   void dispose() {
@@ -158,10 +162,7 @@ class MutationState extends State<Mutation> {
       // toggling mutations at the same place in the tree,
       // such as is done in the example, won't result in bugs
       key: Key(observableQuery?.options?.toKey()),
-      initialData: QueryResult(
-        loading: false,
-        optimistic: false,
-      ),
+      initialData: observableQuery?.latestResult ?? QueryResult(),
       stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,

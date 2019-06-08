@@ -39,7 +39,8 @@ class ObservableQuery {
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
       <StreamSubscription<QueryResult>>{};
 
-  QueryResult previousResult;
+  /// The most recently seen result from this operation's stream
+  QueryResult latestResult;
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
@@ -99,8 +100,10 @@ class ObservableQuery {
     }
   }
 
-  void fetchResults() {
-    queryManager.fetchQuery(queryId, options);
+  MultiSourceResult fetchResults() {
+    final allResults =
+        queryManager.fetchQueryAsMultiSourceResult(queryId, options);
+    latestResult ??= allResults.eagerResult;
 
     // if onData callbacks have been registered,
     // they are waited on by default
@@ -111,28 +114,29 @@ class ObservableQuery {
     if (options.pollInterval != null && options.pollInterval > 0) {
       startPolling(options.pollInterval);
     }
+
+    return allResults;
   }
 
   /// add a result to the stream,
   /// copying `loading` and `optimistic`
-  /// from the `previousResult` if they aren't set.
+  /// from the `latestResult` if they aren't set.
   void addResult(QueryResult result) {
     // don't overwrite results due to some async/optimism issue
-    if (previousResult != null &&
-        previousResult.timestamp.isAfter(result.timestamp)) {
+    if (latestResult != null &&
+        latestResult.timestamp.isAfter(result.timestamp)) {
       return;
     }
 
-    if (previousResult != null) {
-      result.loading ??= previousResult.loading;
-      result.optimistic ??= previousResult.optimistic;
+    if (latestResult != null) {
+      result.source ??= latestResult.source;
     }
 
     if (lifecycle == QueryLifecycle.PENDING && result.optimistic != true) {
       lifecycle = QueryLifecycle.COMPLETED;
     }
 
-    previousResult = result;
+    latestResult = result;
 
     controller.add(result);
   }
