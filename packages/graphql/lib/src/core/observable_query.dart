@@ -112,7 +112,7 @@ class ObservableQuery {
   }
 
   MultiSourceResult fetchResults() {
-    final allResults =
+    final MultiSourceResult allResults =
         queryManager.fetchQueryAsMultiSourceResult(queryId, options);
     latestResult ??= allResults.eagerResult;
 

@@ -64,7 +64,8 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) async {
-    final allResults = fetchQueryAsMultiSourceResult(queryId, options);
+    final MultiSourceResult allResults =
+        fetchQueryAsMultiSourceResult(queryId, options);
     return allResults.networkResult ?? allResults.eagerResult;
   }
 
@@ -74,7 +75,7 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) {
-    final eagerResult = _eagerlyResolveQuery(
+    final QueryResult eagerResult = _eagerlyResolveQuery(
       queryId,
       options,
     );
@@ -178,9 +179,9 @@ class QueryManager {
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
           !queryResult.optimistic) {
-        final data = cache.read(cacheKey);
+        final dynamic data = cache.read(cacheKey);
         // we only push an eager query with data
-        if (queryResult.data != null) {
+        if (data != null) {
           queryResult = QueryResult(
             data: data,
             source: QueryResultSource.Cache,
