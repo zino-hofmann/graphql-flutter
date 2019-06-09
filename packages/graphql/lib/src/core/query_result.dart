@@ -31,14 +31,19 @@ class QueryResult {
     bool optimistic,
     QueryResultSource source,
   })  : timestamp = DateTime.now(),
-        this.source = source ?? loading == true
-            ? QueryResultSource.Loading
-            : optimistic == true ? QueryResultSource.OptimisticResult : null;
+        this.source = source ??
+            ((loading == true)
+                ? QueryResultSource.Loading
+                : (optimistic == true)
+                    ? QueryResultSource.OptimisticResult
+                    : null);
 
   DateTime timestamp;
 
   /// The source of the result data.
-  /// null when unexecuted
+  ///
+  /// null when unexecuted.
+  /// Will be set when encountering an error during any execution attempt
   QueryResultSource source;
 
   /// List<dynamic> or Map<String, dynamic>

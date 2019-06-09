@@ -132,14 +132,11 @@ class QueryManager {
       queryResult = mapFetchResultToQueryResult(
         fetchResult,
         options,
-        loading: false,
-        optimistic: false,
+        source: QueryResultSource.Network,
       );
     } catch (error) {
-      queryResult ??= QueryResult(
-        loading: false,
-        optimistic: false,
-      );
+      // we set the source to indicate where the source of failure
+      queryResult ??= QueryResult(source: QueryResultSource.Network);
       queryResult.addError(_attemptToWrapError(error));
     }
 
@@ -292,6 +289,7 @@ class QueryManager {
             mapFetchResultToQueryResult(
               FetchResult(data: cachedData),
               query.options,
+              source: QueryResultSource.Cache,
             ),
           );
         }
@@ -321,8 +319,7 @@ class QueryManager {
   QueryResult mapFetchResultToQueryResult(
     FetchResult fetchResult,
     BaseOptions options, {
-    bool loading,
-    bool optimistic = false,
+    @required QueryResultSource source,
   }) {
     List<GraphQLError> errors;
     dynamic data;
@@ -354,8 +351,7 @@ class QueryManager {
     return QueryResult(
       data: data,
       errors: errors,
-      loading: loading,
-      optimistic: optimistic,
+      source: source,
     );
   }
 
