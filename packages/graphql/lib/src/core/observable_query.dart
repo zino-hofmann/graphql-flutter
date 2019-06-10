@@ -27,7 +27,7 @@ class ObservableQuery {
     @required this.options,
   }) : queryId = queryManager.generateQueryId().toString() {
     if (options.eagerlyFetchResults) {
-      _lastestWasEagerlyFetched = true;
+      _latestWasEagerlyFetched = true;
       fetchResults();
     }
     controller = StreamController<QueryResult>.broadcast(
@@ -36,7 +36,7 @@ class ObservableQuery {
   }
 
   // set to true when eagerly fetched to prevent back-to-back queries
-  bool _lastestWasEagerlyFetched = false;
+  bool _latestWasEagerlyFetched = false;
 
   final String queryId;
   final QueryManager queryManager;
@@ -102,8 +102,8 @@ class ObservableQuery {
   }
 
   void onListen() {
-    if (_lastestWasEagerlyFetched) {
-      _lastestWasEagerlyFetched = false;
+    if (_latestWasEagerlyFetched) {
+      _latestWasEagerlyFetched = false;
       return;
     }
     if (options.fetchResults) {

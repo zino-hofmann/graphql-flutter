@@ -75,12 +75,12 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) {
-    final QueryResult eagerResult = _eagerlyResolveQuery(
+    final QueryResult eagerResult = _resolveQueryEagerly(
       queryId,
       options,
     );
 
-    // _eagerlyResolveQuery handles cacheOnly,
+    // _resolveQueryEagerly handles cacheOnly,
     // so if we're loading + cacheFirst we continue to network
     return MultiSourceResult(
       eagerResult: eagerResult,
@@ -155,7 +155,7 @@ class QueryManager {
 
   /// Add an eager cache response to the stream if possible,
   /// based on `fetchPolicy` and `optimisticResults`
-  QueryResult _eagerlyResolveQuery(
+  QueryResult _resolveQueryEagerly(
     String queryId,
     BaseOptions options,
   ) {
