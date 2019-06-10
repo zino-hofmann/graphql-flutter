@@ -68,7 +68,6 @@ class QueryState extends State<Query> {
   void didUpdateWidget(Query oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // TODO @micimize - investigate why/if this was causing issues
     if (!observableQuery.options.areEqualTo(_options)) {
       _initQuery();
     }
@@ -83,9 +82,7 @@ class QueryState extends State<Query> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
-      initialData: QueryResult(
-        loading: true,
-      ),
+      initialData: observableQuery?.latestResult ?? QueryResult(loading: true),
       stream: observableQuery.stream,
       builder: (
         BuildContext buildContext,
