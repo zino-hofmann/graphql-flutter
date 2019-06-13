@@ -300,6 +300,10 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
       json.decode(decodedBody) as Map<String, dynamic>;
   final FetchResult fetchResult = FetchResult();
 
+  if(response.headers != null){
+    fetchResult.headers = response.headers;
+  }
+
   if (jsonResponse['errors'] != null) {
     fetchResult.errors =
         (jsonResponse['errors'] as List<dynamic>).where(notNull).toList();

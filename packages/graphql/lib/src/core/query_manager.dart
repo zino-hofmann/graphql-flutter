@@ -314,6 +314,7 @@ class QueryManager {
       errors: errors,
       loading: loading,
       optimistic: optimistic,
+      headers: fetchResult.headers,
     );
   }
 

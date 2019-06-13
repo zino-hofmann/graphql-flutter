@@ -7,6 +7,7 @@ class QueryResult {
     this.loading,
     this.stale,
     this.optimistic = false,
+    this.headers,
   }) : timestamp = DateTime.now();
 
   DateTime timestamp;
@@ -14,6 +15,8 @@ class QueryResult {
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;
   List<GraphQLError> errors;
+  /// Response headers
+  Map<String, String> headers;
   bool loading;
   // TODO not sure what this is for
   bool stale;
