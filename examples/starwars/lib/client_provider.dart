@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 String uuidFromObject(Object object) {
   if (object is Map<String, Object>) {
     final String typeName = object['__typename'] as String;
-    final String id = object['id'] as String;
+    final String id = object['id'].toString();
     if (typeName != null && id != null) {
       return <String>[typeName, id].join('/');
     }

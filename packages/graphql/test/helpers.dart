@@ -1,20 +1,21 @@
-// This
-import 'dart:mirrors';
+import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show File, Platform, Directory;
-import 'dart:typed_data' show Uint8List;
 
 import 'package:meta/meta.dart';
-import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:path/path.dart' show dirname, join;
 import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
 
+overridePrint(testFn(List<String> log)) => () {
+      final log = <String>[];
+      final spec = new ZoneSpecification(print: (_, __, ___, String msg) {
+        log.add(msg);
+      });
+      return Zone.current.fork(specification: spec).run(() => testFn(log));
+    };
+
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
     );
 
 http.StreamedResponse simpleResponse({@required String body, int status}) {
@@ -26,18 +27,3 @@ http.StreamedResponse simpleResponse({@required String body, int status}) {
 
   return r;
 }
-
-class _TestUtils {
-  static String _path;
-
-  static String get path {
-    if (_path == null) {
-      final String basePath =
-          dirname((reflectClass(_TestUtils).owner as LibraryMirror).uri.path);
-      _path = basePath.endsWith('test') ? basePath : join(basePath, 'test');
-    }
-    return _path;
-  }
-}
-
-File tempFile(String fileName) => File(join(_TestUtils.path, fileName));

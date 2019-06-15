@@ -7,6 +7,7 @@ import '../graphql_operation/queries/readRepositories.dart' as queries;
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
+// ignore: uri_does_not_exist
 import '../local.dart';
 
 class Repo {
@@ -59,10 +60,11 @@ class Bloc {
   );
 
   static final AuthLink _authLink = AuthLink(
+    // ignore: undefined_identifier
     getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
   );
 
-  static final Link _link = _authLink.concat(_httpLink as Link);
+  static final Link _link = _authLink.concat(_httpLink);
 
   static final GraphQLClient _client = GraphQLClient(
     cache: NormalizedInMemoryCache(

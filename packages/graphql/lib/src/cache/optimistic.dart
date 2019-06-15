@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
@@ -5,7 +6,6 @@ import 'package:meta/meta.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/cache/normalized_in_memory.dart';
-import 'package:graphql/src/cache/in_memory.dart' show StorageProvider;
 import 'package:graphql/src/cache/lazy_cache_map.dart';
 
 class OptimisticPatch extends Object {
@@ -49,7 +49,7 @@ class OptimisticProxy implements Cache {
 
   // TODO should persistence be a seperate concern from caching
   @override
-  void save() {}
+  Future<void> save() async {}
   @override
   void restore() {}
   @override
@@ -62,11 +62,11 @@ class OptimisticCache extends NormalizedInMemoryCache {
   OptimisticCache({
     @required DataIdFromObject dataIdFromObject,
     String prefix = '@cache/reference',
-    @required StorageProvider storageProvider,
+    FutureOr<String> storagePrefix,
   }) : super(
           dataIdFromObject: dataIdFromObject,
           prefix: prefix,
-          storageProvider: storageProvider,
+          storagePrefix: storagePrefix,
         );
 
   @protected
@@ -82,7 +82,7 @@ class OptimisticCache extends NormalizedInMemoryCache {
       if (patch.data.containsKey(key)) {
         final Object patchData = patch.data[key];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
-          value = deeplyMergeLeft(<Map<String, Object>>[
+          value = deeplyMergeLeft([
             value as Map<String, Object>,
             patchData,
           ]);

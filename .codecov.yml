@@ -1,0 +1,7 @@
+flags:
+  graphql_flutter:
+    paths:
+      - packages/graphql_flutter/
+  graphql_client:
+    paths:
+      - packages/graphql/

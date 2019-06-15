@@ -115,7 +115,8 @@ class WatchQueryOptions extends QueryOptions {
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     Object optimisticResult,
     int pollInterval,
-    this.fetchResults,
+    this.fetchResults = false,
+    this.eagerlyFetchResults,
     Map<String, dynamic> context,
   }) : super(
           document: document,
@@ -125,10 +126,13 @@ class WatchQueryOptions extends QueryOptions {
           pollInterval: pollInterval,
           context: context,
           optimisticResult: optimisticResult,
-        );
+        ) {
+    this.eagerlyFetchResults ??= fetchResults;
+  }
 
   /// Whether or not to fetch result.
   bool fetchResults;
+  bool eagerlyFetchResults;
 
   /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {

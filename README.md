@@ -1,15 +1,12 @@
 [![MIT License][license-badge]][license-link]
 [![All Contributors](https://img.shields.io/badge/all_contributors-31-orange.svg?style=flat-square)](#contributors)
-[![PRs Welcome][prs-badge]](http://makeapullrequest.com)
+[![PRs Welcome][prs-badge]][prs-link]
 
-[![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Watchers)](https://github.com/zino-app/graphql-flutter)
-[![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/zino-app/graphql-flutter)
-[![Discord](https://img.shields.io/discord/559455668810153989.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/tXTtBfC)
+[![Star on GitHub][github-star-badge]][github-star-link]
+[![Watch on GitHub][github-watch-badge]][github-watch-link]
+[![Discord][discord-badge]][discord-link]
 
-## GraphQL Flutter
-
-[![Build Status][build-status-badge]][build-status-link]
-[![Coverage][coverage-badge]][coverage-link]
+# GraphQL Flutter
 
 ## About this project
 
@@ -20,6 +17,9 @@ This project combines the benefits of GraphQL with the benefits of `Streams` in 
 The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
 ## Packages
+
+[![Build Status][build-status-badge]][build-status-link]
+[![Coverage][coverage-badge]][coverage-link]
 
 This is a Monorepo which contains the following packages:
 
@@ -63,18 +63,20 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
-[build-status-badge]: https://circleci.com/gh/zino-app/graphql-flutter/tree/master.svg?style=svg
-[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter/tree/master
-[coverage-badge]: https://codecov.io/gh/zino-app/graphql-flutter/branch/master/graph/badge.svg
+[build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
+[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
+[coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg?style=flat-square
 [coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
-[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
+[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter
-[package-link-client]: https://pub.dartlang.org/packages/graphql/versions/1.0.1
-[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
+[package-link-client]: https://pub.dartlang.org/packages/graphql
+[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
-[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
-[prs]: http://makeapullrequest.com
-[github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=social
-[github-watch]: https://github.com/zino-app/graphql-flutter/watchers
-[github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=social
-[github-star]: https://github.com/zino-app/graphql-flutter/stargazers
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs-link]: http://makeapullrequest.com
+[github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat-square&logo=github&logoColor=ffffff
+[github-watch-link]: https://github.com/zino-app/graphql-flutter/watchers
+[github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat-square&logo=github&logoColor=ffffff
+[github-star-link]: https://github.com/zino-app/graphql-flutter/stargazers
+[discord-badge]: https://img.shields.io/discord/559455668810153989.svg?style=flat-square&logo=discord&logoColor=ffffff
+[discord-link]: https://discord.gg/tXTtBfC
