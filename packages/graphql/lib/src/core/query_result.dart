@@ -52,10 +52,6 @@ class QueryResult {
   List<GraphQLError> errors;
   /// Response headers
   Map<String, String> headers;
-  bool loading;
-  // TODO not sure what this is for
-  bool stale;
-  bool optimistic;
 
   /// Whether data has been specified from either the cache or network)
   bool get loading => source == QueryResultSource.Loading;
