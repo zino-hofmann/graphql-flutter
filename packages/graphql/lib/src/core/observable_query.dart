@@ -129,6 +129,49 @@ class ObservableQuery {
     return allResults;
   }
 
+  /// fetch more results and then merge them according to the
+  /// updateQuery method, the results will then be added to to stream for the widget to re-build
+  void fetchMore(FetchMoreOptions fetchMoreOptions) async {
+    // fetch more and udpate
+    assert(fetchMoreOptions.updateQuery != null);
+
+    QueryOptions combinedOptions;
+
+    if (fetchMoreOptions.document != null) {
+      // use query as is
+      combinedOptions = fetchMoreOptions;
+    } else {
+      /// combine the QueryOptions and FetchMoreOptions
+      combinedOptions = QueryOptions(
+        document: options.document,
+        errorPolicy: fetchMoreOptions.errorPolicy ?? options.errorPolicy,
+        fetchPolicy: FetchPolicy.networkOnly,
+        context: options.context,
+        variables: {...options.variables, ...fetchMoreOptions.variables},
+      );
+    }
+
+    // stream new results with a query loader
+    QueryResult currentResults = QueryResult(
+      data: latestResult.data,
+      loading: true,
+      errors: latestResult.errors,
+    );
+
+    addResult(currentResults);
+
+    var results = await queryManager.query(combinedOptions);
+
+    // combine the query with the new query, using the fucntion provided by the user
+    var combineData =
+        fetchMoreOptions.updateQuery(latestResult.data, results.data);
+
+    results.data = combineData;
+
+    // stream the new results and rebuild
+    addResult(results);
+  }
+
   /// add a result to the stream,
   /// copying `loading` and `optimistic`
   /// from the `latestResult` if they aren't set.
