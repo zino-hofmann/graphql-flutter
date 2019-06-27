@@ -171,8 +171,8 @@ class WatchQueryOptions extends QueryOptions {
 
 /// method to merge fetch more results with current results
 typedef dynamic UpdateQuery(
-  dynamic prev,
-  dynamic results,
+  dynamic previousResults,
+  dynamic nextResults,
 );
 
 /// options for fetchmore operations
