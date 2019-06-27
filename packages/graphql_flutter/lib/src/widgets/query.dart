@@ -80,6 +80,16 @@ class QueryState extends State<Query> {
       );
     }
 
+    // stream new results with a query loader
+    QueryResult currentResults = QueryResult(
+      data: observableQuery.latestResult.data,
+      loading: true,
+      errors: observableQuery.latestResult.errors,
+      optimistic: observableQuery.latestResult.optimistic,
+    );
+
+    observableQuery.addResult(currentResults);
+
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
 
