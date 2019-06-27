@@ -8,7 +8,7 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 typedef BoolCallback = bool Function();
 
 // method to call from widget to fetchmore queries
-typedef FetchMore = dynamic Function(FetchMoreOptions options);
+typedef dynamic FetchMore(FetchMoreOptions options);
 
 typedef QueryBuilder = Widget Function(
   QueryResult result, {
@@ -96,11 +96,13 @@ class QueryState extends State<Query> {
     var results = await client.query(combinedOptions);
 
     // combine the query with the new query, using the fucntion provided by the user
-    var combineResults =
-        options.updateQuery(observableQuery.latestResult, results);
+    var combineData =
+        options.updateQuery(observableQuery.latestResult.data, results.data);
+
+    results.data = combineData;
 
     // stream the new results and rebuild
-    observableQuery.addResult(combineResults);
+    observableQuery.addResult(results);
   }
 
   void _initQuery() {
@@ -144,6 +146,7 @@ class QueryState extends State<Query> {
         return widget?.builder(
           snapshot.data,
           refetch: observableQuery.refetch,
+          fetchMore: fetchMore,
         );
       },
     );
