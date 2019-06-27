@@ -1,12 +1,13 @@
 name: graphql
-description: A stand-alone GraphQL client for Dart, bringing all the features from
+description:
+  A stand-alone GraphQL client for Dart, bringing all the features from
   a modern GraphQL client to one easy to use package.
 version: 1.1.1-beta.8
 authors:
-- Eus Dima <eus@zinoapp.com>
-- Zino Hofmann <zino@zinoapp.com>
-- Michael Joseph Rosenthal <rosenthalm93@gmail.com>
-- TruongSinh Tran-Nguyen <i@truongsinh.pro>
+  - Eus Dima <eus@zinoapp.com>
+  - Zino Hofmann <zino@zinoapp.com>
+  - Michael Joseph Rosenthal <rosenthalm93@gmail.com>
+  - TruongSinh Tran-Nguyen <i@truongsinh.pro>
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql
 dependencies:
   meta: ^1.1.6
@@ -24,4 +25,4 @@ dev_dependencies:
   test: ^1.5.3
   test_coverage: ^0.2.0
 environment:
-  sdk: '>=2.2.0 <3.0.0'
+  sdk: ">=2.2.2 <3.0.0"
