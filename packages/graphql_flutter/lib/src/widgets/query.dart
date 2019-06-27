@@ -7,9 +7,13 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef BoolCallback = bool Function();
 
+// method to call from widget to fetchmore queries
+typedef FetchMore = dynamic Function(FetchMoreOptions options);
+
 typedef QueryBuilder = Widget Function(
   QueryResult result, {
   BoolCallback refetch,
+  FetchMore fetchMore,
 });
 
 /// Builds a [Query] widget based on the a given set of [QueryOptions]
@@ -48,6 +52,45 @@ class QueryState extends State<Query> {
       context: widget.options.context,
       optimisticResult: widget.options.optimisticResult,
     );
+  }
+
+  /// fetch more results and then merge them according to the
+  /// updateQuery method, the results will then be added to to stream for the widget to re-build
+  void fetchMore(FetchMoreOptions options) async {
+    // fetch more and udpate
+    assert(options.updateQuery != null);
+    assert(observableQuery != null);
+
+    // @TODO: Maybe move this to ObserservanleQuery
+    QueryOptions combinedOptions;
+
+    if (options.document != null) {
+      // use query as is
+      combinedOptions = options;
+    } else {
+      /// combine the QueryOptions and FetchMoreOptions
+      combinedOptions = QueryOptions(
+        document: _options.document,
+        errorPolicy: options.errorPolicy != null
+            ? options.errorPolicy
+            : _options.errorPolicy,
+        fetchPolicy: FetchPolicy.networkOnly,
+        context: widget.options.context,
+        variables: {..._options.variables, ...options.variables},
+      );
+    }
+
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+
+    var results = await client.query(combinedOptions);
+
+    // combine the query with the new query, using the fucntion provided by the user
+    var combineResults =
+        options.updateQuery(observableQuery.latestResult, results);
+
+    // stream the new results and rebuild
+    observableQuery.addResult(combineResults);
   }
 
   void _initQuery() {
