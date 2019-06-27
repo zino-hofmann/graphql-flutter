@@ -168,3 +168,31 @@ class WatchQueryOptions extends QueryOptions {
     return areDifferentVariables(a.variables, b.variables);
   }
 }
+
+/// method to merge fetch more results with current results
+typedef dynamic UpdateQuery(
+  dynamic prev,
+  dynamic results,
+);
+
+/// options for fetchmore operations
+class FetchMoreOptions extends QueryOptions {
+  FetchMoreOptions({
+    String document, // optional document
+    Map<String, dynamic> variables,
+    FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
+    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    Map<String, dynamic> context,
+    @required UpdateQuery updateQuery,
+  })  : assert(updateQuery != null),
+        this.updateQuery = updateQuery,
+        super(
+          document: document,
+          variables: variables,
+          fetchPolicy: fetchPolicy,
+          errorPolicy: errorPolicy,
+          context: context,
+        );
+
+  UpdateQuery updateQuery;
+}
