@@ -17,4 +17,18 @@ Future<Map<String, MultipartFile>> deprecatedHelper(
   return null;
 }
 
-bool isIoFile(object) => object is io.File;
+bool isIoFile(object) {
+  final r = object is io.File;
+  if(r) {
+    print(r'''
+⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️ DEPRECATION WARNING ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️
+
+Please do not use `File` direcly anymore. Instead, use
+`MultipartFile`. There's also a utitlity method to help you
+`import 'package:graphql/utilities.dart' show multipartFileFrom;`
+
+⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️ DEPRECATION WARNING ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️
+    ''');
+  }
+  return r;
+}

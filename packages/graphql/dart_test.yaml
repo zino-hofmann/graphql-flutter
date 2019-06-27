@@ -1,3 +1,6 @@
+tags:
+  integration:
+
 define_platforms:
   chromium:
     name: Chromium

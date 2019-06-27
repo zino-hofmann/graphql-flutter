@@ -174,7 +174,7 @@ Future<BaseRequest> _prepareRequest(
     // @deprecated, backward compatible only
     // in case the body is io.File
     // in future release, io.File will no longer be supported
-    if (isIoFile(body)) {
+    if (isIoFile(object)) {
       return null;
     }
     return object.toJson();

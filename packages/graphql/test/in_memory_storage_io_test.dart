@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:test/test.dart';
 import 'package:graphql/src/cache/in_memory_io.dart';
 
+import 'helpers.dart';
+
 void main() {
   group('In memory exception handling', () {
     test('FileSystemException', overridePrint((List<String> log) async {
@@ -19,11 +21,3 @@ void main() {
     }));
   });
 }
-
-overridePrint(testFn(List<String> log)) => () {
-      final log = <String>[];
-      final spec = new ZoneSpecification(print: (_, __, ___, String msg) {
-        log.add(msg);
-      });
-      return Zone.current.fork(specification: spec).run(() => testFn(log));
-    };
