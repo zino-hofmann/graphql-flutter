@@ -18,8 +18,10 @@ void main() {
   GraphQLClient graphQLClientClient;
   MockHttpClient mockHttpClient;
 
-  group('upload', () {
-    const String uploadMutation = r'''
+  group(
+    'upload',
+    () {
+      const String uploadMutation = r'''
     mutation($files: [Upload!]!) {
       multipleUpload(files: $files) {
         id
@@ -30,44 +32,45 @@ void main() {
     }
     ''';
 
-    setUp(() {
-      mockHttpClient = MockHttpClient();
+      setUp(() {
+        mockHttpClient = MockHttpClient();
 
-      when(mockHttpClient.send(any)).thenAnswer((Invocation a) async {
-        return simpleResponse(body: '{"data": {}}');
+        when(mockHttpClient.send(any)).thenAnswer((Invocation a) async {
+          return simpleResponse(body: '{"data": {}}');
+        });
+
+        httpLink = HttpLink(
+            uri: 'http://localhost:3001/graphql', httpClient: mockHttpClient);
+
+        authLink = AuthLink(
+          getToken: () async => 'Bearer my-special-bearer-token',
+        );
+
+        link = authLink.concat(httpLink);
+
+        graphQLClientClient = GraphQLClient(
+          cache: getTestCache(),
+          link: link,
+        );
       });
 
-      httpLink = HttpLink(
-          uri: 'http://localhost:3001/graphql', httpClient: mockHttpClient);
-
-      authLink = AuthLink(
-        getToken: () async => 'Bearer my-special-bearer-token',
-      );
-
-      link = authLink.concat(httpLink);
-
-      graphQLClientClient = GraphQLClient(
-        cache: getTestCache(),
-        link: link,
-      );
-    });
-
-    test('upload with io.File instance deprecation warning',
+      test(
+        'upload with io.File instance deprecation warning',
         overridePrint((log) async {
-      final MutationOptions _options = MutationOptions(
-        document: uploadMutation,
-        variables: <String, dynamic>{
-          'files': [
-            io.File('pubspec.yaml'),
-          ],
-        },
-      );
-      final QueryResult r = await graphQLClientClient.mutate(_options);
+          final MutationOptions _options = MutationOptions(
+            document: uploadMutation,
+            variables: <String, dynamic>{
+              'files': [
+                io.File('pubspec.yaml'),
+              ],
+            },
+          );
+          final QueryResult r = await graphQLClientClient.mutate(_options);
 
-      expect(r.errors, isNull);
-      expect(r.data, isNotNull);
-      expect(log, hasLength(5));
-      final warningMessage = r'''
+          expect(r.errors, isNull);
+          expect(r.data, isNotNull);
+          expect(log, hasLength(5));
+          final warningMessage = r'''
 ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️ DEPRECATION WARNING ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️
 
 Please do not use `File` direcly anymore. Instead, use
@@ -76,11 +79,16 @@ Please do not use `File` direcly anymore. Instead, use
 
 ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️ DEPRECATION WARNING ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️
     ''';
-      expect(log[0], warningMessage);
-      expect(log[1], warningMessage);
-      expect(log[2], warningMessage);
-      expect(log[3], warningMessage);
-      expect(log[4], warningMessage);
-    }));
-  });
+          expect(log[0], warningMessage);
+          expect(log[1], warningMessage);
+          expect(log[2], warningMessage);
+          expect(log[3], warningMessage);
+          expect(log[4], warningMessage);
+        }),
+      );
+    },
+    onPlatform: {
+      "!vm": Skip("This test is only for VM"),
+    },
+  );
 }
