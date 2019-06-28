@@ -163,6 +163,8 @@ class ObservableQuery {
     var combineData =
         fetchMoreOptions.updateQuery(latestResult.data, results.data);
 
+    assert(combineData != null);
+
     results.data = combineData;
 
     // stream the new results and rebuild
