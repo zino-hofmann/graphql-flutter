@@ -171,28 +171,22 @@ class WatchQueryOptions extends QueryOptions {
 
 /// method to merge fetch more results with current results
 typedef dynamic UpdateQuery(
-  dynamic previousResults,
-  dynamic nextResults,
+  dynamic previousQueryResults,
+  dynamic fetchmoreQueryResults,
 );
 
 /// options for fetchmore operations
-class FetchMoreOptions extends QueryOptions {
+class FetchMoreOptions {
   FetchMoreOptions({
-    String document, // optional document
+    String document,
     Map<String, dynamic> variables,
-    FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
-    ErrorPolicy errorPolicy = ErrorPolicy.none,
-    Map<String, dynamic> context,
     @required UpdateQuery updateQuery,
   })  : assert(updateQuery != null),
         this.updateQuery = updateQuery,
-        super(
-          document: document,
-          variables: variables,
-          fetchPolicy: fetchPolicy,
-          errorPolicy: errorPolicy,
-          context: context,
-        );
+        this.variables = variables,
+        this.document = document;
 
+  final String document;
+  final Map<String, dynamic> variables;
   UpdateQuery updateQuery;
 }

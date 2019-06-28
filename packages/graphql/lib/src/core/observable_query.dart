@@ -139,14 +139,11 @@ class ObservableQuery {
 
     if (fetchMoreOptions.document != null) {
       // use query as is
-      combinedOptions = fetchMoreOptions;
+      combinedOptions = fetchMoreOptions as QueryOptions;
     } else {
       /// combine the QueryOptions and FetchMoreOptions
       combinedOptions = QueryOptions(
         document: options.document,
-        errorPolicy: fetchMoreOptions.errorPolicy ?? options.errorPolicy,
-        fetchPolicy: FetchPolicy.networkOnly,
-        context: options.context,
         variables: {...options.variables, ...fetchMoreOptions.variables},
       );
     }
