@@ -7,20 +7,22 @@ import 'package:test/test.dart';
 import 'package:graphql/src/socket_client.dart'
     show SocketClient, SocketConnectionState;
 
+import 'helpers.dart';
+
 void main() {
   group('SocketClient', () {
     SocketClient socketClient;
-    setUp(() {
+    setUp(overridePrint((log) {
       socketClient = SocketClient(
         'ws://echo.websocket.org',
         protocols: null,
         randomBytesForUuid: Uint8List.fromList(
             [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
       );
-    });
-    tearDown(() async {
+    }));
+    tearDown(overridePrint((log) async {
       await socketClient.dispose();
-    });
+    }));
     test('connection', () async {
       await expectLater(
         socketClient.connectionState.asBroadcastStream(),

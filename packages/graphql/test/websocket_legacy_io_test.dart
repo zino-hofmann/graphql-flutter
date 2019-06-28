@@ -10,13 +10,15 @@ import 'package:graphql/src/websocket/messages.dart';
 
 import 'package:graphql/legacy_socket_api/legacy_socket_client.dart';
 
+import 'helpers.dart';
+
 void main() {
   group(
     'SocketClient',
     () {
       // ignore: deprecated_member_use_from_same_package
       SocketClient socketClient;
-      setUp(() {
+      setUp(overridePrint((log) {
         // ignore: deprecated_member_use_from_same_package
         socketClient = SocketClient(
           'ws://echo.websocket.org',
@@ -24,10 +26,10 @@ void main() {
           randomBytesForUuid: Uint8List.fromList(
               [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
         );
-      });
-      tearDown(() async {
+      }));
+      tearDown(overridePrint((log) async {
         await socketClient.dispose();
-      });
+      }));
       test('connection', () async {
         await expectLater(
           socketClient.connectionState.asBroadcastStream(),
