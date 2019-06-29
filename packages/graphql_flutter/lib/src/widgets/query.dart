@@ -61,7 +61,10 @@ class QueryState extends State<Query> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initQuery();
+    if (observableQuery == null ||
+        !observableQuery.options.areEqualTo(_options)) {
+      _initQuery();
+    }
   }
 
   @override
