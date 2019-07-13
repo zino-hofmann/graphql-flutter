@@ -16,6 +16,7 @@ ios/.generated/
 ios/Flutter/Generated.xcconfig
 ios/Runner/GeneratedPluginRegistrant.*
 .flutter-plugins
+pubspec.lock
 
 # Coverage
 coverage.json
@@ -30,3 +31,6 @@ packages/graphql_flutter/example/android/.settings/
 packages/graphql_flutter/example/android/app/.classpath
 packages/graphql_flutter/example/android/app/.project
 packages/graphql_flutter/example/android/app/.settings/
+
+packages/graphql/example/android
+packages/graphql/example/ios

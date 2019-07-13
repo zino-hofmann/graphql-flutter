@@ -1,1 +1,4 @@
 test/.test_coverage.dart
+
+# side effect of running test
+/cache.txt

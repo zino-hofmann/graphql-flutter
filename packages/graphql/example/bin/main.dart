@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:io' show stdout, stderr, exit;
 
 import 'package:args/args.dart';
 import 'package:graphql/client.dart';
@@ -9,6 +9,7 @@ import './graphql_operation/queries/readRepositories.dart';
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
+// ignore: uri_does_not_exist
 import './local.dart';
 
 ArgResults argResults;
@@ -20,10 +21,11 @@ GraphQLClient client() {
   );
 
   final AuthLink _authLink = AuthLink(
+    // ignore: undefined_identifier
     getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
   );
 
-  final Link _link = _authLink.concat(_httpLink as Link);
+  final Link _link = _authLink.concat(_httpLink);
 
   return GraphQLClient(
     cache: InMemoryCache(),

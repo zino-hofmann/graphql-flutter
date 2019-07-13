@@ -36,14 +36,14 @@ Map<String, dynamic> _recursivelyAddAll(
   Map<String, dynamic> target,
   Map<String, dynamic> source,
 ) {
-  target = unwrapMap(target);
+  target = Map.from(unwrapMap(target));
   source = unwrapMap(source);
   source.forEach((String key, dynamic value) {
     if (target.containsKey(key) &&
         target[key] is Map &&
         value != null &&
         value is Map<String, dynamic>) {
-      _recursivelyAddAll(
+      target[key] = _recursivelyAddAll(
         target[key] as Map<String, dynamic>,
         value,
       );
@@ -71,6 +71,5 @@ Map<String, dynamic> deeplyMergeLeft(
   Iterable<Map<String, dynamic>> maps,
 ) {
   // prepend an empty literal for functional immutability
-  return (<Map<String, dynamic>>[<String, dynamic>{}]..addAll(maps))
-      .reduce(_recursivelyAddAll);
+  return (<Map<String, dynamic>>[{}]..addAll(maps)).reduce(_recursivelyAddAll);
 }

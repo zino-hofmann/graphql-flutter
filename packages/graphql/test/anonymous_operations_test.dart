@@ -1,6 +1,3 @@
-// copy/pasted from ./graphql_client_test.dart
-import 'dart:typed_data' show Uint8List;
-
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -51,7 +48,7 @@ void main() {
         getToken: () async => 'Bearer my-special-bearer-token',
       );
 
-      link = authLink.concat(httpLink as Link);
+      link = authLink.concat(httpLink);
 
       graphQLClientClient = GraphQLClient(
         cache: getTestCache(),

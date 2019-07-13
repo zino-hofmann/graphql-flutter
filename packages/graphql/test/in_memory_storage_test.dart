@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Directory;
 import 'package:test/test.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 
@@ -39,15 +38,10 @@ final Map<String, Object> eData = <String, Object>{
   }
 };
 
-final Directory customStorageDirectory =
-    Directory.systemTemp.createTempSync('file_test_');
-
 void main() {
   group('Normalizes writes', () {
     test('.write .read round trip', () async {
-      final InMemoryCache cache = InMemoryCache(
-        storageProvider: () => customStorageDirectory,
-      );
+      final InMemoryCache cache = InMemoryCache();
       cache.write(aKey, aData);
       await cache.save();
       cache.reset();
@@ -55,10 +49,55 @@ void main() {
       expect(cache.read(aKey), equals(aData));
     });
 
-    test('saving concurrently wont error', () async {
-      final InMemoryCache cache = InMemoryCache(
-        storageProvider: () => customStorageDirectory,
+    test('.write avoids overriding a superset with a subset of a field (#155)',
+        () async {
+      final InMemoryCache cache = InMemoryCache();
+      cache.write(aKey, aData);
+
+      final Map<String, Object> anotherAData = <String, Object>{
+        'a': <String, Object>{
+          'key': 'val',
+        },
+      };
+      cache.write(aKey, anotherAData);
+
+      await cache.save();
+      cache.reset();
+      await cache.restore();
+      expect(
+        cache.read(aKey),
+        equals(<String, Object>{
+          'a': {'__typename': 'A', 'key': 'val'}
+        }),
       );
+    });
+
+    test('.write does not mutate input', () async {
+      final InMemoryCache cache = InMemoryCache();
+      cache.write(aKey, aData);
+      final Map<String, Object> anotherAData = <String, Object>{
+        'a': <String, Object>{
+          'key': 'val',
+        },
+      };
+      cache.write(aKey, anotherAData);
+
+      expect(
+        aData,
+        equals(<String, Object>{
+          'a': {'__typename': 'A'}
+        }),
+      );
+      expect(
+        anotherAData,
+        equals(<String, Object>{
+          'a': {'key': 'val'}
+        }),
+      );
+    });
+
+    test('saving concurrently wont error', () async {
+      final InMemoryCache cache = InMemoryCache();
       cache.write(aKey, aData);
       cache.write(bKey, bData);
       cache.write(cKey, cData);

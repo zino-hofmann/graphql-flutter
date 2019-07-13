@@ -1,5 +1,3 @@
-import 'dart:io' show Directory;
-
 import 'package:test/test.dart';
 
 import 'package:graphql/src/cache/normalized_in_memory.dart';
@@ -133,10 +131,12 @@ final Map<String, Object> cyclicalOperationData = <String, Object>{
     'b': <String, Object>{
       '__typename': 'B',
       'id': 5,
-      'a': <String, Object>{
-        '__typename': 'A',
-        'id': 1,
-      },
+      'as': [
+        <String, Object>{
+          '__typename': 'A',
+          'id': 1,
+        },
+      ]
     },
   },
 };
@@ -150,12 +150,43 @@ final Map<String, Object> cyclicalNormalizedA = <String, Object>{
 final Map<String, Object> cyclicalNormalizedB = <String, Object>{
   '__typename': 'B',
   'id': 5,
-  'a': <String>['@cache/reference', 'A/1'],
+  'as': [
+    <String>['@cache/reference', 'A/1']
+  ],
+};
+
+Map<String, Object> get cyclicalObjOperationData {
+  Map<String, Object> a;
+  Map<String, Object> b;
+  a = {
+    '__typename': 'A',
+    'id': 1,
+  };
+  b = <String, Object>{
+    '__typename': 'B',
+    'id': 5,
+    'as': [a]
+  };
+  a['b'] = b;
+  return {'a': a};
+}
+
+final Map<String, Object> cyclicalObjNormalizedA = {
+  '__typename': 'A',
+  'id': 1,
+  'b': <String>['@cache/reference', 'B/5'],
+};
+
+final Map<String, Object> cyclicalObjNormalizedB = {
+  '__typename': 'B',
+  'id': 5,
+  'as': [
+    <String>['@cache/reference', 'A/1']
+  ],
 };
 
 NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
       dataIdFromObject: typenameDataIdFromObject,
-      storageProvider: () => Directory.systemTemp.createTempSync('file_test_'),
     );
 
 void main() {
@@ -185,6 +216,17 @@ void main() {
       expect(a.data, equals(cyclicalNormalizedA));
       final LazyCacheMap b = a['b'] as LazyCacheMap;
       expect(b.data, equals(cyclicalNormalizedB));
+    });
+  });
+
+  group('Handles Object/pointer self-references/cycles', () {
+    final NormalizedInMemoryCache cache = getTestCache();
+    test('lazily reads cyclical references', () {
+      cache.write(rawOperationKey, cyclicalObjOperationData);
+      final LazyCacheMap a = cache.read('A/1') as LazyCacheMap;
+      expect(a.data, equals(cyclicalObjNormalizedA));
+      final LazyCacheMap b = a['b'] as LazyCacheMap;
+      expect(b.data, equals(cyclicalObjNormalizedB));
     });
   });
 }

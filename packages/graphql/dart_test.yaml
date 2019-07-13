@@ -1,0 +1,11 @@
+tags:
+  integration:
+
+define_platforms:
+  chromium:
+    name: Chromium
+    extends: chrome
+    settings:
+      arguments: --no-sandbox
+      executable:
+        linux: chromium

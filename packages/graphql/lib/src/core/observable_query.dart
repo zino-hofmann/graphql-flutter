@@ -17,7 +17,6 @@ enum QueryLifecycle {
   SIDE_EFFECTS_PENDING,
   SIDE_EFFECTS_BLOCKING,
 
-  // right now only Mutations ever become completed
   COMPLETED,
   CLOSED
 }
@@ -27,10 +26,17 @@ class ObservableQuery {
     @required this.queryManager,
     @required this.options,
   }) : queryId = queryManager.generateQueryId().toString() {
+    if (options.eagerlyFetchResults) {
+      _latestWasEagerlyFetched = true;
+      fetchResults();
+    }
     controller = StreamController<QueryResult>.broadcast(
       onListen: onListen,
     );
   }
+
+  // set to true when eagerly fetched to prevent back-to-back queries
+  bool _latestWasEagerlyFetched = false;
 
   final String queryId;
   final QueryManager queryManager;
@@ -40,7 +46,8 @@ class ObservableQuery {
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
       <StreamSubscription<QueryResult>>{};
 
-  QueryResult previousResult;
+  /// The most recently seen result from this operation's stream
+  QueryResult latestResult;
 
   QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
 
@@ -95,13 +102,19 @@ class ObservableQuery {
   }
 
   void onListen() {
+    if (_latestWasEagerlyFetched) {
+      _latestWasEagerlyFetched = false;
+      return;
+    }
     if (options.fetchResults) {
       fetchResults();
     }
   }
 
-  void fetchResults() {
-    queryManager.fetchQuery(queryId, options);
+  MultiSourceResult fetchResults() {
+    final MultiSourceResult allResults =
+        queryManager.fetchQueryAsMultiSourceResult(queryId, options);
+    latestResult ??= allResults.eagerResult;
 
     // if onData callbacks have been registered,
     // they are waited on by default
@@ -112,30 +125,33 @@ class ObservableQuery {
     if (options.pollInterval != null && options.pollInterval > 0) {
       startPolling(options.pollInterval);
     }
+
+    return allResults;
   }
 
   /// add a result to the stream,
   /// copying `loading` and `optimistic`
-  /// from the `previousResult` if they aren't set.
+  /// from the `latestResult` if they aren't set.
   void addResult(QueryResult result) {
     // don't overwrite results due to some async/optimism issue
-    if (previousResult != null &&
-        previousResult.timestamp.isAfter(result.timestamp)) {
+    if (latestResult != null &&
+        latestResult.timestamp.isAfter(result.timestamp)) {
       return;
     }
 
-    if (previousResult != null) {
-      result.loading ??= previousResult.loading;
-      result.optimistic ??= previousResult.optimistic;
+    if (latestResult != null) {
+      result.source ??= latestResult.source;
     }
 
     if (lifecycle == QueryLifecycle.PENDING && result.optimistic != true) {
       lifecycle = QueryLifecycle.COMPLETED;
     }
 
-    previousResult = result;
+    latestResult = result;
 
-    controller.add(result);
+    if (!controller.isClosed) {
+      controller.add(result);
+    }
   }
 
   // most mutation behavior happens here

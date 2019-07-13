@@ -1,16 +1,18 @@
-# GraphQL Flutter 
+[![MIT License][license-badge]][license-link]
+[![All Contributors](https://img.shields.io/badge/all_contributors-31-orange.svg?style=flat-square)](#contributors)
+[![PRs Welcome][prs-badge]][prs-link]
+
+[![Star on GitHub][github-star-badge]][github-star-link]
+[![Watch on GitHub][github-watch-badge]][github-watch-link]
+[![Discord][discord-badge]][discord-link]
 
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
 [![version][version-badge]][package-link]
-[![MIT License][license-badge]][license-link]
-[![All Contributors](https://img.shields.io/badge/all_contributors-15-orange.svg)](#contributors)
-[![PRs Welcome][prs-badge]](http://makeapullrequest.com)
 
-[![Watch on GitHub](https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Watchers)](https://github.com/felangel/bloc)
-[![Star on GitHub](https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat&logo=github&colorB=deeppink&label=Stars)](https://github.com/felangel/bloc)
+# GraphQL Flutter
 
-## Table of Contents 
+## Table of Contents
 
 - [Installation](#installation)
 - [Usage](#usage)
@@ -473,17 +475,19 @@ This is currently our roadmap, please feel free to request additions/changes.
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 
-[build-status-badge]: https://circleci.com/gh/zino-app/graphql-flutter/tree/master.svg?style=svg
-[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter/
-[coverage-badge]: https://codecov.io/gh/zino-app/graphql-flutter/branch/master/graph/badge.svg
+[build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
+[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
+[coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg?style=flat-square
 [coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
-[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg
+[version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter
-[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg
+[license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
-[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg
-[prs]: http://makeapullrequest.com
-[github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=social
-[github-watch]: https://github.com/zino-app/graphql-flutter/watchers
-[github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=social
-[github-star]: https://github.com/zino-app/graphql-flutter/stargazers
+[prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
+[prs-link]: http://makeapullrequest.com
+[github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat-square&logo=github&logoColor=ffffff
+[github-watch-link]: https://github.com/zino-app/graphql-flutter/watchers
+[github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat-square&logo=github&logoColor=ffffff
+[github-star-link]: https://github.com/zino-app/graphql-flutter/stargazers
+[discord-badge]: https://img.shields.io/discord/559455668810153989.svg?style=flat-square&logo=discord&logoColor=ffffff
+[discord-link]: https://discord.gg/tXTtBfC
