@@ -233,6 +233,8 @@ class QueryManager {
     // so try/catch to avoid "could not access message"
     try {
       errorMessage = error.message as String;
+      assert(errorMessage != null);
+      assert(errorMessage.isNotEmpty);
     } catch (e) {
       throw error;
     }
