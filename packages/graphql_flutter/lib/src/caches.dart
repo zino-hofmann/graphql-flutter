@@ -10,7 +10,9 @@ final FutureOr<String> flutterStoragePrefix =
     (() async => (await getApplicationDocumentsDirectory()).path)();
 
 class InMemoryCache extends client.InMemoryCache {
-  InMemoryCache() : super(storagePrefix: flutterStoragePrefix);
+  InMemoryCache({
+    FutureOr<String> storagePrefix,
+  }) : super(storagePrefix: storagePrefix ?? flutterStoragePrefix);
 }
 
 class NormalizedInMemoryCache extends client.NormalizedInMemoryCache {
