@@ -128,7 +128,32 @@ void main() {
         expect(nodes[2]['viewerHasStarred'], false);
         return;
       });
-//    test('failed query because of network', {});
+
+      test('failed query because of an exception with null string', () async {
+        final e = Exception();
+        when(mockHttpClient.send(any)).thenAnswer((_) async {
+          throw e;
+        });
+
+        final Future<QueryResult> r = graphQLClientClient
+            .query(WatchQueryOptions(document: readRepositories));
+
+        await expectLater(r, throwsA(e));
+        return;
+      });
+
+      test('failed query because of an exception with empty string', () async {
+        final e = Exception('');
+        when(mockHttpClient.send(any)).thenAnswer((_) async {
+          throw e;
+        });
+
+        final Future<QueryResult> r = graphQLClientClient
+            .query(WatchQueryOptions(document: readRepositories));
+
+        await expectLater(r, throwsA(e));
+        return;
+      });
 //    test('failed query because of because of error response', {});
 //    test('failed query because of because of invalid response', () {
 //      String responseBody =
