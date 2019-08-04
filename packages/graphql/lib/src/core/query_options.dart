@@ -1,4 +1,3 @@
-import 'package:graphql/src/core/query_result.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';
@@ -172,8 +171,8 @@ class WatchQueryOptions extends QueryOptions {
 
 /// merge fetchMore result data with earlier result data
 typedef dynamic UpdateQuery(
-  dynamic previousResult,
-  dynamic fetchMoreResult,
+  dynamic previousResultData,
+  dynamic fetchMoreResultData,
 );
 
 /// options for fetchmore operations
@@ -187,7 +186,7 @@ class FetchMoreOptions {
   final String document;
   final Map<String, dynamic> variables;
 
-  /// Strategy for merging the fetchMore result
-  /// with the results already in the cache
+  /// Strategy for merging the fetchMore result data
+  /// with the result data already in the cache
   UpdateQuery updateQuery;
 }
