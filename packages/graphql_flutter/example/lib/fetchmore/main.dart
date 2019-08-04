@@ -89,8 +89,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                   'query': _searchQuery,
-                  'cursor':
-                      null // set cursor to null so as to start at the beginning
+                  // set cursor to null so as to start at the beginning
+                  'cursor': null
                 },
                 //pollInterval: 10,
               ),
@@ -115,24 +115,24 @@ class _MyHomePageState extends State<MyHomePage> {
                     (result.data['search']['nodes'] as List<dynamic>);
 
                 final Map pageInfo = result.data['search']['pageInfo'];
-
+                final String fetchMoreCursor = pageInfo['endCursor'];
                 FetchMoreOptions opts = FetchMoreOptions(
-                  variables: {'cursor': pageInfo['endCursor']},
-                  updateQuery: (prev, res) {
+                  variables: {'cursor': fetchMoreCursor},
+                  updateQuery: (previousResultData, fetchMoreResultData) {
                     // this is where you combine your previous data and response
-                    // in case of this, we want to display previous repos plus next repos
+                    // in this case, we want to display previous repos plus next repos
                     // so, we combine data in both into a single list of repos
                     final List<dynamic> repos = [
-                      ...prev['search']['nodes'] as List<dynamic>,
-                      ...res['search']['nodes'] as List<dynamic>
+                      ...previousResultData['search']['nodes'] as List<dynamic>,
+                      ...fetchMoreResultData['search']['nodes'] as List<dynamic>
                     ];
 
                     // to avoid alot of work, lets just update the list of repos in returned
                     // data with new data, this also ensure we have the endCursor already set
                     // correctlty
-                    res['search']['nodes'] = repos;
+                    fetchMoreResultData['search']['nodes'] = repos;
 
-                    return res;
+                    return fetchMoreResultData;
                   },
                 );
 

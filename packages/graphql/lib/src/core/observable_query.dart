@@ -129,46 +129,65 @@ class ObservableQuery {
     return allResults;
   }
 
-  /// fetch more results and then merge them according to the
-  /// updateQuery method, the results will then be added to to stream for the widget to re-build
+  /// fetch more results and then merge them according to the updateQuery method.
+  /// the results will then be added to to stream for the widget to re-build
   void fetchMore(FetchMoreOptions fetchMoreOptions) async {
     // fetch more and udpate
     assert(fetchMoreOptions.updateQuery != null);
 
-    QueryOptions combinedOptions;
-
-    if (fetchMoreOptions.document != null) {
-      // use query as is
-      combinedOptions = fetchMoreOptions as QueryOptions;
-    } else {
-      /// combine the QueryOptions and FetchMoreOptions
-      combinedOptions = QueryOptions(
-        document: options.document,
-        variables: {...options.variables, ...fetchMoreOptions.variables},
-      );
-    }
-
-    // stream new results with a query loader
-    QueryResult currentResults = QueryResult(
-      data: latestResult.data,
-      loading: true,
-      errors: latestResult.errors,
+    final combinedOptions = QueryOptions(
+      fetchPolicy: FetchPolicy.networkOnly,
+      errorPolicy: options.errorPolicy,
+      document: fetchMoreOptions.document ?? options.document,
+      context: options.context,
+      variables: {
+        ...options.variables,
+        ...fetchMoreOptions.variables,
+      },
     );
 
-    addResult(currentResults);
+    // stream old results with a loading indicator
+    addResult(QueryResult(
+      data: latestResult.data,
+      loading: true,
+    ));
 
-    var results = await queryManager.query(combinedOptions);
+    QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
+
+    try {
+      fetchMoreResult.data = fetchMoreOptions.updateQuery(
+        latestResult.data,
+        fetchMoreResult.data,
+      );
+      assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+
+      // we don't want to update variables if merging results failed
+      if (fetchMoreOptions.updateVariables != null) {
+        options.variables = fetchMoreOptions.updateVariables(
+          options.variables,
+          combinedOptions.variables,
+        );
+        assert(options.variables != null,
+            'updateVariables must return a Map<String, dynamic>');
+      }
+    } catch (error) {
+      if (fetchMoreResult.hasErrors) {
+        // because the updateQuery failure might have been because of these errors,
+        // we just add them to the old errors
+        latestResult.errors = [
+          ...(latestResult.errors ?? const []),
+          ...fetchMoreResult.errors
+        ];
+        addResult(latestResult);
+        return;
+      } else {
+        rethrow;
+      }
+    }
 
     // combine the query with the new query, using the fucntion provided by the user
-    var combineData =
-        fetchMoreOptions.updateQuery(latestResult.data, results.data);
-
-    assert(combineData != null);
-
-    results.data = combineData;
-
     // stream the new results and rebuild
-    addResult(results);
+    addResult(fetchMoreResult);
   }
 
   /// add a result to the stream,
