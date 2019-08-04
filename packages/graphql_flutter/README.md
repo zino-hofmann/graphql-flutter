@@ -14,19 +14,19 @@
 
 ## Table of Contents
 
-- [Installation](#installation)
-- [Usage](#usage)
-  - [GraphQL Provider](#graphql-provider)
-  - [Offline Cache](#offline-cache)
-    - [Normalization](#normalization)
-    - [Optimism](#optimism)
-  - [Queries](#queries)
-  - [Mutations](#mutations)
-    - [Mutations with optimism](#mutations-with-optimism)
-  - [Subscriptions (Experimental)](#subscriptions-experimental)
-  - [GraphQL Consumer](#graphql-consumer)
-  - [Graphql Upload](#graphql-upload)
-- [Roadmap](#roadmap)
+- [Installation](#Installation)
+- [Usage](#Usage)
+  - [GraphQL Provider](#GraphQL-Provider)
+  - [Offline Cache](#Offline-Cache)
+    - [Normalization](#Normalization)
+    - [Optimism](#Optimism)
+  - [Queries](#Queries)
+  - [Mutations](#Mutations)
+    - [Mutations with optimism](#Mutations-with-optimism)
+  - [Subscriptions (Experimental)](#Subscriptions-Experimental)
+  - [GraphQL Consumer](#GraphQL-Consumer)
+  - [GraphQL Upload](#GraphQL-Upload)
+- [Roadmap](#Roadmap)
 
 ## Installation
 
@@ -34,7 +34,7 @@ First, depends on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^1.0.0
+  graphql_flutter: ^2.0.0
 ```
 
 Now inside your Dart code, you can import it.
@@ -65,7 +65,7 @@ void main() {
     // getToken: () => 'Bearer <YOUR_PERSONAL_ACCESS_TOKEN>',
   );
 
-  final Link link = authLink.concat(httpLink as Link);
+  final Link link = authLink.concat(httpLink);
 
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
@@ -464,14 +464,14 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Queries                 |    ✅    |
-| Mutations               |    ✅    |
-| Subscriptions           |    ✅    |
-| Query polling           |    ✅    |
-| In memory cache         |    ✅    |
-| Offline cache sync      |    ✅    |
-| GraphQL pload           |    ✅    |
-| Optimistic results      |    ✅    |
+| Queries                 |    ✅     |
+| Mutations               |    ✅     |
+| Subscriptions           |    ✅     |
+| Query polling           |    ✅     |
+| In memory cache         |    ✅     |
+| Offline cache sync      |    ✅     |
+| GraphQL pload           |    ✅     |
+| Optimistic results      |    ✅     |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 

@@ -18,7 +18,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql: ^1.0.1-beta
+  graphql: ^2.0.0
 ```
 
 And then import it inside your dart code:
@@ -44,7 +44,7 @@ final AuthLink _authLink = AuthLink(
     getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
 );
 
-final Link _link = _authLink.concat(_httpLink as Link);
+final Link _link = _authLink.concat(_httpLink);
 
 final GraphQLClient _client = GraphQLClient(
         cache: InMemoryCache(),
