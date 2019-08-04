@@ -160,16 +160,6 @@ class ObservableQuery {
         fetchMoreResult.data,
       );
       assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
-
-      // we don't want to update variables if merging results failed
-      if (fetchMoreOptions.updateVariables != null) {
-        options.variables = fetchMoreOptions.updateVariables(
-          options.variables,
-          combinedOptions.variables,
-        );
-        assert(options.variables != null,
-            'updateVariables must return a Map<String, dynamic>');
-      }
     } catch (error) {
       if (fetchMoreResult.hasErrors) {
         // because the updateQuery failure might have been because of these errors,

@@ -176,20 +176,12 @@ typedef dynamic UpdateQuery(
   dynamic fetchMoreResult,
 );
 
-/// merge fetch more variables with old variables
-/// AFTER the query has been run
-typedef Map<String, dynamic> UpdateVariables(
-  Map<String, dynamic> previousVariables,
-  Map<String, dynamic> fetchMoreVariables,
-);
-
 /// options for fetchmore operations
 class FetchMoreOptions {
   FetchMoreOptions({
     this.document,
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
-    this.updateVariables,
   }) : assert(updateQuery != null);
 
   final String document;
@@ -198,13 +190,4 @@ class FetchMoreOptions {
   /// Strategy for merging the fetchMore result
   /// with the results already in the cache
   UpdateQuery updateQuery;
-
-  /// Optional: Strategy for merging the fetchMore variables
-  /// with the earlier variables AFTER the query is run.
-  ///
-  /// For a conceptual example, the data from
-  /// `fetchItems({first: 1, last: 5}) + fetchItems.fetchMore({ first: 6, last: 10 })`
-  /// would coorespond to  `fetchItems({first: 1, last: 10})`,
-  /// so we might want to update our variables accordingly
-  UpdateVariables updateVariables;
 }
