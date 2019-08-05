@@ -129,6 +129,57 @@ class ObservableQuery {
     return allResults;
   }
 
+  /// fetch more results and then merge them according to the updateQuery method.
+  /// the results will then be added to to stream for the widget to re-build
+  void fetchMore(FetchMoreOptions fetchMoreOptions) async {
+    // fetch more and udpate
+    assert(fetchMoreOptions.updateQuery != null);
+
+    final combinedOptions = QueryOptions(
+      fetchPolicy: FetchPolicy.networkOnly,
+      errorPolicy: options.errorPolicy,
+      document: fetchMoreOptions.document ?? options.document,
+      context: options.context,
+      variables: {
+        ...options.variables,
+        ...fetchMoreOptions.variables,
+      },
+    );
+
+    // stream old results with a loading indicator
+    addResult(QueryResult(
+      data: latestResult.data,
+      loading: true,
+    ));
+
+    QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
+
+    try {
+      fetchMoreResult.data = fetchMoreOptions.updateQuery(
+        latestResult.data,
+        fetchMoreResult.data,
+      );
+      assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+    } catch (error) {
+      if (fetchMoreResult.hasErrors) {
+        // because the updateQuery failure might have been because of these errors,
+        // we just add them to the old errors
+        latestResult.errors = [
+          ...(latestResult.errors ?? const []),
+          ...fetchMoreResult.errors
+        ];
+        addResult(latestResult);
+        return;
+      } else {
+        rethrow;
+      }
+    }
+
+    // combine the query with the new query, using the fucntion provided by the user
+    // stream the new results and rebuild
+    addResult(fetchMoreResult);
+  }
+
   /// add a result to the stream,
   /// copying `loading` and `optimistic`
   /// from the `latestResult` if they aren't set.

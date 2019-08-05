@@ -7,9 +7,13 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef BoolCallback = bool Function();
 
+// method to call from widget to fetchmore queries
+typedef dynamic FetchMore(FetchMoreOptions options);
+
 typedef QueryBuilder = Widget Function(
   QueryResult result, {
   BoolCallback refetch,
+  FetchMore fetchMore,
 });
 
 /// Builds a [Query] widget based on the a given set of [QueryOptions]
@@ -91,6 +95,7 @@ class QueryState extends State<Query> {
         return widget?.builder(
           snapshot.data,
           refetch: observableQuery.refetch,
+          fetchMore: observableQuery.fetchMore,
         );
       },
     );

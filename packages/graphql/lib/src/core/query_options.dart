@@ -168,3 +168,25 @@ class WatchQueryOptions extends QueryOptions {
     return areDifferentVariables(a.variables, b.variables);
   }
 }
+
+/// merge fetchMore result data with earlier result data
+typedef dynamic UpdateQuery(
+  dynamic previousResultData,
+  dynamic fetchMoreResultData,
+);
+
+/// options for fetchmore operations
+class FetchMoreOptions {
+  FetchMoreOptions({
+    this.document,
+    this.variables = const <String, dynamic>{},
+    @required this.updateQuery,
+  }) : assert(updateQuery != null);
+
+  final String document;
+  final Map<String, dynamic> variables;
+
+  /// Strategy for merging the fetchMore result data
+  /// with the result data already in the cache
+  UpdateQuery updateQuery;
+}

@@ -31,7 +31,11 @@ class HeroForEpisode extends StatelessWidget {
           'ep': episodeToJson(episode),
         },
       ),
-      builder: (QueryResult result, {BoolCallback refetch}) {
+      builder: (
+        QueryResult result, {
+        BoolCallback refetch,
+        FetchMore fetchMore,
+      }) {
         if (result.errors != null) {
           return Text(result.errors.toString());
         }
