@@ -14,19 +14,20 @@
 
 ## Table of Contents
 
-- [Installation](#Installation)
-- [Usage](#Usage)
-  - [GraphQL Provider](#GraphQL-Provider)
-  - [Offline Cache](#Offline-Cache)
-    - [Normalization](#Normalization)
-    - [Optimism](#Optimism)
-  - [Queries](#Queries)
-  - [Mutations](#Mutations)
-    - [Mutations with optimism](#Mutations-with-optimism)
-  - [Subscriptions (Experimental)](#Subscriptions-Experimental)
-  - [GraphQL Consumer](#GraphQL-Consumer)
-  - [GraphQL Upload](#GraphQL-Upload)
-- [Roadmap](#Roadmap)
+- [Installation](#installation)
+- [Usage](#usage)
+  - [GraphQL Provider](#graphql-provider)
+  - [Offline Cache](#offline-cache)
+    - [Normalization](#normalization)
+    - [Optimism](#optimism)
+  - [Queries](#queries)
+    - [Fetch More (Pagination)](#fetch-more-pagination)
+  - [Mutations](#mutations)
+    - [Mutations with optimism](#mutations-with-optimism)
+  - [Subscriptions (Experimental)](#subscriptions-experimental)
+  - [GraphQL Consumer](#graphql-consumer)
+  - [GraphQL Upload](#graphql-upload)
+- [Roadmap](#roadmap)
 
 ## Installation
 
@@ -200,6 +201,7 @@ Query(
     pollInterval: 10,
   ),
   // Just like in apollo refetch() could be used to manually trigger a refetch
+  // while fetchMore() can be used for pagination purpose
   builder: (QueryResult result, { VoidCallback refetch, FetchMore fetchMore }) {
     if (result.errors != null) {
       return Text(result.errors.toString());
@@ -222,6 +224,56 @@ Query(
   },
 );
 // ...
+```
+
+#### Fetch More (Pagination)
+
+You can use `fetchMore()` function inside `Query` Builder for pagination effect or run an entirely new query if you wish. The `fetchMore()` function allows you to run an entirely new GraphQL operation and merge the results with the original results. On top of that, you can re-use some aspects of the Original query i.e. Query or Variables.
+
+To use the FetchMore function, first you will need to define `FetchMoreOptions` for the new query you are about to run.
+
+```dart
+...
+// this is returned by the GitHubs GraphQL API for pagination purpose
+final Map pageInfo = result.data['search']['pageInfo'];
+final String fetchMoreCursor = pageInfo['endCursor'];
+
+FetchMoreOptions opts = FetchMoreOptions(
+  variables: {'cursor': fetchMoreCursor},
+  updateQuery: (previousResultData, fetchMoreResultData) {
+    // this function will be called so as to combine both the original and fetchMore results
+    // it allows you to combine them as you would like
+    final List<dynamic> repos = [
+      ...previousResultData['search']['nodes'] as List<dynamic>,
+      ...fetchMoreResultData['search']['nodes'] as List<dynamic>
+    ];
+
+    // to avoid a lot of work, lets just update the list of repos in returned
+    // data with new data, this also ensure we have the endCursor already set
+    // correctly
+    fetchMoreResultData['search']['nodes'] = repos;
+
+    return fetchMoreResultData;
+  },
+);
+
+...
+```
+
+And finally, you can now call the `fetchMore` function and pass the `FetchMoreOptions` you defined above.
+
+```dart
+RaisedButton(
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: <Widget>[
+      Text("Load More"),
+    ],
+  ),
+  onPressed: () {
+    fetchMore(opts);
+  },
+)
 ```
 
 ### Mutations
