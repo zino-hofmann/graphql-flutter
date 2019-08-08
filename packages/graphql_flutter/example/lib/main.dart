@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './graphql_bloc/main.dart' show GraphQLBlocPatternScreen;
 import './graphql_widget/main.dart' show GraphQLWidgetScreen;
+import 'fetchmore/main.dart';
 
 void main() => runApp(
       MaterialApp(
@@ -36,6 +37,18 @@ void main() => runApp(
                             MaterialPageRoute<GraphQLWidgetScreen>(
                               builder: (BuildContext context) =>
                                   const GraphQLWidgetScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      RaisedButton(
+                        child: const Text('Fetchmore (Pagination) Example'),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute<FetchMoreWidgetScreen>(
+                              builder: (BuildContext context) =>
+                                  const FetchMoreWidgetScreen(),
                             ),
                           );
                         },

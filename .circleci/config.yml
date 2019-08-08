@@ -201,6 +201,54 @@ jobs:
             cd packages/graphql_flutter
             pub publish -f
 workflows:
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 0 * * *"
+          filters:
+            branches:
+              only:
+                - beta
+    jobs:
+      - dependencies
+      - lint:
+          requires:
+            - dependencies
+      - coverage:
+          requires:
+            - dependencies
+      - release:
+          requires:
+            - dependencies
+            - lint
+            - coverage
+      - sync_with_beta:
+          requires:
+            - release
+  weekly:
+    triggers:
+      - schedule:
+          cron: "0 21 * * 1"
+          filters:
+            branches:
+              only:
+                - master
+    jobs:
+      - dependencies
+      - lint:
+          requires:
+            - dependencies
+      - coverage:
+          requires:
+            - dependencies
+      - release:
+          requires:
+            - dependencies
+            - lint
+            - coverage
+      - sync_with_beta:
+          requires:
+            - release
   default:
     jobs:
       - dependencies:
@@ -219,23 +267,6 @@ workflows:
           filters:
             tags:
               ignore: /^.*$/
-      - release:
-          requires:
-            - dependencies
-            - lint
-            - coverage
-          filters:
-            branches:
-              only:
-                - master
-                - beta
-      - sync_with_beta:
-          requires:
-            - release
-          filters:
-            branches:
-              only:
-                - master
       - publish:
           requires:
             - dependencies 
