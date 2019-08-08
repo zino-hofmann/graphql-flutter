@@ -228,9 +228,9 @@ Query(
 
 #### Fetch More (Pagination)
 
-You can use `fetchMore()` function inside `Query` Builder for pagination effect or run an entirely new query if you wish. The `fetchMore()` function allows you to run an entirely new GraphQL operation and merge the results with the original results. On top of that, you can re-use some aspects of the Original query i.e. Query or Variables.
+You can use `fetchMore()` function inside `Query` Builder to perform pagination. The `fetchMore()` function allows you to run an entirely new GraphQL operation and merge the new results with the original results. On top of that, you can re-use aspects of the Original query i.e. the Query or some of the Variables.
 
-To use the FetchMore function, first you will need to define `FetchMoreOptions` for the new query you are about to run.
+In order to use the `FetchMore()` function, you will need to first define `FetchMoreOptions` variable for the new query.
 
 ```dart
 ...
@@ -260,7 +260,7 @@ FetchMoreOptions opts = FetchMoreOptions(
 ...
 ```
 
-And finally, you can now call the `fetchMore` function and pass the `FetchMoreOptions` you defined above.
+And then, call the `fetchMore()` function and pass the `FetchMoreOptions` variable you defined above.
 
 ```dart
 RaisedButton(
