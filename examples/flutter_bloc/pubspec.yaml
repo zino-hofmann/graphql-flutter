@@ -10,7 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
   
-  graphql: ^2.0.0
+  graphql:
+    path: ../../packages/graphql
   cupertino_icons: ^0.1.2
   bloc: ^0.14.0
   flutter_bloc: ^0.19.0
