@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/events.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/my_repos_bloc.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/states.dart';
 import 'package:graphql_flutter_bloc_example/repository.dart';
+
+// to run the example, create a file ../local.dart with the content:
+// const String YOUR_PERSONAL_ACCESS_TOKEN =
+//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
+// ignore: uri_does_not_exist
+import 'local.dart';
 
 void main() => runApp(MyApp());
 
@@ -17,10 +24,32 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: BlocProvider(
-        builder: (context) =>
-            MyGithubReposBloc(githubRepository: GithubRepository()),
+        builder: (context) => MyGithubReposBloc(
+          githubRepository: GithubRepository(
+            client: _client(),
+          ),
+        ),
         child: MyHomePage(),
       ),
+    );
+  }
+
+  GraphQLClient _client() {
+    final HttpLink _httpLink = HttpLink(
+      uri: 'https://api.github.com/graphql',
+    );
+
+    final AuthLink _authLink = AuthLink(
+      getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    );
+
+    final Link _link = _authLink.concat(_httpLink);
+
+    return GraphQLClient(
+      cache: OptimisticCache(
+        dataIdFromObject: typenameDataIdFromObject,
+      ),
+      link: _link,
     );
   }
 }

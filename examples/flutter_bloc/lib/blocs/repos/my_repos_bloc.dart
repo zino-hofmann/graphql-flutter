@@ -1,8 +1,8 @@
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql/client.dart';
-import 'package:graphql/internal.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/events.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/states.dart';
@@ -41,7 +41,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       yield ReposLoading();
 
       final queryResults =
-          await this.githubRepository.fetchMyRepositories(numOfRepositories);
+          await this.githubRepository.getRepositories(numOfRepositories);
 
       if (queryResults.hasErrors) {
         yield ReposNotLoaded(queryResults.errors);
@@ -62,7 +62,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       githubRepositories = listOfRepos;
 
       // pass the data instead
-      yield ReposLoaded(listOfRepos);
+      yield ReposLoaded(results: listOfRepos);
     } catch (error) {
       yield ReposNotLoaded(error);
     }
@@ -97,7 +97,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
           .toList();
 
       // pass the data instead
-      yield ReposLoaded(githubRepositories);
+      yield ReposLoaded(results: githubRepositories);
 
       final queryResults = await githubRepository.toggleRepoStar(repo);
 
@@ -121,7 +121,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
           .map((Repo r) => repo.id == r.id ? notloadingRepo : r)
           .toList();
 
-      yield ReposLoaded(githubRepositories);
+      yield ReposLoaded(results: githubRepositories);
     } catch (error) {
       yield ReposNotLoaded(error);
     }
