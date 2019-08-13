@@ -14,22 +14,26 @@ import 'package:graphql_flutter_bloc_example/graphql_operation/queries/readRepos
 import 'local.dart';
 
 class GithubRepository {
-  static final HttpLink _httpLink = HttpLink(
-    uri: 'https://api.github.com/graphql',
-  );
+  GraphQLClient _client;
 
-  static final AuthLink _authLink = AuthLink(
-    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-  );
+  GithubRepository() {
+    final HttpLink _httpLink = HttpLink(
+      uri: 'https://api.github.com/graphql',
+    );
 
-  static final Link _link = _authLink.concat(_httpLink);
+    final AuthLink _authLink = AuthLink(
+      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    );
 
-  static final GraphQLClient _client = GraphQLClient(
-    cache: OptimisticCache(
-      dataIdFromObject: typenameDataIdFromObject,
-    ),
-    link: _link,
-  );
+    final Link _link = _authLink.concat(_httpLink);
+
+    _client = GraphQLClient(
+      cache: OptimisticCache(
+        dataIdFromObject: typenameDataIdFromObject,
+      ),
+      link: _link,
+    );
+  }
 
   Future<QueryResult> fetchMyRepositories({int numOfRepositories: 50}) async {
     final WatchQueryOptions _options = WatchQueryOptions(
