@@ -35,7 +35,7 @@ class GithubRepository {
     );
   }
 
-  Future<QueryResult> fetchMyRepositories({int numOfRepositories: 50}) async {
+  Future<QueryResult> fetchMyRepositories(int numOfRepositories) async {
     final WatchQueryOptions _options = WatchQueryOptions(
       document: queries.readRepositories,
       variables: <String, dynamic>{
@@ -45,7 +45,7 @@ class GithubRepository {
       fetchResults: true,
     );
 
-    return _client.query(_options);
+    return await _client.query(_options);
   }
 
   Future<QueryResult> toggleRepoStar(Repo repo) async {

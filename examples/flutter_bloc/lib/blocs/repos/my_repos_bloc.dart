@@ -40,9 +40,8 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
     try {
       yield ReposLoading();
 
-      final queryResults = await this
-          .githubRepository
-          .fetchMyRepositories(numOfRepositories: numOfRepositories);
+      final queryResults =
+          await this.githubRepository.fetchMyRepositories(numOfRepositories);
 
       if (queryResults.hasErrors) {
         yield ReposNotLoaded(queryResults.errors);
