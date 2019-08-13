@@ -16,10 +16,12 @@ class ReposLoading extends MyGithubReposState {
 class ReposLoaded extends MyGithubReposState {
   final List<Repo> results;
 
-  ReposLoaded([this.results]) : super([results]);
+  ReposLoaded({@required this.results})
+      : assert(results != null),
+        super([results]);
 
   @override
-  String toString() => 'ReposLoaded { Github Repositories: $results }';
+  String toString() => 'ReposLoaded: { Github Repositories: $results }';
 }
 
 class ReposNotLoaded extends MyGithubReposState {
