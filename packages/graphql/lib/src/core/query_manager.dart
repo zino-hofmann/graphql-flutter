@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:graphql/src/exceptions/base_exceptions.dart';
+import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/graphql_error.dart';
 import 'package:graphql/src/core/observable_query.dart';
 
 import 'package:graphql/src/scheduler/scheduler.dart';
@@ -189,12 +190,12 @@ class QueryManager {
             queryResult.loading) {
           queryResult = QueryResult(
             source: QueryResultSource.Cache,
-            errors: [
-              GraphQLError(
-                message:
-                    'Could not find that operation in the cache. (FetchPolicy.cacheOnly)',
+            exception: OperationException(
+              clientException: CacheMissException(
+                'Could not find that operation in the cache. (FetchPolicy.cacheOnly)',
+                cacheKey,
               ),
-            ],
+            ),
           );
         }
       }
@@ -363,8 +364,8 @@ class QueryManager {
 
     return QueryResult(
       data: data,
-      errors: errors,
       source: source,
+      exception: coalesceErrors(graphqlErrors: errors),
     );
   }
 

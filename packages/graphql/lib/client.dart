@@ -6,10 +6,11 @@ export 'package:graphql/src/cache/normalized_in_memory.dart';
 export 'package:graphql/src/cache/optimistic.dart';
 export 'package:graphql/src/cache/lazy_cache_map.dart';
 
-export 'package:graphql/src/core/graphql_error.dart';
 export 'package:graphql/src/core/query_manager.dart';
 export 'package:graphql/src/core/query_options.dart';
 export 'package:graphql/src/core/query_result.dart';
+
+export 'package:graphql/src/exceptions/exceptions.dart';
 
 export 'package:graphql/src/link/auth/link_auth.dart';
 export 'package:graphql/src/link/http/link_http.dart';

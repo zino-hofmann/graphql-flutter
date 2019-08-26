@@ -27,7 +27,9 @@ class GraphQLError {
 
   /// Constructs a [GraphQLError] from a JSON map.
   GraphQLError.fromJSON(this.raw)
-      : message = raw['message'] is String ? raw['message'] as String : 'Invalid server response: message property needs to be of type String',
+      : message = raw['message'] is String
+            ? raw['message'] as String
+            : 'Invalid server response: message property needs to be of type String',
         locations = raw['locations'] is List<Map<String, int>>
             ? List<Location>.from(
                 (raw['locations'] as List<Map<String, int>>).map<Location>(

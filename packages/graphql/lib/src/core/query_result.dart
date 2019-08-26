@@ -1,6 +1,6 @@
 import 'dart:async' show FutureOr;
 
-import 'package:graphql/src/core/graphql_error.dart';
+import 'package:graphql/src/exceptions/exceptions.dart';
 
 /// The source of the result data contained
 ///
@@ -26,7 +26,7 @@ final eagerSources = {
 class QueryResult {
   QueryResult({
     this.data,
-    this.errors,
+    this.exception,
     bool loading,
     bool optimistic,
     QueryResultSource source,
@@ -48,7 +48,8 @@ class QueryResult {
 
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;
-  List<GraphQLError> errors;
+
+  OperationException exception;
 
   /// Whether data has been specified from either the cache or network)
   bool get loading => source == QueryResultSource.Loading;
@@ -58,20 +59,17 @@ class QueryResult {
   bool get optimistic => source == QueryResultSource.OptimisticResult;
 
   /// Whether the response includes any graphql errors
-  bool get hasErrors {
-    if (errors == null) {
-      return false;
-    }
+  bool get hasErrors => !(exception == null);
 
-    return errors.isNotEmpty;
-  }
+  /// Whether the response includes any graphql errors
+  bool get hasGraphqlErrors => exception?.graphqlErrors?.isNotEmpty ?? false;
+
+  /// graphql errors in the exception, if any
+  List<GraphQLError> get graphqlErrors => exception?.graphqlErrors;
 
   void addError(GraphQLError graphQLError) {
-    if (errors != null) {
-      errors.add(graphQLError);
-    } else {
-      errors = <GraphQLError>[graphQLError];
-    }
+    exception ??= OperationException();
+    exception.addError(graphQLError);
   }
 }
 
