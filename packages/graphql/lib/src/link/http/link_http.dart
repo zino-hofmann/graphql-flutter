@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:graphql/src/exceptions/exceptions.dart' as ex;
 import 'package:meta/meta.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
@@ -32,6 +33,8 @@ class HttpLink extends Link {
             Operation operation, [
             NextLink forward,
           ]) {
+            final parsedUri = Uri.parse(uri);
+
             if (operation.isSubscription) {
               if (forward == null) {
                 throw Exception('This link does not support subscriptions.');
@@ -83,7 +86,7 @@ class HttpLink extends Link {
               try {
                 // httpOptionsAndBody.body as String
                 final BaseRequest request = await _prepareRequest(
-                    uri, httpHeadersAndBody.body, httpHeaders);
+                    parsedUri, httpHeadersAndBody.body, httpHeaders);
 
                 response = await fetcher.send(request);
 
@@ -94,9 +97,14 @@ class HttpLink extends Link {
                     await _parseResponse(response);
 
                 controller.add(parsedResponse);
-              } catch (error) {
-                print(<dynamic>[error.runtimeType, error]);
-                controller.addError(error);
+              } catch (failure) {
+                // we overwrite socket uri for now:
+                // https://github.com/dart-lang/sdk/issues/12693
+                dynamic translated = ex.translateFailure(failure);
+                if (translated is ex.NetworkException) {
+                  translated.uri = parsedUri;
+                }
+                controller.addError(translated);
               }
 
               await controller.close();
@@ -153,19 +161,19 @@ Future<Map<String, MultipartFile>> _getFileMap(
 }
 
 Future<BaseRequest> _prepareRequest(
-  String url,
+  Uri uri,
   Map<String, dynamic> body,
   Map<String, String> httpHeaders,
 ) async {
   final Map<String, MultipartFile> fileMap = await _getFileMap(body);
   if (fileMap.isEmpty) {
-    final Request r = Request('post', Uri.parse(url));
+    final Request r = Request('post', uri);
     r.headers.addAll(httpHeaders);
     r.body = json.encode(body);
     return r;
   }
 
-  final MultipartRequest r = MultipartRequest('post', Uri.parse(url));
+  final MultipartRequest r = MultipartRequest('post', uri);
   r.headers.addAll(httpHeaders);
   r.fields['operations'] = json.encode(body, toEncodable: (dynamic object) {
     if (object is MultipartFile) {

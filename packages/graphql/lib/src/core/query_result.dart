@@ -58,19 +58,8 @@ class QueryResult {
   ///   (may include eager results from the cache)
   bool get optimistic => source == QueryResultSource.OptimisticResult;
 
-  /// Whether the response includes any graphql errors
-  bool get hasErrors => !(exception == null);
-
-  /// Whether the response includes any graphql errors
-  bool get hasGraphqlErrors => exception?.graphqlErrors?.isNotEmpty ?? false;
-
-  /// graphql errors in the exception, if any
-  List<GraphQLError> get graphqlErrors => exception?.graphqlErrors;
-
-  void addError(GraphQLError graphQLError) {
-    exception ??= OperationException();
-    exception.addError(graphQLError);
-  }
+  /// Whether the response includes an exception
+  bool get hasException => (exception != null);
 }
 
 class MultiSourceResult {

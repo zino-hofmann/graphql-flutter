@@ -36,14 +36,14 @@ class HeroForEpisode extends StatelessWidget {
         BoolCallback refetch,
         FetchMore fetchMore,
       }) {
-        if (result.errors != null) {
-          return Text(result.errors.toString());
+        if (result.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
         }
 
-        if (result.loading) {
-          return Center(
-            child: const CircularProgressIndicator(),
-          );
+        if (result.hasException) {
+          return Text(result.exception.toString());
         }
         return Column(
           children: <Widget>[

@@ -5,9 +5,9 @@ import './_base_exceptions.dart' show ClientException;
 class NetworkException implements ClientException {
   covariant Exception wrappedException;
 
-  final String message;
+  String message;
 
-  final Uri uri;
+  Uri uri;
 
   NetworkException({
     this.wrappedException,
@@ -15,7 +15,8 @@ class NetworkException implements ClientException {
     this.uri,
   });
 
-  String toString() => 'Failed to connect to $uri: $message';
+  String toString() =>
+      'Failed to connect to $uri: ${message ?? wrappedException}';
 }
 
 NetworkException translateNetworkFailure(dynamic failure) {
@@ -26,4 +27,5 @@ NetworkException translateNetworkFailure(dynamic failure) {
       uri: failure.uri,
     );
   }
+  return null;
 }

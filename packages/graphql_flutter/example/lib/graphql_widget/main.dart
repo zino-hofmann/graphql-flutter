@@ -3,6 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
+import '../helpers.dart' show withGenericHandling;
 
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
@@ -103,37 +104,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 //pollInterval: 10,
               ),
-              builder: (QueryResult result, {refetch, fetchMore}) {
-                if (result.loading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+              builder: withGenericHandling(
+                (QueryResult result, {refetch, fetchMore}) {
+                  if (result.data == null && !result.hasException) {
+                    return const Text(
+                        'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
+                  }
+
+                  // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
+                  final List<LazyCacheMap> repositories = (result.data['viewer']
+                          ['repositories']['nodes'] as List<dynamic>)
+                      .cast<LazyCacheMap>();
+
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: repositories.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return StarrableRepository(
+                            repository: repositories[index]);
+                      },
+                    ),
                   );
-                }
-
-                if (result.hasErrors) {
-                  return Text('\nErrors: \n  ' + result.errors.join(',\n  '));
-                }
-
-                if (result.data == null && result.errors == null) {
-                  return const Text(
-                      'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
-                }
-
-                // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<LazyCacheMap> repositories = (result.data['viewer']
-                        ['repositories']['nodes'] as List<dynamic>)
-                    .cast<LazyCacheMap>();
-
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return StarrableRepository(
-                          repository: repositories[index]);
-                    },
-                  ),
-                );
-              },
+                },
+              ),
             ),
             ENABLE_WEBSOCKETS
                 ? Subscription<Map<String, dynamic>>(
@@ -209,8 +202,8 @@ class StarrableRepository extends StatelessWidget {
         );
       },
       update: (Cache cache, QueryResult result) {
-        if (result.hasErrors) {
-          print(result.errors);
+        if (result.hasException) {
+          print(result.exception);
         } else {
           final Map<String, Object> updated =
               Map<String, Object>.from(repository)

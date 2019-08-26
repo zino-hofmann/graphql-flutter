@@ -6,18 +6,10 @@ import 'package:graphql/src/utilities/traverse.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 import 'package:graphql/src/cache/lazy_cache_map.dart';
+import 'package:graphql/src/exceptions/exceptions.dart'
+    show NormalizationException;
 
 typedef DataIdFromObject = String Function(Object node);
-
-class NormalizationException implements Exception {
-  NormalizationException(this.cause, this.overflowError, this.value);
-
-  StackOverflowError overflowError;
-  String cause;
-  Object value;
-
-  String get message => cause;
-}
 
 typedef Normalizer = List<String> Function(Object node);
 

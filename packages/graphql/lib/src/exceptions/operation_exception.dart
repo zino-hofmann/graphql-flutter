@@ -13,6 +13,12 @@ class OperationException implements Exception {
   }) : this.graphqlErrors = graphqlErrors.toList();
 
   void addError(GraphQLError error) => graphqlErrors.add(error);
+
+  String toString() => [
+        if (clientException != null) 'ClientException: ${clientException}',
+        if (graphqlErrors.isNotEmpty) 'GraphQL Errors:',
+        ...graphqlErrors.map((e) => e.toString()),
+      ].join('\n');
 }
 
 /// `(graphqlErrors?, exception?) => exception?`
@@ -27,10 +33,9 @@ OperationException coalesceErrors({
 }) {
   if (exception != null ||
       clientException != null ||
-      graphqlErrors == null ||
-      graphqlErrors.isEmpty) {
+      (graphqlErrors != null && graphqlErrors.isNotEmpty)) {
     return OperationException(
-      clientException: clientException ?? exception.clientException,
+      clientException: clientException ?? exception?.clientException,
       graphqlErrors: [
         if (graphqlErrors != null) ...graphqlErrors,
         if (exception?.graphqlErrors != null) ...exception.graphqlErrors

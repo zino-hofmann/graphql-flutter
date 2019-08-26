@@ -176,12 +176,13 @@ class ObservableQuery {
         writeToCache: true,
       );
     } catch (error) {
-      if (fetchMoreResult.hasGraphqlErrors) {
+      if (fetchMoreResult.hasException) {
         // because the updateQuery failure might have been because of these errors,
         // we just add them to the old errors
         latestResult.exception = coalesceErrors(
           exception: latestResult.exception,
-          graphqlErrors: fetchMoreResult.graphqlErrors,
+          graphqlErrors: fetchMoreResult.exception.graphqlErrors,
+          clientException: fetchMoreResult.exception.clientException,
         );
 
         queryManager.addQueryResult(

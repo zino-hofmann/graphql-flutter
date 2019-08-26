@@ -5,13 +5,14 @@ import './network_exception_stub.dart' as stub;
 class NetworkException extends stub.NetworkException {
   SocketException wrappedException;
 
-  NetworkException.from(this.wrappedException);
+  Uri uri;
 
-  String get message => wrappedException.message;
-  Uri get uri => Uri(
-        host: wrappedException.address.host,
-        port: wrappedException.port,
-      );
+  NetworkException.from(this.wrappedException)
+      : uri = Uri(
+          scheme: 'http',
+          host: wrappedException.address.host,
+          port: wrappedException.port,
+        );
 }
 
 NetworkException translateNetworkFailure(dynamic failure) {

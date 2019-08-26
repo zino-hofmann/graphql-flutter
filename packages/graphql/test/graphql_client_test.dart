@@ -117,7 +117,7 @@ void main() {
         expect(await capt.finalize().bytesToString(),
             r'{"operationName":"ReadRepositories","variables":{"nRepositories":42},"query":"  query ReadRepositories($nRepositories: Int!) {\n    viewer {\n      repositories(last: $nRepositories) {\n        nodes {\n          __typename\n          id\n          name\n          viewerHasStarred\n        }\n      }\n    }\n  }\n"}');
 
-        expect(r.errors, isNull);
+        expect(r.exception, isNull);
         expect(r.data, isNotNull);
         final List<Map<String, dynamic>> nodes =
             (r.data['viewer']['repositories']['nodes'] as List<dynamic>)
@@ -188,7 +188,7 @@ void main() {
         expect(await request.finalize().bytesToString(),
             r'{"operationName":"AddStar","variables":{},"query":"  mutation AddStar($starrableId: ID!) {\n    action: addStar(input: {starrableId: $starrableId}) {\n      starrable {\n        viewerHasStarred\n      }\n    }\n  }\n"}');
 
-        expect(response.errors, isNull);
+        expect(response.exception, isNull);
         expect(response.data, isNotNull);
         final bool viewerHasStarred =
             response.data['action']['starrable']['viewerHasStarred'] as bool;
