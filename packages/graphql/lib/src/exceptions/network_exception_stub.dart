@@ -1,24 +1,29 @@
-import './base_exceptions.dart' show ClientException;
+import 'package:http/http.dart' as http;
 
-typedef VoidCallback = void Function();
+import './_base_exceptions.dart' show ClientException;
 
 class NetworkException implements ClientException {
   covariant Exception wrappedException;
 
   final String message;
 
-  final String targetAddress;
-  final int targetPort;
+  final Uri uri;
 
   NetworkException({
     this.wrappedException,
     this.message,
-    this.targetAddress,
-    this.targetPort,
+    this.uri,
   });
 
-  String toString() =>
-      'Failed to connect to $targetAddress:$targetPort: $message';
+  String toString() => 'Failed to connect to $uri: $message';
 }
 
-void translateExceptions(VoidCallback block) => block();
+NetworkException translateNetworkFailure(dynamic failure) {
+  if (failure is http.ClientException) {
+    return NetworkException(
+      wrappedException: failure,
+      message: failure.message,
+      uri: failure.uri,
+    );
+  }
+}

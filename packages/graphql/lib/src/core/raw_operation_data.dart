@@ -13,7 +13,8 @@ class RawOperationData {
     @required this.document,
     Map<String, dynamic> variables,
     String operationName,
-  })  : _operationName = operationName,
+  })  : assert(document != null),
+        _operationName = operationName,
         variables = SplayTreeMap<String, dynamic>.of(
           variables ?? const <String, dynamic>{},
         );

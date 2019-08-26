@@ -1,5 +1,9 @@
 abstract class ClientException implements Exception {}
 
+//
+// Cache exceptions
+//
+
 abstract class ClientCacheException implements ClientException {}
 
 /// A failure during the cache's entity normalization processes
@@ -21,4 +25,21 @@ class CacheMissException implements ClientCacheException {
   String missingKey;
 
   String get message => cause;
+}
+
+//
+// end cache exceptions
+//
+
+class UnhandledFailureWrapper implements ClientException {
+  covariant Object failure;
+  UnhandledFailureWrapper(this.failure);
+}
+
+ClientException translateFailure(dynamic failure) {
+  if (failure is ClientException) {
+    return failure;
+  }
+
+  return UnhandledFailureWrapper(failure);
 }

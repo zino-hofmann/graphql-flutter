@@ -1,4 +1,5 @@
 import 'dart:io' show SocketException;
+import 'dart:io';
 import './network_exception_stub.dart' as stub;
 
 class NetworkException extends stub.NetworkException {
@@ -7,14 +8,15 @@ class NetworkException extends stub.NetworkException {
   NetworkException.from(this.wrappedException);
 
   String get message => wrappedException.message;
-  String get targetAddress => wrappedException.address.address;
-  int get targetPort => wrappedException.port;
+  Uri get uri => Uri(
+        host: wrappedException.address.host,
+        port: wrappedException.port,
+      );
 }
 
-void translateExceptions(stub.VoidCallback block) {
-  try {
-    block();
-  } on SocketException catch (e) {
-    throw NetworkException.from(e);
+NetworkException translateNetworkFailure(dynamic failure) {
+  if (failure is SocketException) {
+    return NetworkException.from(failure);
   }
+  return stub.translateNetworkFailure(failure);
 }

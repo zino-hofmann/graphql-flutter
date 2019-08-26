@@ -1,8 +1,5 @@
-import 'package:graphql/src/exceptions/base_exceptions.dart';
-
+import 'package:graphql/src/exceptions/_base_exceptions.dart';
 import './graphql_error.dart';
-import './network_exception_stub.dart'
-    if (dart.library.io) './io_network_exceptions.dart';
 
 class OperationException implements Exception {
   List<GraphQLError> graphqlErrors = [];

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:graphql/src/exceptions/base_exceptions.dart';
 import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:meta/meta.dart';
 
@@ -37,12 +36,6 @@ class QueryManager {
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
-    if (options.document == null) {
-      throw Exception(
-        'document option is required. You must specify your GraphQL document in the query options.',
-      );
-    }
-
     final ObservableQuery observableQuery = ObservableQuery(
       queryManager: this,
       options: options,
@@ -121,6 +114,9 @@ class QueryManager {
         );
       }
 
+      // TODO this should never happen right?
+      // if there is an error reaching the server, there should be an error thrown,
+      // if not, data should not be null.
       if (fetchResult.data == null &&
           fetchResult.errors == null &&
           (options.fetchPolicy == FetchPolicy.noCache ||
@@ -135,10 +131,14 @@ class QueryManager {
         options,
         source: QueryResultSource.Network,
       );
-    } catch (error) {
+    } catch (failure) {
       // we set the source to indicate where the source of failure
       queryResult ??= QueryResult(source: QueryResultSource.Network);
-      queryResult.addError(_attemptToWrapError(error));
+
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        clientException: translateFailure(failure),
+      );
     }
 
     // cleanup optimistic results
@@ -199,8 +199,11 @@ class QueryManager {
           );
         }
       }
-    } catch (error) {
-      queryResult.addError(_attemptToWrapError(error));
+    } catch (failure) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        clientException: translateFailure(failure),
+      );
     }
 
     // If not a regular eager cache resolution,
@@ -225,24 +228,6 @@ class QueryManager {
     }
 
     return null;
-  }
-
-  GraphQLError _attemptToWrapError(dynamic error) {
-    String errorMessage;
-
-    // not all errors thrown above are GraphQL errors,
-    // so try/catch to avoid "could not access message"
-    try {
-      errorMessage = error.message as String;
-      assert(errorMessage != null);
-      assert(errorMessage.isNotEmpty);
-    } catch (e) {
-      throw error;
-    }
-
-    return GraphQLError(
-      message: errorMessage,
-    );
   }
 
   /// Add a result to the query specified by `queryId`, if it exists
