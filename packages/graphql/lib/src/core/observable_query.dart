@@ -136,7 +136,7 @@ class ObservableQuery {
     assert(fetchMoreOptions.updateQuery != null);
 
     final combinedOptions = QueryOptions(
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.noCache,
       errorPolicy: options.errorPolicy,
       document: fetchMoreOptions.document ?? options.document,
       context: options.context,
