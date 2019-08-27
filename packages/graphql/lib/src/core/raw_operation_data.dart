@@ -58,7 +58,8 @@ class RawOperationData {
       if (isIoFile(object)) {
         return object.path;
       }
-      return object;
+      // default toEncodable behavior
+      return object.toJson();
     });
 
     return '$document|$encodedVariables|$_identifier';
