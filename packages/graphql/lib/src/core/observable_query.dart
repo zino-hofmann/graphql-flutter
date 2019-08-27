@@ -155,11 +155,18 @@ class ObservableQuery {
     QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
 
     try {
+      // combine the query with the new query, using the function provided by the user
       fetchMoreResult.data = fetchMoreOptions.updateQuery(
         latestResult.data,
         fetchMoreResult.data,
       );
       assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+      // stream the new results and rebuild
+      queryManager.addQueryResult(
+        queryId,
+        fetchMoreResult,
+        writeToCache: true,
+      );
     } catch (error) {
       if (fetchMoreResult.hasErrors) {
         // because the updateQuery failure might have been because of these errors,
@@ -168,16 +175,17 @@ class ObservableQuery {
           ...(latestResult.errors ?? const []),
           ...fetchMoreResult.errors
         ];
-        addResult(latestResult);
+        queryManager.addQueryResult(
+          queryId,
+          latestResult,
+          writeToCache: true,
+        );
+
         return;
       } else {
         rethrow;
       }
     }
-
-    // combine the query with the new query, using the fucntion provided by the user
-    // stream the new results and rebuild
-    addResult(fetchMoreResult);
   }
 
   /// add a result to the stream,
