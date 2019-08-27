@@ -249,7 +249,7 @@ FetchMoreOptions opts = FetchMoreOptions(
     ];
 
     // to avoid a lot of work, lets just update the list of repos in returned
-    // data with new data, this also ensure we have the endCursor already set
+    // data with new data, this also ensures we have the endCursor already set
     // correctly
     fetchMoreResultData['search']['nodes'] = repos;
 

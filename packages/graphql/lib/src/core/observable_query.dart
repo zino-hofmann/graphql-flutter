@@ -104,6 +104,13 @@ class ObservableQuery {
   void onListen() {
     if (_latestWasEagerlyFetched) {
       _latestWasEagerlyFetched = false;
+
+      // eager results are resolved synchronously,
+      // so we have to add them manually now that
+      // the stream is available
+      if (!controller.isClosed && latestResult != null) {
+        controller.add(latestResult);
+      }
       return;
     }
     if (options.fetchResults) {
