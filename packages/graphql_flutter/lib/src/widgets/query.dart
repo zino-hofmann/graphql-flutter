@@ -36,21 +36,17 @@ class QueryState extends State<Query> {
   ObservableQuery observableQuery;
 
   WatchQueryOptions get _options {
-    FetchPolicy fetchPolicy = widget.options.fetchPolicy;
-
-    if (fetchPolicy == FetchPolicy.cacheFirst) {
-      fetchPolicy = FetchPolicy.cacheAndNetwork;
-    }
+    final QueryOptions options = widget.options;
 
     return WatchQueryOptions(
-      document: widget.options.document,
-      variables: widget.options.variables,
-      fetchPolicy: fetchPolicy,
-      errorPolicy: widget.options.errorPolicy,
-      pollInterval: widget.options.pollInterval,
+      document: options.document,
+      variables: options.variables,
+      fetchPolicy: options.fetchPolicy,
+      errorPolicy: options.errorPolicy,
+      pollInterval: options.pollInterval,
       fetchResults: true,
-      context: widget.options.context,
-      optimisticResult: widget.options.optimisticResult,
+      context: options.context,
+      optimisticResult: options.optimisticResult,
     );
   }
 
