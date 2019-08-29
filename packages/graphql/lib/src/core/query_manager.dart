@@ -245,8 +245,19 @@ class QueryManager {
   }
 
   /// Add a result to the query specified by `queryId`, if it exists
-  void addQueryResult(String queryId, QueryResult queryResult) {
+  void addQueryResult(
+    String queryId,
+    QueryResult queryResult, {
+    bool writeToCache = false,
+  }) {
     final ObservableQuery observableQuery = getQuery(queryId);
+    if (writeToCache) {
+      cache.write(
+        observableQuery.options.toKey(),
+        queryResult.data,
+      );
+    }
+
     if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.addResult(queryResult);
     }

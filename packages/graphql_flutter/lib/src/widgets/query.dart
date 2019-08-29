@@ -86,6 +86,7 @@ class QueryState extends State<Query> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
+      key: Key(observableQuery?.options?.toKey()),
       initialData: observableQuery?.latestResult ?? QueryResult(loading: true),
       stream: observableQuery.stream,
       builder: (

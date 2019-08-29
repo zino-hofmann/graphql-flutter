@@ -104,6 +104,13 @@ class ObservableQuery {
   void onListen() {
     if (_latestWasEagerlyFetched) {
       _latestWasEagerlyFetched = false;
+
+      // eager results are resolved synchronously,
+      // so we have to add them manually now that
+      // the stream is available
+      if (!controller.isClosed && latestResult != null) {
+        controller.add(latestResult);
+      }
       return;
     }
     if (options.fetchResults) {
@@ -136,7 +143,7 @@ class ObservableQuery {
     assert(fetchMoreOptions.updateQuery != null);
 
     final combinedOptions = QueryOptions(
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.noCache,
       errorPolicy: options.errorPolicy,
       document: fetchMoreOptions.document ?? options.document,
       context: options.context,
@@ -155,11 +162,18 @@ class ObservableQuery {
     QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
 
     try {
+      // combine the query with the new query, using the function provided by the user
       fetchMoreResult.data = fetchMoreOptions.updateQuery(
         latestResult.data,
         fetchMoreResult.data,
       );
       assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+      // stream the new results and rebuild
+      queryManager.addQueryResult(
+        queryId,
+        fetchMoreResult,
+        writeToCache: true,
+      );
     } catch (error) {
       if (fetchMoreResult.hasErrors) {
         // because the updateQuery failure might have been because of these errors,
@@ -168,16 +182,17 @@ class ObservableQuery {
           ...(latestResult.errors ?? const []),
           ...fetchMoreResult.errors
         ];
-        addResult(latestResult);
+        queryManager.addQueryResult(
+          queryId,
+          latestResult,
+          writeToCache: true,
+        );
+
         return;
       } else {
         rethrow;
       }
     }
-
-    // combine the query with the new query, using the fucntion provided by the user
-    // stream the new results and rebuild
-    addResult(fetchMoreResult);
   }
 
   /// add a result to the stream,
