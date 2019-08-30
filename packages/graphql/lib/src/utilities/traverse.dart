@@ -13,17 +13,17 @@ class Traversal {
     this.transformSideEffect,
     this.seenObjects,
   }) {
-    seenObjects ??= HashSet<int>();
+    seenObjects ??= HashSet<Object>();
   }
 
   Transform transform;
 
   /// An optional side effect to call when a node is transformed.
   SideEffect transformSideEffect;
-  HashSet<int> seenObjects;
+  HashSet<Object> seenObjects;
 
-  bool hasAlreadySeen(Object node) {
-    final bool wasAdded = seenObjects.add(node.hashCode);
+  bool alreadySeen(Object node) {
+    final bool wasAdded = seenObjects.add(node);
     return !wasAdded;
   }
 
@@ -31,9 +31,9 @@ class Traversal {
   Map<String, Object> traverseValues(Map<String, Object> node) {
     return node.map<String, Object>(
       (String key, Object value) => MapEntry<String, Object>(
-            key,
-            traverse(value),
-          ),
+        key,
+        traverse(value),
+      ),
     );
   }
 
@@ -41,7 +41,7 @@ class Traversal {
   // Stops recursing when a node is transformed (returns non-null)
   Object traverse(Object node) {
     final Object transformed = transform(node);
-    if (hasAlreadySeen(node)) {
+    if (alreadySeen(node)) {
       return transformed ?? node;
     }
     if (transformed != null) {
