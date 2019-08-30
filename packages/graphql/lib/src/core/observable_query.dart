@@ -227,18 +227,16 @@ class ObservableQuery {
     callbacks ??= const <OnData>[];
     StreamSubscription<QueryResult> subscription;
 
-    subscription = stream.listen((QueryResult result) {
-      void handle(OnData callback) {
-        callback(result);
-      }
-
+    subscription = stream.listen((QueryResult result) async {
       if (!result.loading) {
-        callbacks.forEach(handle);
+        for (final callback in callbacks) {
+          await callback(result);
+        }
 
         queryManager.rebroadcastQueries();
 
         if (!result.optimistic) {
-          subscription.cancel();
+          await subscription.cancel();
           _onDataSubscriptions.remove(subscription);
 
           if (_onDataSubscriptions.isEmpty) {
