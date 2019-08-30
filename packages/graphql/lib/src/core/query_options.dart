@@ -41,13 +41,35 @@ enum ErrorPolicy {
   all,
 }
 
+class Policies {
+  /// Specifies the [FetchPolicy] to be used.
+  FetchPolicy fetch;
+
+  /// Specifies the [ErrorPolicy] to be used.
+  ErrorPolicy error;
+  Policies({
+    this.fetch,
+    this.error,
+  });
+
+  Policies.safe(
+    this.fetch,
+    this.error,
+  )   : assert(fetch != null, 'fetch policy must be specified'),
+        assert(error != null, 'error policy must be specified');
+
+  Policies withOverrides([Policies overrides]) => Policies.safe(
+        overrides?.fetch ?? fetch,
+        overrides?.error ?? error,
+      );
+}
+
 /// Base options.
 class BaseOptions extends RawOperationData {
   BaseOptions({
     @required String document,
     Map<String, dynamic> variables,
-    this.fetchPolicy,
-    this.errorPolicy,
+    this.policies,
     this.context,
     this.optimisticResult,
   }) : super(document: document, variables: variables);
@@ -55,11 +77,11 @@ class BaseOptions extends RawOperationData {
   /// An optimistic result to eagerly add to the operation stream
   Object optimisticResult;
 
-  /// Specifies the [FetchPolicy] to be used.
-  FetchPolicy fetchPolicy;
+  /// Specifies the [Policies] to be used during execution.
+  Policies policies;
 
-  /// Specifies the [ErrorPolicy] to be used.
-  ErrorPolicy errorPolicy;
+  FetchPolicy get fetchPolicy => policies.fetch;
+  ErrorPolicy get errorPolicy => policies.error;
 
   /// Context to be passed to link execution chain.
   Map<String, dynamic> context;
@@ -76,10 +98,9 @@ class QueryOptions extends BaseOptions {
     this.pollInterval,
     Map<String, dynamic> context,
   }) : super(
+          policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           document: document,
           variables: variables,
-          fetchPolicy: fetchPolicy,
-          errorPolicy: errorPolicy,
           context: context,
           optimisticResult: optimisticResult,
         );
@@ -98,10 +119,9 @@ class MutationOptions extends BaseOptions {
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     Map<String, dynamic> context,
   }) : super(
+          policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           document: document,
           variables: variables,
-          fetchPolicy: fetchPolicy,
-          errorPolicy: errorPolicy,
           context: context,
         );
 }
@@ -148,11 +168,7 @@ class WatchQueryOptions extends QueryOptions {
       return true;
     }
 
-    if (a.fetchPolicy != b.fetchPolicy) {
-      return true;
-    }
-
-    if (a.errorPolicy != b.errorPolicy) {
+    if (a.policies != b.policies) {
       return true;
     }
 
