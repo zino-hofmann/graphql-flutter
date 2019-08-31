@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';
@@ -41,7 +42,7 @@ enum ErrorPolicy {
   all,
 }
 
-class Policies {
+class Policies extends Equatable {
   /// Specifies the [FetchPolicy] to be used.
   FetchPolicy fetch;
 
