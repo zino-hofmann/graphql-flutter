@@ -80,35 +80,9 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
 
   @override
   void initState() {
-    _networkSubscription = Connectivity()
-        .onConnectivityChanged
-        .listen((ConnectivityResult result) async {
-      // if state change from no internet connection to internet connection
-      if (_currentConnectivityResult == ConnectivityResult.none &&
-          (result == ConnectivityResult.mobile ||
-              result == ConnectivityResult.wifi)) {
-        _currentConnectivityResult = result;
+    _networkSubscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async => await _onNetworkChange(result));
 
-        // android connectivitystate cannot be trusted
-        // validate with nslookup
-        if (Platform.isAndroid) {
-          try {
-            final nsLookupResult = await InternetAddress.lookup('google.com');
-            if (nsLookupResult.isNotEmpty &&
-                nsLookupResult[0].rawAddress.isNotEmpty) {
-              _initSubscription();
-            }
-            // on exception -> no real connection, set current state to none
-          } on SocketException catch (_) {
-            _currentConnectivityResult = ConnectivityResult.none;
-          }
-        } else {
-          _initSubscription();
-        }
-      } else {
-        _currentConnectivityResult = result;
-      }
-    });
     super.initState();
   }
 
@@ -155,6 +129,35 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   void _onDone() {
     if (widget.onCompleted != null) {
       widget.onCompleted();
+    }
+  }
+
+  Future _onNetworkChange(ConnectivityResult result) async {
+
+    //if from offline to online
+    if (_currentConnectivityResult == ConnectivityResult.none &&
+        (result == ConnectivityResult.mobile ||
+            result == ConnectivityResult.wifi)) {
+      _currentConnectivityResult = result;
+
+      // android connectivitystate cannot be trusted
+      // validate with nslookup
+      if (Platform.isAndroid) {
+        try {
+          final nsLookupResult = await InternetAddress.lookup('google.com');
+          if (nsLookupResult.isNotEmpty &&
+              nsLookupResult[0].rawAddress.isNotEmpty) {
+            _initSubscription();
+          }
+          // on exception -> no real connection, set current state to none
+        } on SocketException catch (_) {
+          _currentConnectivityResult = ConnectivityResult.none;
+        }
+      } else {
+        _initSubscription();
+      }
+    } else {
+      _currentConnectivityResult = result;
     }
   }
 
