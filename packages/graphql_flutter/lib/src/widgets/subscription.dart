@@ -80,7 +80,6 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
 
   @override
   void initState() {
-    debugPrint("INIT!");
     _networkSubscription = Connectivity()
         .onConnectivityChanged
         .listen((ConnectivityResult result) async {
@@ -88,6 +87,8 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
       if (_currentConnectivityResult == ConnectivityResult.none &&
           (result == ConnectivityResult.mobile ||
               result == ConnectivityResult.wifi)) {
+        _currentConnectivityResult = result;
+
         // android connectivitystate cannot be trusted
         // validate with nslookup
         if (Platform.isAndroid) {
@@ -98,12 +99,12 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
               _initSubscription();
               _currentConnectivityResult = result;
             }
+            // on exception -> no real connection, set current state to none
           } on SocketException catch (_) {
-            // debugPrint('not connected');
+            _currentConnectivityResult = ConnectivityResult.none;
           }
         } else {
           _initSubscription();
-          _currentConnectivityResult = result;
         }
       } else {
         _currentConnectivityResult = result;
