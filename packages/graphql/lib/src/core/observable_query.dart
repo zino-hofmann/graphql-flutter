@@ -218,11 +218,6 @@ class ObservableQuery {
 
     latestResult = result;
 
-    print('${options.operationName} addResult');
-    if (options.operationName.contains('UserEventRecords')) {
-      print(latestResult.data['eventRecordsThrough']['eventRecords'].length);
-    }
-
     if (!controller.isClosed) {
       controller.add(result);
     }
