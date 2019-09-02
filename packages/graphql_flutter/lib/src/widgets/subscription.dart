@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 
@@ -6,6 +7,7 @@ import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
+import 'package:connectivity/connectivity.dart';
 
 typedef OnSubscriptionCompleted = void Function();
 
@@ -73,6 +75,43 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     );
   }
 
+  ConnectivityResult _currentConnectivityResult;
+  StreamSubscription<ConnectivityResult> _networkSubscription;
+
+  @override
+  void initState() {
+    debugPrint("INIT!");
+    _networkSubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((ConnectivityResult result) async {
+      // if state change from no internet connection to internet connection
+      if (_currentConnectivityResult == ConnectivityResult.none &&
+          (result == ConnectivityResult.mobile ||
+              result == ConnectivityResult.wifi)) {
+        // android connectivitystate cannot be trusted
+        // validate with nslookup
+        if (Platform.isAndroid) {
+          try {
+            final nsLookupResult = await InternetAddress.lookup('google.com');
+            if (nsLookupResult.isNotEmpty &&
+                nsLookupResult[0].rawAddress.isNotEmpty) {
+              _initSubscription();
+              _currentConnectivityResult = result;
+            }
+          } on SocketException catch (_) {
+            // debugPrint('not connected');
+          }
+        } else {
+          _initSubscription();
+          _currentConnectivityResult = result;
+        }
+      } else {
+        _currentConnectivityResult = result;
+      }
+    });
+    super.initState();
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -93,6 +132,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   @override
   void dispose() {
     _subscription?.cancel();
+    _networkSubscription?.cancel();
     super.dispose();
   }
 
