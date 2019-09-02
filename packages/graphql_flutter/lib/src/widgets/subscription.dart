@@ -97,7 +97,6 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
             if (nsLookupResult.isNotEmpty &&
                 nsLookupResult[0].rawAddress.isNotEmpty) {
               _initSubscription();
-              _currentConnectivityResult = result;
             }
             // on exception -> no real connection, set current state to none
           } on SocketException catch (_) {
