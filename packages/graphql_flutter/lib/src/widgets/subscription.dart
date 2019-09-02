@@ -45,6 +45,9 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   dynamic _error;
   StreamSubscription<FetchResult> _subscription;
 
+  ConnectivityResult _currentConnectivityResult;
+  StreamSubscription<ConnectivityResult> _networkSubscription;
+
   void _initSubscription() {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
@@ -74,9 +77,6 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
       onDone: _onDone,
     );
   }
-
-  ConnectivityResult _currentConnectivityResult;
-  StreamSubscription<ConnectivityResult> _networkSubscription;
 
   @override
   void initState() {
