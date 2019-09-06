@@ -213,9 +213,9 @@ class QueryManager {
     return queryResult;
   }
 
-  void refetchQuery(String queryId) {
+  Future<QueryResult> refetchQuery(String queryId) {
     final WatchQueryOptions options = queries[queryId].options;
-    fetchQuery(queryId, options);
+    return fetchQuery(queryId, options);
   }
 
   ObservableQuery getQuery(String queryId) {
