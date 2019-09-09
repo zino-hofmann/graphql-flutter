@@ -28,6 +28,13 @@ This is a Monorepo which contains the following packages:
 | [graphql/client.dart](./packages/graphql)     | [![version][version-badge]][package-link-client] |
 | [graphql_flutter](./packages/graphql_flutter) | [![version][version-badge]][package-link]        |
 
+## Examples
+
+Here are some examples you can follow:
+
+1. [Starwars Example](./examples/starwars)
+2. [`flutter_bloc` example](./examples/flutter_bloc)
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
