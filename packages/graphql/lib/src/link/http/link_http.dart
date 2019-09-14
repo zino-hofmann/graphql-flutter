@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
+import 'package:gql/language.dart' as lang;
 
 import 'package:graphql/src/utilities/helpers.dart' show notNull;
 import 'package:graphql/src/link/link.dart';
@@ -292,7 +293,7 @@ HttpHeadersAndBody _selectHttpOptionsAndBody(
   }
 
   if (http.includeQuery) {
-    body['query'] = operation.document;
+    body['query'] = lang.printNode(operation.document);
   }
 
   return HttpHeadersAndBody(

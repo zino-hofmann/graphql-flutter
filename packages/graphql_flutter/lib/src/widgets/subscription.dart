@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:gql/ast.dart';
 
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
@@ -27,7 +28,7 @@ class Subscription<T> extends StatefulWidget {
   }) : super(key: key);
 
   final String operationName;
-  final String query;
+  final DocumentNode query;
   final Map<String, dynamic> variables;
   final SubscriptionBuilder<T> builder;
   final OnSubscriptionCompleted onCompleted;

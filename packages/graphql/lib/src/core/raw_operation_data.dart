@@ -3,6 +3,7 @@ import 'dart:convert' show json;
 
 import 'package:http/http.dart';
 import 'package:meta/meta.dart';
+import 'package:gql/ast.dart';
 
 import 'package:graphql/src/utilities/get_from_ast.dart' show getOperationName;
 import 'package:graphql/src/link/http/link_http_helper_deprecated_stub.dart'
@@ -19,7 +20,7 @@ class RawOperationData {
         );
 
   /// A GraphQL document that consists of a single query to be sent down to the server.
-  String document;
+  DocumentNode document;
 
   /// A map going from variable name to variable value, where the variables are used
   /// within the GraphQL query.
@@ -29,8 +30,6 @@ class RawOperationData {
 
   /// The last operation name appearing in the contained document.
   String get operationName {
-    // XXX there is a bug in the `graphql_parser` package, where this result might be
-    // null event though the operation name is present in the document
     _operationName ??= getOperationName(document);
     return _operationName;
   }

@@ -1,10 +1,11 @@
-import 'package:meta/meta.dart';
-
+import 'package:gql/ast.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
+import 'package:graphql/src/utilities/get_from_ast.dart' as ast_utils;
+import 'package:meta/meta.dart';
 
 class Operation extends RawOperationData {
   Operation({
-    @required String document,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     this.extensions,
     String operationName,
@@ -38,7 +39,5 @@ class Operation extends RawOperationData {
     return result;
   }
 
-  bool get isSubscription =>
-      operationName != null &&
-      document.contains(RegExp(r'.*?subscription ' + operationName));
+  bool get isSubscription => ast_utils.isSubscription(document);
 }

@@ -1,3 +1,4 @@
+import 'package:gql/ast.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';
@@ -67,7 +68,7 @@ class Policies {
 /// Base options.
 class BaseOptions extends RawOperationData {
   BaseOptions({
-    @required String document,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     this.policies,
     this.context,
@@ -90,7 +91,7 @@ class BaseOptions extends RawOperationData {
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    @required String document,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
@@ -113,7 +114,7 @@ class QueryOptions extends BaseOptions {
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    @required String document,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
@@ -129,7 +130,7 @@ class MutationOptions extends BaseOptions {
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
-    @required String document,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
     ErrorPolicy errorPolicy = ErrorPolicy.none,

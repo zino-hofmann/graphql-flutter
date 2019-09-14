@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import './review.dart';
@@ -8,13 +9,13 @@ class ReviewFeed extends StatelessWidget {
   Widget build(BuildContext context) {
     return Subscription<Map<String, dynamic>>(
       'reviewAdded',
-      r'''
+      parseString(r'''
         subscription reviewAdded {
           reviewAdded {
             stars, commentary, episode
           }
         }
-      ''',
+      '''),
       builder: ({dynamic loading, dynamic payload, dynamic error}) {
         if (error != null) {
           return Text(error.toString());

@@ -1,3 +1,5 @@
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +11,7 @@ import './helpers.dart';
 class MockHttpClient extends Mock implements http.Client {}
 
 void main() {
-  const String readRepositories = r'''
+  final DocumentNode readRepositories = parseString(r'''
   query ReadRepositories($nRepositories: Int!) {
     viewer {
       repositories(last: $nRepositories) {
@@ -22,9 +24,9 @@ void main() {
       }
     }
   }
-''';
+''');
 
-  const String addStar = r'''
+  final DocumentNode addStar = parseString(r'''
   mutation AddStar($starrableId: ID!) {
     action: addStar(input: {starrableId: $starrableId}) {
       starrable {
@@ -32,7 +34,7 @@ void main() {
       }
     }
   }
-''';
+''');
 
   HttpLink httpLink;
   AuthLink authLink;
@@ -115,7 +117,7 @@ void main() {
           },
         );
         expect(await capt.finalize().bytesToString(),
-            r'{"operationName":"ReadRepositories","variables":{"nRepositories":42},"query":"  query ReadRepositories($nRepositories: Int!) {\n    viewer {\n      repositories(last: $nRepositories) {\n        nodes {\n          __typename\n          id\n          name\n          viewerHasStarred\n        }\n      }\n    }\n  }\n"}');
+            r'{"operationName":"ReadRepositories","variables":{"nRepositories":42},"query":"query ReadRepositories($nRepositories: Int!) {\n  viewer {\n    repositories(last: $nRepositories) {\n      nodes {\n        __typename\n        id\n        name\n        viewerHasStarred\n      }\n    }\n  }\n}"}');
 
         expect(r.errors, isNull);
         expect(r.data, isNotNull);
@@ -186,7 +188,7 @@ void main() {
           },
         );
         expect(await request.finalize().bytesToString(),
-            r'{"operationName":"AddStar","variables":{},"query":"  mutation AddStar($starrableId: ID!) {\n    action: addStar(input: {starrableId: $starrableId}) {\n      starrable {\n        viewerHasStarred\n      }\n    }\n  }\n"}');
+            r'{"operationName":"AddStar","variables":{},"query":"mutation AddStar($starrableId: ID!) {\n  action: addStar(input: {starrableId: $starrableId}) {\n    starrable {\n      viewerHasStarred\n    }\n  }\n}"}');
 
         expect(response.errors, isNull);
         expect(response.data, isNotNull);

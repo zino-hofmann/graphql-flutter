@@ -1,3 +1,5 @@
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
 @TestOn("vm")
 
 import 'package:test/test.dart';
@@ -21,7 +23,7 @@ void main() {
   group(
     'upload',
     () {
-      const String uploadMutation = r'''
+      final DocumentNode uploadMutation = parseString(r'''
     mutation($files: [Upload!]!) {
       multipleUpload(files: $files) {
         id
@@ -30,7 +32,7 @@ void main() {
         path
       }
     }
-    ''';
+    ''');
 
       setUp(() {
         mockHttpClient = MockHttpClient();

@@ -1,4 +1,7 @@
-const String readRepositories = r'''
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
+
+final DocumentNode readRepositories = parseString(r'''
   query ReadRepositories($nRepositories: Int!) {
     viewer {
       repositories(last: $nRepositories) {
@@ -11,13 +14,13 @@ const String readRepositories = r'''
       }
     }
   }
-''';
+''');
 
-const String testSubscription = r'''
+final DocumentNode testSubscription = parseString(r'''
 		subscription test {
 	    deviceChanged(id: 2) {
         id
         name
       }
 		}
-''';
+''');

@@ -8,6 +8,7 @@ dependencies:
     path: ../../packages/graphql_flutter
   graphql:
     path: ../../packages/graphql
+  gql: ^0.3.0
   graphql_starwars_test_server: ^0.0.1
 
 flutter:

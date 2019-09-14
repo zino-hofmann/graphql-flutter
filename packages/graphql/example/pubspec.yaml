@@ -6,7 +6,8 @@ environment:
   sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
-  args: 
+  args:
+  gql: ^0.3.0
   graphql:
     path: ..
 

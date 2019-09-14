@@ -1,29 +1,29 @@
-import 'package:graphql_parser/graphql_parser.dart';
+import 'package:gql/ast.dart';
 
-String getOperationName(String rawDoc) {
-  final List<Token> tokens = scan(rawDoc);
-  final Parser parser = Parser(tokens);
+OperationDefinitionNode getOperationNode(DocumentNode doc) {
+  if (doc.definitions == null || doc.definitions.isEmpty) return null;
 
-  if (parser.errors.isNotEmpty) {
-    // Handle errors...
-    print(parser.errors.toString());
-  }
+  final operations = doc.definitions.whereType<OperationDefinitionNode>();
 
-  // Parse the GraphQL document using recursive descent
-  final DocumentContext doc = parser.parseDocument();
+  if (operations.isEmpty) return null;
 
-  if (doc.definitions != null && doc.definitions.isNotEmpty) {
-    final OperationDefinitionContext definition = doc.definitions.lastWhere(
-      (DefinitionContext context) => context is OperationDefinitionContext,
-      orElse: () => null,
-    ) as OperationDefinitionContext;
+  return operations.last;
+}
 
-    if (definition != null) {
-      if (definition.name != null) {
-        return definition.name;
-      }
-    }
-  }
+bool isSubscription(DocumentNode doc) {
+  final operation = getOperationNode(doc);
 
-  return null;
+  if (operation == null) throw ArgumentError('Document must contain an operation');
+
+  return operation.type == OperationType.subscription;
+}
+
+String getOperationName(DocumentNode doc) {
+  final operation = getOperationNode(doc);
+
+  if (operation == null) throw ArgumentError('Document must contain an operation');
+
+  if (operation.name == null) return null;
+
+  return operation.name.value;
 }
