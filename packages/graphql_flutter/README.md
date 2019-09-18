@@ -24,6 +24,7 @@
     - [Fetch More (Pagination)](#fetch-more-pagination)
   - [Mutations](#mutations)
     - [Mutations with optimism](#mutations-with-optimism)
+  - [Exceptions](#exceptions)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
   - [GraphQL Consumer](#graphql-consumer)
   - [GraphQL Upload](#graphql-upload)
@@ -203,8 +204,8 @@ Query(
   // Just like in apollo refetch() could be used to manually trigger a refetch
   // while fetchMore() can be used for pagination purpose
   builder: (QueryResult result, { VoidCallback refetch, FetchMore fetchMore }) {
-    if (result.errors != null) {
-      return Text(result.errors.toString());
+    if (result.hasException) {
+        return Text(result.exception.toString());
     }
 
     if (result.loading) {
@@ -382,8 +383,8 @@ Mutation(
   },
   // will be called for both optimistic and final results
   update: (Cache cache, QueryResult result) {
-    if (result.hasErrors) {
-      print(['optimistic', result.errors]);
+    if (result.hasException) {
+      print(['optimistic', result.exception.toString()]);
     } else {
       final Map<String, Object> updated =
           Map<String, Object>.from(repository)
@@ -415,6 +416,31 @@ Mutation(
     );
   },
 );
+```
+
+### Exceptions
+
+If there were problems encountered during a query or mutation, the `QueryResult` will have an `OperationException` in the `exception` field:
+
+```dart
+class OperationException implements Exception {
+  /// Any graphql errors returned from the operation
+  List<GraphQLError> graphqlErrors = [];
+
+  /// Errors encountered during execution such as network or cache errors
+  ClientException clientException;
+}
+```
+
+Example usage:
+
+```dart
+if (result.hasException) {
+    if (result.exception.clientException is NetworkException) {
+        // handle network issues, maybe
+    }
+    return Text(result.exception.toString())
+}
 ```
 
 ### Subscriptions (Experimental)
@@ -516,14 +542,14 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Queries                 |    ✅     |
-| Mutations               |    ✅     |
-| Subscriptions           |    ✅     |
-| Query polling           |    ✅     |
-| In memory cache         |    ✅     |
-| Offline cache sync      |    ✅     |
-| GraphQL pload           |    ✅     |
-| Optimistic results      |    ✅     |
+| Queries                 |    ✅    |
+| Mutations               |    ✅    |
+| Subscriptions           |    ✅    |
+| Query polling           |    ✅    |
+| In memory cache         |    ✅    |
+| Offline cache sync      |    ✅    |
+| GraphQL pload           |    ✅    |
+| Optimistic results      |    ✅    |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 

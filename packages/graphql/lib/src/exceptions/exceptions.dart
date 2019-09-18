@@ -1,11 +1,12 @@
-import './_base_exceptions.dart' as _b;
+import 'package:graphql/src/exceptions/_base_exceptions.dart' as _b;
 import 'package:graphql/src/exceptions/io_network_exception.dart' as _n;
 
-export './_base_exceptions.dart' hide translateFailure;
-export './graphql_error.dart';
-export './operation_exception.dart';
-export './network_exception_stub.dart'
-    if (dart.library.io) './io_network_exception.dart'
+export 'package:graphql/src/exceptions/_base_exceptions.dart'
+    hide translateFailure;
+export 'package:graphql/src/exceptions/graphql_error.dart';
+export 'package:graphql/src/exceptions/operation_exception.dart';
+export 'package:graphql/src/exceptions/network_exception_stub.dart'
+    if (dart.library.io) 'package:graphql/src/exceptions/io_network_exception.dart'
     hide translateNetworkFailure;
 
 _b.ClientException translateFailure(dynamic failure) {

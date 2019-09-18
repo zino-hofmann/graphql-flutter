@@ -2,9 +2,11 @@ import 'package:graphql/src/exceptions/_base_exceptions.dart';
 import './graphql_error.dart';
 
 class OperationException implements Exception {
+  /// Any graphql errors returned from the operation
   List<GraphQLError> graphqlErrors = [];
 
   // generalize to include cache error, etc
+  /// Errors encountered during execution such as network or cache errors
   ClientException clientException;
 
   OperationException({
