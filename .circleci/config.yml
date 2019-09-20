@@ -103,11 +103,7 @@ jobs:
             pub global activate coverage
             pub get
             pub run test_coverage
-            # cannot run `pub run test test/.test_coverage.dart -p chromium`
-            # it randomly fails compiling some dart files to js
-            # test/.test_coverage.dart is a by product of running
-            # `pub run test_coverage`
-            pub run test test/.test_coverage.dart -p chromium
+            dart --enable_asserts --enable-vm-service test/.test_coverage.dart
       - run:
           name: Code coverage (graphql_flutter)
           command: |
