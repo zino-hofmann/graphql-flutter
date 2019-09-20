@@ -126,7 +126,7 @@ jobs:
       - checkout
       - run:
           name: Generate release tags
-          command: npx semantic-release@beta
+          command: npx semantic-release@beta@16.0.0-beta.22
   sync_with_beta:
     docker: *node_environment
     steps:
@@ -269,7 +269,7 @@ workflows:
               ignore: /^.*$/
       - publish:
           requires:
-            - dependencies 
+            - dependencies
           filters:
             tags:
               only: /^.*$/
