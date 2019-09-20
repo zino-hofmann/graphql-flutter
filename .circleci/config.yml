@@ -103,7 +103,7 @@ jobs:
             pub global activate coverage
             pub get
             pub run test_coverage
-            # cannot `run pub run test test/.test_coverage.dart -p chromium`
+            # cannot run `pub run test test/.test_coverage.dart -p chromium`
             # it randomly fails compiling some dart files to js
             # test/.test_coverage.dart is a by product of running
             # `pub run test_coverage`
