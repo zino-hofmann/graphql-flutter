@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/queries/readRepositories.dart' as queries;
@@ -20,10 +22,13 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
     final AuthLink authLink = AuthLink(
       // ignore: undefined_identifier
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    Link link = authLink.concat(httpLink);
+    Link link = Link.from([
+      authLink,
+      httpLink,
+    ]);
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
@@ -85,13 +90,17 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                document: queries.searchRepositories,
-                variables: <String, dynamic>{
-                  'nRepositories': nRepositories,
-                  'query': _searchQuery,
-                  // set cursor to null so as to start at the beginning
-                  'cursor': null
-                },
+                request: Request(
+                  operation: Operation(
+                    document: queries.searchRepositories,
+                    variables: <String, dynamic>{
+                      'nRepositories': nRepositories,
+                      'query': _searchQuery,
+                      // set cursor to null so as to start at the beginning
+                      'cursor': null
+                    },
+                  ),
+                ),
                 //pollInterval: 10,
               ),
               builder: (QueryResult result, {refetch, FetchMore fetchMore}) {

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
@@ -23,19 +25,21 @@ class GraphQLWidgetScreen extends StatelessWidget {
 
     final AuthLink authLink = AuthLink(
       // ignore: undefined_identifier
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    Link link = authLink.concat(httpLink);
-    if (ENABLE_WEBSOCKETS) {
-      final WebSocketLink websocketLink = WebSocketLink(
-        url: 'ws://localhost:8080/ws/graphql',
-        config: SocketClientConfig(
-            autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-      );
-
-      link = link.concat(websocketLink);
-    }
+    Link link = Link.from([
+      authLink,
+      httpLink,
+      if (ENABLE_WEBSOCKETS)
+        WebSocketLink(
+          url: 'ws://localhost:8080/ws/graphql',
+          config: SocketClientConfig(
+            autoReconnect: true,
+            inactivityTimeout: Duration(seconds: 15),
+          ),
+        ),
+    ]);
 
     final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
@@ -97,10 +101,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                document: queries.readRepositories,
-                variables: <String, dynamic>{
-                  'nRepositories': nRepositories,
-                },
+                request: Request(
+                  operation: Operation(
+                    document: queries.readRepositories,
+                    variables: <String, dynamic>{
+                      'nRepositories': nRepositories,
+                    },
+                  ),
+                ),
                 //pollInterval: 10,
               ),
               builder: (QueryResult result, {refetch, fetchMore}) {
@@ -172,6 +180,7 @@ class StarrableRepository extends StatelessWidget {
   }
 
   bool get starred => repository['viewerHasStarred'] as bool;
+
   bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 
   Map<String, dynamic> get expectedResult => <String, dynamic>{
@@ -184,7 +193,10 @@ class StarrableRepository extends StatelessWidget {
   Widget build(BuildContext context) {
     return Mutation(
       options: MutationOptions(
-        document: starred ? mutations.removeStar : mutations.addStar,
+        request: Request(
+            operation: Operation(
+          document: starred ? mutations.removeStar : mutations.addStar,
+        )),
       ),
       builder: (RunMutation toggleStar, QueryResult result) {
         return ListTile(

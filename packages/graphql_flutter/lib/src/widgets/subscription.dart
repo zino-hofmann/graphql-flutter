@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:gql/ast.dart';
+import 'package:gql/execution.dart';
 
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
@@ -19,7 +20,7 @@ typedef SubscriptionBuilder<T> = Widget Function({
 class Subscription<T> extends StatefulWidget {
   const Subscription(
     this.operationName,
-    this.query, {
+    this.document, {
     this.variables = const <String, dynamic>{},
     final Key key,
     @required this.builder,
@@ -28,7 +29,7 @@ class Subscription<T> extends StatefulWidget {
   }) : super(key: key);
 
   final String operationName;
-  final DocumentNode query;
+  final DocumentNode document;
   final Map<String, dynamic> variables;
   final SubscriptionBuilder<T> builder;
   final OnSubscriptionCompleted onCompleted;
@@ -42,18 +43,22 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   bool _loading = true;
   T _data;
   dynamic _error;
-  StreamSubscription<Request> _subscription;
+  StreamSubscription<Response> _subscription;
 
   void _initSubscription() {
-    final GraphQLClient client = GraphQLProvider.of(context).value;
+    final client = GraphQLProvider.of(context).value;
     assert(client != null);
     final Operation operation = Operation(
-      document: widget.query,
+      document: widget.document,
       variables: widget.variables,
       operationName: widget.operationName,
     );
 
-    final Stream<Request> stream = client.subscribe(operation);
+    final stream = client.subscribe(
+      Request(
+        operation: operation,
+      ),
+    );
 
     if (_subscription == null) {
       // Set the initial value for the first time.
@@ -84,7 +89,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   void didUpdateWidget(Subscription<T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.query != oldWidget.query ||
+    if (widget.document != oldWidget.document ||
         widget.operationName != oldWidget.operationName ||
         areDifferentVariables(widget.variables, oldWidget.variables)) {
       _initSubscription();
@@ -97,11 +102,11 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     super.dispose();
   }
 
-  void _onData(final Request message) {
+  void _onData(final Response response) {
     setState(() {
       _loading = false;
-      _data = message.data as T;
-      _error = message.errors;
+      _data = response.data as T;
+      _error = response.errors;
     });
   }
 

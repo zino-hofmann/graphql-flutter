@@ -1,3 +1,5 @@
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
 import 'package:rxdart/subjects.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
@@ -12,6 +14,7 @@ import '../local.dart';
 
 class Repo {
   const Repo({this.id, this.name, this.viewerHasStarred});
+
   final String id;
   final String name;
   final bool viewerHasStarred;
@@ -39,9 +42,11 @@ class Bloc {
 
   final BehaviorSubject<List<Repo>> _repoSubject =
       BehaviorSubject<List<Repo>>();
+
   Stream<List<Repo>> get repoStream => _repoSubject.stream;
 
   final ReplaySubject<Repo> _toggleStarSubject = ReplaySubject<Repo>();
+
   Sink<Repo> get toggleStarSink => _toggleStarSubject;
 
   /// The repo currently loading, if any
@@ -61,10 +66,13 @@ class Bloc {
 
   static final AuthLink _authLink = AuthLink(
     // ignore: undefined_identifier
-    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
   );
 
-  static final Link _link = _authLink.concat(_httpLink);
+  static final Link _link = Link.from([
+    _authLink,
+    _httpLink,
+  ]);
 
   static final GraphQLClient _client = GraphQLClient(
     cache: NormalizedInMemoryCache(
@@ -75,11 +83,15 @@ class Bloc {
 
   Future<QueryResult> _mutateToggleStar(Repo repo) async {
     final MutationOptions _options = MutationOptions(
-      document:
-          repo.viewerHasStarred ? mutations.removeStar : mutations.addStar,
-      variables: <String, String>{
-        'starrableId': repo.id,
-      },
+      request: Request(
+        operation: Operation(
+          document:
+              repo.viewerHasStarred ? mutations.removeStar : mutations.addStar,
+          variables: <String, String>{
+            'starrableId': repo.id,
+          },
+        ),
+      ),
 //      fetchPolicy: widget.options.fetchPolicy,
 //      errorPolicy: widget.options.errorPolicy,
     );
@@ -97,10 +109,15 @@ class Bloc {
 //      fetchPolicy = FetchPolicy.cacheAndNetwork;
 //    }
     final WatchQueryOptions _options = WatchQueryOptions(
-      document: queries.readRepositories,
-      variables: <String, dynamic>{
-        'nRepositories': nRepositories,
-      },
+      request: Request(
+        operation: Operation(
+          document: queries.readRepositories,
+          variables: <String, dynamic>{
+            'nRepositories': nRepositories,
+          },
+        ),
+      ),
+
 //      fetchPolicy: fetchPolicy,
 //      errorPolicy: widget.options.errorPolicy,
       pollInterval: 4,

@@ -17,10 +17,17 @@ dependencies:
   path_provider: ^1.1.0
   rxdart: ^0.22.0
 dev_dependencies:
-  pedantic: <=1.7.99
+  pedantic: ^1.8.0
   mockito: ^4.0.0
   flutter_test:
     sdk: flutter
   test: ^1.5.3
 environment:
   sdk: '>=2.2.2 <3.0.0'
+
+dependency_overrides:
+  gql: ^0.8.0
+  test_api: ^0.2.5
+  collection: ^1.14.11
+  graphql:
+    path: ../graphql

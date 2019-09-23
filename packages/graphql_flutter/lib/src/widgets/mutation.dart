@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:gql/execution.dart';
 
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
@@ -43,12 +44,10 @@ class MutationState extends State<Mutation> {
   ObservableQuery observableQuery;
 
   WatchQueryOptions get _options => WatchQueryOptions(
-        document: widget.options.document,
-        variables: widget.options.variables,
+        request: widget.options.request,
         fetchPolicy: widget.options.fetchPolicy,
         errorPolicy: widget.options.errorPolicy,
         fetchResults: false,
-        context: widget.options.context,
       );
 
   // TODO is it possible to extract shared logic into mixin

@@ -39,13 +39,11 @@ class QueryState extends State<Query> {
     final QueryOptions options = widget.options;
 
     return WatchQueryOptions(
-      document: options.document,
-      variables: options.variables,
+      request: options.request,
       fetchPolicy: options.fetchPolicy,
       errorPolicy: options.errorPolicy,
       pollInterval: options.pollInterval,
       fetchResults: true,
-      context: options.context,
       optimisticResult: options.optimisticResult,
     );
   }
