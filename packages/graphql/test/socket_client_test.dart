@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:gql/execution.dart';
 import 'package:gql/language.dart';
-import 'package:graphql/src/link/operation.dart';
 import 'package:graphql/src/socket_client.dart'
     show SocketClient, SocketConnectionState;
 import 'package:graphql/src/websocket/messages.dart';
@@ -36,11 +36,13 @@ void main() {
       );
     });
     test('subscription data', () async {
-      final payload = SubscriptionRequest(Operation(
-        document: parseString("""
-          subscription {}
-          """),
-      ));
+      final payload = SubscriptionRequest(
+        Request(
+          operation: Operation(
+            document: parseString("subscription {}"),
+          ),
+        ),
+      );
       final waitForConnection = true;
       final subscriptionDataStream =
           socketClient.subscribe(payload, waitForConnection);

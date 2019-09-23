@@ -1,10 +1,11 @@
 import 'package:gql/ast.dart';
+import 'package:gql/execution.dart';
 import 'package:gql/language.dart';
-import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:http/http.dart' as http;
-
+import 'package:gql/link.dart';
 import 'package:graphql/client.dart';
+import 'package:http/http.dart' as http;
+import 'package:mockito/mockito.dart';
+import 'package:test/test.dart';
 
 import './helpers.dart';
 
@@ -46,13 +47,18 @@ void main() {
       mockHttpClient = MockHttpClient();
 
       httpLink = HttpLink(
-          uri: 'https://api.github.com/graphql', httpClient: mockHttpClient);
-
-      authLink = AuthLink(
-        getToken: () async => 'Bearer my-special-bearer-token',
+        uri: 'https://api.github.com/graphql',
+        httpClient: mockHttpClient,
       );
 
-      link = authLink.concat(httpLink);
+      authLink = AuthLink(
+        () async => 'Bearer my-special-bearer-token',
+      );
+
+      link = Link.from([
+        authLink,
+        httpLink,
+      ]);
 
       graphQLClientClient = GraphQLClient(
         cache: getTestCache(),
@@ -62,10 +68,15 @@ void main() {
     group('query', () {
       test('successful query', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
-          document: readRepositories,
-          variables: <String, dynamic>{
-            'nRepositories': 42,
-          },
+          request: Request(
+            operation: Operation(
+              document: readRepositories,
+              variables: <String, dynamic>{
+                'nRepositories': 42,
+              },
+              operationName: 'ReadRepositories',
+            ),
+          ),
         );
         when(
           mockHttpClient.send(any),
@@ -137,8 +148,15 @@ void main() {
           throw e;
         });
 
-        final Future<QueryResult> r = graphQLClientClient
-            .query(WatchQueryOptions(document: readRepositories));
+        final Future<QueryResult> r = graphQLClientClient.query(
+          WatchQueryOptions(
+            request: Request(
+              operation: Operation(
+                document: readRepositories,
+              ),
+            ),
+          ),
+        );
 
         await expectLater(r, throwsA(e));
         return;
@@ -150,8 +168,15 @@ void main() {
           throw e;
         });
 
-        final Future<QueryResult> r = graphQLClientClient
-            .query(WatchQueryOptions(document: readRepositories));
+        final Future<QueryResult> r = graphQLClientClient.query(
+          WatchQueryOptions(
+            request: Request(
+              operation: Operation(
+                document: readRepositories,
+              ),
+            ),
+          ),
+        );
 
         await expectLater(r, throwsA(e));
         return;
@@ -166,7 +191,14 @@ void main() {
     });
     group('mutation', () {
       test('successful mutation', () async {
-        final MutationOptions _options = MutationOptions(document: addStar);
+        final MutationOptions _options = MutationOptions(
+          request: Request(
+            operation: Operation(
+              document: addStar,
+              operationName: 'AddStar',
+            ),
+          ),
+        );
         when(mockHttpClient.send(any)).thenAnswer((Invocation a) async =>
             simpleResponse(
                 body:

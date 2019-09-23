@@ -12,9 +12,6 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 import 'package:meta/meta.dart';
 
-import './link_http_helper_deprecated_stub.dart'
-    if (dart.library.io) './link_http_helper_deprecated_io.dart';
-
 class HttpLink extends gql_http_link.HttpLink {
   final String uri;
   final HttpConfig _linkConfig;
@@ -146,13 +143,6 @@ Future<Map<String, http.MultipartFile>> _getFileMap(
       ..addAll(<String, http.MultipartFile>{currentPath.join('.'): body});
   }
 
-  // @deprecated, backward compatible only
-  // in case the body is io.File
-  // in future release, io.File will no longer be supported
-  if (isIoFile(body)) {
-    return deprecatedHelper(body, currentMap, currentPath);
-  }
-
   // else should only be either String, num, null; NOTHING else
   return currentMap;
 }
@@ -186,12 +176,7 @@ Future<http.BaseRequest> _prepareRequest(
       if (object is http.MultipartFile) {
         return null;
       }
-      // @deprecated, backward compatible only
-      // in case the body is io.File
-      // in future release, io.File will no longer be supported
-      if (isIoFile(object)) {
-        return null;
-      }
+
       return object.toJson();
     },
   );
