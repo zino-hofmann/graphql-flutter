@@ -1,6 +1,6 @@
 import 'dart:async' show FutureOr;
 
-import 'package:graphql/src/core/graphql_error.dart';
+import 'package:gql/execution.dart';
 
 /// The source of the result data contained
 ///

@@ -1,8 +1,6 @@
 import 'package:gql/ast.dart';
+import 'package:gql/execution.dart';
 import 'package:meta/meta.dart';
-
-import 'package:graphql/src/utilities/helpers.dart';
-import 'package:graphql/src/core/raw_operation_data.dart';
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
@@ -48,6 +46,7 @@ class Policies {
 
   /// Specifies the [ErrorPolicy] to be used.
   ErrorPolicy error;
+
   Policies({
     this.fetch,
     this.error,
@@ -66,14 +65,8 @@ class Policies {
 }
 
 /// Base options.
-class BaseOptions extends RawOperationData {
-  BaseOptions({
-    @required DocumentNode document,
-    Map<String, dynamic> variables,
-    this.policies,
-    this.context,
-    this.optimisticResult,
-  }) : super(document: document, variables: variables);
+class BaseOptions {
+  Request request;
 
   /// An optimistic result to eagerly add to the operation stream
   Object optimisticResult;
@@ -82,27 +75,34 @@ class BaseOptions extends RawOperationData {
   Policies policies;
 
   FetchPolicy get fetchPolicy => policies.fetch;
+
   ErrorPolicy get errorPolicy => policies.error;
 
-  /// Context to be passed to link execution chain.
-  Map<String, dynamic> context;
+  BaseOptions({
+    @required this.request,
+    this.policies,
+    this.optimisticResult,
+  });
+
+  // TODO: proper implementation
+  String toKey() => request.hashCode.toString();
 }
 
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    @required DocumentNode document,
-    Map<String, dynamic> variables,
+    @required Request request,
     FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     Object optimisticResult,
     this.pollInterval,
     Map<String, dynamic> context,
   }) : super(
-          policies: Policies(fetch: fetchPolicy, error: errorPolicy),
-          document: document,
-          variables: variables,
-          context: context,
+          policies: Policies(
+            fetch: fetchPolicy,
+            error: errorPolicy,
+          ),
+          request: request,
           optimisticResult: optimisticResult,
         );
 
@@ -114,24 +114,23 @@ class QueryOptions extends BaseOptions {
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    @required DocumentNode document,
-    Map<String, dynamic> variables,
+    @required Request request,
     FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     Map<String, dynamic> context,
   }) : super(
-          policies: Policies(fetch: fetchPolicy, error: errorPolicy),
-          document: document,
-          variables: variables,
-          context: context,
+          policies: Policies(
+            fetch: fetchPolicy,
+            error: errorPolicy,
+          ),
+          request: request,
         );
 }
 
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
-    @required DocumentNode document,
-    Map<String, dynamic> variables,
+    @required Request request,
     FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
     ErrorPolicy errorPolicy = ErrorPolicy.none,
     Object optimisticResult,
@@ -140,12 +139,10 @@ class WatchQueryOptions extends QueryOptions {
     this.eagerlyFetchResults,
     Map<String, dynamic> context,
   }) : super(
-          document: document,
-          variables: variables,
+          request: request,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           pollInterval: pollInterval,
-          context: context,
           optimisticResult: optimisticResult,
         ) {
     this.eagerlyFetchResults ??= fetchResults;
@@ -165,24 +162,10 @@ class WatchQueryOptions extends QueryOptions {
     WatchQueryOptions a,
     WatchQueryOptions b,
   ) {
-    if (a.document != b.document) {
-      return true;
-    }
-
-    if (a.policies != b.policies) {
-      return true;
-    }
-
-    if (a.pollInterval != b.pollInterval) {
-      return true;
-    }
-
-    if (a.fetchResults != b.fetchResults) {
-      return true;
-    }
-
-    // compare variables last, because maps take more time
-    return areDifferentVariables(a.variables, b.variables);
+    return a.request != b.request &&
+        a.policies != b.policies &&
+        a.pollInterval != b.pollInterval &&
+        a.fetchResults != b.fetchResults;
   }
 }
 
@@ -194,16 +177,16 @@ typedef dynamic UpdateQuery(
 
 /// options for fetchmore operations
 class FetchMoreOptions {
-  FetchMoreOptions({
-    this.document,
-    this.variables = const <String, dynamic>{},
-    @required this.updateQuery,
-  }) : assert(updateQuery != null);
-
-  final String document;
+  final DocumentNode document;
   final Map<String, dynamic> variables;
 
   /// Strategy for merging the fetchMore result data
   /// with the result data already in the cache
-  UpdateQuery updateQuery;
+  final UpdateQuery updateQuery;
+
+  const FetchMoreOptions({
+    this.document,
+    this.variables = const <String, dynamic>{},
+    @required this.updateQuery,
+  }) : assert(updateQuery != null);
 }

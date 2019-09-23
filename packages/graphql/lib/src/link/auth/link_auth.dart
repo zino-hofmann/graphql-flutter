@@ -1,38 +1,58 @@
 import 'dart:async';
 
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
-import 'package:graphql/src/link/fetch_result.dart';
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
+import 'package:graphql/src/link/http/http_config.dart';
 
 typedef GetToken = FutureOr<String> Function();
 
-class AuthLink extends Link {
-  AuthLink({
-    this.getToken,
-  }) : super(
-          request: (Operation operation, [NextLink forward]) {
-            StreamController<FetchResult> controller;
+class AuthLink implements Link {
+  final GetToken getToken;
 
-            Future<void> onListen() async {
-              try {
-                final String token = await getToken();
+  AuthLink(this.getToken);
 
-                operation.setContext(<String, Map<String, String>>{
-                  'headers': <String, String>{'Authorization': token}
-                });
-              } catch (error) {
-                controller.addError(error);
-              }
+  @override
+  Stream<Response> request(
+    Request request, [
+    NextLink forward,
+  ]) {
+    StreamController<Response> controller;
 
-              await controller.addStream(forward(operation));
-              await controller.close();
-            }
+    controller = StreamController<Response>(
+      onListen: () async {
+        Context context;
+        try {
+          final String token = await getToken();
 
-            controller = StreamController<FetchResult>(onListen: onListen);
+          final entry = request.context.entry<HttpConfig>(
+            HttpConfig(
+              headers: <String, String>{},
+            ),
+          );
 
-            return controller.stream;
-          },
+          entry.headers.addAll(
+            <String, String>{'Authorization': token},
+          );
+
+          context = request.context.withEntry(entry);
+        } catch (error) {
+          controller.addError(error);
+        }
+
+        await controller.addStream(
+          forward(
+            context == null
+                ? request
+                : Request(
+                    operation: request.operation,
+                    context: context,
+                  ),
+          ),
         );
+        await controller.close();
+      },
+    );
 
-  GetToken getToken;
+    return controller.stream;
+  }
 }

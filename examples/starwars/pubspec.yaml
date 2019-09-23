@@ -4,11 +4,11 @@ description: An example graphql_flutter application utilizing graphql_starwars_t
 dependencies:
   flutter:
     sdk: flutter
-  graphql_flutter: 
+  graphql_flutter:
     path: ../../packages/graphql_flutter
   graphql:
     path: ../../packages/graphql
-  gql: ^0.3.0
+  gql: ^0.8.0
   graphql_starwars_test_server: ^0.0.1
 
 flutter:

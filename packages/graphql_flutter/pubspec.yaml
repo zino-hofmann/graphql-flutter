@@ -11,7 +11,7 @@ dependencies:
   graphql: ^2.1.1-beta.2
   flutter:
     sdk: flutter
-  gql: ^0.3.0
+  gql: ^0.8.0
   meta: ^1.1.6
   path: ^1.6.2
   path_provider: ^1.1.0

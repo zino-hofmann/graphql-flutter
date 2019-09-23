@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:meta/meta.dart';
-import 'package:websocket/websocket.dart' show WebSocket, WebSocketStatus;
 
+import 'package:graphql/src/utilities/get_from_ast.dart';
+import 'package:graphql/src/websocket/messages.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:uuid_enhanced/uuid.dart';
-
-import 'package:graphql/src/websocket/messages.dart';
+import 'package:websocket/websocket.dart' show WebSocket, WebSocketStatus;
 
 class SocketClientConfig {
   const SocketClientConfig({
@@ -76,6 +76,7 @@ class SocketClient {
 
   Timer _reconnectTimer;
   WebSocket _socket;
+
   @visibleForTesting
   WebSocket get socket => _socket;
   Stream<GraphQLSocketMessage> _messageStream;
@@ -236,12 +237,13 @@ class SocketClient {
   ///
   /// In case of socket disconnection, the returned stream will be closed.
   Stream<SubscriptionData> subscribe(
-      final SubscriptionRequest payload, final bool waitForConnection) {
-    final String id = Uuid.randomUuid(random: randomBytesForUuid).toString();
-    final StreamController<SubscriptionData> response =
-        StreamController<SubscriptionData>();
+    final SubscriptionRequest payload,
+    final bool waitForConnection,
+  ) {
+    final id = Uuid.randomUuid(random: randomBytesForUuid).toString();
+    final response = StreamController<SubscriptionData>();
     StreamSubscription<SocketConnectionState> sub;
-    final bool addTimeout = !payload.operation.isSubscription &&
+    final addTimeout = !isSubscription(payload.request.operation.document) &&
         config.queryAndMutationTimeout != null;
 
     response.onListen = () {

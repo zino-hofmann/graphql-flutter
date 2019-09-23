@@ -1,8 +1,7 @@
 import 'dart:convert';
 
+import 'package:gql/execution.dart';
 import 'package:gql/language.dart' as lang;
-
-import 'package:graphql/src/link/operation.dart';
 
 /// These messages represent the structures used for Client-server communication
 /// in a GraphQL web-socket subscription. Each message is represented in a JSON
@@ -74,14 +73,15 @@ class InitOperation extends GraphQLSocketMessage {
 /// defined in the query provided. Additional variables can be provided
 /// and sent to the server for processing.
 class SubscriptionRequest extends JsonSerializable {
-  SubscriptionRequest(this.operation);
-  final Operation operation;
+  final Request request;
+
+  SubscriptionRequest(this.request);
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
-        'operationName': operation.operationName,
-        'query': lang.printNode(operation.document),
-        'variables': operation.variables,
+        'operationName': request.operation.operationName,
+        'query': lang.printNode(request.operation.document),
+        'variables': request.operation.variables,
       };
 }
 
@@ -157,12 +157,15 @@ class ConnectionKeepAlive extends GraphQLSocketMessage {
 /// payload. The user should check the errors result before processing the
 /// data value. These error are from the query resolvers.
 class SubscriptionData extends GraphQLSocketMessage {
-  SubscriptionData(this.id, this.data, this.errors)
-      : super(MessageTypes.GQL_DATA);
-
   final String id;
   final dynamic data;
   final dynamic errors;
+
+  SubscriptionData(
+    this.id,
+    this.data,
+    this.errors,
+  ) : super(MessageTypes.GQL_DATA);
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{

@@ -1,44 +1,27 @@
-import 'package:meta/meta.dart';
-
-import 'package:graphql/src/link/fetch_result.dart';
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
+import 'package:gql_http_link/gql_http_link.dart';
 import 'package:graphql/src/socket_client.dart';
 import 'package:graphql/src/websocket/messages.dart';
+import 'package:meta/meta.dart';
 
 /// A Universal Websocket [Link] implementation to support the websocket transport.
 /// It supports subscriptions, query and mutation operations as well.
 ///
 /// NOTE: the actual socket connection will only get established after an [Operation] is handled by this [WebSocketLink].
 /// If you'd like to connect to the socket server instantly, call the [connectOrReconnect] method after creating this [WebSocketLink] instance.
-class WebSocketLink extends Link {
-  /// Creates a new [WebSocketLink] instance with the specified config.
-  WebSocketLink({
-    @required this.url,
-    this.config = const SocketClientConfig(),
-  }) : super() {
-    request = _doOperation;
-  }
-
+class WebSocketLink extends HttpLink {
   final String url;
   final SocketClientConfig config;
 
   // cannot be final because we're changing the instance upon a header change.
   SocketClient _socketClient;
 
-  Stream<FetchResult> _doOperation(Operation operation, [NextLink forward]) {
-    if (_socketClient == null) {
-      connectOrReconnect();
-    }
-
-    return _socketClient.subscribe(SubscriptionRequest(operation), true).map(
-          (SubscriptionData result) => FetchResult(
-              data: result.data,
-              errors: result.errors as List<dynamic>,
-              context: operation.getContext(),
-              extensions: operation.extensions),
-        );
-  }
+  /// Creates a new [WebSocketLink] instance with the specified config.
+  WebSocketLink({
+    @required this.url,
+    this.config = const SocketClientConfig(),
+  }) : super(url);
 
   /// Connects or reconnects to the server with the specified headers.
   void connectOrReconnect() {
@@ -51,5 +34,29 @@ class WebSocketLink extends Link {
   Future<void> dispose() async {
     await _socketClient?.dispose();
     _socketClient = null;
+  }
+
+  @override
+  Stream<Response> request(
+    Request request, [
+    NextLink forward,
+  ]) {
+    if (_socketClient == null) {
+      connectOrReconnect();
+    }
+
+    return _socketClient
+        .subscribe(
+          SubscriptionRequest(request),
+          true,
+        )
+        .map(
+          (SubscriptionData result) => parseResponse(
+            <String, dynamic>{
+              'data': result.data,
+              'errors': result.errors,
+            },
+          ),
+        );
   }
 }

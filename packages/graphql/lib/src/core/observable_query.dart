@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
+import 'package:gql/execution.dart';
 import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
+import 'package:meta/meta.dart';
 
 typedef OnData = void Function(QueryResult result);
 
@@ -16,7 +16,6 @@ enum QueryLifecycle {
   POLLING_STOPPED,
   SIDE_EFFECTS_PENDING,
   SIDE_EFFECTS_BLOCKING,
-
   COMPLETED,
   CLOSED
 }
@@ -56,6 +55,7 @@ class ObservableQuery {
   StreamController<QueryResult> controller;
 
   Stream<QueryResult> get stream => controller.stream;
+
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
 
   bool get _isRefetchSafe {
@@ -143,23 +143,30 @@ class ObservableQuery {
     assert(fetchMoreOptions.updateQuery != null);
 
     final combinedOptions = QueryOptions(
+      request: Request(
+        operation: Operation(
+          document:
+              fetchMoreOptions.document ?? options.request.operation.document,
+          variables: {
+            ...options.request.operation.variables,
+            ...fetchMoreOptions.variables,
+          },
+        ),
+        context: options.request.context,
+      ),
       fetchPolicy: FetchPolicy.noCache,
       errorPolicy: options.errorPolicy,
-      document: fetchMoreOptions.document ?? options.document,
-      context: options.context,
-      variables: {
-        ...options.variables,
-        ...fetchMoreOptions.variables,
-      },
     );
 
     // stream old results with a loading indicator
-    addResult(QueryResult(
-      data: latestResult.data,
-      loading: true,
-    ));
+    addResult(
+      QueryResult(
+        data: latestResult.data,
+        loading: true,
+      ),
+    );
 
-    QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
+    final fetchMoreResult = await queryManager.query(combinedOptions);
 
     try {
       // combine the query with the new query, using the function provided by the user
@@ -278,7 +285,14 @@ class ObservableQuery {
   }
 
   set variables(Map<String, dynamic> variables) {
-    options.variables = variables;
+    options.request = Request(
+      operation: Operation(
+        document: options.request.operation.document,
+        operationName: options.request.operation.operationName,
+        variables: variables,
+      ),
+      context: options.request.context,
+    );
   }
 
   /// Closes the query or mutation, or else queues it for closing.

@@ -1,35 +1,29 @@
 import 'dart:io' show stdout, stderr, exit;
 
 import 'package:args/args.dart';
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
 import 'package:graphql/client.dart';
 
 import './graphql_operation/mutations/mutations.dart';
 import './graphql_operation/queries/readRepositories.dart';
-
-// to run the example, create a file ../local.dart with the content:
-// const String YOUR_PERSONAL_ACCESS_TOKEN =
-//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
-// ignore: uri_does_not_exist
 import './local.dart';
 
 ArgResults argResults;
 
 // client - create a graphql client
 GraphQLClient client() {
-  final HttpLink _httpLink = HttpLink(
-    uri: 'https://api.github.com/graphql',
-  );
-
-  final AuthLink _authLink = AuthLink(
-    // ignore: undefined_identifier
-    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-  );
-
-  final Link _link = _authLink.concat(_httpLink);
-
   return GraphQLClient(
     cache: InMemoryCache(),
-    link: _link,
+    link: Link.from([
+      AuthLink(
+        // ignore: undefined_identifier
+        () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      ),
+      HttpLink(
+        uri: 'https://api.github.com/graphql',
+      ),
+    ]),
   );
 }
 
@@ -40,10 +34,14 @@ void query() async {
   const int nRepositories = 50;
 
   final QueryOptions options = QueryOptions(
-    document: readRepositories,
-    variables: <String, dynamic>{
-      'nRepositories': nRepositories,
-    },
+    request: Request(
+      operation: Operation(
+        document: readRepositories,
+        variables: <String, dynamic>{
+          'nRepositories': nRepositories,
+        },
+      ),
+    ),
   );
 
   final QueryResult result = await _client.query(options);
@@ -72,10 +70,14 @@ void starRepository(String repositoryID) async {
   final GraphQLClient _client = client();
 
   final MutationOptions options = MutationOptions(
-    document: addStar,
-    variables: <String, dynamic>{
-      'starrableId': repositoryID,
-    },
+    request: Request(
+      operation: Operation(
+        document: addStar,
+        variables: <String, dynamic>{
+          'starrableId': repositoryID,
+        },
+      ),
+    ),
   );
 
   final QueryResult result = await _client.mutate(options);
@@ -105,10 +107,14 @@ void removeStarFromRepository(String repositoryID) async {
   final GraphQLClient _client = client();
 
   final MutationOptions options = MutationOptions(
-    document: removeStar,
-    variables: <String, dynamic>{
-      'starrableId': repositoryID,
-    },
+    request: Request(
+      operation: Operation(
+        document: removeStar,
+        variables: <String, dynamic>{
+          'starrableId': repositoryID,
+        },
+      ),
+    ),
   );
 
   final QueryResult result = await _client.mutate(options);

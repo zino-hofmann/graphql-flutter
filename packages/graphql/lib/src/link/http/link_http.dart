@@ -2,120 +2,124 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:meta/meta.dart';
-import 'package:http/http.dart';
-import 'package:http_parser/http_parser.dart';
+import 'package:gql/execution.dart';
 import 'package:gql/language.dart' as lang;
-
-import 'package:graphql/src/utilities/helpers.dart' show notNull;
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
-import 'package:graphql/src/link/fetch_result.dart';
+import 'package:gql_http_link/gql_http_link.dart' as gql_http_link;
 import 'package:graphql/src/link/http/fallback_http_config.dart';
 import 'package:graphql/src/link/http/http_config.dart';
+import 'package:graphql/src/utilities/get_from_ast.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
+import 'package:meta/meta.dart';
+
 import './link_http_helper_deprecated_stub.dart'
     if (dart.library.io) './link_http_helper_deprecated_io.dart';
 
-class HttpLink extends Link {
+class HttpLink extends gql_http_link.HttpLink {
+  final String uri;
+  final HttpConfig _linkConfig;
+  final http.Client _fetcher;
+
   HttpLink({
-    @required String uri,
+    @required this.uri,
     bool includeExtensions,
 
     /// pass on customized httpClient, especially handy for mocking and testing
-    Client httpClient,
+    http.Client httpClient,
     Map<String, String> headers,
     Map<String, dynamic> credentials,
     Map<String, dynamic> fetchOptions,
-  }) : super(
-          // @todo possibly this is a bug in dart analyzer
-          // ignore: undefined_named_parameter
-          request: (
-            Operation operation, [
-            NextLink forward,
-          ]) {
-            if (operation.isSubscription) {
-              if (forward == null) {
-                throw Exception('This link does not support subscriptions.');
-              }
-              return forward(operation);
-            }
-
-            final Client fetcher = httpClient ?? Client();
-
-            final HttpConfig linkConfig = HttpConfig(
-              http: HttpQueryOptions(
-                includeExtensions: includeExtensions,
-              ),
-              options: fetchOptions,
-              credentials: credentials,
-              headers: headers,
-            );
-
-            final Map<String, dynamic> context = operation.getContext();
-            HttpConfig contextConfig;
-
-            if (context != null) {
-              // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
-              contextConfig = HttpConfig(
-                http: HttpQueryOptions(
-                  includeExtensions: context['includeExtensions'] as bool,
-                ),
-                options: context['fetchOptions'] as Map<String, dynamic>,
-                credentials: context['credentials'] as Map<String, dynamic>,
-                headers: context['headers'] as Map<String, String>,
-              );
-            }
-
-            final HttpHeadersAndBody httpHeadersAndBody =
-                _selectHttpOptionsAndBody(
-              operation,
-              fallbackHttpConfig,
-              linkConfig,
-              contextConfig,
-            );
-
-            final Map<String, String> httpHeaders = httpHeadersAndBody.headers;
-
-            StreamController<FetchResult> controller;
-
-            Future<void> onListen() async {
-              StreamedResponse response;
-
-              try {
-                // httpOptionsAndBody.body as String
-                final BaseRequest request = await _prepareRequest(
-                    uri, httpHeadersAndBody.body, httpHeaders);
-
-                response = await fetcher.send(request);
-
-                operation.setContext(<String, StreamedResponse>{
-                  'response': response,
-                });
-                final FetchResult parsedResponse =
-                    await _parseResponse(response);
-
-                controller.add(parsedResponse);
-              } catch (error) {
-                print(<dynamic>[error.runtimeType, error]);
-                controller.addError(error);
-              }
-
-              await controller.close();
-            }
-
-            controller = StreamController<FetchResult>(onListen: onListen);
-
-            return controller.stream;
-          },
+  })  : _fetcher = httpClient ?? http.Client(),
+        _linkConfig = HttpConfig(
+          http: HttpQueryOptions(
+            includeExtensions: includeExtensions,
+          ),
+          options: fetchOptions,
+          credentials: credentials,
+          headers: headers,
+        ),
+        super(
+          uri,
+          httpClient: httpClient,
         );
+
+  @override
+  Stream<Response> request(Request request, [forward]) {
+    if (isSubscription(request.operation.document)) {
+      if (forward == null) {
+        throw Exception('This link does not support subscriptions.');
+      }
+      return forward(request);
+    }
+
+    final HttpHeadersAndBody httpHeadersAndBody = _selectHttpOptionsAndBody(
+      request,
+      fallbackHttpConfig,
+      _linkConfig,
+      request.context.entry(HttpConfig()),
+    );
+
+    StreamController<Response> controller;
+
+    Future<void> onListen() async {
+      try {
+        // httpOptionsAndBody.body as String
+        final http.BaseRequest request = await _prepareRequest(
+          uri,
+          httpHeadersAndBody.body,
+          httpHeadersAndBody.headers,
+        );
+
+        controller.add(
+          await _parseResponse(
+            await _fetcher.send(request),
+          ),
+        );
+      } catch (error) {
+        print(<dynamic>[error.runtimeType, error]);
+        controller.addError(error);
+      }
+
+      await controller.close();
+    }
+
+    controller = StreamController<Response>(onListen: onListen);
+
+    return controller.stream;
+  }
+
+  Future<Response> _parseResponse(http.StreamedResponse httpResponse) async {
+    final int statusCode = httpResponse.statusCode;
+
+    final Encoding encoding = _determineEncodingFromResponse(httpResponse);
+    // @todo limit bodyBytes
+    final Uint8List responseByte = await httpResponse.stream.toBytes();
+
+    final String decodedBody = encoding.decode(responseByte);
+
+    final Map<String, dynamic> jsonResponse =
+        json.decode(decodedBody) as Map<String, dynamic>;
+    final Response response = parseResponse(jsonResponse);
+
+    if (response.data == null && response.errors == null) {
+      if (statusCode < 200 || statusCode >= 400) {
+        throw http.ClientException(
+          'Network Error: $statusCode $decodedBody',
+        );
+      }
+      throw http.ClientException('Invalid response body: $decodedBody');
+    }
+
+    return response;
+  }
 }
 
-Future<Map<String, MultipartFile>> _getFileMap(
+Future<Map<String, http.MultipartFile>> _getFileMap(
   dynamic body, {
-  Map<String, MultipartFile> currentMap,
+  Map<String, http.MultipartFile> currentMap,
   List<String> currentPath = const <String>[],
 }) async {
-  currentMap ??= <String, MultipartFile>{};
+  currentMap ??= <String, http.MultipartFile>{};
   if (body is Map<String, dynamic>) {
     final Iterable<MapEntry<String, dynamic>> entries = body.entries;
     for (MapEntry<String, dynamic> element in entries) {
@@ -137,9 +141,9 @@ Future<Map<String, MultipartFile>> _getFileMap(
     }
     return currentMap;
   }
-  if (body is MultipartFile) {
+  if (body is http.MultipartFile) {
     return currentMap
-      ..addAll(<String, MultipartFile>{currentPath.join('.'): body});
+      ..addAll(<String, http.MultipartFile>{currentPath.join('.'): body});
   }
 
   // @deprecated, backward compatible only
@@ -153,48 +157,58 @@ Future<Map<String, MultipartFile>> _getFileMap(
   return currentMap;
 }
 
-Future<BaseRequest> _prepareRequest(
+Future<http.BaseRequest> _prepareRequest(
   String url,
   Map<String, dynamic> body,
   Map<String, String> httpHeaders,
 ) async {
-  final Map<String, MultipartFile> fileMap = await _getFileMap(body);
+  final fileMap = await _getFileMap(body);
+
   if (fileMap.isEmpty) {
-    final Request r = Request('post', Uri.parse(url));
+    final r = http.Request(
+      'post',
+      Uri.parse(url),
+    );
     r.headers.addAll(httpHeaders);
     r.body = json.encode(body);
+
     return r;
   }
 
-  final MultipartRequest r = MultipartRequest('post', Uri.parse(url));
+  final r = http.MultipartRequest(
+    'post',
+    Uri.parse(url),
+  );
   r.headers.addAll(httpHeaders);
-  r.fields['operations'] = json.encode(body, toEncodable: (dynamic object) {
-    if (object is MultipartFile) {
-      return null;
-    }
-    // @deprecated, backward compatible only
-    // in case the body is io.File
-    // in future release, io.File will no longer be supported
-    if (isIoFile(object)) {
-      return null;
-    }
-    return object.toJson();
-  });
+  r.fields['operations'] = json.encode(
+    body,
+    toEncodable: (dynamic object) {
+      if (object is http.MultipartFile) {
+        return null;
+      }
+      // @deprecated, backward compatible only
+      // in case the body is io.File
+      // in future release, io.File will no longer be supported
+      if (isIoFile(object)) {
+        return null;
+      }
+      return object.toJson();
+    },
+  );
 
-  final Map<String, List<String>> fileMapping = <String, List<String>>{};
-  final List<MultipartFile> fileList = <MultipartFile>[];
+  final fileMapping = <String, List<String>>{};
+  final fileList = <http.MultipartFile>[];
 
-  final List<MapEntry<String, MultipartFile>> fileMapEntries =
-      fileMap.entries.toList(growable: false);
+  final fileMapEntries = fileMap.entries.toList(growable: false);
 
   for (int i = 0; i < fileMapEntries.length; i++) {
-    final MapEntry<String, MultipartFile> entry = fileMapEntries[i];
-    final String indexString = i.toString();
+    final entry = fileMapEntries[i];
+    final indexString = i.toString();
     fileMapping.addAll(<String, List<String>>{
       indexString: <String>[entry.key],
     });
-    final MultipartFile f = entry.value;
-    fileList.add(MultipartFile(
+    final f = entry.value;
+    fileList.add(http.MultipartFile(
       indexString,
       f.finalize(),
       f.length,
@@ -204,22 +218,22 @@ Future<BaseRequest> _prepareRequest(
   }
 
   r.fields['map'] = json.encode(fileMapping);
-
   r.files.addAll(fileList);
+
   return r;
 }
 
 HttpHeadersAndBody _selectHttpOptionsAndBody(
-  Operation operation,
+  Request request,
   HttpConfig fallbackConfig, [
   HttpConfig linkConfig,
   HttpConfig contextConfig,
 ]) {
-  final Map<String, dynamic> options = <String, dynamic>{
+  final options = <String, dynamic>{
     'headers': <String, String>{},
     'credentials': <String, dynamic>{},
   };
-  final HttpQueryOptions http = HttpQueryOptions();
+  final http = HttpQueryOptions();
 
   // http options
 
@@ -282,18 +296,18 @@ HttpHeadersAndBody _selectHttpOptionsAndBody(
   }
 
   // the body depends on the http options
-  final Map<String, dynamic> body = <String, dynamic>{
-    'operationName': operation.operationName,
-    'variables': operation.variables,
+  final body = <String, dynamic>{
+    'operationName': request.operation.operationName,
+    'variables': request.operation.variables,
   };
 
   // not sending the query (i.e persisted queries)
-  if (http.includeExtensions) {
-    body['extensions'] = operation.extensions;
-  }
+//  if (http.includeExtensions) {
+//    body['extensions'] = request.extensions;
+//  }
 
   if (http.includeQuery) {
-    body['query'] = lang.printNode(operation.document);
+    body['query'] = lang.printNode(request.operation.document);
   }
 
   return HttpHeadersAndBody(
@@ -302,60 +316,27 @@ HttpHeadersAndBody _selectHttpOptionsAndBody(
   );
 }
 
-Future<FetchResult> _parseResponse(StreamedResponse response) async {
-  final int statusCode = response.statusCode;
-
-  final Encoding encoding = _determineEncodingFromResponse(response);
-  // @todo limit bodyBytes
-  final Uint8List responseByte = await response.stream.toBytes();
-  final String decodedBody = encoding.decode(responseByte);
-
-  final Map<String, dynamic> jsonResponse =
-      json.decode(decodedBody) as Map<String, dynamic>;
-  final FetchResult fetchResult = FetchResult();
-
-  if (jsonResponse['errors'] != null) {
-    fetchResult.errors =
-        (jsonResponse['errors'] as List<dynamic>).where(notNull).toList();
-  }
-
-  if (jsonResponse['data'] != null) {
-    fetchResult.data = jsonResponse['data'];
-  }
-
-  if (fetchResult.data == null && fetchResult.errors == null) {
-    if (statusCode < 200 || statusCode >= 400) {
-      throw ClientException(
-        'Network Error: $statusCode $decodedBody',
-      );
-    }
-    throw ClientException('Invalid response body: $decodedBody');
-  }
-
-  return fetchResult;
-}
-
 /// Returns the charset encoding for the given response.
 ///
 /// The default fallback encoding is set to UTF-8 according to the IETF RFC4627 standard
 /// which specifies the application/json media type:
 ///   "JSON text SHALL be encoded in Unicode. The default encoding is UTF-8."
-Encoding _determineEncodingFromResponse(BaseResponse response,
-    [Encoding fallback = utf8]) {
-  final String contentType = response.headers['content-type'];
+Encoding _determineEncodingFromResponse(
+  http.BaseResponse response, [
+  Encoding fallback = utf8,
+]) {
+  final contentType = response.headers['content-type'];
 
   if (contentType == null) {
     return fallback;
   }
 
-  final MediaType mediaType = MediaType.parse(contentType);
-  final String charset = mediaType.parameters['charset'];
+  final mediaType = MediaType.parse(contentType);
+  final charset = mediaType.parameters['charset'];
 
   if (charset == null) {
     return fallback;
   }
 
-  final Encoding encoding = Encoding.getByName(charset);
-
-  return encoding == null ? fallback : encoding;
+  return Encoding.getByName(charset) ?? fallback;
 }

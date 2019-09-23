@@ -42,7 +42,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   bool _loading = true;
   T _data;
   dynamic _error;
-  StreamSubscription<FetchResult> _subscription;
+  StreamSubscription<Request> _subscription;
 
   void _initSubscription() {
     final GraphQLClient client = GraphQLProvider.of(context).value;
@@ -53,7 +53,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
       operationName: widget.operationName,
     );
 
-    final Stream<FetchResult> stream = client.subscribe(operation);
+    final Stream<Request> stream = client.subscribe(operation);
 
     if (_subscription == null) {
       // Set the initial value for the first time.
@@ -97,7 +97,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     super.dispose();
   }
 
-  void _onData(final FetchResult message) {
+  void _onData(final Request message) {
     setState(() {
       _loading = false;
       _data = message.data as T;

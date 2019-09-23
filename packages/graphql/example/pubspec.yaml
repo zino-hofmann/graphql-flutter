@@ -7,7 +7,9 @@ environment:
 
 dependencies:
   args:
-  gql: ^0.3.0
+  gql: ^0.8.0
   graphql:
     path: ..
 
+dependency_overrides:
+  gql: ^0.8.0

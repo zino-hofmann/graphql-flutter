@@ -1,22 +1,17 @@
 import 'dart:async';
 
-import 'package:meta/meta.dart';
-
-import 'package:graphql/src/core/query_options.dart';
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/graphql_error.dart';
-import 'package:graphql/src/core/observable_query.dart';
-
-import 'package:graphql/src/scheduler/scheduler.dart';
-
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
-import 'package:graphql/src/link/fetch_result.dart';
-
+import 'package:gql/execution.dart';
+import 'package:gql/link.dart';
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/cache/normalized_in_memory.dart'
     show NormalizedInMemoryCache;
 import 'package:graphql/src/cache/optimistic.dart' show OptimisticCache;
+import 'package:graphql/src/core/observable_query.dart';
+import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/link/link.dart';
+import 'package:graphql/src/scheduler/scheduler.dart';
+import 'package:meta/meta.dart';
 
 class QueryManager {
   QueryManager({
@@ -36,9 +31,9 @@ class QueryManager {
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
-    if (options.document == null) {
+    if (options.request == null) {
       throw Exception(
-        'document option is required. You must specify your GraphQL document in the query options.',
+        'request option is required. You must specify your GraphQL request in the query options.',
       );
     }
 
@@ -97,31 +92,26 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) async {
-    // create a new operation to fetch
-    final Operation operation = Operation.fromOptions(options)
-      ..setContext(options.context);
-
-    FetchResult fetchResult;
+    Response response;
     QueryResult queryResult;
 
     try {
       // execute the operation through the provided link(s)
-      fetchResult = await execute(
+      response = await execute(
         link: link,
-        operation: operation,
+        request: options.request,
       ).first;
 
-      // save the data from fetchResult to the cache
-      if (fetchResult.data != null &&
-          options.fetchPolicy != FetchPolicy.noCache) {
+      // save the data from request to the cache
+      if (response.data != null && options.fetchPolicy != FetchPolicy.noCache) {
         cache.write(
-          operation.toKey(),
-          fetchResult.data,
+          options.toKey(),
+          response.data,
         );
       }
 
-      if (fetchResult.data == null &&
-          fetchResult.errors == null &&
+      if (response.data == null &&
+          response.errors == null &&
           (options.fetchPolicy == FetchPolicy.noCache ||
               options.fetchPolicy == FetchPolicy.networkOnly)) {
         throw Exception(
@@ -130,7 +120,7 @@ class QueryManager {
       }
 
       queryResult = mapFetchResultToQueryResult(
-        fetchResult,
+        response,
         options,
         source: QueryResultSource.Network,
       );
@@ -145,7 +135,7 @@ class QueryManager {
     if (options.fetchPolicy != FetchPolicy.noCache &&
         cache is NormalizedInMemoryCache) {
       // normalize results if previously written
-      queryResult.data = cache.read(operation.toKey());
+      queryResult.data = cache.read(options.toKey());
     }
 
     addQueryResult(queryId, queryResult);
@@ -300,7 +290,7 @@ class QueryManager {
         if (cachedData != null) {
           query.addResult(
             mapFetchResultToQueryResult(
-              FetchResult(data: cachedData),
+              Response(data: cachedData),
               query.options,
               source: QueryResultSource.Cache,
             ),
@@ -330,7 +320,7 @@ class QueryManager {
   }
 
   QueryResult mapFetchResultToQueryResult(
-    FetchResult fetchResult,
+    Response response,
     BaseOptions options, {
     @required QueryResultSource source,
   }) {
@@ -339,26 +329,26 @@ class QueryManager {
 
     // check if there are errors and apply the error policy if so
     // in a nutshell: `ignore` swallows errors, `none` swallows data
-    if (fetchResult.errors != null && fetchResult.errors.isNotEmpty) {
+    if (response.errors != null && response.errors.isNotEmpty) {
       switch (options.errorPolicy) {
         case ErrorPolicy.all:
           // handle both errors and data
-          errors = _errorsFromResult(fetchResult);
-          data = fetchResult.data;
+          errors = response.errors;
+          data = response.data;
           break;
         case ErrorPolicy.ignore:
           // ignore errors
-          data = fetchResult.data;
+          data = response.data;
           break;
         case ErrorPolicy.none:
         default:
           // TODO not actually sure if apollo even casts graphql errors in `none` mode,
           // it's also kind of legacy
-          errors = _errorsFromResult(fetchResult);
+          errors = response.errors;
           break;
       }
     } else {
-      data = fetchResult.data;
+      data = response.data;
     }
 
     return QueryResult(
@@ -367,9 +357,4 @@ class QueryManager {
       source: source,
     );
   }
-
-  List<GraphQLError> _errorsFromResult(FetchResult fetchResult) =>
-      List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
-        (dynamic rawError) => GraphQLError.fromJSON(rawError),
-      ));
 }
