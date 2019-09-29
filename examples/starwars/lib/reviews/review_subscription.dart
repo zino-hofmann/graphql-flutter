@@ -61,6 +61,20 @@ class _ReviewListState extends State<ReviewList> {
 
   @override
   Widget build(BuildContext context) {
+    return DisplayReviews(reviews: reviews);
+  }
+}
+
+class DisplayReviews extends StatelessWidget {
+  const DisplayReviews({
+    Key key,
+    @required this.reviews,
+  }) : super(key: key);
+
+  final List<Map<String, dynamic>> reviews;
+
+  @override
+  Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(8.0),
       children: reviews
