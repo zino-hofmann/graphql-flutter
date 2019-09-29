@@ -135,23 +135,30 @@ void main() {
           throw e;
         });
 
-        final Future<QueryResult> r = graphQLClientClient
+        final QueryResult r = await graphQLClientClient
             .query(WatchQueryOptions(document: readRepositories));
 
-        await expectLater(r, throwsA(e));
+        expect((r.exception.clientException as UnhandledFailureWrapper).failure,
+            e);
+
         return;
       });
 
       test('failed query because of an exception with empty string', () async {
         final e = Exception('');
+
         when(mockHttpClient.send(any)).thenAnswer((_) async {
           throw e;
         });
 
-        final Future<QueryResult> r = graphQLClientClient
+        final QueryResult r = await graphQLClientClient
             .query(WatchQueryOptions(document: readRepositories));
 
-        await expectLater(r, throwsA(e));
+        expect(
+          (r.exception.clientException as UnhandledFailureWrapper).failure,
+          e,
+        );
+
         return;
       });
 //    test('failed query because of because of error response', {});
