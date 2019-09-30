@@ -5,14 +5,12 @@ import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef BoolCallback = bool Function();
-
 // method to call from widget to fetchmore queries
 typedef dynamic FetchMore(FetchMoreOptions options);
 
 typedef QueryBuilder = Widget Function(
   QueryResult result, {
-  BoolCallback refetch,
+  Future<QueryResult> Function() refetch,
   FetchMore fetchMore,
 });
 

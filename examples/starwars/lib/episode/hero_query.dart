@@ -33,7 +33,7 @@ class HeroForEpisode extends StatelessWidget {
       ),
       builder: (
         QueryResult result, {
-        BoolCallback refetch,
+        Future<QueryResult> Function() refetch,
         FetchMore fetchMore,
       }) {
         if (result.errors != null) {
