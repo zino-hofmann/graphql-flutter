@@ -76,7 +76,7 @@ class ObservableQuery {
   }
 
   /// Attempts to refetch, throwing error if not refetch safe
-  Future<QueryResult> refetch() async {
+  Future<QueryResult> refetch() {
     if (_isRefetchSafe) {
       return queryManager.refetchQuery(queryId);
     }

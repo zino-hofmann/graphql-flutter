@@ -213,7 +213,7 @@ class QueryManager {
     return queryResult;
   }
 
-  Future<QueryResult> refetchQuery(String queryId) async {
+  Future<QueryResult> refetchQuery(String queryId) {
     final WatchQueryOptions options = queries[queryId].options;
     return fetchQuery(queryId, options);
   }
