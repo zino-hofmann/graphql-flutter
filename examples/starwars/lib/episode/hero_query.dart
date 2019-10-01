@@ -36,15 +36,16 @@ class HeroForEpisode extends StatelessWidget {
         BoolCallback refetch,
         FetchMore fetchMore,
       }) {
+        if (result.hasException) {
+          return Text(result.exception.toString());
+        }
+
         if (result.loading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
         }
 
-        if (result.hasException) {
-          return Text(result.exception.toString());
-        }
         return Column(
           children: <Widget>[
             Text(getPrettyJSONString(result.data)),

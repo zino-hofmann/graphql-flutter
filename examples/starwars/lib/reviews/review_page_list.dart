@@ -34,14 +34,14 @@ class PagingReviews extends StatelessWidget {
         BoolCallback refetch,
         FetchMore fetchMore,
       }) {
+        if (result.hasException) {
+          return Text(result.exception.toString());
+        }
+
         if (result.loading && result.data == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
-        }
-
-        if (result.hasException) {
-          return Text(result.exception.toString());
         }
 
         final nextPage = result.data['reviews']['page'] + 1;
@@ -64,14 +64,14 @@ class PagingReviews extends StatelessWidget {
                         FetchMoreOptions(
                           variables: {'page': nextPage},
                           updateQuery: (existing, newReviews) => ({
-                            'reviews': {
-                              'page': newReviews['reviews']['page'],
-                              'reviews': [
-                                ...existing['reviews']['reviews'],
-                                ...newReviews['reviews']['reviews']
-                              ],
-                            }
-                          }),
+                                'reviews': {
+                                  'page': newReviews['reviews']['page'],
+                                  'reviews': [
+                                    ...existing['reviews']['reviews'],
+                                    ...newReviews['reviews']['reviews']
+                                  ],
+                                }
+                              }),
                         ),
                       );
                     },

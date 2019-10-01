@@ -95,13 +95,14 @@ class _MyHomePageState extends State<MyHomePage> {
                 //pollInterval: 10,
               ),
               builder: (QueryResult result, {refetch, FetchMore fetchMore}) {
+                if (result.hasException) {
+                  return Text(result.exception.toString());
+                }
+
                 if (result.loading && result.data == null) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
-                }
-                if (result.hasException) {
-                  return Text(result.exception.toString());
                 }
 
                 if (result.data == null && !result.hasException) {
