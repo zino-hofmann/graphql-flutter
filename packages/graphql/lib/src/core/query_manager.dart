@@ -114,18 +114,6 @@ class QueryManager {
         );
       }
 
-      // TODO this should never happen right?
-      // if there is an error reaching the server, there should be an error thrown,
-      // if not, data should not be null.
-      if (fetchResult.data == null &&
-          fetchResult.errors == null &&
-          (options.fetchPolicy == FetchPolicy.noCache ||
-              options.fetchPolicy == FetchPolicy.networkOnly)) {
-        throw Exception(
-          'Could not resolve that operation on the network. (${options.fetchPolicy.toString()})',
-        );
-      }
-
       queryResult = mapFetchResultToQueryResult(
         fetchResult,
         options,
