@@ -13,7 +13,10 @@ class RawOperationData {
     @required this.document,
     Map<String, dynamic> variables,
     String operationName,
-  })  : assert(document != null),
+  })  : assert(
+          document != null,
+          'document option is required. You must specify your GraphQL document in the query options.',
+        ),
         _operationName = operationName,
         variables = SplayTreeMap<String, dynamic>.of(
           variables ?? const <String, dynamic>{},
