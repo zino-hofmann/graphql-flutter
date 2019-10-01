@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:starwars_app/reviews/review_subscription.dart'
     show DisplayReviews;
-import './force_rebroadcast.dart';
 
 class PagingReviews extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
@@ -77,7 +76,6 @@ class PagingReviews extends StatelessWidget {
                     },
                     child: Text('LOAD PAGE $nextPage'),
                   ),
-            ForceRebroadcast(),
           ],
         );
       },
