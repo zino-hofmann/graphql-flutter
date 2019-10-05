@@ -1,7 +1,15 @@
 flags:
-  graphql_flutter:
-    paths:
-      - packages/graphql_flutter/
-  graphql_client:
-    paths:
-      - packages/graphql/
+  - graphql_flutter:
+      paths:
+        - packages/graphql_flutter/
+  - graphql_client:
+      paths:
+        - packages/graphql/
+comment:
+  require_changes: true # Only post a comment if coverage changes.
+coverage:
+  status:
+    project:
+      default:
+        threshold: 1% # Allow coverage to drop by up to 1% in a PR before marking it failed
+    patch: off
