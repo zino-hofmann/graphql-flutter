@@ -102,8 +102,8 @@ And finally you can send the query to the server and `await` the response:
 
 final QueryResult result = await _client.query(options);
 
-if (result.hasErrors) {
-    print(result.errors);
+if (result.hasException) {
+    print(result.exception.toString());
 }
 
 final List<dynamic> repositories =
@@ -150,9 +150,9 @@ And finally you can send the query to the server and `await` the response:
 
 final QueryResult result = await _client.mutate(options);
 
-if (result.hasErrors) {
-  print(result.errors);
-  return;
+if (result.hasException) {
+    print(result.exception.toString());
+    return
 }
 
 final bool isStarrred =

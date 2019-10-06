@@ -92,8 +92,8 @@ class QueryOptions extends BaseOptions {
   QueryOptions({
     @required String document,
     Map<String, dynamic> variables,
-    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
-    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    FetchPolicy fetchPolicy,
+    ErrorPolicy errorPolicy,
     Object optimisticResult,
     this.pollInterval,
     Map<String, dynamic> context,
@@ -115,8 +115,8 @@ class MutationOptions extends BaseOptions {
   MutationOptions({
     @required String document,
     Map<String, dynamic> variables,
-    FetchPolicy fetchPolicy = FetchPolicy.networkOnly,
-    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    FetchPolicy fetchPolicy,
+    ErrorPolicy errorPolicy,
     Map<String, dynamic> context,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
@@ -131,8 +131,8 @@ class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
     @required String document,
     Map<String, dynamic> variables,
-    FetchPolicy fetchPolicy = FetchPolicy.cacheAndNetwork,
-    ErrorPolicy errorPolicy = ErrorPolicy.none,
+    FetchPolicy fetchPolicy,
+    ErrorPolicy errorPolicy,
     Object optimisticResult,
     int pollInterval,
     this.fetchResults = false,

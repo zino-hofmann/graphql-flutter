@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/graphql_error.dart';
 import 'package:graphql/src/core/observable_query.dart';
 
 import 'package:graphql/src/scheduler/scheduler.dart';
@@ -36,12 +36,6 @@ class QueryManager {
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
-    if (options.document == null) {
-      throw Exception(
-        'document option is required. You must specify your GraphQL document in the query options.',
-      );
-    }
-
     final ObservableQuery observableQuery = ObservableQuery(
       queryManager: this,
       options: options,
@@ -120,24 +114,19 @@ class QueryManager {
         );
       }
 
-      if (fetchResult.data == null &&
-          fetchResult.errors == null &&
-          (options.fetchPolicy == FetchPolicy.noCache ||
-              options.fetchPolicy == FetchPolicy.networkOnly)) {
-        throw Exception(
-          'Could not resolve that operation on the network. (${options.fetchPolicy.toString()})',
-        );
-      }
-
       queryResult = mapFetchResultToQueryResult(
         fetchResult,
         options,
         source: QueryResultSource.Network,
       );
-    } catch (error) {
+    } catch (failure) {
       // we set the source to indicate where the source of failure
       queryResult ??= QueryResult(source: QueryResultSource.Network);
-      queryResult.addError(_attemptToWrapError(error));
+
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        clientException: translateFailure(failure),
+      );
     }
 
     // cleanup optimistic results
@@ -189,17 +178,20 @@ class QueryManager {
             queryResult.loading) {
           queryResult = QueryResult(
             source: QueryResultSource.Cache,
-            errors: [
-              GraphQLError(
-                message:
-                    'Could not find that operation in the cache. (FetchPolicy.cacheOnly)',
+            exception: OperationException(
+              clientException: CacheMissException(
+                'Could not find that operation in the cache. (FetchPolicy.cacheOnly)',
+                cacheKey,
               ),
-            ],
+            ),
           );
         }
       }
-    } catch (error) {
-      queryResult.addError(_attemptToWrapError(error));
+    } catch (failure) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        clientException: translateFailure(failure),
+      );
     }
 
     // If not a regular eager cache resolution,
@@ -224,24 +216,6 @@ class QueryManager {
     }
 
     return null;
-  }
-
-  GraphQLError _attemptToWrapError(dynamic error) {
-    String errorMessage;
-
-    // not all errors thrown above are GraphQL errors,
-    // so try/catch to avoid "could not access message"
-    try {
-      errorMessage = error.message as String;
-      assert(errorMessage != null);
-      assert(errorMessage.isNotEmpty);
-    } catch (e) {
-      throw error;
-    }
-
-    return GraphQLError(
-      message: errorMessage,
-    );
   }
 
   /// Add a result to the query specified by `queryId`, if it exists
@@ -363,8 +337,8 @@ class QueryManager {
 
     return QueryResult(
       data: data,
-      errors: errors,
       source: source,
+      exception: coalesceErrors(graphqlErrors: errors),
     );
   }
 

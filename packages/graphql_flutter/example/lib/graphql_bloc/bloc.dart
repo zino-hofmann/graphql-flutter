@@ -110,8 +110,8 @@ class Bloc {
 
     final QueryResult result = await _client.query(_options);
 
-    if (result.hasErrors) {
-      _repoSubject.addError(result.errors);
+    if (result.hasException) {
+      _repoSubject.addError(result.exception);
       return;
     }
 

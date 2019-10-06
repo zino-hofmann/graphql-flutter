@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
@@ -174,21 +175,23 @@ class ObservableQuery {
         writeToCache: true,
       );
     } catch (error) {
-      if (fetchMoreResult.hasErrors) {
+      if (fetchMoreResult.hasException) {
         // because the updateQuery failure might have been because of these errors,
         // we just add them to the old errors
-        latestResult.errors = [
-          ...(latestResult.errors ?? const []),
-          ...fetchMoreResult.errors
-        ];
+        latestResult.exception = coalesceErrors(
+          exception: latestResult.exception,
+          graphqlErrors: fetchMoreResult.exception.graphqlErrors,
+          clientException: fetchMoreResult.exception.clientException,
+        );
+
         queryManager.addQueryResult(
           queryId,
           latestResult,
           writeToCache: true,
         );
-
         return;
       } else {
+        // TODO merge results OperationException
         rethrow;
       }
     }

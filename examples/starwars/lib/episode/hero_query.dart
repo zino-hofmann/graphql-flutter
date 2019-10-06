@@ -36,15 +36,16 @@ class HeroForEpisode extends StatelessWidget {
         Future<QueryResult> Function() refetch,
         FetchMore fetchMore,
       }) {
-        if (result.errors != null) {
-          return Text(result.errors.toString());
+        if (result.hasException) {
+          return Text(result.exception.toString());
         }
 
         if (result.loading) {
-          return Center(
-            child: const CircularProgressIndicator(),
+          return const Center(
+            child: CircularProgressIndicator(),
           );
         }
+
         return Column(
           children: <Widget>[
             Text(getPrettyJSONString(result.data)),

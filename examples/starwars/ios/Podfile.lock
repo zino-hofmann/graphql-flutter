@@ -14,7 +14,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider/ios"
 
 SPEC CHECKSUMS:
-  Flutter: 58dd7d1b27887414a370fcccb9e645c08ffd7a6a
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   path_provider: f96fff6166a8867510d2c25fdcc346327cc4b259
 
 PODFILE CHECKSUM: aff02bfeed411c636180d6812254b2daeea14d09

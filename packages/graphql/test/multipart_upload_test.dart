@@ -144,7 +144,7 @@ void main() {
       );
       final QueryResult r = await graphQLClientClient.mutate(_options);
 
-      expect(r.errors, isNull);
+      expect(r.exception, isNull);
       expect(r.data, isNotNull);
 
       final http.MultipartRequest request =

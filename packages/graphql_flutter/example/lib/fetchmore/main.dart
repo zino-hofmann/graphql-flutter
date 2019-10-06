@@ -95,19 +95,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 //pollInterval: 10,
               ),
               builder: (QueryResult result, {refetch, FetchMore fetchMore}) {
+                if (result.hasException) {
+                  return Text(result.exception.toString());
+                }
+
                 if (result.loading && result.data == null) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 }
 
-                if (result.hasErrors) {
-                  return Text('\nErrors: \n  ' + result.errors.join(',\n  '));
-                }
-
-                if (result.data == null && result.errors == null) {
+                if (result.data == null && !result.hasException) {
                   return const Text(
-                      'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
+                      'Both data and errors are null, this is a known bug after refactoring, you might have forgotten to set Github token');
                 }
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
