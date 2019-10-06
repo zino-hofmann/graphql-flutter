@@ -77,7 +77,7 @@ void main() {
             '\r\ncontent-disposition: form-data; name="operations"\r\n\r\n');
         // operationName of unamed operations is "UNNAMED/" +  document.hashCode.toString()
         expectContinuationString(bodyBytes,
-            r'{"operationName":null,"variables":{"files":[null,null]},"query":"    mutation($files: [Upload!]!) {\n      multipleUpload(files: $files) {\n        id\n        filename\n        mimetype\n        path\n      }\n    }\n    "}');
+            r'{"operationName":null,"variables":{"files":[null,null]},"query":"mutation($files: [Upload!]!) {\n  multipleUpload(files: $files) {\n    id\n    filename\n    mimetype\n    path\n  }\n}"}');
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
