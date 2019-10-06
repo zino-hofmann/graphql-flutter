@@ -75,13 +75,12 @@ class ObservableQuery {
     return false;
   }
 
-  /// Attempts to refetch, returning `true` if successful
-  bool refetch() {
+  /// Attempts to refetch, throwing error if not refetch safe
+  Future<QueryResult> refetch() {
     if (_isRefetchSafe) {
-      queryManager.refetchQuery(queryId);
-      return true;
+      return queryManager.refetchQuery(queryId);
     }
-    return false;
+    return Future<QueryResult>.error(Exception('Query is not refetch safe'));
   }
 
   bool get isRebroadcastSafe {
