@@ -6,11 +6,13 @@ import 'package:graphql/internal.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 // method to call from widget to fetchmore queries
-typedef dynamic FetchMore(FetchMoreOptions options);
+typedef FetchMore = dynamic Function(FetchMoreOptions options);
+
+typedef Refetch = Future<QueryResult> Function();
 
 typedef QueryBuilder = Widget Function(
   QueryResult result, {
-  Future<QueryResult> Function() refetch,
+  Refetch refetch,
   FetchMore fetchMore,
 });
 
