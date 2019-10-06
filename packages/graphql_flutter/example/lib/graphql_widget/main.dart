@@ -211,6 +211,24 @@ class StarrableRepository extends StatelessWidget {
           cache.write(typenameDataIdFromObject(updated), updated);
         }
       },
+      onError: (OperationException error) {
+        showDialog<AlertDialog>(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(error.toString()),
+              actions: <Widget>[
+                SimpleDialogOption(
+                  child: const Text('DISMISS'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                )
+              ],
+            );
+          },
+        );
+      },
       onCompleted: (dynamic resultData) {
         showDialog<AlertDialog>(
           context: context,
