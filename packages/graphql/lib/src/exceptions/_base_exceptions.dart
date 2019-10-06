@@ -35,6 +35,8 @@ class UnhandledFailureWrapper implements ClientException {
   covariant Object failure;
 
   UnhandledFailureWrapper(this.failure);
+
+  String toString() => message;
 }
 
 ClientException translateFailure(dynamic failure) {
