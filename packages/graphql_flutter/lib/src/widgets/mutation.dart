@@ -17,6 +17,7 @@ typedef MutationBuilder = Widget Function(
 
 typedef OnMutationCompleted = void Function(dynamic data);
 typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
+typedef OnError = void Function(OperationException error);
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
@@ -27,12 +28,14 @@ class Mutation extends StatefulWidget {
     @required this.builder,
     this.onCompleted,
     this.update,
+    this.onError,
   }) : super(key: key);
 
   final MutationOptions options;
   final MutationBuilder builder;
   final OnMutationCompleted onCompleted;
   final OnMutationUpdate update;
+  final OnError onError;
 
   @override
   MutationState createState() => MutationState();
@@ -87,6 +90,20 @@ class MutationState extends State<Mutation> {
     return null;
   }
 
+  OnData get onError {
+    if (widget.onError != null) {
+      return (QueryResult result) {
+        if (!result.loading &&
+            result.hasException &&
+            widget.options.errorPolicy != ErrorPolicy.ignore) {
+          return widget.onError(result.exception);
+        }
+      };
+    }
+
+    return null;
+  }
+
   /// The optimistic cache layer id `update` will write to
   /// is a "child patch" of the default optimistic patch
   /// created by the query manager
@@ -134,7 +151,7 @@ class MutationState extends State<Mutation> {
   // callbacks will be called against each result in the stream,
   // which should then rebroadcast queries with the appropriate optimism
   Iterable<OnData> get callbacks =>
-      <OnData>[onCompleted, update].where(notNull);
+      <OnData>[onCompleted, update, onError].where(notNull);
 
   /// Run the mutation with the given `variables` and `optimisticResult`,
   /// returning a [MultiSourceResult] for handling both the eager and network results
