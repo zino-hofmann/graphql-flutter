@@ -48,8 +48,8 @@ void query() async {
 
   final QueryResult result = await _client.query(options);
 
-  if (result.hasException) {
-    stderr.writeln(result.exception.toString());
+  if (result.hasErrors) {
+    stderr.writeln(result.errors);
     exit(2);
   }
 
@@ -80,8 +80,8 @@ void starRepository(String repositoryID) async {
 
   final QueryResult result = await _client.mutate(options);
 
-  if (result.hasException) {
-    stderr.writeln(result.exception.toString());
+  if (result.hasErrors) {
+    stderr.writeln(result.errors);
     exit(2);
   }
 
@@ -113,8 +113,8 @@ void removeStarFromRepository(String repositoryID) async {
 
   final QueryResult result = await _client.mutate(options);
 
-  if (result.hasException) {
-    stderr.writeln(result.exception.toString());
+  if (result.hasErrors) {
+    stderr.writeln(result.errors);
     exit(2);
   }
 

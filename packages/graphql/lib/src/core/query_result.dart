@@ -1,6 +1,6 @@
 import 'dart:async' show FutureOr;
 
-import 'package:graphql/src/exceptions/exceptions.dart';
+import 'package:graphql/src/core/graphql_error.dart';
 
 /// The source of the result data contained
 ///
@@ -26,7 +26,7 @@ final eagerSources = {
 class QueryResult {
   QueryResult({
     this.data,
-    this.exception,
+    this.errors,
     bool loading,
     bool optimistic,
     QueryResultSource source,
@@ -48,8 +48,7 @@ class QueryResult {
 
   /// List<dynamic> or Map<String, dynamic>
   dynamic data;
-
-  OperationException exception;
+  List<GraphQLError> errors;
 
   /// Whether data has been specified from either the cache or network)
   bool get loading => source == QueryResultSource.Loading;
@@ -58,8 +57,22 @@ class QueryResult {
   ///   (may include eager results from the cache)
   bool get optimistic => source == QueryResultSource.OptimisticResult;
 
-  /// Whether the response includes an exception
-  bool get hasException => (exception != null);
+  /// Whether the response includes any graphql errors
+  bool get hasErrors {
+    if (errors == null) {
+      return false;
+    }
+
+    return errors.isNotEmpty;
+  }
+
+  void addError(GraphQLError graphQLError) {
+    if (errors != null) {
+      errors.add(graphQLError);
+    } else {
+      errors = <GraphQLError>[graphQLError];
+    }
+  }
 }
 
 class MultiSourceResult {
