@@ -63,6 +63,7 @@ void main() {
         expect(opData.operationName, 'Operation');
       });
     });
+
     group('multiple operations', () {
       const document = r'''
         query OperationQ {}
