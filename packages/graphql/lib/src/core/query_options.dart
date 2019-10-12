@@ -1,7 +1,10 @@
-import 'package:gql/ast.dart';
-import 'package:gql/language.dart';
 import 'package:meta/meta.dart';
 
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
+
+import 'package:graphql/client.dart';
+import 'package:graphql/internal.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
 
@@ -151,6 +154,93 @@ class MutationOptions extends BaseOptions {
   OnMutationCompleted onCompleted;
   OnMutationUpdate update;
   OnError onError;
+}
+
+class MutationCallbacks {
+  final MutationOptions options;
+  final Cache cache;
+  final ObservableQuery observableQuery;
+
+  MutationCallbacks({
+    this.options,
+    this.cache,
+    this.observableQuery,
+  })  : assert(cache != null),
+        assert(options != null),
+        assert(observableQuery != null);
+
+  // callbacks will be called against each result in the stream,
+  // which should then rebroadcast queries with the appropriate optimism
+  Iterable<OnData> get callbacks =>
+      <OnData>[onCompleted, update, onError].where(notNull);
+
+  // Todo: probably move this to its own class
+  OnData get onCompleted {
+    if (options.onCompleted != null) {
+      return (QueryResult result) {
+        if (!result.loading && !result.optimistic) {
+          return options.onCompleted(result.data);
+        }
+      };
+    }
+    return null;
+  }
+
+  OnData get onError {
+    if (options.onError != null) {
+      return (QueryResult result) {
+        if (!result.loading &&
+            result.hasException &&
+            options.errorPolicy != ErrorPolicy.ignore) {
+          return options.onError(result.exception);
+        }
+      };
+    }
+
+    return null;
+  }
+
+  /// The optimistic cache layer id `update` will write to
+  /// is a "child patch" of the default optimistic patch
+  /// created by the query manager
+  String get _patchId => '${observableQuery.queryId}.update';
+
+  /// apply the user's patch
+  void _optimisticUpdate(QueryResult result) {
+    final String patchId = _patchId;
+    // this is also done in query_manager, but better safe than sorry
+    assert(cache is OptimisticCache,
+        "can't optimisticly update non-optimistic cache");
+    (cache as OptimisticCache).addOptimisiticPatch(patchId, (Cache cache) {
+      options.update(cache, result);
+      return cache;
+    });
+  }
+
+  // optimistic patches will be cleaned up by the query_manager
+  // cleanup is handled by heirarchical optimism -
+  // as in, because our patch id is prefixed with '${observableQuery.queryId}.',
+  // it will be discarded along with the observableQuery.queryId patch
+  // TODO this results in an implicit coupling with the patch id system
+  OnData get update {
+    if (options.update != null) {
+      // dereference all variables that might be needed if the widget is disposed
+      final OnMutationUpdate widgetUpdate = options.update;
+      final OnData optimisticUpdate = _optimisticUpdate;
+
+      // wrap update logic to handle optimism
+      void updateOnData(QueryResult result) {
+        if (result.optimistic) {
+          return optimisticUpdate(result);
+        } else {
+          return widgetUpdate(cache, result);
+        }
+      }
+
+      return updateOnData;
+    }
+    return null;
+  }
 }
 
 // ObservableQuery options
