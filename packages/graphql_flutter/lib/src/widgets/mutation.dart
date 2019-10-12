@@ -74,13 +74,21 @@ class MutationState extends State<Mutation> {
   MultiSourceResult runMutation(
     Map<String, dynamic> variables, {
     Object optimisticResult,
-  }) =>
-      (observableQuery
+  }) {
+    final mutationCallbacks = MutationCallbacks(
+      cache: client.cache,
+      observableQuery: observableQuery,
+      options: widget.options,
+    );
+
+    return (observableQuery
             ..variables = variables
             ..options.optimisticResult = optimisticResult
-            ..onData(callbacks) // add callbacks to observable
+          ..onData(mutationCallbacks
+              .callbacks) // add callbacks to observable // interesting
           )
           .fetchResults();
+  }
 
   @override
   void dispose() {
