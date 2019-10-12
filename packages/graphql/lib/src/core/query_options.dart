@@ -123,6 +123,10 @@ class QueryOptions extends BaseOptions {
   int pollInterval;
 }
 
+typedef OnMutationCompleted = void Function(dynamic data);
+typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
+typedef OnError = void Function(OperationException error);
+
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
@@ -133,6 +137,9 @@ class MutationOptions extends BaseOptions {
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Map<String, dynamic> context,
+    this.onCompleted,
+    this.update,
+    this.onError,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           document: document,
@@ -140,6 +147,10 @@ class MutationOptions extends BaseOptions {
           variables: variables,
           context: context,
         );
+
+  OnMutationCompleted onCompleted;
+  OnMutationUpdate update;
+  OnError onError;
 }
 
 // ObservableQuery options

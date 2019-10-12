@@ -15,10 +15,6 @@ typedef MutationBuilder = Widget Function(
   QueryResult result,
 );
 
-typedef OnMutationCompleted = void Function(dynamic data);
-typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
-typedef OnError = void Function(OperationException error);
-
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
 class Mutation extends StatefulWidget {
@@ -26,16 +22,10 @@ class Mutation extends StatefulWidget {
     final Key key,
     @required this.options,
     @required this.builder,
-    this.onCompleted,
-    this.update,
-    this.onError,
   }) : super(key: key);
 
   final MutationOptions options;
   final MutationBuilder builder;
-  final OnMutationCompleted onCompleted;
-  final OnMutationUpdate update;
-  final OnError onError;
 
   @override
   MutationState createState() => MutationState();
