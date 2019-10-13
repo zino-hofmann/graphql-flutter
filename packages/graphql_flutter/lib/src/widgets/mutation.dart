@@ -77,17 +77,17 @@ class MutationState extends State<Mutation> {
   }) {
     final mutationCallbacks = MutationCallbacks(
       cache: client.cache,
-      observableQuery: observableQuery,
+      queryId: observableQuery.queryId,
       options: widget.options,
     );
 
     return (observableQuery
-            ..variables = variables
-            ..options.optimisticResult = optimisticResult
+          ..variables = variables
+          ..options.optimisticResult = optimisticResult
           ..onData(mutationCallbacks
               .callbacks) // add callbacks to observable // interesting
-          )
-          .fetchResults();
+        )
+        .fetchResults();
   }
 
   @override

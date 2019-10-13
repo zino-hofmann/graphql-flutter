@@ -159,15 +159,15 @@ class MutationOptions extends BaseOptions {
 class MutationCallbacks {
   final MutationOptions options;
   final Cache cache;
-  final ObservableQuery observableQuery;
+  final String queryId;
 
   MutationCallbacks({
     this.options,
     this.cache,
-    this.observableQuery,
+    this.queryId,
   })  : assert(cache != null),
         assert(options != null),
-        assert(observableQuery != null);
+        assert(queryId != null);
 
   // callbacks will be called against each result in the stream,
   // which should then rebroadcast queries with the appropriate optimism
@@ -203,7 +203,7 @@ class MutationCallbacks {
   /// The optimistic cache layer id `update` will write to
   /// is a "child patch" of the default optimistic patch
   /// created by the query manager
-  String get _patchId => '${observableQuery.queryId}.update';
+  String get _patchId => '${queryId}.update';
 
   /// apply the user's patch
   void _optimisticUpdate(QueryResult result) {
