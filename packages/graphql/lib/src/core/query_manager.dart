@@ -51,7 +51,24 @@ class QueryManager {
   }
 
   Future<QueryResult> mutate(MutationOptions options) {
-    return fetchQuery('0', options);
+    return fetchQuery('0', options).then((result) async {
+      // not sure why query id is '0', may be needs improvements
+      // once the mutation has been process successfully, execute callbacks
+      // before returning the results
+      final mutationCallbacks = MutationCallbacks(
+        cache: cache,
+        options: options,
+        queryId: '0',
+      );
+
+      final callbacks = mutationCallbacks.callbacks;
+
+      for (final callback in callbacks) {
+        await callback(result);
+      }
+
+      return result;
+    });
   }
 
   Future<QueryResult> fetchQuery(
