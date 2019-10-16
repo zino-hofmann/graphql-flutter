@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 
+import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
 import 'package:graphql/src/link/http/link_http.dart';
 import 'package:graphql/src/link/link.dart';
@@ -340,11 +341,17 @@ void main() {
 
       expect(
         exception,
+        const TypeMatcher<NetworkException>(),
+      );
+
+      expect(
+        (exception as NetworkException).wrappedException,
         const TypeMatcher<http.ClientException>(),
       );
+
       expect(
         exception.toString(),
-        'Invalid response body: {}',
+        'Failed to connect to /graphql-test: Invalid response body: {}',
       );
     });
 
@@ -375,11 +382,17 @@ void main() {
 
       expect(
         exception,
+        const TypeMatcher<NetworkException>(),
+      );
+
+      expect(
+        (exception as NetworkException).wrappedException,
         const TypeMatcher<http.ClientException>(),
       );
+
       expect(
         exception.toString(),
-        'Network Error: 400 {}',
+        'Failed to connect to /graphql-test: Network Error: 400 {}',
       );
     });
 
@@ -439,6 +452,11 @@ void main() {
 
       expect(
         exception,
+        const TypeMatcher<UnhandledFailureWrapper>(),
+      );
+
+      expect(
+        (exception as UnhandledFailureWrapper).failure,
         const TypeMatcher<FormatException>(),
       );
     });
