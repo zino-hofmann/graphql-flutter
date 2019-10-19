@@ -1,8 +1,0 @@
-// This is a generated file; do not edit or check into version control.
-FLUTTER_ROOT=/Users/mjr/flutter
-FLUTTER_APPLICATION_PATH=/Users/mjr/Documents/code/libraries/graphql-flutter/examples/starwars
-FLUTTER_TARGET=/Users/mjr/Documents/code/libraries/graphql-flutter/examples/starwars/lib/main.dart
-FLUTTER_BUILD_DIR=build
-SYMROOT=${SOURCE_ROOT}/../build/ios
-FLUTTER_FRAMEWORK_DIR=/Users/mjr/flutter/bin/cache/artifacts/engine/ios
-TRACK_WIDGET_CREATION=true

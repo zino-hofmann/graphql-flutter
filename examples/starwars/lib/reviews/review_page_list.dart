@@ -30,7 +30,7 @@ class PagingReviews extends StatelessWidget {
       ),
       builder: (
         QueryResult result, {
-        BoolCallback refetch,
+        Refetch refetch,
         FetchMore fetchMore,
       }) {
         if (result.hasException) {
@@ -63,14 +63,14 @@ class PagingReviews extends StatelessWidget {
                         FetchMoreOptions(
                           variables: {'page': nextPage},
                           updateQuery: (existing, newReviews) => ({
-                                'reviews': {
-                                  'page': newReviews['reviews']['page'],
-                                  'reviews': [
-                                    ...existing['reviews']['reviews'],
-                                    ...newReviews['reviews']['reviews']
-                                  ],
-                                }
-                              }),
+                            'reviews': {
+                              'page': newReviews['reviews']['page'],
+                              'reviews': [
+                                ...existing['reviews']['reviews'],
+                                ...newReviews['reviews']['reviews']
+                              ],
+                            }
+                          }),
                         ),
                       );
                     },
