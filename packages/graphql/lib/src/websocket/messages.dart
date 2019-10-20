@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:gql/language.dart';
 import 'package:graphql/src/link/operation.dart';
 
 /// These messages represent the structures used for Client-server communication
@@ -78,7 +79,7 @@ class SubscriptionRequest extends JsonSerializable {
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
         'operationName': operation.operationName,
-        'query': operation.document,
+        'query': printNode(operation.documentNode),
         'variables': operation.variables,
       };
 }

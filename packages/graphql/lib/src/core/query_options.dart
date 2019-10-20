@@ -1,3 +1,5 @@
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';
@@ -47,6 +49,7 @@ class Policies {
 
   /// Specifies the [ErrorPolicy] to be used.
   ErrorPolicy error;
+
   Policies({
     this.fetch,
     this.error,
@@ -67,12 +70,18 @@ class Policies {
 /// Base options.
 class BaseOptions extends RawOperationData {
   BaseOptions({
-    @required String document,
+    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
+        String document,
+    DocumentNode documentNode,
     Map<String, dynamic> variables,
     this.policies,
     this.context,
     this.optimisticResult,
-  }) : super(document: document, variables: variables);
+  }) : super(
+          document: document,
+          documentNode: documentNode,
+          variables: variables,
+        );
 
   /// An optimistic result to eagerly add to the operation stream
   Object optimisticResult;
@@ -81,6 +90,7 @@ class BaseOptions extends RawOperationData {
   Policies policies;
 
   FetchPolicy get fetchPolicy => policies.fetch;
+
   ErrorPolicy get errorPolicy => policies.error;
 
   /// Context to be passed to link execution chain.
@@ -90,7 +100,9 @@ class BaseOptions extends RawOperationData {
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    @required String document,
+    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
+        String document,
+    DocumentNode documentNode,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
@@ -100,6 +112,7 @@ class QueryOptions extends BaseOptions {
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           document: document,
+          documentNode: documentNode,
           variables: variables,
           context: context,
           optimisticResult: optimisticResult,
@@ -113,7 +126,9 @@ class QueryOptions extends BaseOptions {
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    @required String document,
+    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
+        String document,
+    DocumentNode documentNode,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
@@ -121,6 +136,7 @@ class MutationOptions extends BaseOptions {
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           document: document,
+          documentNode: documentNode,
           variables: variables,
           context: context,
         );
@@ -129,7 +145,9 @@ class MutationOptions extends BaseOptions {
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
-    @required String document,
+    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
+        String document,
+    DocumentNode documentNode,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
@@ -140,6 +158,7 @@ class WatchQueryOptions extends QueryOptions {
     Map<String, dynamic> context,
   }) : super(
           document: document,
+          documentNode: documentNode,
           variables: variables,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -164,7 +183,7 @@ class WatchQueryOptions extends QueryOptions {
     WatchQueryOptions a,
     WatchQueryOptions b,
   ) {
-    if (a.document != b.document) {
+    if (a.documentNode != b.documentNode) {
       return true;
     }
 
@@ -194,12 +213,29 @@ typedef dynamic UpdateQuery(
 /// options for fetchmore operations
 class FetchMoreOptions {
   FetchMoreOptions({
-    this.document,
+    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
+        String document,
+    DocumentNode documentNode,
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
-  }) : assert(updateQuery != null);
+  })  : assert((document != null && documentNode == null) ||
+            (document == null && documentNode != null)),
+        assert(updateQuery != null),
+        documentNode = parseString(document);
 
-  final String document;
+  DocumentNode documentNode;
+
+  /// A string representation of [documentNode]
+  @Deprecated(
+      'The "document" option has been deprecated, use "documentNode" instead')
+  String get document => printNode(documentNode);
+
+  @Deprecated(
+      'The "document" option has been deprecated, use "documentNode" instead')
+  set document(value) {
+    documentNode = parseString(value);
+  }
+
   final Map<String, dynamic> variables;
 
   /// Strategy for merging the fetchMore result data

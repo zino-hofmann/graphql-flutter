@@ -111,7 +111,7 @@ void main() {
           },
         );
         expect(await capt.finalize().bytesToString(),
-            r'{"operationName":null,"variables":{},"query":"{\n    viewer {\n      repositories(last: 42) {\n        nodes {\n          __typename\n          id\n          name\n          viewerHasStarred\n        }\n      }\n    }\n  }\n"}');
+            r'{"operationName":null,"variables":{},"query":"query {\n  viewer {\n    repositories(last: 42) {\n      nodes {\n        __typename\n        id\n        name\n        viewerHasStarred\n      }\n    }\n  }\n}"}');
 
         expect(r.exception, isNull);
         expect(r.data, isNotNull);
@@ -157,7 +157,7 @@ void main() {
           },
         );
         expect(await request.finalize().bytesToString(),
-            r'{"operationName":null,"variables":{},"query":"mutation {\n    action: addStar(input: {starrableId: \"some_repo\"}) {\n      starrable {\n        viewerHasStarred\n      }\n    }\n  }\n"}');
+            r'{"operationName":null,"variables":{},"query":"mutation {\n  action: addStar(input: {starrableId: \"some_repo\"}) {\n    starrable {\n      viewerHasStarred\n    }\n  }\n}"}');
 
         expect(response.exception, isNull);
         expect(response.data, isNotNull);
