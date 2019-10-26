@@ -55,6 +55,12 @@ final GraphQLClient _client = GraphQLClient(
 
 ```
 
+`Link.from` joins multiple links into a single link at once.
+
+```dart
+final Link _link = Link.from([_authLink, _httpLink]);
+```
+
 Once you have initialized a client, you can run queries and mutations.
 
 ### Query
