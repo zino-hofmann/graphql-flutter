@@ -27,6 +27,24 @@ And then import it inside your dart code:
 import 'package:graphql/client.dart';
 ```
 
+#### Working with AST documents
+
+`package:graphql` v2.2.0 adds support for working with AST documents.
+
+##### Parsing at run-time
+To parse documents at run-time use `parseString` from `package:gql/language.dart`:
+```yaml
+dependencies:
+  gql: ^0.10.0
+```
+
+##### Parsing at build-time
+To parse documents at build-time use `ast_builder` from [`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen):
+```yaml
+dev_dependencies:
+  gql_code_gen: ^0.1.0
+```
+
 ## Usage
 
 To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
@@ -34,7 +52,7 @@ To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `Gr
 In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatinate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `InMemoryCache`.
 
 ```dart
-...
+// ...
 
 final HttpLink _httpLink = HttpLink(
     uri: 'https://api.github.com/graphql',
@@ -51,7 +69,7 @@ final GraphQLClient _client = GraphQLClient(
         link: _link,
     );
 
-...
+// ...
 
 ```
 
@@ -80,7 +98,7 @@ const String readRepositories = r'''
 
 Then create a `QueryOptions` object with the query string as the document and pass any variables necessary.
 
-In our case, we need pass `nRepositories` variable and the document name is `readRepositories`.
+In our case, we need to pass `nRepositories` variable and the document name is `readRepositories`.
 
 ```dart
 
@@ -98,7 +116,7 @@ final QueryOptions options = QueryOptions(
 And finally you can send the query to the server and `await` the response:
 
 ```dart
-...
+// ...
 
 final QueryResult result = await _client.query(options);
 
@@ -109,7 +127,7 @@ if (result.hasException) {
 final List<dynamic> repositories =
     result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
-...
+// ...
 ```
 
 ### Mutations
@@ -131,7 +149,7 @@ const String addStar = r'''
 Then instead of the `QueryOptions`, for mutations we will `MutationOptions`, which is where we pass our mutation and id of the repository we are starring.
 
 ```dart
-...
+// ...
 
 final MutationOptions options = MutationOptions(
   document: addStar,
@@ -140,13 +158,13 @@ final MutationOptions options = MutationOptions(
   },
 );
 
-...
+// ...
 ```
 
 And finally you can send the query to the server and `await` the response:
 
 ```dart
-...
+// ...
 
 final QueryResult result = await _client.mutate(options);
 
@@ -163,8 +181,58 @@ if (isStarrred) {
   return;
 }
 
-...
+// ...
 ```
+
+### AST documents
+
+To use AST documents set `documentNode` instead of `document`. For example:
+
+```dart
+import 'package:gql/language.dart';
+
+// ...
+
+final MutationOptions options = MutationOptions(
+  documentNode: parseString(addStar),
+  variables: <String, dynamic>{
+    'starrableId': repositoryID,
+  },
+);
+
+// ...
+```
+
+With [`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen) you can parse your `*.graphql` files at build-time.
+
+**`add_star.graphql`**:
+```graphql
+mutation AddStar($starrableId: ID!) {
+  action: addStar(input: {starrableId: $starrableId}) {
+    starrable {
+      viewerHasStarred
+    }
+  }
+}
+```
+
+```dart
+import 'package:gql/add_star.ast.g.dart' as add_star;
+
+// ...
+
+final MutationOptions options = MutationOptions(
+  documentNode: add_star.document,
+  variables: <String, dynamic>{
+    'starrableId': repositoryID,
+  },
+);
+
+// ...
+```
+
+
+
 
 [build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
 [build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter

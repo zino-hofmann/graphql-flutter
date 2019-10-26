@@ -42,7 +42,9 @@ void main() {
         );
       });
       test('subscription data', () async {
-        final payload = SubscriptionRequest(Operation(document: 'empty'));
+        final payload = SubscriptionRequest(
+          Operation(document: 'subscription {}'),
+        );
         final waitForConnection = true;
         final subscriptionDataStream =
             socketClient.subscribe(payload, waitForConnection);
@@ -52,20 +54,26 @@ void main() {
 
         // ignore: unawaited_futures
         socketClient.stream
-            .where((message) =>
-                message ==
-                '{"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10","payload":{"operationName":null,"query":"empty","variables":{}}}')
+            .where(
+              (message) =>
+                  message ==
+                  r'{"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10","payload":{"operationName":null,"query":"subscription {\n  \n}","variables":{}}}',
+            )
             .first
-            .then((_) {
-          socketClient.socket.add(jsonEncode({
-            'type': 'data',
-            'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
-            'payload': {
-              'data': {'foo': 'bar'},
-              'errors': ['error and data can coexist']
-            }
-          }));
-        });
+            .then(
+          (_) {
+            socketClient.socket.add(
+              jsonEncode({
+                'type': 'data',
+                'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
+                'payload': {
+                  'data': {'foo': 'bar'},
+                  'errors': ['error and data can coexist']
+                }
+              }),
+            );
+          },
+        );
 
         await expectLater(
           subscriptionDataStream,

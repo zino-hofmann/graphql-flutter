@@ -145,7 +145,7 @@ class ObservableQuery {
     final combinedOptions = QueryOptions(
       fetchPolicy: FetchPolicy.noCache,
       errorPolicy: options.errorPolicy,
-      document: fetchMoreOptions.document ?? options.document,
+      documentNode: fetchMoreOptions.documentNode ?? options.documentNode,
       context: options.context,
       variables: {
         ...options.variables,

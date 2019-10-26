@@ -35,7 +35,9 @@ void main() {
       );
     });
     test('subscription data', () async {
-      final payload = SubscriptionRequest(Operation(document: 'empty'));
+      final payload = SubscriptionRequest(
+        Operation(document: 'subscription {}'),
+      );
       final waitForConnection = true;
       final subscriptionDataStream =
           socketClient.subscribe(payload, waitForConnection);
@@ -47,7 +49,7 @@ void main() {
       socketClient.socket.stream
           .where((message) =>
               message ==
-              '{"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10","payload":{"operationName":null,"query":"empty","variables":{}}}')
+              r'{"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10","payload":{"operationName":null,"query":"subscription {\n  \n}","variables":{}}}')
           .first
           .then((_) {
         socketClient.socket.add(jsonEncode({
