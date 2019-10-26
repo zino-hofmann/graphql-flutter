@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:graphql/src/utilities/path.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';
@@ -58,8 +59,8 @@ class OptimisticProxy implements Cache {
 
 typedef CacheTransform = Cache Function(Cache proxy);
 
-class OptimisticCache extends NormalizedInMemoryCache {
-  OptimisticCache({
+class _OptimisticCache extends NormalizedInMemoryCache {
+  _OptimisticCache({
     @required DataIdFromObject dataIdFromObject,
     String prefix = '@cache/reference',
     FutureOr<String> storagePrefix,
@@ -152,4 +153,15 @@ class OptimisticCache extends NormalizedInMemoryCache {
           patch.id == removeId || _parentPatchId(patch.id) == removeId,
     );
   }
+}
+
+class OptimisticCache extends _OptimisticCache {
+  OptimisticCache({
+    @required DataIdFromObject dataIdFromObject,
+    String prefix = '@cache/reference',
+  }) : super(
+          dataIdFromObject: dataIdFromObject,
+          prefix: prefix,
+          storagePrefix: flutterStoragePrefix,
+        );
 }

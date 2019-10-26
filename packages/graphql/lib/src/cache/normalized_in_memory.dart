@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:graphql/src/utilities/path.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/traverse.dart';
@@ -13,8 +14,8 @@ typedef DataIdFromObject = String Function(Object node);
 
 typedef Normalizer = List<String> Function(Object node);
 
-class NormalizedInMemoryCache extends InMemoryCache {
-  NormalizedInMemoryCache({
+class _NormalizedInMemoryCache extends InMemoryCache {
+  _NormalizedInMemoryCache({
     @required this.dataIdFromObject,
     this.prefix = '@cache/reference',
     FutureOr<String> storagePrefix,
@@ -137,6 +138,18 @@ class NormalizedInMemoryCache extends InMemoryCache {
   void write(String key, Object value) {
     writeInto(key, value, data, _normalize);
   }
+}
+
+class NormalizedInMemoryCache extends _NormalizedInMemoryCache {
+  NormalizedInMemoryCache({
+    @required DataIdFromObject dataIdFromObject,
+    String prefix = '@cache/reference',
+    FutureOr<String> storagePrefix,
+  }) : super(
+          dataIdFromObject: dataIdFromObject,
+          prefix: prefix,
+          storagePrefix: storagePrefix ?? flutterStoragePrefix,
+        );
 }
 
 String typenameDataIdFromObject(Object object) {

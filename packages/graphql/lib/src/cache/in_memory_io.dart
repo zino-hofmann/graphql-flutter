@@ -4,21 +4,17 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:meta/meta.dart';
-// TODO need to think about this
-// import 'package:path_provider/path_provider.dart';
-
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/utilities/helpers.dart' show deeplyMergeLeft;
+import 'package:graphql/src/utilities/path.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart';
 
-
-class InMemoryCache implements Cache {
-
-  InMemoryCache({
+class _InMemoryCache implements Cache {
+  _InMemoryCache({
     this.storagePrefix = '',
   });
-  
+
   final FutureOr<String> storagePrefix;
 
   bool _writingToStorage = false;
@@ -142,4 +138,10 @@ class InMemoryCache implements Cache {
       return HashMap<String, dynamic>();
     }
   }
+}
+
+class InMemoryCache extends _InMemoryCache {
+  InMemoryCache({
+    FutureOr<String> storagePrefix,
+  }) : super(storagePrefix: storagePrefix ?? flutterStoragePrefix);
 }
