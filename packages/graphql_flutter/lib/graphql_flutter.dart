@@ -2,6 +2,7 @@ library graphql_flutter;
 
 export 'package:graphql/client.dart'
     hide InMemoryCache, NormalizedInMemoryCache, OptimisticCache;
+export 'package:graphql/src/link/operation.dart' show Operation;
 
 export 'package:graphql_flutter/src/caches.dart';
 
