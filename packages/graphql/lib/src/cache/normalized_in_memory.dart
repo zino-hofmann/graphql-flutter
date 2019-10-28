@@ -82,6 +82,11 @@ class NormalizedInMemoryCache extends InMemoryCache {
     }
   }
 
+  @override
+  void reset(){
+    data.clear();
+  }
+
   /*
     Dereferences object references,
     replacing them with cached instances
