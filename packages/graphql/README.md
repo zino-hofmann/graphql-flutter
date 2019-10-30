@@ -114,7 +114,7 @@ final List<dynamic> repositories =
 
 ### Mutations
 
-Creating a Matation is also similar to creating a query, with a small difference. First, start with a multiline string:
+Creating a Mutation is also similar to creating a query, with a small difference. First, start with a multiline string:
 
 ```dart
 const String addStar = r'''
