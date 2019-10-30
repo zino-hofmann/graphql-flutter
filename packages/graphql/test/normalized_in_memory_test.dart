@@ -229,4 +229,16 @@ void main() {
       expect(b.data, equals(cyclicalObjNormalizedB));
     });
   });
+
+  group('Resets cache correctly', () {
+    final NormalizedInMemoryCache cache = getTestCache();
+    test('resets cache correctly when cache.reset() is called', () {
+      cache.write(rawOperationKey, cyclicalObjOperationData);
+      final LazyCacheMap a = cache.read('A/1') as LazyCacheMap;
+      expect(a.data, equals(cyclicalObjNormalizedA));
+      cache.reset();
+      final resetA = cache.read('A/1');
+      expect(resetA, equals(null));
+    });
+  });
 }
