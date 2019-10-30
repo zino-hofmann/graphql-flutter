@@ -319,10 +319,13 @@ class FetchMoreOptions {
     DocumentNode documentNode,
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
-  })  : assert((document != null && documentNode == null) ||
-            (document == null && documentNode != null)),
+  })  : assert(
+          _mutuallyExclusive(document, documentNode),
+          '"document" or "documentNode" options are mutually exclusive.',
+        ),
         assert(updateQuery != null),
-        documentNode = parseString(document);
+        this.documentNode =
+            documentNode ?? document != null ? parseString(document) : null;
 
   DocumentNode documentNode;
 
@@ -343,3 +346,12 @@ class FetchMoreOptions {
   /// with the result data already in the cache
   UpdateQuery updateQuery;
 }
+
+bool _mutuallyExclusive(
+  Object a,
+  Object b, {
+  bool required = false,
+}) =>
+    (!required && a == null && b == null) ||
+    (a != null && b == null) ||
+    (a == null && b != null);
