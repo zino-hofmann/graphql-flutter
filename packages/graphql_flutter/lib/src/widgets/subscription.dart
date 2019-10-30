@@ -133,7 +133,6 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   }
 
   Future _onNetworkChange(ConnectivityResult result) async {
-
     //if from offline to online
     if (_currentConnectivityResult == ConnectivityResult.none &&
         (result == ConnectivityResult.mobile ||
