@@ -5,6 +5,8 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 import '../helpers.dart' show withGenericHandling;
+
+// ignore: uri_does_not_exist
 import '../local.dart';
 
 const bool ENABLE_WEBSOCKETS = false;

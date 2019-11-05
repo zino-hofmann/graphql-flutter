@@ -3,6 +3,8 @@ import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/queries/readRepositories.dart' as queries;
+
+// ignore: uri_does_not_exist
 import '../local.dart';
 
 class FetchMoreWidgetScreen extends StatelessWidget {

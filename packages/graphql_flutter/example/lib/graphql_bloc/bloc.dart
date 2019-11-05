@@ -4,6 +4,8 @@ import 'package:rxdart/subjects.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
+
+// ignore: uri_does_not_exist
 import '../local.dart';
 
 class Repo {
