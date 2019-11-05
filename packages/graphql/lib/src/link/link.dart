@@ -31,11 +31,6 @@ class Link {
 
   RequestHandler request;
 
-  static Link from(List<Link> links) {
-    assert(links.isNotEmpty);
-    return links.reduce((first, second) => first.concat(second));
-  }
-
   Link concat(Link next) => _concat(this, next);
 }
 
