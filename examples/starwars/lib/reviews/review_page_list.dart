@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:starwars_app/reviews/review_subscription.dart'
     show DisplayReviews;
+import 'package:gql/language.dart';
 
 class PagingReviews extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
@@ -13,7 +14,7 @@ class PagingReviews extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        document: r'''
+        documentNode: parseString(r'''
           query Reviews($page: Int!) {
             reviews(page: $page) {
               page
@@ -25,7 +26,7 @@ class PagingReviews extends StatelessWidget {
               }
             }
           }
-        ''',
+        '''),
         variables: {'page': 0},
       ),
       builder: (
