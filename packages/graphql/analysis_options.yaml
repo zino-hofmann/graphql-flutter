@@ -1,0 +1,6 @@
+include: package:pedantic/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - test/_data/**
+    - lib/**/**
