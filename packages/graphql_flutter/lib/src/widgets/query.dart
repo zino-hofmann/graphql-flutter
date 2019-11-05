@@ -40,6 +40,7 @@ class QueryState extends State<Query> {
 
     return WatchQueryOptions(
       document: options.document,
+      documentNode: options.documentNode,
       variables: options.variables,
       fetchPolicy: options.fetchPolicy,
       errorPolicy: options.errorPolicy,
