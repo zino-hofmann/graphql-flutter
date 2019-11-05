@@ -1,5 +1,5 @@
+import 'package:gql/language.dart';
 @TestOn("vm")
-
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -58,7 +58,7 @@ void main() {
         'upload with io.File instance deprecation warning',
         overridePrint((log) async {
           final MutationOptions _options = MutationOptions(
-            document: uploadMutation,
+            documentNode: parseString(uploadMutation),
             variables: <String, dynamic>{
               'files': [
                 io.File('pubspec.yaml'),
