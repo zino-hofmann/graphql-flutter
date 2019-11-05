@@ -109,7 +109,7 @@ void main() {
       );
       expect(
         captured.body,
-        '{"operationName":"Operation","variables":{},"query":"query Operation {}"}',
+        '{"operationName":"Operation","variables":{},"query":"query Operation {\\n  \\n}"}',
       );
     });
 
@@ -163,7 +163,7 @@ void main() {
       );
       expect(
         captured.body,
-        '{"operationName":"Operation","variables":{},"extensions":null,"query":"query Operation {}"}',
+        '{"operationName":"Operation","variables":{},"extensions":null,"query":"query Operation {\\n  \\n}"}',
       );
     });
 
@@ -215,7 +215,7 @@ void main() {
       );
       expect(
         captured.body,
-        '{"operationName":"Operation","variables":{},"extensions":null,"query":"query Operation {}"}',
+        '{"operationName":"Operation","variables":{},"extensions":null,"query":"query Operation {\\n  \\n}"}',
       );
     });
 
@@ -252,7 +252,7 @@ void main() {
 
       expect(
         captured.body,
-        '{"operationName":null,"variables":{},"extensions":{"extension-1":"extension-value-1"},"query":"{}"}',
+        '{"operationName":null,"variables":{},"extensions":{"extension-1":"extension-value-1"},"query":"query {\\n  \\n}"}',
       );
     });
 
@@ -519,7 +519,7 @@ void main() {
         r'''--dart-http-boundary-REPLACED
 content-disposition: form-data; name="operations"
 
-{"operationName":null,"variables":{"files":[null,null]},"query":"{}"}
+{"operationName":null,"variables":{"files":[null,null]},"query":"query {\n  \n}"}
 --dart-http-boundary-REPLACED
 content-disposition: form-data; name="map"
 

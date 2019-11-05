@@ -76,7 +76,7 @@ class NormalizedInMemoryCache extends InMemoryCache {
   }
 
   @override
-  void reset(){
+  void reset() {
     data.clear();
   }
 

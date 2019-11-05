@@ -178,6 +178,56 @@ class StarrableRepository extends StatelessWidget {
     return Mutation(
       options: MutationOptions(
         document: starred ? mutations.removeStar : mutations.addStar,
+        update: (Cache cache, QueryResult result) {
+          if (result.hasException) {
+            print(result.exception);
+          } else {
+            final Map<String, Object> updated =
+                Map<String, Object>.from(repository)
+                  ..addAll(extractRepositoryData(result.data));
+            cache.write(typenameDataIdFromObject(updated), updated);
+          }
+        },
+        onError: (OperationException error) {
+          showDialog<AlertDialog>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(error.toString()),
+                actions: <Widget>[
+                  SimpleDialogOption(
+                    child: const Text('DISMISS'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            },
+          );
+        },
+        onCompleted: (dynamic resultData) {
+          showDialog<AlertDialog>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(
+                  extractRepositoryData(resultData)['viewerHasStarred'] as bool
+                      ? 'Thanks for your star!'
+                      : 'Sorry you changed your mind!',
+                ),
+                actions: <Widget>[
+                  SimpleDialogOption(
+                    child: const Text('DISMISS'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            },
+          );
+        },
       ),
       builder: (RunMutation toggleStar, QueryResult result) {
         return ListTile(
@@ -197,38 +247,6 @@ class StarrableRepository extends StatelessWidget {
                 'starrableId': repository['id'],
               },
               optimisticResult: expectedResult,
-            );
-          },
-        );
-      },
-      update: (Cache cache, QueryResult result) {
-        if (result.hasException) {
-          print(result.exception);
-        } else {
-          final Map<String, Object> updated =
-              Map<String, Object>.from(repository)
-                ..addAll(extractRepositoryData(result.data));
-          cache.write(typenameDataIdFromObject(updated), updated);
-        }
-      },
-      onCompleted: (dynamic resultData) {
-        showDialog<AlertDialog>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(
-                extractRepositoryData(resultData)['viewerHasStarred'] as bool
-                    ? 'Thanks for your star!'
-                    : 'Sorry you changed your mind!',
-              ),
-              actions: <Widget>[
-                SimpleDialogOption(
-                  child: const Text('DISMISS'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
             );
           },
         );

@@ -4,6 +4,7 @@ import 'dart:collection';
 
 import 'package:graphql/src/cache/cache.dart';
 import 'package:meta/meta.dart';
+
 class InMemoryCache implements Cache {
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
@@ -16,10 +17,10 @@ class InMemoryCache implements Cache {
   ///
   /// For vm/flutter, `storagePrefix` is a path to the directory
   /// that can save `cache.txt` file
-  /// 
-  /// For flutter usually provided by 
+  ///
+  /// For flutter usually provided by
   /// [path_provider.getApplicationDocumentsDirectory]
-  /// 
+  ///
   /// @NotNull
   final FutureOr<String> storagePrefix;
 

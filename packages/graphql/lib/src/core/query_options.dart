@@ -1,7 +1,10 @@
-import 'package:gql/ast.dart';
-import 'package:gql/language.dart';
 import 'package:meta/meta.dart';
 
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
+
+import 'package:graphql/client.dart';
+import 'package:graphql/internal.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
 
@@ -123,6 +126,10 @@ class QueryOptions extends BaseOptions {
   int pollInterval;
 }
 
+typedef OnMutationCompleted = void Function(dynamic data);
+typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
+typedef OnError = void Function(OperationException error);
+
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
@@ -133,6 +140,9 @@ class MutationOptions extends BaseOptions {
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Map<String, dynamic> context,
+    this.onCompleted,
+    this.update,
+    this.onError,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           document: document,
@@ -140,6 +150,97 @@ class MutationOptions extends BaseOptions {
           variables: variables,
           context: context,
         );
+
+  OnMutationCompleted onCompleted;
+  OnMutationUpdate update;
+  OnError onError;
+}
+
+class MutationCallbacks {
+  final MutationOptions options;
+  final Cache cache;
+  final String queryId;
+
+  MutationCallbacks({
+    this.options,
+    this.cache,
+    this.queryId,
+  })  : assert(cache != null),
+        assert(options != null),
+        assert(queryId != null);
+
+  // callbacks will be called against each result in the stream,
+  // which should then rebroadcast queries with the appropriate optimism
+  Iterable<OnData> get callbacks =>
+      <OnData>[onCompleted, update, onError].where(notNull);
+
+  // Todo: probably move this to its own class
+  OnData get onCompleted {
+    if (options.onCompleted != null) {
+      return (QueryResult result) {
+        if (!result.loading && !result.optimistic) {
+          return options.onCompleted(result.data);
+        }
+      };
+    }
+    return null;
+  }
+
+  OnData get onError {
+    if (options.onError != null) {
+      return (QueryResult result) {
+        if (!result.loading &&
+            result.hasException &&
+            options.errorPolicy != ErrorPolicy.ignore) {
+          return options.onError(result.exception);
+        }
+      };
+    }
+
+    return null;
+  }
+
+  /// The optimistic cache layer id `update` will write to
+  /// is a "child patch" of the default optimistic patch
+  /// created by the query manager
+  String get _patchId => '${queryId}.update';
+
+  /// apply the user's patch
+  void _optimisticUpdate(QueryResult result) {
+    final String patchId = _patchId;
+    // this is also done in query_manager, but better safe than sorry
+    assert(cache is OptimisticCache,
+        "can't optimisticly update non-optimistic cache");
+    (cache as OptimisticCache).addOptimisiticPatch(patchId, (Cache cache) {
+      options.update(cache, result);
+      return cache;
+    });
+  }
+
+  // optimistic patches will be cleaned up by the query_manager
+  // cleanup is handled by heirarchical optimism -
+  // as in, because our patch id is prefixed with '${observableQuery.queryId}.',
+  // it will be discarded along with the observableQuery.queryId patch
+  // TODO this results in an implicit coupling with the patch id system
+  OnData get update {
+    if (options.update != null) {
+      // dereference all variables that might be needed if the widget is disposed
+      final OnMutationUpdate widgetUpdate = options.update;
+      final OnData optimisticUpdate = _optimisticUpdate;
+
+      // wrap update logic to handle optimism
+      void updateOnData(QueryResult result) {
+        if (result.optimistic) {
+          return optimisticUpdate(result);
+        } else {
+          return widgetUpdate(cache, result);
+        }
+      }
+
+      return updateOnData;
+    }
+    return null;
+  }
 }
 
 // ObservableQuery options
@@ -218,10 +319,13 @@ class FetchMoreOptions {
     DocumentNode documentNode,
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
-  })  : assert((document != null && documentNode == null) ||
-            (document == null && documentNode != null)),
+  })  : assert(
+          _mutuallyExclusive(document, documentNode),
+          '"document" or "documentNode" options are mutually exclusive.',
+        ),
         assert(updateQuery != null),
-        documentNode = parseString(document);
+        this.documentNode =
+            documentNode ?? document != null ? parseString(document) : null;
 
   DocumentNode documentNode;
 
@@ -242,3 +346,12 @@ class FetchMoreOptions {
   /// with the result data already in the cache
   UpdateQuery updateQuery;
 }
+
+bool _mutuallyExclusive(
+  Object a,
+  Object b, {
+  bool required = false,
+}) =>
+    (!required && a == null && b == null) ||
+    (a != null && b == null) ||
+    (a == null && b != null);

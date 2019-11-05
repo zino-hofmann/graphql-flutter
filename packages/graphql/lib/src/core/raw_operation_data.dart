@@ -17,9 +17,14 @@ class RawOperationData {
     Map<String, dynamic> variables,
     String operationName,
   })  : assert(
+          document != null || documentNode != null,
+          'Either a "document"  or "documentNode" option is required. '
+          'You must specify your GraphQL document in the query options.',
+        ),
+        assert(
           (document != null && documentNode == null) ||
               (document == null && documentNode != null),
-          '"document" or "documentNode" option is required. You must specify your GraphQL document in the query options.',
+          '"document" or "documentNode" options are mutually exclusive.',
         ),
         documentNode = documentNode ?? parseString(document),
         _operationName = operationName,
