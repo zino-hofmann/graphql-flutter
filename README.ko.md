@@ -10,20 +10,18 @@ Read this in other languages:[English](README.md), [한국어](README.ko.md)
 
 # GraphQL Flutter
 
-## About this project
+## 이 프로젝트에 대하여
 
-GraphQL brings many benefits, both to the client: devices will need fewer requests, and therefore reduce data usage. And to the programmer: requests are arguable, they have the same structure as the request.
-
-This project combines the benefits of GraphQL with the benefits of `Streams` in Dart to deliver a high-performance client.
-
-The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
+GraphQL은 클라이언트와 프로그래머 모두에게 상당한 이점을 제공해줍니다. 예를들면 요청의 수를 줄여주고 데이터 사용량을 획기적으로 축소할 수 있습니다.
+이 프로젝트는 GraphQL의 장점과 다트 언어의 `Streams`를 합쳐 높은 성능의 클라이언트 개발을 할 수 있도록 해줍니다.
+이 프로젝트는 [Apollo GraphQL client](https://github.com/apollographql/apollo-client)에서 많은 영감을 받았습니다.
 
 ## Packages
 
 [![Build Status][build-status-badge]][build-status-link]
 [![Coverage][coverage-badge]][coverage-link]
 
-This is a Monorepo which contains the following packages:
+이 레포지토리는 아래 두개의 패키지들을 포함하고 있습니다.
 
 | Package                                       | Pub                                              |
 | :-------------------------------------------- | :----------------------------------------------- |
@@ -32,7 +30,7 @@ This is a Monorepo which contains the following packages:
 
 ## Roadmap
 
-This is currently our roadmap, please feel free to request additions/changes.
+현재 저희의 로드맵입니다. 원하시는 기능을 자유롭게 추가 또는 변경 요청 해주세요.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
@@ -49,13 +47,13 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 ## Contributing
 
-To contribute, please see the [CONTRIBUTING.md](CONTRIBUTING.md) file.
+저희 오픈소스 프로젝트 개발에 참여하기 위해서는 [CONTRIBUTING.md](CONTRIBUTING.ko.md)를 참조해주세요.
 
 ## Contributors
 
-This package was originally created and published by the engineers at [Zino App BV](https://zinoapp.com). Since then the community has helped to make it even more useful for even more developers.
+이 패키지는 초기에 [Zino App BV](https://zinoapp.com)엔지니어들에의해 개발되고 퍼블리시 되었습니다. 오픈소스 된 이후 커뮤니티의 도움을 받아 더욱 유용한 패키지로 발전하였습니다.
 
-Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
+아래 기여하신분들에게 감사드립니다. ([emoji key](https://github.com/kentcdodds/all-contributors#emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
@@ -63,7 +61,7 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
-This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
+이 프로젝트는 [all-contributors](https://github.com/kentcdodds/all-contributors) 기준을 따릅니다. 어떤 형태로든 개발 참여는 모두 환영입니다.
 
 [build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
 [build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
