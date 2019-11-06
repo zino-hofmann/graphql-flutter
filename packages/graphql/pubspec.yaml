@@ -20,6 +20,7 @@ dependencies:
   rxdart: ^0.22.0
   websocket: ^0.0.5
   quiver: ">=2.0.0 <3.0.0"
+  equatable: ^0.6.0
 dev_dependencies:
   pedantic: ^1.8.0+1
   mockito: ^4.0.0
