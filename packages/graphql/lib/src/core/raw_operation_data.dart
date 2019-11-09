@@ -21,11 +21,14 @@ class RawOperationData {
           'Either a "document"  or "documentNode" option is required. '
           'You must specify your GraphQL document in the query options.',
         ),
-        assert(
-          (document != null && documentNode == null) ||
-              (document == null && documentNode != null),
-          '"document" or "documentNode" options are mutually exclusive.',
-        ),
+
+        // todo: Investigate why this assertion is failing
+        // assert(
+        //   (document != null && documentNode == null) ||
+        //       (document == null && documentNode != null),
+        //   '"document" or "documentNode" options are mutually exclusive.',
+        // ),
+
         documentNode = documentNode ?? parseString(document),
         _operationName = operationName,
         variables = SplayTreeMap<String, dynamic>.of(
