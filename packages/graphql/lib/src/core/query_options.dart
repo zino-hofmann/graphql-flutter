@@ -1,12 +1,13 @@
-import 'package:meta/meta.dart';
-
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
-
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
-import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
+import 'package:graphql/src/utilities/helpers.dart';
+import 'package:meta/meta.dart';
+
+/// Parse GraphQL query strings into the standard GraphQL AST.
+DocumentNode gql(String query) => parseString(query);
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
