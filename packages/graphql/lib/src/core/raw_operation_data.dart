@@ -27,6 +27,7 @@ class RawOperationData {
         //       (document == null && documentNode != null),
         //   '"document" or "documentNode" options are mutually exclusive.',
         // ),
+        // ignore: deprecated_member_use_from_same_package
         documentNode = documentNode ?? parseString(document),
         _operationName = operationName,
         variables = SplayTreeMap<String, dynamic>.of(
