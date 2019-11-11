@@ -12,7 +12,6 @@ import 'package:path/path.dart';
 
 class _InMemoryCache implements Cache {
   _InMemoryCache({
-
     this.storagePrefix = '',
   });
 
