@@ -81,6 +81,7 @@ class BaseOptions extends RawOperationData {
     this.context,
     this.optimisticResult,
   }) : super(
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -114,6 +115,7 @@ class QueryOptions extends BaseOptions {
     Map<String, dynamic> context,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -145,6 +147,7 @@ class MutationOptions extends BaseOptions {
     this.onError,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -258,6 +261,7 @@ class WatchQueryOptions extends QueryOptions {
     this.eagerlyFetchResults,
     Map<String, dynamic> context,
   }) : super(
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -320,11 +324,13 @@ class FetchMoreOptions {
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
   })  : assert(
+          // ignore: deprecated_member_use_from_same_package
           _mutuallyExclusive(document, documentNode),
           '"document" or "documentNode" options are mutually exclusive.',
         ),
         assert(updateQuery != null),
         this.documentNode =
+            // ignore: deprecated_member_use_from_same_package
             documentNode ?? document != null ? parseString(document) : null;
 
   DocumentNode documentNode;

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:equatable/equatable.dart';
 import 'package:graphql/src/link/fetch_result.dart';
 import 'package:graphql/src/link/operation.dart';
 
@@ -27,7 +26,7 @@ Link _concat(
   });
 }
 
-class Link extends Equatable {
+class Link {
   Link({this.request});
 
   RequestHandler request;
@@ -40,7 +39,11 @@ class Link extends Equatable {
   Link concat(Link next) => _concat(this, next);
 
   @override
-  List<Object> get props => null;
+  bool operator ==(other) =>
+      identical(this, other) || other is Link && other.request == request;
+
+  @override
+  int get hashCode => request.hashCode;
 }
 
 Stream<FetchResult> execute({Link link, Operation operation}) =>
