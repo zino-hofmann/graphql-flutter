@@ -27,19 +27,11 @@ And then import it inside your dart code:
 import 'package:graphql/client.dart';
 ```
 
-#### Working with AST documents
+### Parsing at build-time
 
-`package:graphql` v2.2.0 adds support for working with AST documents.
+To parse documents at build-time use `ast_builder` from
+[`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen):
 
-##### Parsing at run-time
-To parse documents at run-time use `parseString` from `package:gql/language.dart`:
-```yaml
-dependencies:
-  gql: ^0.10.0
-```
-
-##### Parsing at build-time
-To parse documents at build-time use `ast_builder` from [`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen):
 ```yaml
 dev_dependencies:
   gql_code_gen: ^0.1.0
@@ -49,7 +41,7 @@ dev_dependencies:
 
 To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
 
-In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatinate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `InMemoryCache`.
+In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `InMemoryCache`.
 
 ```dart
 // ...
@@ -72,6 +64,16 @@ final GraphQLClient _client = GraphQLClient(
 // ...
 
 ```
+
+### Combining Multiple Links
+
+#### Using Concat
+
+```dart
+final Link _link = _authLink.concat(_httpLink);
+```
+
+#### Using Links.from
 
 `Link.from` joins multiple links into a single link at once.
 
@@ -102,7 +104,9 @@ const String readRepositories = r'''
 ''';
 ```
 
-Then create a `QueryOptions` object with the query string as the document and pass any variables necessary.
+Then create a `QueryOptions` object:
+
+> **NB:** for `documentNode` - Use our built-in help function - `gql(query)` to convert your document string to **ASTs** `documentNode`.
 
 In our case, we need to pass `nRepositories` variable and the document name is `readRepositories`.
 
@@ -111,7 +115,7 @@ In our case, we need to pass `nRepositories` variable and the document name is `
 const int nRepositories = 50;
 
 final QueryOptions options = QueryOptions(
-    document: readRepositories,
+    documentNode: gql(readRepositories),
     variables: <String, dynamic>{
         'nRepositories': nRepositories,
     },
@@ -158,7 +162,7 @@ Then instead of the `QueryOptions`, for mutations we will `MutationOptions`, whi
 // ...
 
 final MutationOptions options = MutationOptions(
-  document: addStar,
+  documentNode: gql(addStar),
   variables: <String, dynamic>{
     'starrableId': repositoryID,
   },
@@ -179,10 +183,10 @@ if (result.hasException) {
     return
 }
 
-final bool isStarrred =
+final bool isStarred =
     result.data['action']['starrable']['viewerHasStarred'] as bool;
 
-if (isStarrred) {
+if (isStarred) {
   print('Thanks for your star!');
   return;
 }
@@ -192,15 +196,16 @@ if (isStarrred) {
 
 ### AST documents
 
-To use AST documents set `documentNode` instead of `document`. For example:
+> We are deprecating `document` and recommend you update your application to use
+`documentNode` instead. `document` will be removed from the api in a future version.
+
+For example:
 
 ```dart
-import 'package:gql/language.dart';
-
 // ...
 
 final MutationOptions options = MutationOptions(
-  documentNode: parseString(addStar),
+  documentNode: gql(addStar),
   variables: <String, dynamic>{
     'starrableId': repositoryID,
   },
@@ -212,6 +217,7 @@ final MutationOptions options = MutationOptions(
 With [`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen) you can parse your `*.graphql` files at build-time.
 
 **`add_star.graphql`**:
+
 ```graphql
 mutation AddStar($starrableId: ID!) {
   action: addStar(input: {starrableId: $starrableId}) {
