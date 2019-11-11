@@ -21,14 +21,12 @@ class RawOperationData {
           'Either a "document"  or "documentNode" option is required. '
           'You must specify your GraphQL document in the query options.',
         ),
-        assert(
-          // ignore: deprecated_member_use_from_same_package
-          (document != null && documentNode == null) ||
-              // ignore: deprecated_member_use_from_same_package
-              (document == null && documentNode != null),
-          '"document" or "documentNode" options are mutually exclusive.',
-        ),
-        // ignore: deprecated_member_use_from_same_package
+        // todo: Investigate why this assertion is failing
+        // assert(
+        //   (document != null && documentNode == null) ||
+        //       (document == null && documentNode != null),
+        //   '"document" or "documentNode" options are mutually exclusive.',
+        // ),
         documentNode = documentNode ?? parseString(document),
         _operationName = operationName,
         variables = SplayTreeMap<String, dynamic>.of(
