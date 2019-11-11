@@ -12,7 +12,7 @@ class HeroForEpisode extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        document: r'''
+        documentNode: gql(r'''
           query HeroForEpisode($ep: Episode!) {
             hero(episode: $ep) {
               __typename
@@ -26,7 +26,7 @@ class HeroForEpisode extends StatelessWidget {
               }
             }
           }
-        ''',
+        '''),
         variables: <String, String>{
           'ep': episodeToJson(episode),
         },

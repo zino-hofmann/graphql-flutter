@@ -73,6 +73,12 @@ final GraphQLClient _client = GraphQLClient(
 
 ```
 
+`Link.from` joins multiple links into a single link at once.
+
+```dart
+final Link _link = Link.from([_authLink, _httpLink]);
+```
+
 Once you have initialized a client, you can run queries and mutations.
 
 ### Query
@@ -231,8 +237,21 @@ final MutationOptions options = MutationOptions(
 // ...
 ```
 
+## Links
 
+### `ErrorLink`
 
+Perform custom logic when a GraphQL or network error happens, such as logging or
+signing out.
+
+```dart
+final ErrorLink errorLink = ErrorLink(errorHandler: (ErrorResponse response) {
+  Operation operation = response.operation;
+  FetchResult result = response.fetchResult;
+  OperationException exception = response.exception;
+  print(exception.toString());
+});
+```
 
 [build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
 [build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter

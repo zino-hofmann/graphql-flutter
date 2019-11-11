@@ -1,15 +1,18 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
+
 import './client_provider.dart';
 import './episode/episode_page.dart';
 import './reviews/review_page.dart';
 import './reviews/review_page_list.dart';
 
 String get host {
-  if (Platform.isAndroid)
+  if (Platform.isAndroid) {
     return '10.0.2.2';
-  else // for iOS simulator
+  } else {
     return 'localhost';
+  }
 }
 
 final String GRAPHQL_ENDPOINT = 'http://$host:3000/graphql';

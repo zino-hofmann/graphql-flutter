@@ -3,9 +3,6 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 
-// to run the example, create a file ../local.dart with the content:
-// const String YOUR_PERSONAL_ACCESS_TOKEN =
-//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 // ignore: uri_does_not_exist
 import '../local.dart';
 
@@ -85,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                document: queries.searchRepositories,
+                documentNode: gql(queries.searchRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                   'query': _searchQuery,

@@ -19,7 +19,7 @@ Future<Map<String, MultipartFile>> deprecatedHelper(
 
 bool isIoFile(object) {
   final r = object is io.File;
-  if(r) {
+  if (r) {
     print(r'''
 ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️ DEPRECATION WARNING ⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️⚠️️️️️️️️
 

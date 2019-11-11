@@ -3,6 +3,7 @@ import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
+import 'package:gql/language.dart';
 
 import './helpers.dart';
 
@@ -60,7 +61,7 @@ void main() {
     group('query', () {
       test('successful query', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
-          document: readRepositories,
+          documentNode: parseString(readRepositories),
           variables: <String, dynamic>{
             'nRepositories': 42,
           },
@@ -135,8 +136,8 @@ void main() {
           throw e;
         });
 
-        final QueryResult r = await graphQLClientClient
-            .query(WatchQueryOptions(document: readRepositories));
+        final QueryResult r = await graphQLClientClient.query(
+            WatchQueryOptions(documentNode: parseString(readRepositories)));
 
         expect((r.exception.clientException as UnhandledFailureWrapper).failure,
             e);
@@ -151,8 +152,8 @@ void main() {
           throw e;
         });
 
-        final QueryResult r = await graphQLClientClient
-            .query(WatchQueryOptions(document: readRepositories));
+        final QueryResult r = await graphQLClientClient.query(
+            WatchQueryOptions(documentNode: parseString(readRepositories)));
 
         expect(
           (r.exception.clientException as UnhandledFailureWrapper).failure,
@@ -171,7 +172,8 @@ void main() {
     });
     group('mutation', () {
       test('successful mutation', () async {
-        final MutationOptions _options = MutationOptions(document: addStar);
+        final MutationOptions _options =
+            MutationOptions(documentNode: parseString(addStar));
         when(mockHttpClient.send(any)).thenAnswer((Invocation a) async =>
             simpleResponse(
                 body:

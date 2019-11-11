@@ -39,7 +39,9 @@ class QueryState extends State<Query> {
     final QueryOptions options = widget.options;
 
     return WatchQueryOptions(
+      // ignore: deprecated_member_use
       document: options.document,
+      documentNode: options.documentNode,
       variables: options.variables,
       fetchPolicy: options.fetchPolicy,
       errorPolicy: options.errorPolicy,

@@ -301,6 +301,14 @@ The syntax for mutations is fairly similar to that of a query. The only differen
 Mutation(
   options: MutationOptions(
     document: addStar, // this is the mutation string you just created
+    // you can update the cache based on results
+    update: (Cache cache, QueryResult result) {
+      return cache;
+    },
+    // or do something with the result.data on completion
+    onCompleted: (dynamic resultData) {
+      print(resultData);
+    },
   ),
   builder: (
     RunMutation runMutation,

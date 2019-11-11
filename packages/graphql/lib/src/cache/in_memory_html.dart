@@ -73,7 +73,7 @@ class InMemoryCache implements Cache {
 
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     try {
-      final decoded =  jsonDecode(window.localStorage[masterKey]);
+      final decoded = jsonDecode(window.localStorage[masterKey]);
       return HashMap.from(decoded);
     } catch (error) {
       // TODO: handle error

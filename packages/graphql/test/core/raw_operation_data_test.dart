@@ -1,3 +1,4 @@
+import 'package:gql/language.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
 import 'package:test/test.dart';
 
@@ -6,7 +7,7 @@ void main() {
     group('single operation', () {
       test('query without name', () {
         final opData = RawOperationData(
-          document: 'query {}',
+          documentNode: parseString('query {}'),
         );
 
         expect(opData.operationName, null);
@@ -14,7 +15,7 @@ void main() {
 
       test('query with explicit name', () {
         final opData = RawOperationData(
-          document: 'query Operation {}',
+          documentNode: parseString('query Operation {}'),
           operationName: 'Operation',
         );
 
@@ -23,7 +24,7 @@ void main() {
 
       test('mutation with explicit name', () {
         final opData = RawOperationData(
-          document: 'mutation Operation {}',
+          documentNode: parseString('mutation Operation {}'),
           operationName: 'Operation',
         );
 
@@ -32,7 +33,7 @@ void main() {
 
       test('subscription with explicit name', () {
         final opData = RawOperationData(
-          document: 'subscription Operation {}',
+          documentNode: parseString('subscription Operation {}'),
           operationName: 'Operation',
         );
 
@@ -41,7 +42,7 @@ void main() {
 
       test('query with implicit name', () {
         final opData = RawOperationData(
-          document: 'query Operation {}',
+          documentNode: parseString('query Operation {}'),
         );
 
         expect(opData.operationName, 'Operation');
@@ -49,7 +50,7 @@ void main() {
 
       test('mutation with implicit name', () {
         final opData = RawOperationData(
-          document: 'mutation Operation {}',
+          documentNode: parseString('mutation Operation {}'),
         );
 
         expect(opData.operationName, 'Operation');
@@ -57,7 +58,7 @@ void main() {
 
       test('subscription with implicit name', () {
         final opData = RawOperationData(
-          document: 'subscription Operation {}',
+          documentNode: parseString('subscription Operation {}'),
         );
 
         expect(opData.operationName, 'Operation');
@@ -73,7 +74,7 @@ void main() {
 
       test('query with explicit name', () {
         final opData = RawOperationData(
-          document: document,
+          documentNode: parseString(document),
           operationName: 'OperationQ',
         );
 
@@ -82,7 +83,7 @@ void main() {
 
       test('mutation with explicit name', () {
         final opData = RawOperationData(
-          document: document,
+          documentNode: parseString(document),
           operationName: 'OperationM',
         );
 
@@ -91,7 +92,7 @@ void main() {
 
       test('subscription with explicit name', () {
         final opData = RawOperationData(
-          document: document,
+          documentNode: parseString(document),
           operationName: 'OperationS',
         );
 
@@ -100,7 +101,7 @@ void main() {
 
       test('query with implicit name', () {
         final opData = RawOperationData(
-          document: document,
+          documentNode: parseString(document),
         );
 
         expect(opData.operationName, 'OperationS');
@@ -108,7 +109,7 @@ void main() {
 
       test('mutation with implicit name', () {
         final opData = RawOperationData(
-          document: document,
+          documentNode: parseString(document),
         );
 
         expect(opData.operationName, 'OperationS');
@@ -116,7 +117,7 @@ void main() {
 
       test('subscription with implicit name', () {
         final opData = RawOperationData(
-          document: document,
+          documentNode: parseString(document),
         );
 
         expect(opData.operationName, 'OperationS');
