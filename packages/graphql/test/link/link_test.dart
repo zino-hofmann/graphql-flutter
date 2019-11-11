@@ -4,7 +4,7 @@ import 'package:test/test.dart';
 
 void main() {
   group('link', () {
-    test('multiple', () {
+    test('multiple', () async {
       final link1 = Link(
         request: (Operation op, [NextLink forward]) {
           return null;
@@ -27,7 +27,10 @@ void main() {
 
       final linksConcat = link1..concat(link2)..concat(link3);
 
-      expect(linksFrom, linksConcat);
+      var resultConcat = await execute(link: linksConcat);
+      var resultFrom = await execute(link: linksFrom);
+
+      expect(resultConcat, resultFrom);
     });
   });
 }

@@ -37,13 +37,6 @@ class Link {
   }
 
   Link concat(Link next) => _concat(this, next);
-
-  @override
-  bool operator ==(other) =>
-      identical(this, other) || other is Link && other.request == request;
-
-  @override
-  int get hashCode => request.hashCode;
 }
 
 Stream<FetchResult> execute({Link link, Operation operation}) =>
