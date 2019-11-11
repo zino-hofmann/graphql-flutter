@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
@@ -96,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                documentNode: parseString(queries.readRepositories),
+                documentNode: gql(queries.readRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
@@ -175,8 +174,7 @@ class StarrableRepository extends StatelessWidget {
   Widget build(BuildContext context) {
     return Mutation(
       options: MutationOptions(
-        documentNode:
-            parseString(starred ? mutations.removeStar : mutations.addStar),
+        documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
         update: (Cache cache, QueryResult result) {
           if (result.hasException) {
             print(result.exception);

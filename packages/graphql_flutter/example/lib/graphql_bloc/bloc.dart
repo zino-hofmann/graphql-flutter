@@ -73,8 +73,8 @@ class Bloc {
 
   Future<QueryResult> _mutateToggleStar(Repo repo) async {
     final MutationOptions _options = MutationOptions(
-      documentNode: parseString(
-          repo.viewerHasStarred ? mutations.removeStar : mutations.addStar),
+      documentNode:
+          gql(repo.viewerHasStarred ? mutations.removeStar : mutations.addStar),
       variables: <String, String>{
         'starrableId': repo.id,
       },

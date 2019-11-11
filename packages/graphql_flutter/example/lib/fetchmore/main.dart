@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/queries/readRepositories.dart' as queries;
@@ -83,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                documentNode: parseString(queries.searchRepositories),
+                documentNode: gql(queries.searchRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                   'query': _searchQuery,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 import './episode.dart';
@@ -13,7 +12,7 @@ class HeroForEpisode extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: parseString(r'''
+        documentNode: gql(r'''
           query HeroForEpisode($ep: Episode!) {
             hero(episode: $ep) {
               __typename
