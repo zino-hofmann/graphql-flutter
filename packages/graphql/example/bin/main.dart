@@ -5,7 +5,6 @@ import 'package:graphql/client.dart';
 
 import './graphql_operation/mutations/mutations.dart';
 import './graphql_operation/queries/readRepositories.dart';
-
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
@@ -40,7 +39,7 @@ void query() async {
   const int nRepositories = 50;
 
   final QueryOptions options = QueryOptions(
-    document: readRepositories,
+    documentNode: gql(readRepositories),
     variables: <String, dynamic>{
       'nRepositories': nRepositories,
     },
@@ -72,7 +71,7 @@ void starRepository(String repositoryID) async {
   final GraphQLClient _client = client();
 
   final MutationOptions options = MutationOptions(
-    document: addStar,
+    documentNode: gql(addStar),
     variables: <String, dynamic>{
       'starrableId': repositoryID,
     },
@@ -105,7 +104,7 @@ void removeStarFromRepository(String repositoryID) async {
   final GraphQLClient _client = client();
 
   final MutationOptions options = MutationOptions(
-    document: removeStar,
+    documentNode: gql(removeStar),
     variables: <String, dynamic>{
       'starrableId': repositoryID,
     },

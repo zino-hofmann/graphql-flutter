@@ -12,6 +12,7 @@ class Operation extends RawOperationData {
     this.extensions,
     String operationName,
   }) : super(
+            // ignore: deprecated_member_use_from_same_package
             document: document,
             documentNode: documentNode,
             variables: variables,

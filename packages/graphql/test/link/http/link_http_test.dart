@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 
+import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
 import 'package:graphql/src/link/http/link_http.dart';
@@ -23,11 +24,11 @@ void main() {
     setUp(() {
       client = MockClient();
       query = Operation(
-        document: 'query Operation {}',
+        documentNode: parseString('query Operation {}'),
         operationName: 'Operation',
       );
       subscription = Operation(
-        document: 'subscription Operation {}',
+        documentNode: parseString('subscription Operation {}'),
         operationName: 'Operation',
       );
       link = HttpLink(
@@ -234,7 +235,7 @@ void main() {
       );
 
       final query = Operation(
-        document: '{}',
+        documentNode: parseString('{}'),
         extensions: {'extension-1': 'extension-value-1'},
       );
       query.setContext({
@@ -476,7 +477,7 @@ void main() {
       );
 
       final query = Operation(
-        document: '{}',
+        documentNode: parseString('{}'),
         variables: {
           'files': [
             http.MultipartFile.fromString(

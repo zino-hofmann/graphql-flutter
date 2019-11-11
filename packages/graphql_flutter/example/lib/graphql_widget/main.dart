@@ -5,9 +5,6 @@ import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 import '../helpers.dart' show withGenericHandling;
 
-// to run the example, create a file ../local.dart with the content:
-// const String YOUR_PERSONAL_ACCESS_TOKEN =
-//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 // ignore: uri_does_not_exist
 import '../local.dart';
 
@@ -98,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                document: queries.readRepositories,
+                documentNode: gql(queries.readRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
@@ -177,7 +174,7 @@ class StarrableRepository extends StatelessWidget {
   Widget build(BuildContext context) {
     return Mutation(
       options: MutationOptions(
-        document: starred ? mutations.removeStar : mutations.addStar,
+        documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
         update: (Cache cache, QueryResult result) {
           if (result.hasException) {
             print(result.exception);

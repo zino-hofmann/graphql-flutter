@@ -1,12 +1,13 @@
-import 'package:meta/meta.dart';
-
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
-
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
-import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
+import 'package:graphql/src/utilities/helpers.dart';
+import 'package:meta/meta.dart';
+
+/// Parse GraphQL query strings into the standard GraphQL AST.
+DocumentNode gql(String query) => parseString(query);
 
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
@@ -81,6 +82,7 @@ class BaseOptions extends RawOperationData {
     this.context,
     this.optimisticResult,
   }) : super(
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -114,6 +116,7 @@ class QueryOptions extends BaseOptions {
     Map<String, dynamic> context,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -145,6 +148,7 @@ class MutationOptions extends BaseOptions {
     this.onError,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -258,6 +262,7 @@ class WatchQueryOptions extends QueryOptions {
     this.eagerlyFetchResults,
     Map<String, dynamic> context,
   }) : super(
+          // ignore: deprecated_member_use_from_same_package
           document: document,
           documentNode: documentNode,
           variables: variables,
@@ -320,11 +325,13 @@ class FetchMoreOptions {
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
   })  : assert(
+          // ignore: deprecated_member_use_from_same_package
           _mutuallyExclusive(document, documentNode),
           '"document" or "documentNode" options are mutually exclusive.',
         ),
         assert(updateQuery != null),
         this.documentNode =
+            // ignore: deprecated_member_use_from_same_package
             documentNode ?? document != null ? parseString(document) : null;
 
   DocumentNode documentNode;

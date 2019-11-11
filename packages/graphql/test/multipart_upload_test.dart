@@ -1,3 +1,4 @@
+import 'package:gql/language.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
@@ -124,7 +125,7 @@ void main() {
       });
 
       final MutationOptions _options = MutationOptions(
-        document: uploadMutation,
+        documentNode: parseString(uploadMutation),
         variables: <String, dynamic>{
           'files': [
             http.MultipartFile.fromBytes(

@@ -1,3 +1,4 @@
+import 'package:gql/language.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -58,7 +59,7 @@ void main() {
     group('query', () {
       test('successful query', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
-          document: readRepositories,
+          documentNode: parseString(readRepositories),
           variables: <String, dynamic>{},
         );
         when(
@@ -135,7 +136,8 @@ void main() {
     });
     group('mutation', () {
       test('successful mutation', () async {
-        final MutationOptions _options = MutationOptions(document: addStar);
+        final MutationOptions _options =
+            MutationOptions(documentNode: parseString(addStar));
         when(mockHttpClient.send(any)).thenAnswer((Invocation a) async =>
             simpleResponse(
                 body:

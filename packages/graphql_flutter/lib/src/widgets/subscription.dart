@@ -1,13 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
-
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
-import 'package:connectivity/connectivity.dart';
 
 typedef OnSubscriptionCompleted = void Function();
 
@@ -52,7 +51,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
     final Operation operation = Operation(
-      document: widget.query,
+      documentNode: parseString(widget.query),
       variables: widget.variables,
       operationName: widget.operationName,
     );

@@ -1,22 +1,18 @@
 import 'dart:async';
 
-import 'package:graphql/src/exceptions/exceptions.dart';
-import 'package:meta/meta.dart';
-
-import 'package:graphql/src/core/query_options.dart';
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/observable_query.dart';
-
-import 'package:graphql/src/scheduler/scheduler.dart';
-
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
-import 'package:graphql/src/link/fetch_result.dart';
-
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/cache/normalized_in_memory.dart'
     show NormalizedInMemoryCache;
 import 'package:graphql/src/cache/optimistic.dart' show OptimisticCache;
+import 'package:graphql/src/core/observable_query.dart';
+import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/exceptions/exceptions.dart';
+import 'package:graphql/src/link/fetch_result.dart';
+import 'package:graphql/src/link/link.dart';
+import 'package:graphql/src/link/operation.dart';
+import 'package:graphql/src/scheduler/scheduler.dart';
+import 'package:meta/meta.dart';
 
 class QueryManager {
   QueryManager({

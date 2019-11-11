@@ -3,6 +3,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:gql/language.dart';
 import 'package:test/test.dart';
 
 import 'package:graphql/src/link/operation.dart';
@@ -43,7 +44,7 @@ void main() {
       });
       test('subscription data', () async {
         final payload = SubscriptionRequest(
-          Operation(document: 'subscription {}'),
+          Operation(documentNode: parseString('subscription {}')),
         );
         final waitForConnection = true;
         final subscriptionDataStream =

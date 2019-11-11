@@ -1,6 +1,7 @@
 import "dart:async";
 import "dart:convert";
 
+import 'package:gql/language.dart';
 import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:graphql/src/link/error/link_error.dart';
 import 'package:graphql/src/link/http/link_http.dart';
@@ -21,7 +22,7 @@ void main() {
     setUp(() {
       client = MockClient();
       query = Operation(
-        document: 'query Operation {}',
+        documentNode: parseString('query Operation {}'),
         operationName: 'Operation',
       );
       httpLink = HttpLink(
