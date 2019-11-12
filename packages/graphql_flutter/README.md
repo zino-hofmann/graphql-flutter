@@ -195,7 +195,7 @@ In your widget:
 // ...
 Query(
   options: QueryOptions(
-    document: readRepositories, // this is the query string you just created
+    documentNode: gql(readRepositories), // this is the query string you just created
     variables: {
       'nRepositories': 50,
     },
@@ -300,7 +300,7 @@ The syntax for mutations is fairly similar to that of a query. The only differen
 
 Mutation(
   options: MutationOptions(
-    document: addStar, // this is the mutation string you just created
+    documentNode: gql(addStar), // this is the mutation string you just created
     // you can update the cache based on results
     update: (Cache cache, QueryResult result) {
       return cache;
@@ -363,7 +363,7 @@ With a bit more context (taken from **[the complete mutation example `StarrableR
 // bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 Mutation(
   options: MutationOptions(
-    document: starred ? mutations.removeStar : mutations.addStar,
+    documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
   ),
   builder: (RunMutation toggleStar, QueryResult result) {
     return ListTile(
@@ -536,7 +536,7 @@ import 'dart:io' show File;
 String filePath = '/aboslute/path/to/file.ext';
 final QueryResult r = await graphQLClientClient.mutate(
   MutationOptions(
-    document: uploadMutation,
+    documentNode: gql(uploadMutation),
     variables: {
       'files': [File(filePath)],
     },
