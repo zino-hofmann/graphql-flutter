@@ -322,10 +322,6 @@ Mutation(
       child: Icon(Icons.star),
     );
   },
-  // you can update the cache based on results
-  update: (Cache cache, QueryResult result) {
-    return cache;
-  },
   // or do something with the result.data on completion
   onCompleted: (dynamic resultData) {
     print(resultData);
@@ -364,6 +360,40 @@ With a bit more context (taken from **[the complete mutation example `StarrableR
 Mutation(
   options: MutationOptions(
     documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
+    // will be called for both optimistic and final results
+    update: (Cache cache, QueryResult result) {
+      if (result.hasException) {
+        print(['optimistic', result.exception.toString()]);
+      } else {
+        final Map<String, Object> updated =
+            Map<String, Object>.from(repository)
+              ..addAll(extractRepositoryData(result.data));
+        cache.write(typenameDataIdFromObject(updated), updated);
+      }
+    },
+    // will only be called for final result
+    onCompleted: (dynamic resultData) {
+      showDialog<AlertDialog>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              extractRepositoryData(resultData)['viewerHasStarred'] as bool
+                  ? 'Thanks for your star!'
+                  : 'Sorry you changed your mind!',
+            ),
+            actions: <Widget>[
+              SimpleDialogOption(
+                child: const Text('Dismiss'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        },
+      );
+    },
   ),
   builder: (RunMutation toggleStar, QueryResult result) {
     return ListTile(
@@ -385,40 +415,6 @@ Mutation(
               'starrable': {'viewerHasStarred': !starred}
             }
           },
-        );
-      },
-    );
-  },
-  // will be called for both optimistic and final results
-  update: (Cache cache, QueryResult result) {
-    if (result.hasException) {
-      print(['optimistic', result.exception.toString()]);
-    } else {
-      final Map<String, Object> updated =
-          Map<String, Object>.from(repository)
-            ..addAll(extractRepositoryData(result.data));
-      cache.write(typenameDataIdFromObject(updated), updated);
-    }
-  },
-  // will only be called for final result
-  onCompleted: (dynamic resultData) {
-    showDialog<AlertDialog>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            extractRepositoryData(resultData)['viewerHasStarred'] as bool
-                ? 'Thanks for your star!'
-                : 'Sorry you changed your mind!',
-          ),
-          actions: <Widget>[
-            SimpleDialogOption(
-              child: const Text('Dismiss'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
         );
       },
     );
