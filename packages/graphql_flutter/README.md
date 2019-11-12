@@ -322,10 +322,6 @@ Mutation(
       child: Icon(Icons.star),
     );
   },
-  // or do something with the result.data on completion
-  onCompleted: (dynamic resultData) {
-    print(resultData);
-  },
 );
 
 ...
