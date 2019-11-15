@@ -61,7 +61,7 @@ class _CacheProviderState extends State<CacheProvider>
         client.cache?.save();
         break;
 
-      case AppLifecycleState.suspending:
+      case AppLifecycleState.detached:
         break;
 
       case AppLifecycleState.resumed:
