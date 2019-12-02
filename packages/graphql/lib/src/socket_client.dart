@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:meta/meta.dart';
@@ -74,6 +75,9 @@ class SocketClient {
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
 
+  final HashMap<String, Function> _subscriptionInitializers = HashMap();
+  bool _connectionWasLost = false;
+
   Timer _reconnectTimer;
   WebSocket _socket;
   @visibleForTesting
@@ -132,6 +136,14 @@ class SocketClient {
           onError: (dynamic e) {
             print('error: $e');
           });
+
+      if (_connectionWasLost) {
+        for (Function callback in _subscriptionInitializers.values) {
+          callback();
+        }
+
+        _connectionWasLost = false;
+      }
     } catch (e) {
       onConnectionLost(e);
     }
@@ -149,6 +161,8 @@ class SocketClient {
     if (_connectionStateController.isClosed) {
       return;
     }
+
+    _connectionWasLost = true;
 
     if (_connectionStateController.value !=
         SocketConnectionState.NOT_CONNECTED) {
@@ -244,7 +258,7 @@ class SocketClient {
     final bool addTimeout = !payload.operation.isSubscription &&
         config.queryAndMutationTimeout != null;
 
-    response.onListen = () {
+    final onListen = () {
       final Observable<SocketConnectionState>
           waitForConnectedStateWithoutTimeout = _connectionStateController
               .startWith(
@@ -322,13 +336,19 @@ class SocketClient {
       });
     };
 
+    response.onListen = onListen;
+
     response.onCancel = () {
+      _subscriptionInitializers.remove(id);
+
       sub?.cancel();
       if (_connectionStateController.value == SocketConnectionState.CONNECTED &&
           _socket != null) {
         _write(StopOperation(id));
       }
     };
+
+    _subscriptionInitializers[id] = onListen;
 
     return response.stream;
   }
