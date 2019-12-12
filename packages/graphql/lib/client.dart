@@ -12,6 +12,9 @@ export 'package:graphql/src/core/query_result.dart';
 
 export 'package:graphql/src/exceptions/exceptions.dart';
 
+export 'package:graphql/src/link/operation.dart';
+export 'package:graphql/src/link/fetch_result.dart';
+
 export 'package:graphql/src/link/auth/link_auth.dart';
 export 'package:graphql/src/link/error/link_error.dart';
 export 'package:graphql/src/link/http/link_http.dart';
