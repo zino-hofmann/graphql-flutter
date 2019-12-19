@@ -1,6 +1,9 @@
 name: app
 description: A new Flutter project.
 
+module:
+  androidX: true // Add this line.
+
 dependencies:
   flutter:
     sdk: flutter
