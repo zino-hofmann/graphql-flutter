@@ -6,18 +6,10 @@ import 'package:graphql/src/utilities/traverse.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/in_memory.dart';
 import 'package:graphql/src/cache/lazy_cache_map.dart';
+import 'package:graphql/src/exceptions/exceptions.dart'
+    show NormalizationException;
 
 typedef DataIdFromObject = String Function(Object node);
-
-class NormalizationException implements Exception {
-  NormalizationException(this.cause, this.overflowError, this.value);
-
-  StackOverflowError overflowError;
-  String cause;
-  Object value;
-
-  String get message => cause;
-}
 
 typedef Normalizer = List<String> Function(Object node);
 
@@ -62,7 +54,8 @@ class NormalizedInMemoryCache extends InMemoryCache {
     return null;
   }
 
-  // TODO ideally cyclical references would be noticed and replaced with null or something
+  // ~TODO~ ideally cyclical references would be noticed and replaced with null or something
+  // @micimize: pretty sure I implemented the above
   /// eagerly dereferences all cache references.
   /// *WARNING* if your system allows cyclical references, this will break
   dynamic denormalizedRead(String key) {
@@ -80,6 +73,11 @@ class NormalizedInMemoryCache extends InMemoryCache {
         );
       }
     }
+  }
+
+  @override
+  void reset() {
+    data.clear();
   }
 
   /*

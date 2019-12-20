@@ -80,18 +80,19 @@ Before you submit your Pull Request (PR) consider the following guidelines:
    is necessary because release notes are automatically generated from these messages.
 
    ```shell
-   git commit -a
+   git commit -S -a
    ```
 
-   Note: the optional commit `-a` command line option will automatically "add" and "rm" edited files.
+   **Note:** the optional commit `-a` command line option will automatically "add" and "rm" edited files. While the options `-S` ensures are your commits are signed.
 
-8. Push your branch to GitHub:
+8. Make sure all of your commits are signed - follow instructions [here](https://help.github.com/en/articles/signing-commits) to learn how to sign your commits.
+9. Push your branch to GitHub:
 
-```shell
-git push origin my-fix-branch
-```
+    ```shell
+    git push origin my-fix-branch
+    ```
 
-11. In GitHub, send a pull request to `graphql-flutter:beta`.
+10. In GitHub, send a pull request to `graphql-flutter:beta`.
 
 - If we suggest changes then:
 
@@ -204,8 +205,8 @@ The scope should be the name of the package affected (as perceived by the person
 The following is the list of supported scopes:
 
 - **client**: For GraphQL Client Package
-- **flutter**: For updates realted to Flutter GraphQL package
-- **packaging**: For pub dependancy updates
+- **flutter**: For updates related to Flutter GraphQL package
+- **packaging**: For pub dependency updates
 - **upgrade**
 - **changelog**
 

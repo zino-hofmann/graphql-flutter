@@ -57,8 +57,7 @@ class _InheritedGraphQLProvider extends InheritedWidget {
         super(child: child);
 
   factory _InheritedGraphQLProvider.of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(_InheritedGraphQLProvider)
-          as _InheritedGraphQLProvider;
+      context.dependOnInheritedWidgetOfExactType<_InheritedGraphQLProvider>();
 
   final ValueNotifier<GraphQLClient> client;
   final GraphQLClient clientValue;

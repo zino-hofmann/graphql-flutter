@@ -24,6 +24,7 @@
     - [Fetch More (Pagination)](#fetch-more-pagination)
   - [Mutations](#mutations)
     - [Mutations with optimism](#mutations-with-optimism)
+  - [Exceptions](#exceptions)
   - [Subscriptions (Experimental)](#subscriptions-experimental)
   - [GraphQL Consumer](#graphql-consumer)
   - [GraphQL Upload](#graphql-upload)
@@ -194,7 +195,7 @@ In your widget:
 // ...
 Query(
   options: QueryOptions(
-    document: readRepositories, // this is the query string you just created
+    documentNode: gql(readRepositories), // this is the query string you just created
     variables: {
       'nRepositories': 50,
     },
@@ -203,8 +204,8 @@ Query(
   // Just like in apollo refetch() could be used to manually trigger a refetch
   // while fetchMore() can be used for pagination purpose
   builder: (QueryResult result, { VoidCallback refetch, FetchMore fetchMore }) {
-    if (result.errors != null) {
-      return Text(result.errors.toString());
+    if (result.hasException) {
+        return Text(result.exception.toString());
     }
 
     if (result.loading) {
@@ -249,7 +250,7 @@ FetchMoreOptions opts = FetchMoreOptions(
     ];
 
     // to avoid a lot of work, lets just update the list of repos in returned
-    // data with new data, this also ensure we have the endCursor already set
+    // data with new data, this also ensures we have the endCursor already set
     // correctly
     fetchMoreResultData['search']['nodes'] = repos;
 
@@ -299,7 +300,15 @@ The syntax for mutations is fairly similar to that of a query. The only differen
 
 Mutation(
   options: MutationOptions(
-    document: addStar, // this is the mutation string you just created
+    documentNode: gql(addStar), // this is the mutation string you just created
+    // you can update the cache based on results
+    update: (Cache cache, QueryResult result) {
+      return cache;
+    },
+    // or do something with the result.data on completion
+    onCompleted: (dynamic resultData) {
+      print(resultData);
+    },
   ),
   builder: (
     RunMutation runMutation,
@@ -312,14 +321,6 @@ Mutation(
       tooltip: 'Star',
       child: Icon(Icons.star),
     );
-  },
-  // you can update the cache based on results
-  update: (Cache cache, QueryResult result) {
-    return cache;
-  },
-  // or do something with the result.data on completion
-  onCompleted: (dynamic resultData) {
-    print(resultData);
   },
 );
 
@@ -354,7 +355,41 @@ With a bit more context (taken from **[the complete mutation example `StarrableR
 // bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 Mutation(
   options: MutationOptions(
-    document: starred ? mutations.removeStar : mutations.addStar,
+    documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
+    // will be called for both optimistic and final results
+    update: (Cache cache, QueryResult result) {
+      if (result.hasException) {
+        print(['optimistic', result.exception.toString()]);
+      } else {
+        final Map<String, Object> updated =
+            Map<String, Object>.from(repository)
+              ..addAll(extractRepositoryData(result.data));
+        cache.write(typenameDataIdFromObject(updated), updated);
+      }
+    },
+    // will only be called for final result
+    onCompleted: (dynamic resultData) {
+      showDialog<AlertDialog>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text(
+              extractRepositoryData(resultData)['viewerHasStarred'] as bool
+                  ? 'Thanks for your star!'
+                  : 'Sorry you changed your mind!',
+            ),
+            actions: <Widget>[
+              SimpleDialogOption(
+                child: const Text('Dismiss'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              )
+            ],
+          );
+        },
+      );
+    },
   ),
   builder: (RunMutation toggleStar, QueryResult result) {
     return ListTile(
@@ -380,41 +415,32 @@ Mutation(
       },
     );
   },
-  // will be called for both optimistic and final results
-  update: (Cache cache, QueryResult result) {
-    if (result.hasErrors) {
-      print(['optimistic', result.errors]);
-    } else {
-      final Map<String, Object> updated =
-          Map<String, Object>.from(repository)
-            ..addAll(extractRepositoryData(result.data));
-      cache.write(typenameDataIdFromObject(updated), updated);
-    }
-  },
-  // will only be called for final result
-  onCompleted: (dynamic resultData) {
-    showDialog<AlertDialog>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(
-            extractRepositoryData(resultData)['viewerHasStarred'] as bool
-                ? 'Thanks for your star!'
-                : 'Sorry you changed your mind!',
-          ),
-          actions: <Widget>[
-            SimpleDialogOption(
-              child: const Text('Dismiss'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            )
-          ],
-        );
-      },
-    );
-  },
 );
+```
+
+### Exceptions
+
+If there were problems encountered during a query or mutation, the `QueryResult` will have an `OperationException` in the `exception` field:
+
+```dart
+class OperationException implements Exception {
+  /// Any graphql errors returned from the operation
+  List<GraphQLError> graphqlErrors = [];
+
+  /// Errors encountered during execution such as network or cache errors
+  ClientException clientException;
+}
+```
+
+Example usage:
+
+```dart
+if (result.hasException) {
+    if (result.exception.clientException is NetworkException) {
+        // handle network issues, maybe
+    }
+    return Text(result.exception.toString())
+}
 ```
 
 ### Subscriptions (Experimental)
@@ -502,7 +528,7 @@ import 'dart:io' show File;
 String filePath = '/aboslute/path/to/file.ext';
 final QueryResult r = await graphQLClientClient.mutate(
   MutationOptions(
-    document: uploadMutation,
+    documentNode: gql(uploadMutation),
     variables: {
       'files': [File(filePath)],
     },
@@ -516,14 +542,14 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Queries                 |    ✅     |
-| Mutations               |    ✅     |
-| Subscriptions           |    ✅     |
-| Query polling           |    ✅     |
-| In memory cache         |    ✅     |
-| Offline cache sync      |    ✅     |
-| GraphQL pload           |    ✅     |
-| Optimistic results      |    ✅     |
+| Queries                 |    ✅    |
+| Mutations               |    ✅    |
+| Subscriptions           |    ✅    |
+| Query polling           |    ✅    |
+| In memory cache         |    ✅    |
+| Offline cache sync      |    ✅    |
+| GraphQL pload           |    ✅    |
+| Optimistic results      |    ✅    |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 

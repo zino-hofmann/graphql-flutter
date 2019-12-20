@@ -1,12 +1,10 @@
-import 'package:rxdart/subjects.dart';
+import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:rxdart/subjects.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 
-// to run the example, create a file ../local.dart with the content:
-// const String YOUR_PERSONAL_ACCESS_TOKEN =
-//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 // ignore: uri_does_not_exist
 import '../local.dart';
 
@@ -75,8 +73,8 @@ class Bloc {
 
   Future<QueryResult> _mutateToggleStar(Repo repo) async {
     final MutationOptions _options = MutationOptions(
-      document:
-          repo.viewerHasStarred ? mutations.removeStar : mutations.addStar,
+      documentNode:
+          gql(repo.viewerHasStarred ? mutations.removeStar : mutations.addStar),
       variables: <String, String>{
         'starrableId': repo.id,
       },
@@ -97,7 +95,7 @@ class Bloc {
 //      fetchPolicy = FetchPolicy.cacheAndNetwork;
 //    }
     final WatchQueryOptions _options = WatchQueryOptions(
-      document: queries.readRepositories,
+      documentNode: parseString(queries.readRepositories),
       variables: <String, dynamic>{
         'nRepositories': nRepositories,
       },
@@ -110,8 +108,8 @@ class Bloc {
 
     final QueryResult result = await _client.query(_options);
 
-    if (result.hasErrors) {
-      _repoSubject.addError(result.errors);
+    if (result.hasException) {
+      _repoSubject.addError(result.exception);
       return;
     }
 

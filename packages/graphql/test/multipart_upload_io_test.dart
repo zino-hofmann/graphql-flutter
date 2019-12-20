@@ -1,5 +1,5 @@
+import 'package:gql/language.dart';
 @TestOn("vm")
-
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:http/http.dart' as http;
@@ -58,7 +58,7 @@ void main() {
         'upload with io.File instance deprecation warning',
         overridePrint((log) async {
           final MutationOptions _options = MutationOptions(
-            document: uploadMutation,
+            documentNode: parseString(uploadMutation),
             variables: <String, dynamic>{
               'files': [
                 io.File('pubspec.yaml'),
@@ -67,7 +67,7 @@ void main() {
           );
           final QueryResult r = await graphQLClientClient.mutate(_options);
 
-          expect(r.errors, isNull);
+          expect(r.exception, isNull);
           expect(r.data, isNotNull);
           expect(log, hasLength(5));
           final warningMessage = r'''

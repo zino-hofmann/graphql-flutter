@@ -3,10 +3,8 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
+import '../helpers.dart' show withGenericHandling;
 
-// to run the example, create a file ../local.dart with the content:
-// const String YOUR_PERSONAL_ACCESS_TOKEN =
-//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 // ignore: uri_does_not_exist
 import '../local.dart';
 
@@ -97,43 +95,35 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                document: queries.readRepositories,
+                documentNode: gql(queries.readRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
                 //pollInterval: 10,
               ),
-              builder: (QueryResult result, {refetch, fetchMore}) {
-                if (result.loading) {
-                  return const Center(
-                    child: CircularProgressIndicator(),
+              builder: withGenericHandling(
+                (QueryResult result, {refetch, fetchMore}) {
+                  if (result.data == null && !result.hasException) {
+                    return const Text(
+                        'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
+                  }
+
+                  // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
+                  final List<LazyCacheMap> repositories = (result.data['viewer']
+                          ['repositories']['nodes'] as List<dynamic>)
+                      .cast<LazyCacheMap>();
+
+                  return Expanded(
+                    child: ListView.builder(
+                      itemCount: repositories.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return StarrableRepository(
+                            repository: repositories[index]);
+                      },
+                    ),
                   );
-                }
-
-                if (result.hasErrors) {
-                  return Text('\nErrors: \n  ' + result.errors.join(',\n  '));
-                }
-
-                if (result.data == null && result.errors == null) {
-                  return const Text(
-                      'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
-                }
-
-                // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<LazyCacheMap> repositories = (result.data['viewer']
-                        ['repositories']['nodes'] as List<dynamic>)
-                    .cast<LazyCacheMap>();
-
-                return Expanded(
-                  child: ListView.builder(
-                    itemCount: repositories.length,
-                    itemBuilder: (BuildContext context, int index) {
-                      return StarrableRepository(
-                          repository: repositories[index]);
-                    },
-                  ),
-                );
-              },
+                },
+              ),
             ),
             ENABLE_WEBSOCKETS
                 ? Subscription<Map<String, dynamic>>(
@@ -184,7 +174,57 @@ class StarrableRepository extends StatelessWidget {
   Widget build(BuildContext context) {
     return Mutation(
       options: MutationOptions(
-        document: starred ? mutations.removeStar : mutations.addStar,
+        documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
+        update: (Cache cache, QueryResult result) {
+          if (result.hasException) {
+            print(result.exception);
+          } else {
+            final Map<String, Object> updated =
+                Map<String, Object>.from(repository)
+                  ..addAll(extractRepositoryData(result.data));
+            cache.write(typenameDataIdFromObject(updated), updated);
+          }
+        },
+        onError: (OperationException error) {
+          showDialog<AlertDialog>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(error.toString()),
+                actions: <Widget>[
+                  SimpleDialogOption(
+                    child: const Text('DISMISS'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            },
+          );
+        },
+        onCompleted: (dynamic resultData) {
+          showDialog<AlertDialog>(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(
+                  extractRepositoryData(resultData)['viewerHasStarred'] as bool
+                      ? 'Thanks for your star!'
+                      : 'Sorry you changed your mind!',
+                ),
+                actions: <Widget>[
+                  SimpleDialogOption(
+                    child: const Text('DISMISS'),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                  )
+                ],
+              );
+            },
+          );
+        },
       ),
       builder: (RunMutation toggleStar, QueryResult result) {
         return ListTile(
@@ -204,38 +244,6 @@ class StarrableRepository extends StatelessWidget {
                 'starrableId': repository['id'],
               },
               optimisticResult: expectedResult,
-            );
-          },
-        );
-      },
-      update: (Cache cache, QueryResult result) {
-        if (result.hasErrors) {
-          print(result.errors);
-        } else {
-          final Map<String, Object> updated =
-              Map<String, Object>.from(repository)
-                ..addAll(extractRepositoryData(result.data));
-          cache.write(typenameDataIdFromObject(updated), updated);
-        }
-      },
-      onCompleted: (dynamic resultData) {
-        showDialog<AlertDialog>(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text(
-                extractRepositoryData(resultData)['viewerHasStarred'] as bool
-                    ? 'Thanks for your star!'
-                    : 'Sorry you changed your mind!',
-              ),
-              actions: <Widget>[
-                SimpleDialogOption(
-                  child: const Text('DISMISS'),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                )
-              ],
             );
           },
         );

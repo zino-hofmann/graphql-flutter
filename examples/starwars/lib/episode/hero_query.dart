@@ -12,7 +12,7 @@ class HeroForEpisode extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        document: r'''
+        documentNode: gql(r'''
           query HeroForEpisode($ep: Episode!) {
             hero(episode: $ep) {
               __typename
@@ -26,25 +26,26 @@ class HeroForEpisode extends StatelessWidget {
               }
             }
           }
-        ''',
+        '''),
         variables: <String, String>{
           'ep': episodeToJson(episode),
         },
       ),
       builder: (
         QueryResult result, {
-        BoolCallback refetch,
+        Future<QueryResult> Function() refetch,
         FetchMore fetchMore,
       }) {
-        if (result.errors != null) {
-          return Text(result.errors.toString());
+        if (result.hasException) {
+          return Text(result.exception.toString());
         }
 
         if (result.loading) {
-          return Center(
-            child: const CircularProgressIndicator(),
+          return const Center(
+            child: CircularProgressIndicator(),
           );
         }
+
         return Column(
           children: <Widget>[
             Text(getPrettyJSONString(result.data)),

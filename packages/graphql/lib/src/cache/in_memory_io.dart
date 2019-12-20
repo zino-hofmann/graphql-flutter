@@ -12,13 +12,11 @@ import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/utilities/helpers.dart' show deeplyMergeLeft;
 import 'package:path/path.dart';
 
-
 class InMemoryCache implements Cache {
-
   InMemoryCache({
     this.storagePrefix = '',
   });
-  
+
   final FutureOr<String> storagePrefix;
 
   bool _writingToStorage = false;

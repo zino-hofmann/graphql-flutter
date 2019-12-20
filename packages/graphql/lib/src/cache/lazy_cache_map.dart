@@ -1,4 +1,5 @@
 import 'dart:core';
+import 'package:quiver/core.dart' show hash3;
 
 import 'package:meta/meta.dart';
 
@@ -33,6 +34,14 @@ class LazyCacheMap extends LazyDereferencingMap {
     }
     return result;
   }
+
+  int get hashCode => hash3(_data, _dereference, cacheState);
+
+  bool operator ==(Object other) =>
+      other is LazyCacheMap &&
+      other._data == _data &&
+      other._dereference == _dereference &&
+      other.cacheState == cacheState;
 }
 
 /// Unwrap a given Object that could possibly be a lazy map

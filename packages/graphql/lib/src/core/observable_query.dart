@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
@@ -75,13 +76,12 @@ class ObservableQuery {
     return false;
   }
 
-  /// Attempts to refetch, returning `true` if successful
-  bool refetch() {
+  /// Attempts to refetch, throwing error if not refetch safe
+  Future<QueryResult> refetch() {
     if (_isRefetchSafe) {
-      queryManager.refetchQuery(queryId);
-      return true;
+      return queryManager.refetchQuery(queryId);
     }
-    return false;
+    return Future<QueryResult>.error(Exception('Query is not refetch safe'));
   }
 
   bool get isRebroadcastSafe {
@@ -104,6 +104,13 @@ class ObservableQuery {
   void onListen() {
     if (_latestWasEagerlyFetched) {
       _latestWasEagerlyFetched = false;
+
+      // eager results are resolved synchronously,
+      // so we have to add them manually now that
+      // the stream is available
+      if (!controller.isClosed && latestResult != null) {
+        controller.add(latestResult);
+      }
       return;
     }
     if (options.fetchResults) {
@@ -136,9 +143,9 @@ class ObservableQuery {
     assert(fetchMoreOptions.updateQuery != null);
 
     final combinedOptions = QueryOptions(
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: FetchPolicy.noCache,
       errorPolicy: options.errorPolicy,
-      document: fetchMoreOptions.document ?? options.document,
+      documentNode: fetchMoreOptions.documentNode ?? options.documentNode,
       context: options.context,
       variables: {
         ...options.variables,
@@ -155,29 +162,39 @@ class ObservableQuery {
     QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
 
     try {
+      // combine the query with the new query, using the function provided by the user
       fetchMoreResult.data = fetchMoreOptions.updateQuery(
         latestResult.data,
         fetchMoreResult.data,
       );
       assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+      // stream the new results and rebuild
+      queryManager.addQueryResult(
+        queryId,
+        fetchMoreResult,
+        writeToCache: true,
+      );
     } catch (error) {
-      if (fetchMoreResult.hasErrors) {
+      if (fetchMoreResult.hasException) {
         // because the updateQuery failure might have been because of these errors,
         // we just add them to the old errors
-        latestResult.errors = [
-          ...(latestResult.errors ?? const []),
-          ...fetchMoreResult.errors
-        ];
-        addResult(latestResult);
+        latestResult.exception = coalesceErrors(
+          exception: latestResult.exception,
+          graphqlErrors: fetchMoreResult.exception.graphqlErrors,
+          clientException: fetchMoreResult.exception.clientException,
+        );
+
+        queryManager.addQueryResult(
+          queryId,
+          latestResult,
+          writeToCache: true,
+        );
         return;
       } else {
+        // TODO merge results OperationException
         rethrow;
       }
     }
-
-    // combine the query with the new query, using the fucntion provided by the user
-    // stream the new results and rebuild
-    addResult(fetchMoreResult);
   }
 
   /// add a result to the stream,
@@ -212,18 +229,16 @@ class ObservableQuery {
     callbacks ??= const <OnData>[];
     StreamSubscription<QueryResult> subscription;
 
-    subscription = stream.listen((QueryResult result) {
-      void handle(OnData callback) {
-        callback(result);
-      }
-
+    subscription = stream.listen((QueryResult result) async {
       if (!result.loading) {
-        callbacks.forEach(handle);
+        for (final callback in callbacks) {
+          await callback(result);
+        }
 
         queryManager.rebroadcastQueries();
 
         if (!result.optimistic) {
-          subscription.cancel();
+          await subscription.cancel();
           _onDataSubscriptions.remove(subscription);
 
           if (_onDataSubscriptions.isEmpty) {

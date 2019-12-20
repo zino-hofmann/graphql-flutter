@@ -1,3 +1,4 @@
+import 'package:gql/language.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
@@ -77,7 +78,7 @@ void main() {
             '\r\ncontent-disposition: form-data; name="operations"\r\n\r\n');
         // operationName of unamed operations is "UNNAMED/" +  document.hashCode.toString()
         expectContinuationString(bodyBytes,
-            r'{"operationName":null,"variables":{"files":[null,null]},"query":"    mutation($files: [Upload!]!) {\n      multipleUpload(files: $files) {\n        id\n        filename\n        mimetype\n        path\n      }\n    }\n    "}');
+            r'{"operationName":null,"variables":{"files":[null,null]},"query":"mutation($files: [Upload!]!) {\n  multipleUpload(files: $files) {\n    id\n    filename\n    mimetype\n    path\n  }\n}"}');
         expectContinuationString(bodyBytes, '\r\n--');
         expectContinuationString(bodyBytes, boundary);
         expectContinuationString(bodyBytes,
@@ -124,7 +125,7 @@ void main() {
       });
 
       final MutationOptions _options = MutationOptions(
-        document: uploadMutation,
+        documentNode: parseString(uploadMutation),
         variables: <String, dynamic>{
           'files': [
             http.MultipartFile.fromBytes(
@@ -144,7 +145,7 @@ void main() {
       );
       final QueryResult r = await graphQLClientClient.mutate(_options);
 
-      expect(r.errors, isNull);
+      expect(r.exception, isNull);
       expect(r.data, isNotNull);
 
       final http.MultipartRequest request =

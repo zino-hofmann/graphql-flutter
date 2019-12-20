@@ -1,7 +1,7 @@
 name: graphql
 description: A stand-alone GraphQL client for Dart, bringing all the features from
   a modern GraphQL client to one easy to use package.
-version: 2.1.0
+version: 2.1.1-beta.5
 authors:
 - Eus Dima <eus@zinoapp.com>
 - Zino Hofmann <zino@zinoapp.com>
@@ -15,13 +15,14 @@ dependencies:
   path: ^1.6.2
   http_parser: ^3.1.3
   uuid_enhanced: ^3.0.2
-  graphql_parser: ^1.1.3
+  gql: ^0.11.1
   rxdart: ^0.22.0
   websocket: ^0.0.5
+  quiver: '>=2.0.0 <3.0.0'
 dev_dependencies:
-  pedantic: <=1.7.99
+  pedantic: ^1.8.0+1
   mockito: ^4.0.0
   test: ^1.5.3
-  test_coverage: ^0.2.0
+  test_coverage: ^0.3.0+1
 environment:
   sdk: '>=2.2.2 <3.0.0'

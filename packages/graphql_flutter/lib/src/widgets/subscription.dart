@@ -1,10 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:connectivity/connectivity.dart';
 import 'package:flutter/widgets.dart';
-
+import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
-
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef OnSubscriptionCompleted = void Function();
@@ -43,11 +44,14 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   dynamic _error;
   StreamSubscription<FetchResult> _subscription;
 
+  ConnectivityResult _currentConnectivityResult;
+  StreamSubscription<ConnectivityResult> _networkSubscription;
+
   void _initSubscription() {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
     final Operation operation = Operation(
-      document: widget.query,
+      documentNode: parseString(widget.query),
       variables: widget.variables,
       operationName: widget.operationName,
     );
@@ -74,6 +78,14 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   }
 
   @override
+  void initState() {
+    _networkSubscription = Connectivity().onConnectivityChanged.listen(
+        (ConnectivityResult result) async => await _onNetworkChange(result));
+
+    super.initState();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _initSubscription();
@@ -93,6 +105,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   @override
   void dispose() {
     _subscription?.cancel();
+    _networkSubscription?.cancel();
     super.dispose();
   }
 
@@ -115,6 +128,34 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   void _onDone() {
     if (widget.onCompleted != null) {
       widget.onCompleted();
+    }
+  }
+
+  Future _onNetworkChange(ConnectivityResult result) async {
+    //if from offline to online
+    if (_currentConnectivityResult == ConnectivityResult.none &&
+        (result == ConnectivityResult.mobile ||
+            result == ConnectivityResult.wifi)) {
+      _currentConnectivityResult = result;
+
+      // android connectivitystate cannot be trusted
+      // validate with nslookup
+      if (Platform.isAndroid) {
+        try {
+          final nsLookupResult = await InternetAddress.lookup('google.com');
+          if (nsLookupResult.isNotEmpty &&
+              nsLookupResult[0].rawAddress.isNotEmpty) {
+            _initSubscription();
+          }
+          // on exception -> no real connection, set current state to none
+        } on SocketException catch (_) {
+          _currentConnectivityResult = ConnectivityResult.none;
+        }
+      } else {
+        _initSubscription();
+      }
+    } else {
+      _currentConnectivityResult = result;
     }
   }
 
