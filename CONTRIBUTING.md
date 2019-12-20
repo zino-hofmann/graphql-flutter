@@ -125,7 +125,7 @@ from the main (upstream) repository:
   git push origin --delete my-fix-branch
   ```
 
-- Check out the beta branch:
+- Check out the master branch:
 
   ```shell
   git checkout master -f
