@@ -12,7 +12,7 @@ import 'package:test/test.dart';
 import 'helpers.dart';
 
 void main() {
-  group('SocketClient', () {
+  group('SocketClient without payload', () {
     SocketClient socketClient;
     setUp(overridePrint((log) {
       socketClient = SocketClient(
@@ -118,4 +118,58 @@ void main() {
       );
     });
   }, tags: "integration");
+
+  group('SocketClient with const payload', () {
+    SocketClient socketClient;
+    const initPayload = {'token': 'mytoken'};
+
+    setUp(overridePrint((log) {
+      socketClient = SocketClient(
+        'ws://echo.websocket.org',
+        config: SocketClientConfig(initPayload: initPayload),
+      );
+    }));
+
+    tearDown(overridePrint((log) async {
+      await socketClient.dispose();
+    }));
+
+    test('connection', () async {
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.CONNECTED)
+          .first;
+
+      await expectLater(socketClient.socket.stream.map((s) {
+        return jsonDecode(s)['payload'];
+      }), emits(initPayload));
+    });
+  });
+
+  group('SocketClient with future payload', () {
+    SocketClient socketClient;
+    const initPayload = {'token': 'mytoken'};
+
+    setUp(overridePrint((log) {
+      socketClient = SocketClient(
+        'ws://echo.websocket.org',
+        config: SocketClientConfig(
+          initPayload: Future.delayed(Duration(seconds: 3), () => initPayload),
+        ),
+      );
+    }));
+
+    tearDown(overridePrint((log) async {
+      await socketClient.dispose();
+    }));
+
+    test('connection', () async {
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.CONNECTED)
+          .first;
+
+      await expectLater(socketClient.socket.stream.map((s) {
+        return jsonDecode(s)['payload'];
+      }), emits(initPayload));
+    });
+  });
 }
