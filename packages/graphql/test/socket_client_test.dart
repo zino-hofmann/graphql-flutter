@@ -37,50 +37,40 @@ void main() {
       );
     });
     test('connection with non future initPayload', () async {
-      const initPayload = {
-        'token': 'mytoken'
-      };
+      const initPayload = {'token': 'mytoken'};
 
-      socketClient = SocketClient(
-        'ws://echo.websocket.org',
-        protocols: null,
-        randomBytesForUuid: Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
-        config: SocketClientConfig(initPayload: initPayload)
-      );
+      socketClient = SocketClient('ws://echo.websocket.org',
+          protocols: null,
+          randomBytesForUuid: Uint8List.fromList(
+              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+          config: SocketClientConfig(initPayload: initPayload));
 
       await socketClient.connectionState
-        .where((state) => state == SocketConnectionState.CONNECTED)
-        .first;
+          .where((state) => state == SocketConnectionState.CONNECTED)
+          .first;
 
-      await expectLater(
-        socketClient.socket.stream.map((s) {
-          return jsonDecode(s)['payload'];
-        }),
-        emits(initPayload)
-      );
+      await expectLater(socketClient.socket.stream.map((s) {
+        return jsonDecode(s)['payload'];
+      }), emits(initPayload));
     });
     test('connection with future initPayload', () async {
-      const initPayload = {
-        'token': 'mytoken'
-      };
+      const initPayload = {'token': 'mytoken'};
 
-      socketClient = SocketClient(
-        'ws://echo.websocket.org',
-        protocols: null,
-        randomBytesForUuid: Uint8List.fromList([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
-        config: SocketClientConfig(initPayload: Future.delayed(Duration(seconds: 3), () => initPayload))
-      );
+      socketClient = SocketClient('ws://echo.websocket.org',
+          protocols: null,
+          randomBytesForUuid: Uint8List.fromList(
+              [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+          config: SocketClientConfig(
+              initPayload:
+                  Future.delayed(Duration(seconds: 3), () => initPayload)));
 
       await socketClient.connectionState
-        .where((state) => state == SocketConnectionState.CONNECTED)
-        .first;
+          .where((state) => state == SocketConnectionState.CONNECTED)
+          .first;
 
-      await expectLater(
-        socketClient.socket.stream.map((s) {
-          return jsonDecode(s)['payload'];
-        }),
-        emits(initPayload)
-      );
+      await expectLater(socketClient.socket.stream.map((s) {
+        return jsonDecode(s)['payload'];
+      }), emits(initPayload));
     });
     test('subscription data', () async {
       final payload = SubscriptionRequest(
