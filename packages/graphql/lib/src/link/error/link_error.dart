@@ -14,11 +14,13 @@ class ErrorResponse {
     this.operation,
     this.fetchResult,
     this.exception,
+    this.forward,
   });
 
   Operation operation;
   FetchResult fetchResult;
   OperationException exception;
+  NextLink forward;
 }
 
 class ErrorLink extends Link {
@@ -39,6 +41,7 @@ class ErrorLink extends Link {
                     operation: operation,
                     fetchResult: fetchResult,
                     exception: OperationException(graphqlErrors: errors),
+                    forward: forward,
                   );
 
                   errorHandler(response);
@@ -50,6 +53,7 @@ class ErrorLink extends Link {
                   exception: OperationException(
                     clientException: translateFailure(error),
                   ),
+                  forward: forward,
                 );
 
                 errorHandler(response);
