@@ -16,7 +16,7 @@ class InMemoryCache implements Cache {
     masterKey = storagePrefix ?? '' + '_graphql_cache';
   }
 
-  final String storagePrefix;
+  final FutureOr<String> storagePrefix;
   String masterKey;
 
   @protected
