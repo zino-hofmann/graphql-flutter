@@ -11,7 +11,7 @@ stub.NetworkException translateNetworkFailure(dynamic failure) {
       message: failure.message,
       uri: Uri(
         scheme: 'http',
-        host: failure.address.host,
+        host: failure.address?.host,
         port: failure.port,
       ),
     );
