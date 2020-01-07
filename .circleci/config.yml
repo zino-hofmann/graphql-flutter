@@ -122,7 +122,7 @@ jobs:
       - checkout
       - run:
           name: Generate release tags
-          command: npx -p @semantic-release/changelog -p @semantic-release/git -p semantic-release@16.0.0-beta.46 semantic-release
+          command: npx -p @semantic-release/changelog -p @semantic-release/git@7.1.0-beta.11 -p semantic-release@16.0.0-beta.46 semantic-release
   sync_with_beta:
     docker: *node_environment
     steps:
@@ -151,7 +151,7 @@ jobs:
           command: |
             cd packages/graphql
 
-            VERSION=${CIRCLE_TAG%"@beta"}
+            VERSION=${CIRCLE_TAG}
             VERSION=${VERSION#"v"}
 
             # patch version
@@ -163,7 +163,7 @@ jobs:
           command: |
             cd packages/graphql_flutter
 
-            VERSION=${CIRCLE_TAG%"@beta"}
+            VERSION=${CIRCLE_TAG}
             VERSION=${VERSION#"v"}
 
             # patch version
@@ -178,7 +178,7 @@ jobs:
       - run:
           name: Bump version numbers
           command: |
-            if [[ $CIRCLE_TAG =~ ^.*@beta.*$ ]]; then BRANCH=beta; else BRANCH=master; fi 
+            if [[ $CIRCLE_TAG =~ ^.*beta.*$ ]]; then BRANCH=beta; else BRANCH=master; fi 
             git checkout $BRANCH
 
             git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
