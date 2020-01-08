@@ -1,3 +1,18 @@
+# [3.0.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v3.0.0-beta.1...v3.0.0-beta.2) (2020-01-08)
+
+
+### Bug Fixes
+
+* **packaging:** update rxdart and sdk min versions ([1980f22](https://github.com/zino-app/graphql-flutter/commit/1980f226183d0734a39f5f65efd6d1ef11accdbb)), closes [#497](https://github.com/zino-app/graphql-flutter/issues/497)
+
+
+### BREAKING CHANGES
+
+* **packaging:** projects dependent on old sdk/rxdart versions wouldn't build,
+there is a way to override rxdart dependency with dependency_override
+(we don't use Observable features in these places, so it should be compatible with older version)
+there is no way to override min sdk version outside of a project
+
 # [3.0.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v2.1.0...v3.0.0-beta.1) (2019-12-22)
 
 
