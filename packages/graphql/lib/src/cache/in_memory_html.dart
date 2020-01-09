@@ -13,7 +13,7 @@ class InMemoryCache implements Cache {
   InMemoryCache({
     this.storagePrefix = '',
   }) {
-    masterKey = storagePrefix.toString() ?? '' + '_graphql_cache';
+    masterKey = storagePrefix.toString() ?? '_graphql_cache';
   }
 
   final FutureOr<String> storagePrefix;
