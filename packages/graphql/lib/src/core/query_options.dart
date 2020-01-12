@@ -69,6 +69,8 @@ class Policies {
         overrides?.fetch ?? fetch,
         overrides?.error ?? error,
       );
+  operator ==(Object other) =>
+      other is Policies && fetch == other.fetch && error == other.error;
 }
 
 /// Base options.
@@ -308,6 +310,18 @@ class WatchQueryOptions extends QueryOptions {
     // compare variables last, because maps take more time
     return areDifferentVariables(a.variables, b.variables);
   }
+
+  WatchQueryOptions copy() => WatchQueryOptions(
+        documentNode: documentNode,
+        variables: variables,
+        fetchPolicy: fetchPolicy,
+        errorPolicy: errorPolicy,
+        optimisticResult: optimisticResult,
+        pollInterval: pollInterval,
+        fetchResults: fetchResults,
+        eagerlyFetchResults: eagerlyFetchResults,
+        context: context,
+      );
 }
 
 /// merge fetchMore result data with earlier result data
