@@ -69,9 +69,17 @@ Before you submit your Pull Request (PR) consider the following guidelines:
 3. Fork the `zino-app/graphql-flutter` repo.
 4. Make your changes in a new git branch:
 
+    - For fixes bug fixes:
+
    ```shell
-   git checkout -b my-fix-branch beta
+   git checkout -b my-fix-branch master
    ```
+
+    - For new features:
+    
+     ```shell
+    git checkout -b my-fix-branch beta
+    ```
 
 5. Create your patch, **including appropriate test cases**.
 6. Add and Update the documentation for your feature.
@@ -92,7 +100,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
     git push origin my-fix-branch
     ```
 
-10. In GitHub, send a pull request to `graphql-flutter:beta`.
+10. In GitHub, send a pull request to `graphql-flutter:master` for fixes and `graphql-flutter:beta` for new features.
 
 - If we suggest changes then:
 
@@ -100,7 +108,7 @@ Before you submit your Pull Request (PR) consider the following guidelines:
   - Rebase your branch and force push to your GitHub repository (this will update your Pull Request):
 
     ```shell
-    git rebase beta -i
+    git rebase master -i
     git push -f
     ```
 
@@ -117,10 +125,10 @@ from the main (upstream) repository:
   git push origin --delete my-fix-branch
   ```
 
-- Check out the beta branch:
+- Check out the master branch:
 
   ```shell
-  git checkout beta -f
+  git checkout master -f
   ```
 
 - Delete the local branch:
@@ -129,10 +137,10 @@ from the main (upstream) repository:
   git branch -D my-fix-branch
   ```
 
-- Update your beta with the latest upstream version:
+- Update your master with the latest upstream version:
 
   ```shell
-  git pull --ff upstream beta
+  git pull --ff upstream master
   ```
 
 ## <a name="rules"></a> Coding Rules

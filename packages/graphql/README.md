@@ -27,6 +27,10 @@ And then import it inside your dart code:
 import 'package:graphql/client.dart';
 ```
 
+## Migration Guide
+
+Find the migration from version 2 to version 3 [here](./../../changelog-v2-v3.md).
+
 ### Parsing at build-time
 
 To parse documents at build-time use `ast_builder` from
