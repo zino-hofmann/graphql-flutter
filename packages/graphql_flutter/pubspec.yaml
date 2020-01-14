@@ -1,20 +1,20 @@
 name: graphql_flutter
 description: A GraphQL client for Flutter, bringing all the features from a modern
   GraphQL client to one easy to use package.
-version: 2.1.1-beta.5
+version: 3.0.0
 authors:
 - Eus Dima <eus@zinoapp.com>
 - Zino Hofmann <zino@zinoapp.com>
 - Michael Joseph Rosenthal <rosenthalm93@gmail.com>
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
 dependencies:
-  graphql: ^2.1.1-beta.5
+  graphql: ^3.0.0
   flutter:
     sdk: flutter
   meta: ^1.1.6
   path: ^1.6.2
   path_provider: ^1.1.0
-  rxdart: ^0.22.0
+  rxdart: ^0.23.1
   connectivity: ^0.4.4
 dev_dependencies:
   pedantic: ^1.8.0+1
@@ -23,4 +23,4 @@ dev_dependencies:
     sdk: flutter
   test: ^1.5.3
 environment:
-  sdk: '>=2.2.2 <3.0.0'
+  sdk: '>=2.6.0 <3.0.0'

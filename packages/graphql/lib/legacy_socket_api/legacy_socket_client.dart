@@ -282,7 +282,7 @@ class SocketClient {
         config.queryAndMutationTimeout != null;
 
     response.onListen = () {
-      final Observable<SocketConnectionState>
+      final Stream<SocketConnectionState>
           waitForConnectedStateWithoutTimeout = _connectionStateController
               .startWith(
                   waitForConnection ? null : SocketConnectionState.CONNECTED)
@@ -290,7 +290,7 @@ class SocketClient {
                   state == SocketConnectionState.CONNECTED)
               .take(1);
 
-      final Observable<SocketConnectionState> waitForConnectedState = addTimeout
+      final Stream<SocketConnectionState> waitForConnectedState = addTimeout
           ? waitForConnectedStateWithoutTimeout.timeout(
               config.queryAndMutationTimeout,
               onTimeout: (EventSink<SocketConnectionState> event) {

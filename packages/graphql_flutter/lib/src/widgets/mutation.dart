@@ -35,16 +35,33 @@ class MutationState extends State<Mutation> {
   GraphQLClient client;
   ObservableQuery observableQuery;
 
-  WatchQueryOptions get _options => WatchQueryOptions(
-        // ignore: deprecated_member_use
-        document: widget.options.document,
-        documentNode: widget.options.documentNode,
-        variables: widget.options.variables,
-        fetchPolicy: widget.options.fetchPolicy,
-        errorPolicy: widget.options.errorPolicy,
-        fetchResults: false,
-        context: widget.options.context,
-      );
+  WatchQueryOptions __cachedOptions;
+
+  WatchQueryOptions get _providedOptions {
+    final _options = WatchQueryOptions(
+      // ignore: deprecated_member_use
+      document: widget.options.document,
+      documentNode: widget.options.documentNode,
+      variables: widget.options.variables,
+      fetchPolicy: widget.options.fetchPolicy,
+      errorPolicy: widget.options.errorPolicy,
+      fetchResults: false,
+      context: widget.options.context,
+    );
+    __cachedOptions ??= _options;
+    return _options;
+  }
+
+  /// sets new options, returning true if they didn't equal the old
+  bool _setNewOptions() {
+    final _cached = __cachedOptions;
+    final _new = _providedOptions;
+    if (_cached == null || !_new.areEqualTo(_cached)) {
+      __cachedOptions = _new;
+      return true;
+    }
+    return false;
+  }
 
   // TODO is it possible to extract shared logic into mixin
   void _initQuery() {
@@ -52,7 +69,7 @@ class MutationState extends State<Mutation> {
     assert(client != null);
 
     observableQuery?.close();
-    observableQuery = client.watchQuery(_options);
+    observableQuery = client.watchQuery(_providedOptions.copy());
   }
 
   @override
@@ -66,7 +83,7 @@ class MutationState extends State<Mutation> {
     super.didUpdateWidget(oldWidget);
 
     // TODO @micimize - investigate why/if this was causing issues
-    if (!observableQuery.options.areEqualTo(_options)) {
+    if (_setNewOptions()) {
       _initQuery();
     }
   }
