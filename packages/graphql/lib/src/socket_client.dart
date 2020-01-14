@@ -41,9 +41,12 @@ class SocketClientConfig {
 
   /// The initial payload that will be sent to the server upon connection.
   /// Can be null, but must be a valid json structure if provided.
-  final dynamic initPayload;
+  final FutureOr<dynamic> initPayload;
 
-  InitOperation get initOperation => InitOperation(initPayload);
+  Future<InitOperation> get initOperation async {
+    dynamic payload = await initPayload;
+    return InitOperation(payload);
+  }
 }
 
 enum SocketConnectionState { NOT_CONNECTED, CONNECTING, CONNECTED }
@@ -105,7 +108,7 @@ class SocketClient {
       );
       _connectionStateController.value = SocketConnectionState.CONNECTED;
       print('Connected to websocket.');
-      _write(config.initOperation);
+      _write(await config.initOperation);
 
       _messageStream =
           _socket.stream.map<GraphQLSocketMessage>(_parseSocketMessage);
@@ -259,8 +262,8 @@ class SocketClient {
         config.queryAndMutationTimeout != null;
 
     final onListen = () {
-      final Stream<SocketConnectionState>
-          waitForConnectedStateWithoutTimeout = _connectionStateController
+      final Stream<SocketConnectionState> waitForConnectedStateWithoutTimeout =
+          _connectionStateController
               .startWith(
                   waitForConnection ? null : SocketConnectionState.CONNECTED)
               .where((SocketConnectionState state) =>
