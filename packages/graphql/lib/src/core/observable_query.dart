@@ -123,11 +123,15 @@ class ObservableQuery {
         queryManager.fetchQueryAsMultiSourceResult(queryId, options);
     latestResult ??= allResults.eagerResult;
 
-    // if onData callbacks have been registered,
-    // they are waited on by default
-    lifecycle = _onDataSubscriptions.isNotEmpty
-        ? QueryLifecycle.SIDE_EFFECTS_PENDING
-        : QueryLifecycle.PENDING;
+    if (allResults.networkResult != null) {
+      // if onData callbacks have been registered,
+      // they are waited on by default
+      lifecycle = _onDataSubscriptions.isNotEmpty
+          ? QueryLifecycle.SIDE_EFFECTS_PENDING
+          : QueryLifecycle.PENDING;
+    } else if (allResults.eagerResult != null) {
+      lifecycle = QueryLifecycle.COMPLETED;
+    }
 
     if (options.pollInterval != null && options.pollInterval > 0) {
       startPolling(options.pollInterval);
