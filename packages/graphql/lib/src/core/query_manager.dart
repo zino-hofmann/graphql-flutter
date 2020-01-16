@@ -219,7 +219,14 @@ class QueryManager {
   }
 
   Future<QueryResult> refetchQuery(String queryId) {
-    final WatchQueryOptions options = queries[queryId].options;
+    WatchQueryOptions options = queries[queryId].options;
+    if (options.fetchPolicy == FetchPolicy.cacheFirst) {
+      options = options.copy()
+        ..policies = Policies(
+          fetch: FetchPolicy.cacheAndNetwork,
+          error: options.errorPolicy,
+        );
+    }
     return fetchQuery(queryId, options);
   }
 
