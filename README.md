@@ -35,6 +35,10 @@ Here are some examples you can follow:
 1. [Starwars Example](./examples/starwars)
 2. [`flutter_bloc` example](./examples/flutter_bloc)
 
+## Articles and videos
+
+1. [Ultimate toolchain to work with GraphQL in Flutter](https://medium.com/@v.ditsyak/ultimate-toolchain-to-work-with-graphql-in-flutter-13aef79c6484)
+
 ## Roadmap
 
 This is currently our roadmap, please feel free to request additions/changes.
