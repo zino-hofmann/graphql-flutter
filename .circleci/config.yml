@@ -122,7 +122,7 @@ jobs:
       - checkout
       - run:
           name: Generate release tags
-          command: npx -p @semantic-release/changelog -p @semantic-release/git semantic-release
+          command: npx -p semantic-release -p @semantic-release/changelog -p @semantic-release/git semantic-release
   sync_with_beta:
     docker: *node_environment
     steps:
