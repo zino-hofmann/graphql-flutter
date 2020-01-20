@@ -45,6 +45,10 @@ Now inside your Dart code, you can import it.
 import 'package:graphql_flutter/graphql_flutter.dart';
 ```
 
+## Migration Guide
+
+Find the migration from version 2 to version 3 [here](./../../changelog-v2-v3.md).
+
 ## Usage
 
 To use the client it first needs to be initialized with a link and cache. For this example, we will be using an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can concatenate the `AuthLink`, it resolves the credentials using a future, so you can authenticate asynchronously.
@@ -542,14 +546,14 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Queries                 |    ✅    |
-| Mutations               |    ✅    |
-| Subscriptions           |    ✅    |
-| Query polling           |    ✅    |
-| In memory cache         |    ✅    |
-| Offline cache sync      |    ✅    |
-| GraphQL pload           |    ✅    |
-| Optimistic results      |    ✅    |
+| Queries                 |    ✅     |
+| Mutations               |    ✅     |
+| Subscriptions           |    ✅     |
+| Query polling           |    ✅     |
+| In memory cache         |    ✅     |
+| Offline cache sync      |    ✅     |
+| GraphQL pload           |    ✅     |
+| Optimistic results      |    ✅     |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 
