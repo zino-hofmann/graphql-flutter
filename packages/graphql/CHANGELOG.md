@@ -1,3 +1,10 @@
+## [3.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.0...v3.0.1-beta.1) (2020-01-21)
+
+
+### Bug Fixes
+
+* **client:** translateNetworkFailure when no route to host ([e8b6322](https://github.com/zino-app/graphql-flutter/commit/e8b6322cc537df8cbc829be0f6182bdfdf6d0779))
+
 # [3.0.0](https://github.com/zino-app/graphql-flutter/compare/v2.1.0...v3.0.0) (2020-01-13)
 
 
