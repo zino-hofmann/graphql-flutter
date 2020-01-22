@@ -126,7 +126,7 @@ void main() {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         'ws://echo.websocket.org',
-        config: SocketClientConfig(initPayload: initPayload),
+        config: SocketClientConfig(initPayload: () => initPayload),
       );
     }));
 
@@ -153,7 +153,10 @@ void main() {
       socketClient = SocketClient(
         'ws://echo.websocket.org',
         config: SocketClientConfig(
-          initPayload: Future.delayed(Duration(seconds: 3), () => initPayload),
+          initPayload: () async {
+            await Future.delayed(Duration(seconds: 3));
+            return initPayload;
+          },
         ),
       );
     }));
