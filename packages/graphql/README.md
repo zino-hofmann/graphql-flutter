@@ -18,7 +18,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql: ^2.0.0
+  graphql: ^3.0.0
 ```
 
 And then import it inside your dart code:
