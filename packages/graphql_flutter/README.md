@@ -36,7 +36,7 @@ First, depends on the library by adding this to your packages `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^2.0.0
+  graphql_flutter: ^3.0.0
 ```
 
 Now inside your Dart code, you can import it.
