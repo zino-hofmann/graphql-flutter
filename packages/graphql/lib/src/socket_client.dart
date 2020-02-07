@@ -12,6 +12,13 @@ import 'package:graphql/src/websocket/messages.dart';
 
 typedef GetInitPayload = FutureOr<dynamic> Function();
 
+class SubscriptionListener {
+  Function callback;
+  bool hasBeenTriggered = false;
+
+  SubscriptionListener(this.callback, this.hasBeenTriggered);
+}
+
 class SocketClientConfig {
   const SocketClientConfig({
     this.autoReconnect = true,
@@ -84,7 +91,8 @@ class SocketClient {
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
 
-  final HashMap<String, Function> _subscriptionInitializers = HashMap();
+  final HashMap<String, SubscriptionListener> _subscriptionInitializers =
+      HashMap();
   bool _connectionWasLost = false;
 
   Timer _reconnectTimer;
@@ -150,8 +158,8 @@ class SocketClient {
           });
 
       if (_connectionWasLost) {
-        for (Function callback in _subscriptionInitializers.values) {
-          callback();
+        for (SubscriptionListener s in _subscriptionInitializers.values) {
+          s.callback();
         }
 
         _connectionWasLost = false;
@@ -175,6 +183,7 @@ class SocketClient {
     }
 
     _connectionWasLost = true;
+    _subscriptionInitializers.values.forEach((s) => s.hasBeenTriggered = false);
 
     if (_connectionStateController.value !=
         SocketConnectionState.NOT_CONNECTED) {
@@ -344,7 +353,10 @@ class SocketClient {
             .listen(
                 (GraphQLSocketMessage message) => response.addError(message));
 
-        _write(StartOperation(id, payload));
+        if (!_subscriptionInitializers[id].hasBeenTriggered) {
+          _write(StartOperation(id, payload));
+          _subscriptionInitializers[id].hasBeenTriggered = true;
+        }
       });
     };
 
@@ -360,7 +372,7 @@ class SocketClient {
       }
     };
 
-    _subscriptionInitializers[id] = onListen;
+    _subscriptionInitializers[id] = SubscriptionListener(onListen, false);
 
     return response.stream;
   }

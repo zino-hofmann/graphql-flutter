@@ -165,6 +165,7 @@ class SubscriptionData extends GraphQLSocketMessage {
 
   @override
   Map<String, dynamic> toJson() => <String, dynamic>{
+        'id': id,
         'type': type,
         'data': data,
         'errors': errors,
