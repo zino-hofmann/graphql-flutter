@@ -1,3 +1,10 @@
+## [3.0.1-beta.2](https://github.com/zino-app/graphql-flutter/compare/v3.0.1-beta.1...v3.0.1-beta.2) (2020-02-14)
+
+
+### Bug Fixes
+
+* **client:** Throw a ClientException on non-json responses, to be ([7d538e1](https://github.com/zino-app/graphql-flutter/commit/7d538e16dd626d2ff7c4f963031ff6c825f24269)), closes [#552](https://github.com/zino-app/graphql-flutter/issues/552)
+
 ## [3.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.0...v3.0.1-beta.1) (2020-01-21)
 
 
