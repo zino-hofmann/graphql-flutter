@@ -1,10 +1,13 @@
 import 'dart:io' show stdout, stderr, exit;
 
 import 'package:args/args.dart';
+import 'package:gql_http_link/gql_http_link.dart';
+import 'package:gql_link/gql_link.dart';
 import 'package:graphql/client.dart';
 
 import './graphql_operation/mutations/mutations.dart';
 import './graphql_operation/queries/readRepositories.dart';
+
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
@@ -15,16 +18,12 @@ ArgResults argResults;
 
 // client - create a graphql client
 GraphQLClient client() {
-  final HttpLink _httpLink = HttpLink(
-    uri: 'https://api.github.com/graphql',
+  final Link _link = HttpLink(
+    'https://api.github.com/graphql',
+    defaultHeaders: {
+      'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    },
   );
-
-  final AuthLink _authLink = AuthLink(
-    // ignore: undefined_identifier
-    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-  );
-
-  final Link _link = _authLink.concat(_httpLink);
 
   return GraphQLClient(
     cache: InMemoryCache(),

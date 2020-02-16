@@ -3,10 +3,7 @@ import 'dart:convert' show json;
 
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
-import 'package:graphql/src/link/http/link_http_helper_deprecated_stub.dart'
-    if (dart.library.io) 'package:graphql/src/link/http/link_http_helper_deprecated_io.dart';
 import 'package:graphql/src/utilities/get_from_ast.dart';
-import 'package:http/http.dart';
 
 class RawOperationData {
   RawOperationData({
@@ -74,20 +71,14 @@ class RawOperationData {
 
   String toKey() {
     /// SplayTreeMap is always sorted
-    final String encodedVariables =
-        json.encode(variables, toEncodable: (dynamic object) {
-      if (object is MultipartFile) {
-        return object.filename;
-      }
-      // @deprecated, backward compatible only
-      // in case the body is io.File
-      // in future release, io.File will no longer be supported
-      if (isIoFile(object)) {
-        return object.path;
-      }
-      // default toEncodable behavior
-      return object.toJson();
-    });
+    final String encodedVariables = json.encode(
+      variables,
+      toEncodable: (dynamic object) {
+        // TODO: transparently handle multipart file without introducing package:http
+        // default toEncodable behavior
+        return object.toJson();
+      },
+    );
 
     // TODO: document is being depracated, find ways for generating key
     // ignore: deprecated_member_use_from_same_package

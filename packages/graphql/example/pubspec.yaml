@@ -6,7 +6,9 @@ environment:
   sdk: ">=2.6.0 <3.0.0"
 
 dependencies:
-  args: 
+  args:
+  gql_link: ^0.2.3
+  gql_http_link: ^0.2.7
   graphql:
     path: ..
 
