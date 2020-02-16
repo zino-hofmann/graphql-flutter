@@ -70,6 +70,7 @@ class Policies {
         overrides?.fetch ?? fetch,
         overrides?.error ?? error,
       );
+
   operator ==(Object other) =>
       other is Policies && fetch == other.fetch && error == other.error;
 }
@@ -77,17 +78,13 @@ class Policies {
 /// Base options.
 class BaseOptions extends RawOperationData {
   BaseOptions({
-    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
-        String document,
-    DocumentNode documentNode,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     this.policies,
     this.context,
     this.optimisticResult,
   }) : super(
-          // ignore: deprecated_member_use_from_same_package
           document: document,
-          documentNode: documentNode,
           variables: variables,
         );
 
@@ -108,9 +105,7 @@ class BaseOptions extends RawOperationData {
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
-        String document,
-    DocumentNode documentNode,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
@@ -119,9 +114,7 @@ class QueryOptions extends BaseOptions {
     Context context,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
-          // ignore: deprecated_member_use_from_same_package
           document: document,
-          documentNode: documentNode,
           variables: variables,
           context: context,
           optimisticResult: optimisticResult,
@@ -139,9 +132,7 @@ typedef OnError = void Function(OperationException error);
 /// Mutation options
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
-        String document,
-    DocumentNode documentNode,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
@@ -151,9 +142,7 @@ class MutationOptions extends BaseOptions {
     this.onError,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
-          // ignore: deprecated_member_use_from_same_package
           document: document,
-          documentNode: documentNode,
           variables: variables,
           context: context,
         );
@@ -253,9 +242,7 @@ class MutationCallbacks {
 // ObservableQuery options
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
-    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
-        String document,
-    DocumentNode documentNode,
+    @required DocumentNode document,
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
@@ -265,9 +252,7 @@ class WatchQueryOptions extends QueryOptions {
     this.eagerlyFetchResults,
     Context context,
   }) : super(
-          // ignore: deprecated_member_use_from_same_package
           document: document,
-          documentNode: documentNode,
           variables: variables,
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -292,7 +277,7 @@ class WatchQueryOptions extends QueryOptions {
     WatchQueryOptions a,
     WatchQueryOptions b,
   ) {
-    if (a.documentNode != b.documentNode) {
+    if (a.document != b.document) {
       return true;
     }
 
@@ -313,7 +298,7 @@ class WatchQueryOptions extends QueryOptions {
   }
 
   WatchQueryOptions copy() => WatchQueryOptions(
-        documentNode: documentNode,
+        document: document,
         variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
@@ -334,33 +319,12 @@ typedef dynamic UpdateQuery(
 /// options for fetchmore operations
 class FetchMoreOptions {
   FetchMoreOptions({
-    @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
-        String document,
-    DocumentNode documentNode,
+    @required this.document,
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
-  })  : assert(
-          // ignore: deprecated_member_use_from_same_package
-          _mutuallyExclusive(document, documentNode),
-          '"document" or "documentNode" options are mutually exclusive.',
-        ),
-        assert(updateQuery != null),
-        this.documentNode =
-            // ignore: deprecated_member_use_from_same_package
-            documentNode ?? document != null ? parseString(document) : null;
+  }) : assert(updateQuery != null);
 
-  DocumentNode documentNode;
-
-  /// A string representation of [documentNode]
-  @Deprecated(
-      'The "document" option has been deprecated, use "documentNode" instead')
-  String get document => printNode(documentNode);
-
-  @Deprecated(
-      'The "document" option has been deprecated, use "documentNode" instead')
-  set document(value) {
-    documentNode = parseString(value);
-  }
+  DocumentNode document;
 
   final Map<String, dynamic> variables;
 
@@ -368,12 +332,3 @@ class FetchMoreOptions {
   /// with the result data already in the cache
   UpdateQuery updateQuery;
 }
-
-bool _mutuallyExclusive(
-  Object a,
-  Object b, {
-  bool required = false,
-}) =>
-    (!required && a == null && b == null) ||
-    (a != null && b == null) ||
-    (a == null && b != null);

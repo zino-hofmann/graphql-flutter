@@ -38,7 +38,7 @@ void query() async {
   const int nRepositories = 50;
 
   final QueryOptions options = QueryOptions(
-    documentNode: gql(readRepositories),
+    document: gql(readRepositories),
     variables: <String, dynamic>{
       'nRepositories': nRepositories,
     },
@@ -70,7 +70,7 @@ void starRepository(String repositoryID) async {
   final GraphQLClient _client = client();
 
   final MutationOptions options = MutationOptions(
-    documentNode: gql(addStar),
+    document: gql(addStar),
     variables: <String, dynamic>{
       'starrableId': repositoryID,
     },
@@ -103,7 +103,7 @@ void removeStarFromRepository(String repositoryID) async {
   final GraphQLClient _client = client();
 
   final MutationOptions options = MutationOptions(
-    documentNode: gql(removeStar),
+    document: gql(removeStar),
     variables: <String, dynamic>{
       'starrableId': repositoryID,
     },

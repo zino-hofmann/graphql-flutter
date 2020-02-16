@@ -50,7 +50,7 @@ void main() {
     group('query', () {
       test('successful query', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
-          documentNode: parseString(readRepositories),
+          document: parseString(readRepositories),
           variables: <String, dynamic>{},
         );
 
@@ -129,7 +129,7 @@ void main() {
     group('mutation', () {
       test('successful mutation', () async {
         final MutationOptions _options = MutationOptions(
-          documentNode: parseString(addStar),
+          document: parseString(addStar),
         );
 
         when(

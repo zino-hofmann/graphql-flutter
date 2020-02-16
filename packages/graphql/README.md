@@ -110,7 +110,7 @@ const String readRepositories = r'''
 
 Then create a `QueryOptions` object:
 
-> **NB:** for `documentNode` - Use our built-in help function - `gql(query)` to convert your document string to **ASTs** `documentNode`.
+> **NB:** for `document` - Use our built-in help function - `gql(query)` to convert your document string to **ASTs** `document`.
 
 In our case, we need to pass `nRepositories` variable and the document name is `readRepositories`.
 
@@ -119,7 +119,7 @@ In our case, we need to pass `nRepositories` variable and the document name is `
 const int nRepositories = 50;
 
 final QueryOptions options = QueryOptions(
-    documentNode: gql(readRepositories),
+    document: gql(readRepositories),
     variables: <String, dynamic>{
         'nRepositories': nRepositories,
     },
@@ -166,7 +166,7 @@ Then instead of the `QueryOptions`, for mutations we will `MutationOptions`, whi
 // ...
 
 final MutationOptions options = MutationOptions(
-  documentNode: gql(addStar),
+  document: gql(addStar),
   variables: <String, dynamic>{
     'starrableId': repositoryID,
   },
@@ -201,7 +201,7 @@ if (isStarred) {
 ### AST documents
 
 > We are deprecating `document` and recommend you update your application to use
-`documentNode` instead. `document` will be removed from the api in a future version.
+`document` instead. `document` will be removed from the api in a future version.
 
 For example:
 
@@ -209,7 +209,7 @@ For example:
 // ...
 
 final MutationOptions options = MutationOptions(
-  documentNode: gql(addStar),
+  document: gql(addStar),
   variables: <String, dynamic>{
     'starrableId': repositoryID,
   },
@@ -238,7 +238,7 @@ import 'package:gql/add_star.ast.g.dart' as add_star;
 // ...
 
 final MutationOptions options = MutationOptions(
-  documentNode: add_star.document,
+  document: add_star.document,
   variables: <String, dynamic>{
     'starrableId': repositoryID,
   },
