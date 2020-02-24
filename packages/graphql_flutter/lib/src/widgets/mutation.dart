@@ -5,7 +5,7 @@ import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef RunMutation = void Function(
+typedef RunMutation = MultiSourceResult Function(
   Map<String, dynamic> variables, {
   Object optimisticResult,
 });
