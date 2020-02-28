@@ -135,7 +135,7 @@ class MyApp extends StatelessWidget {
 
 #### Normalization
 
-To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache` or `OptimisticCache`:
+To enable [apollo-like normalization](https://www.apollographql.com/docs/react/caching/cache-configuration/#data-normalization), use a `NormalizedInMemoryCache` or `OptimisticCache`:
 
 ```dart
 ValueNotifier<GraphQLClient> client = ValueNotifier(
