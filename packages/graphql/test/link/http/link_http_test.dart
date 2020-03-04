@@ -183,7 +183,10 @@ void main() {
       );
 
       query.setContext({
-        'includeExtensions': true,
+        'http': {
+          'includeExtensions': true,
+          'includeQuery': true,
+        },
         'fetchOptions': {'option-1': 'option-value-1'},
         'credentials': {'credential-1': 'credential-value-1'},
         'headers': {'header-1': 'header-value-1'},
@@ -239,7 +242,9 @@ void main() {
         extensions: {'extension-1': 'extension-value-1'},
       );
       query.setContext({
-        'includeExtensions': true,
+        'http': {
+          'includeExtensions': true,
+        }
       });
 
       await execute(
@@ -254,6 +259,46 @@ void main() {
       expect(
         captured.body,
         '{"operationName":null,"variables":{},"extensions":{"extension-1":"extension-value-1"},"query":"query {\\n  \\n}"}',
+      );
+    });
+
+    test('request without query', () async {
+      when(
+        client.send(any),
+      ).thenAnswer(
+        (_) => Future.value(
+          http.StreamedResponse(
+            Stream.fromIterable(
+              [utf8.encode('{"data":{}}')],
+            ),
+            200,
+          ),
+        ),
+      );
+
+      final query = Operation(
+        documentNode: parseString('{}'),
+        extensions: {'sha256Hash': 'some-hash'},
+      );
+      query.setContext({
+        'http': {
+          'includeExtensions': true,
+          'includeQuery': false,
+        }
+      });
+
+      await execute(
+        link: link,
+        operation: query,
+      ).first;
+
+      final http.Request captured = verify(
+        client.send(captureAny),
+      ).captured.single;
+
+      expect(
+        captured.body,
+        '{"operationName":null,"variables":{},"extensions":{"sha256Hash":"some-hash"}}',
       );
     });
 

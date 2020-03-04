@@ -59,10 +59,19 @@ class HttpLink extends Link {
 
             if (context != null) {
               // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
+
+              HttpQueryOptions http;
+
+              if (context.containsKey('http')) {
+                http = HttpQueryOptions(
+                  includeExtensions:
+                      context['http']['includeExtensions'] as bool,
+                  includeQuery: context['http']['includeQuery'] as bool,
+                );
+              }
+
               contextConfig = HttpConfig(
-                http: HttpQueryOptions(
-                  includeExtensions: context['includeExtensions'] as bool,
-                ),
+                http: http,
                 options: context['fetchOptions'] as Map<String, dynamic>,
                 credentials: context['credentials'] as Map<String, dynamic>,
                 headers: context['headers'] as Map<String, String>,
