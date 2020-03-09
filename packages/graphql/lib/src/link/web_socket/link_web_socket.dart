@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/link/fetch_result.dart';
@@ -41,8 +43,8 @@ class WebSocketLink extends Link {
   }
 
   /// Connects or reconnects to the server with the specified headers.
-  void connectOrReconnect() {
-    _socketClient?.dispose();
+  void connectOrReconnect() async {
+    await _socketClient?.dispose();
     _socketClient = SocketClient(url, config: config);
   }
 
