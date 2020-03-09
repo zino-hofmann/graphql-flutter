@@ -20,10 +20,19 @@ class WebSocketLink extends Link {
     this.config = const SocketClientConfig(),
   }) : super() {
     request = _doOperation;
+
+    // initial state
+    _websocketState.sink.add(SocketConnectionState.NOT_CONNECTED);
   }
 
   final String url;
   final SocketClientConfig config;
+
+  // don't give-out access to the .sink
+  final _websocketState = StreamController<SocketConnectionState>();
+
+  /// A Stream that will send the current status of the Websocket connection
+  Stream<SocketConnectionState> get websocketState => _websocketState.stream;
 
   // cannot be final because we're changing the instance upon a header change.
   SocketClient _socketClient;
@@ -46,6 +55,10 @@ class WebSocketLink extends Link {
   void connectOrReconnect() async {
     await _socketClient?.dispose();
     _socketClient = SocketClient(url, config: config);
+
+    // subscribe to the status changes of this new socket
+    _socketClient.connectionState
+        .listen((status) => _websocketState.sink.add(status));
   }
 
   /// Disposes the underlying socket client explicitly. Only use this, if you want to disconnect from
@@ -53,5 +66,6 @@ class WebSocketLink extends Link {
   Future<void> dispose() async {
     await _socketClient?.dispose();
     _socketClient = null;
+    _websocketState.sink.add(SocketConnectionState.NOT_CONNECTED);
   }
 }
