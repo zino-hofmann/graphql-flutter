@@ -17,6 +17,8 @@ class SocketClientConfig {
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.initPayload,
+    this.onInitResponse,
+    this.onKeepAlive,
   });
 
   /// Whether to reconnect to the server after detecting connection loss.
@@ -42,6 +44,13 @@ class SocketClientConfig {
   /// The initial payload that will be sent to the server upon connection.
   /// Can be null, but must be a valid json structure if provided.
   final dynamic initPayload;
+
+  /// User-provided callback that will be called when the Server responds to the connection_init request.
+  final Function(GraphQLSocketMessage response) onInitResponse;
+
+  /// User-provided callback that will be called when the Server sends any connection_ka message.
+  /// This means that the server is still connected and is alive.
+  final Function(GraphQLSocketMessage ka) onKeepAlive;
 
   InitOperation get initOperation => InitOperation(initPayload);
 }
@@ -127,6 +136,11 @@ class SocketClient {
       _messageSubscription = _messageStream.listen(
           (dynamic data) {
             // print('data: $data');
+            if (data is ConnectionError || data is ConnectionAck) {
+              if (config.onInitResponse != null) config.onInitResponse(data);
+            } else if (data is ConnectionKeepAlive) {
+              if (config.onKeepAlive != null) config.onKeepAlive(data);
+            }
           },
           onDone: () {
             // print('done');
