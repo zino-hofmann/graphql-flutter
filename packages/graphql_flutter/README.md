@@ -128,8 +128,8 @@ See more: [Issue #209](https://github.com/zino-app/graphql-flutter/issues/209)
 
 API key, IAM, and Federated provider authorization could be accomplished through custom links, but it is not known to be supported. Anyone wanting to implement this can reference AWS' JS SDK `AuthLink` implementation.
 
-Making a custom link: [Comment on Issue 173](https://github.com/zino-app/graphql-flutter/issues/173#issuecomment-464435942)
-AWS JS SDK `auth-link.ts`: [aws-mobile-appsync-sdk-js:auth-link.ts](https://github.com/awslabs/aws-mobile-appsync-sdk-js/blob/master/packages/aws-appsync-auth-link/src/auth-link.ts)
+- Making a custom link: [Comment on Issue 173](https://github.com/zino-app/graphql-flutter/issues/173#issuecomment-464435942)
+- AWS JS SDK `auth-link.ts`: [aws-mobile-appsync-sdk-js:auth-link.ts](https://github.com/awslabs/aws-mobile-appsync-sdk-js/blob/master/packages/aws-appsync-auth-link/src/auth-link.ts)
 
 
 ### Offline Cache
