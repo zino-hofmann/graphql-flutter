@@ -320,7 +320,9 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
 
   final Map<String, dynamic> jsonResponse =
       json.decode(decodedBody) as Map<String, dynamic>;
-  final FetchResult fetchResult = FetchResult();
+  final FetchResult fetchResult = FetchResult(
+    statusCode: statusCode,
+  );
 
   if (jsonResponse['errors'] != null) {
     fetchResult.errors =
