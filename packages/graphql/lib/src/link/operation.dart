@@ -48,4 +48,10 @@ class Operation extends RawOperationData {
         documentNode,
         operationName,
       );
+
+  bool get isQuery => isOfType(
+        OperationType.query,
+        documentNode,
+        operationName,
+      );
 }
