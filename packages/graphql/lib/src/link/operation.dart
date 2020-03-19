@@ -22,6 +22,8 @@ class Operation extends RawOperationData {
     return Operation(
       documentNode: options.documentNode,
       variables: options.variables,
+      // initalize extensions - is required for APQ to work
+      extensions: {},
     );
   }
 
