@@ -263,6 +263,30 @@ final ErrorLink errorLink = ErrorLink(errorHandler: (ErrorResponse response) {
 });
 ```
 
+### `PersistedQueriesLink`
+
+To improve performance you can make use of a concept introduced by [Apollo](https://www.apollographql.com/) called [Automatic persisted queries](https://www.apollographql.com/docs/apollo-server/performance/apq/) (or short "APQ") to send smaller requests and even enabled CDN caching for your GraphQL API. 
+
+**ATTENTION:** This also requires you to have a GraphQL server that supports APQ, like [Apollo's GraphQL Server](https://www.apollographql.com/docs/apollo-server/) and will only work for queries (but not for mutations or subscriptions).
+
+
+You can than use it simply by prepending a `PersistedQueriesLink` to your normal `HttpLink`:
+
+
+```dart
+final PersistedQueriesLink _apqLink = PersistedQueriesLink(
+  // To enable GET queries for the first load to allow for CDN caching
+  useGETForHashedQueries: true,
+);
+
+final HttpLink _httpLink = HttpLink(
+  uri: 'https://api.url/graphql',
+);
+
+final Link _link = _apqLink.concat(_httpLink);
+```
+
+
 [build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
 [build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
 [coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg?style=flat-square
