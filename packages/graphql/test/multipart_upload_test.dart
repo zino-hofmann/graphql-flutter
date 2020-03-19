@@ -151,7 +151,7 @@ void main() {
       final http.MultipartRequest request =
           verify(mockHttpClient.send(captureAny)).captured.first
               as http.MultipartRequest;
-      expect(request.method, 'post');
+      expect(request.method, 'POST');
       expect(request.url.toString(), 'http://localhost:3001/graphql');
       expect(request.headers['accept'], '*/*');
       expect(
