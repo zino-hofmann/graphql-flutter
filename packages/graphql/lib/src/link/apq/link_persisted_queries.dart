@@ -121,8 +121,6 @@ class PersistedQueriesLink extends Link {
         }
 
         subscription = _attachListener(controller, forward(operation), retry);
-        // await subscription;
-        // await controller.close();
       }
 
       controller = StreamController<FetchResult>(onListen: onListen);
