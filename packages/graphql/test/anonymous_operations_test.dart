@@ -148,7 +148,7 @@ void main() {
         final http.Request request = verify(mockHttpClient.send(captureAny))
             .captured
             .first as http.Request;
-        expect(request.method, 'post');
+        expect(request.method, 'POST');
         expect(request.url.toString(), 'https://api.github.com/graphql');
         expect(
           request.headers,
