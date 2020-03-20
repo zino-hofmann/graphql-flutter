@@ -37,13 +37,3 @@ class HttpConfig {
   Map<String, dynamic> credentials;
   Map<String, String> headers;
 }
-
-class HttpHeadersAndBody {
-  HttpHeadersAndBody({
-    this.headers,
-    this.body,
-  });
-
-  final Map<String, String> headers;
-  final Map<String, dynamic> body;
-}
