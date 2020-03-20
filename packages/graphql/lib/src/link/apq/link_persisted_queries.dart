@@ -12,14 +12,21 @@ import 'package:graphql/src/link/fetch_result.dart';
 
 final VERSION = 1;
 
+typedef QueryHashGenerator = String Function(DocumentNode query);
+typedef DisableChecker = bool Function(ErrorResponse error);
+
 class PersistedQueriesLink extends Link {
 
   bool _supportsPersistedQueries = true;
 
   final bool useGETForHashedQueries;
+  final QueryHashGenerator queryHasher;
+  final DisableChecker disablChecker;
 
   PersistedQueriesLink({
     this.useGETForHashedQueries = true,
+    this.queryHasher,
+    this.disablChecker,
   }) : super() {
     this.request = (Operation operation, [NextLink forward]) {
       if (forward == null) {
@@ -130,10 +137,17 @@ class PersistedQueriesLink extends Link {
   }
 
   _getQueryHash(DocumentNode query) {
-    return sha256.convert(utf8.encode(printNode(query))).toString();
+    return queryHasher != null 
+      ? queryHasher(query)
+      : sha256.convert(utf8.encode(printNode(query))).toString();
   }
 
   _disableCheck(ErrorResponse error) {
+    // in case there is a custom disable function defined use this one
+    if (disablChecker != null) {
+      return disablChecker(error);
+    }
+
     // if the server doesn't support persisted queries, don't try anymore
     if (!_arePersistedQueriesSupported(error.fetchResult)) {
       return true;

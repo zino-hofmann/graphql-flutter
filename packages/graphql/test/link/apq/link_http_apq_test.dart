@@ -15,7 +15,7 @@ import "package:test/test.dart";
 class MockClient extends Mock implements http.Client {}
 
 void main() {
-  group('Automatic Persisted Queries link', () {
+  group('Automatic Persisted Queries link integrated with HttpLink', () {
     MockClient client;
     Operation query;
     Link link;
@@ -88,16 +88,15 @@ void main() {
     });
 
     test('handle "PERSISTED_QUERY_NOT_FOUND"', () async {
-      int count = 0;
       when(
         client.send(any),
       )..thenAnswer(
-        (_) {
-          count++;
+        (inv) {
+          http.Request request = inv.positionalArguments[0];
           return Future.value(
             http.StreamedResponse(
               Stream.fromIterable(
-                [utf8.encode(count == 1
+                [utf8.encode(request.method == 'GET' 
                   ? '{"errors":[{"extensions": { "code": "PERSISTED_QUERY_NOT_FOUND" }, "message": "PersistedQueryNotFound" }]}'
                   : '{"data":{}}'
                 )],
@@ -157,16 +156,15 @@ void main() {
     });
 
     test('handle server that does not support persisted queries', () async {
-      int count = 0;
       when(
         client.send(any),
       )..thenAnswer(
-        (_) {
-          count++;
+        (inv) {
+          http.Request request = inv.positionalArguments[0];
           return Future.value(
             http.StreamedResponse(
               Stream.fromIterable(
-                [utf8.encode(count == 1
+                [utf8.encode(request.method == 'GET' 
                   ? '{"errors":[{"extensions": { "code": "PERSISTED_QUERY_NOT_SUPPORTED" }, "message": "PersistedQueryNotSupported" }]}'
                   : '{"data":{}}'
                 )],
@@ -222,6 +220,103 @@ void main() {
       expect(
         result.statusCode,
         200,
+      );
+    });
+
+    test('unsubscribes correctly', () async {
+      final link = Link.from([
+        PersistedQueriesLink(),
+        Link(request: (operation, [forward]) {
+          return Stream.fromFuture(Future.delayed(
+            Duration(milliseconds: 100), 
+            () => FetchResult(
+              statusCode: 200,
+            ),
+          ));
+        })
+      ]);
+
+      StreamSubscription subscription = execute(
+        link: link,
+        operation: query,
+      ).listen(
+        (_) => fail('should not complete'),
+        onError: (_) => fail('should not complete'),
+        onDone: () => fail('should not complete'),
+      );
+
+      await Future.delayed(Duration(milliseconds: 10), () {
+        subscription.cancel();
+      });
+    });
+
+    test('supports loading the hash from other method', () async {
+      final link = Link.from([
+        PersistedQueriesLink(
+          queryHasher: (_) => 'custom_hashCode',
+        ),
+        HttpLink(
+          uri: '/graphql-apq-test',
+          httpClient: client,
+        ),
+      ]);
+
+      when(
+        client.send(any),
+      ).thenAnswer(
+        (_) => Future.value(
+          http.StreamedResponse(
+            Stream.fromIterable(
+              [utf8.encode('{"data":{}}')],
+            ),
+            200,
+          ),
+        ),
+      );
+
+      await execute(
+        link: link,
+        operation: query,
+      ).first;
+
+      final http.Request captured = verify(
+        client.send(captureAny),
+      ).captured.single;
+
+      final extensions = json.decode(captured.url.queryParameters['extensions']);
+
+      expect(
+        captured.url,
+        Uri.parse('/graphql-apq-test?operationName=Operation&variables=%7B%7D&extensions=%7B%22persistedQuery%22%3A%7B%22sha256Hash%22%3A%22custom_hashCode%22%2C%22version%22%3A1%7D%7D'),
+      );
+      expect(
+        extensions['persistedQuery']['sha256Hash'],
+        'custom_hashCode',
+      );
+      expect(
+        captured.method,
+        'GET',
+      );
+    });
+
+    test('errors if unable to hash query', () async {
+      final link = Link.from([
+        PersistedQueriesLink(
+          queryHasher: (_) {
+            throw Exception('failed to hash query');
+          }
+        ),
+        Link(request: (operation, [forward]) {
+          return Stream.value(FetchResult( statusCode: 200 ));
+        }),
+      ]);
+
+      expect(
+        execute(
+          link: link,
+          operation: query,
+        ).first, 
+        throwsException,
       );
     });
   });
