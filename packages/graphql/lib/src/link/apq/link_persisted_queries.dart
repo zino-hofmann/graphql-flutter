@@ -9,6 +9,7 @@ import 'package:graphql/src/link/error/link_error.dart';
 import 'package:graphql/src/link/link.dart';
 import 'package:graphql/src/link/operation.dart';
 import 'package:graphql/src/link/fetch_result.dart';
+import 'package:graphql/src/exceptions/exceptions.dart' as ex;
 
 final VERSION = 1;
 
@@ -21,12 +22,12 @@ class PersistedQueriesLink extends Link {
 
   final bool useGETForHashedQueries;
   final QueryHashGenerator queryHasher;
-  final DisableChecker disablChecker;
+  final DisableChecker disabler;
 
   PersistedQueriesLink({
     this.useGETForHashedQueries = true,
     this.queryHasher,
-    this.disablChecker,
+    this.disabler,
   }) : super() {
     this.request = (Operation operation, [NextLink forward]) {
       if (forward == null) {
@@ -60,7 +61,7 @@ class PersistedQueriesLink extends Link {
         Function retry;
         retry = ({
           FetchResult response,
-          dynamic networkError,
+          NetworkException networkError,
           Function callback,
         }) {
           if (!retried && (response?.errors != null || networkError != null)) {
@@ -69,7 +70,7 @@ class PersistedQueriesLink extends Link {
             final disableCheckPayload = ErrorResponse(
               operation: operation,
               fetchResult: response,
-              exception: networkError,
+              exception: OperationException(clientException: networkError),
             );
             // if the server doesn't support persisted queries, don't try anymore
             _supportsPersistedQueries = !_disableCheck(disableCheckPayload);
@@ -144,8 +145,8 @@ class PersistedQueriesLink extends Link {
 
   _disableCheck(ErrorResponse error) {
     // in case there is a custom disable function defined use this one
-    if (disablChecker != null) {
-      return disablChecker(error);
+    if (disabler != null) {
+      return disabler(error);
     }
 
     // if the server doesn't support persisted queries, don't try anymore
@@ -160,7 +161,7 @@ class PersistedQueriesLink extends Link {
   }
 
   bool _arePersistedQueriesSupported(FetchResult result) {
-    return !(result.errors != null &&
+    return !(result?.errors != null &&
         result.errors.any(
           (err) => err['message'] == 'PersistedQueryNotSupported',
         ));
@@ -174,7 +175,7 @@ class PersistedQueriesLink extends Link {
         );
       },
       onError: (err) {
-        retry(networkError: err, callback: () => 
+        retry(networkError: ex.translateFailure(err), callback: () => 
           controller.addError(err)
         );
       },
