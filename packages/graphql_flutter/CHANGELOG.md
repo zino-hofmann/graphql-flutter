@@ -1,3 +1,15 @@
+# [3.1.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.1-beta.3...v3.1.0-beta.1) (2020-03-30)
+
+
+### Bug Fixes
+
+* **examples/starwars:** use git dependency for graphql_starwars_test_server ([0facc48](https://github.com/zino-app/graphql-flutter/commit/0facc4880b3cfcb6abe9f4e7ed5609b97f3fab42))
+
+
+### Features
+
+* **examples/starwars:** add web support ([f52b1db](https://github.com/zino-app/graphql-flutter/commit/f52b1dbc5bbafd0933e2b5b51b8f09c18462bd0b))
+
 ## [3.0.1-beta.3](https://github.com/zino-app/graphql-flutter/compare/v3.0.1-beta.2...v3.0.1-beta.3) (2020-03-10)
 
 
