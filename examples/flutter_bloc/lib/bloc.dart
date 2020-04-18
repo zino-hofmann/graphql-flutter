@@ -128,19 +128,21 @@ class StarrableRepository extends StatelessWidget {
   }
 
   Widget _showLoadingIndicator() {
-    if (repository.isLoading)
+    if (repository.isLoading) {
       return CircularProgressIndicator();
-    else
+    } else {
       return null;
+    }
   }
 
   Widget _isRepoStarred() {
-    if (repository.viewerHasStarred)
+    if (repository.viewerHasStarred) {
       return Icon(
         Icons.star,
         color: Colors.amber,
       );
-    else
+    } else {
       return Icon(Icons.star_border);
+    }
   }
 }
