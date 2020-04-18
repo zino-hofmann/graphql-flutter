@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql/client.dart';
+
 import 'package:graphql_flutter_bloc_example/bloc.dart';
-import 'package:graphql_flutter_bloc_example/blocs/repos/my_repos_bloc.dart';
-import 'package:graphql_flutter_bloc_example/extended-bloc/repositories_bloc.dart';
-import 'package:graphql_flutter_bloc_example/extended_bloc.dart';
 import 'package:graphql_flutter_bloc_example/repository.dart';
+import 'package:graphql_flutter_bloc_example/blocs/repos/my_repos_bloc.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/repositories_bloc.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc.dart';
 
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
-// ignore: uri_does_not_exist
-import 'extended-bloc.dart';
 import 'local.dart';
 
 void main() => runApp(MyApp());

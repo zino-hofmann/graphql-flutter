@@ -1,11 +1,12 @@
 import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 import 'package:graphql/internal.dart';
 
-import 'event.dart';
-import 'state.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/event.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/state.dart';
 
 abstract class GraphqlBloc<T> extends Bloc<GraphqlEvent<T>, GraphqlState<T>> {
   GraphQLClient client;

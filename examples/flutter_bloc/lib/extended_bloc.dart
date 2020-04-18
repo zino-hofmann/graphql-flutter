@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql/client.dart';
-import 'package:graphql_flutter_bloc_example/extended-bloc/repositories_bloc.dart';
 
-import 'extended-bloc/graphql/event.dart';
-import 'extended-bloc/graphql/state.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/repositories_bloc.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/event.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/state.dart';
 
 class ExtendedBloc extends StatefulWidget {
   @override

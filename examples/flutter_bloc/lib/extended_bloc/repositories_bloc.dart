@@ -1,7 +1,8 @@
 import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
-import 'graphql/bloc.dart';
-import 'graphql/event.dart';
+
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/bloc.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/event.dart';
 
 class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
   RepositoriesBloc({GraphQLClient client, WatchQueryOptions options})
