@@ -7,9 +7,15 @@ flags:
         - packages/graphql/
 comment:
   require_changes: true # Only post a comment if coverage changes.
+
 coverage:
   status:
     project:
       default:
         threshold: 1% # Allow coverage to drop by up to 1% in a PR before marking it failed
     patch: off
+
+# don't factor tests into coverage scores
+ignore:
+  - packages/graphql_flutter/test
+  - packages/graphql/test

@@ -72,7 +72,13 @@ class QueryState extends State<Query> {
   void didUpdateWidget(Query oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (!observableQuery.options.areEqualTo(_options)) {
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+
+    final optionsWithOverrides = _options;
+    optionsWithOverrides.policies = client.defaultPolicies.watchQuery
+      .withOverrides(optionsWithOverrides.policies);
+
+    if (!observableQuery.options.areEqualTo(optionsWithOverrides)) {
       _initQuery();
     }
   }
