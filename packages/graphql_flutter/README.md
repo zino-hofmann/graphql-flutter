@@ -106,6 +106,32 @@ In order to use the client, you `Query` and `Mutation` widgets to be wrapped wit
   ...
 ```
 
+### AWS AppSync Support
+
+#### Cognito Pools
+
+To use with an AppSync GraphQL API that is authorized with AWS Cognito User Pools, simply pass the JWT token for your Cognito user session in to the `AuthLink`:
+
+```dart
+// Where `session` is a CognitorUserSession
+// from amazon_cognito_identity_dart_2
+final token = session.getAccessToken().getJwtToken();
+
+final AuthLink authLink = AuthLink(
+  getToken: () => token,
+);
+```
+
+See more: [Issue #209](https://github.com/zino-app/graphql-flutter/issues/209)
+
+#### Other Authorization Types
+
+API key, IAM, and Federated provider authorization could be accomplished through custom links, but it is not known to be supported. Anyone wanting to implement this can reference AWS' JS SDK `AuthLink` implementation.
+
+- Making a custom link: [Comment on Issue 173](https://github.com/zino-app/graphql-flutter/issues/173#issuecomment-464435942)
+- AWS JS SDK `auth-link.ts`: [aws-mobile-appsync-sdk-js:auth-link.ts](https://github.com/awslabs/aws-mobile-appsync-sdk-js/blob/master/packages/aws-appsync-auth-link/src/auth-link.ts)
+
+
 ### Offline Cache
 
 The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
@@ -135,7 +161,7 @@ class MyApp extends StatelessWidget {
 
 #### Normalization
 
-To enable [apollo-like normalization](https://www.apollographql.com/docs/react/advanced/caching.html#normalization), use a `NormalizedInMemoryCache` or `OptimisticCache`:
+To enable [apollo-like normalization](https://www.apollographql.com/docs/react/caching/cache-configuration/#data-normalization), use a `NormalizedInMemoryCache` or `OptimisticCache`:
 
 ```dart
 ValueNotifier<GraphQLClient> client = ValueNotifier(
