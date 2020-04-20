@@ -1,3 +1,12 @@
+# [3.1.0-beta.3](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.2...v3.1.0-beta.3) (2020-04-20)
+
+
+### Bug Fixes
+
+* **flutter:** Query.didUpdateWidget and policy overrides ([32f6172](https://github.com/zino-app/graphql-flutter/commit/32f617240b9a2a7ddb00e8d654384c89e6770c76))
+* **style:** use curly braces ([42f4da4](https://github.com/zino-app/graphql-flutter/commit/42f4da4cb5ddb9f76c34a5946eb1bf662d138cbf))
+* **tests:** don't factor tests into coverage scores ([4a9bcd4](https://github.com/zino-app/graphql-flutter/commit/4a9bcd4c708e955dbfcd432f0ce803541a343487))
+
 # [3.1.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.1...v3.1.0-beta.2) (2020-04-12)
 
 
