@@ -2,10 +2,12 @@ class HttpQueryOptions {
   HttpQueryOptions({
     this.includeQuery,
     this.includeExtensions,
+    this.useGETForQueries,
   });
 
   bool includeQuery;
   bool includeExtensions;
+  bool useGETForQueries;
 
   void addAll(HttpQueryOptions options) {
     if (options.includeQuery != null) {
@@ -14,6 +16,10 @@ class HttpQueryOptions {
 
     if (options.includeExtensions != null) {
       includeExtensions = options.includeExtensions;
+    }
+
+    if (options.useGETForQueries != null) {
+      useGETForQueries = options.useGETForQueries;
     }
   }
 }
@@ -30,14 +36,4 @@ class HttpConfig {
   Map<String, dynamic> options;
   Map<String, dynamic> credentials;
   Map<String, String> headers;
-}
-
-class HttpHeadersAndBody {
-  HttpHeadersAndBody({
-    this.headers,
-    this.body,
-  });
-
-  final Map<String, String> headers;
-  final Map<String, dynamic> body;
 }
