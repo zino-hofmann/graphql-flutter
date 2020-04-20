@@ -263,7 +263,7 @@ final ErrorLink errorLink = ErrorLink(errorHandler: (ErrorResponse response) {
 });
 ```
 
-### `PersistedQueriesLink`
+### `PersistedQueriesLink` (experimental)
 
 To improve performance you can make use of a concept introduced by [Apollo](https://www.apollographql.com/) called [Automatic persisted queries](https://www.apollographql.com/docs/apollo-server/performance/apq/) (or short "APQ") to send smaller requests and even enabled CDN caching for your GraphQL API. 
 
