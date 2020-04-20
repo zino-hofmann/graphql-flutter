@@ -301,8 +301,12 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final Uint8List responseByte = await response.stream.toBytes();
   final String decodedBody = encoding.decode(responseByte);
 
-  final Map<String, dynamic> jsonResponse =
-      json.decode(decodedBody) as Map<String, dynamic>;
+  Map<String, dynamic> jsonResponse;
+  try {
+      jsonResponse = json.decode(decodedBody) as Map<String, dynamic>;
+  } catch(e) {
+    throw ClientException('Invalid response body: $decodedBody');
+  }
   final FetchResult fetchResult = FetchResult(
     statusCode: statusCode,
   );

@@ -16,7 +16,7 @@ aliases:
       sudo apt update && \
       sudo apt install -y wget
 
-      wget https://github.com/mikefarah/yq/releases/download/2.4.0/yq_linux_amd64 -O ~/yq
+      wget https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64 -O ~/yq
       sudo chmod +x ~/yq
 
       sudo apt remove -y wget
@@ -122,7 +122,7 @@ jobs:
       - checkout
       - run:
           name: Generate release tags
-          command: npx -p @semantic-release/changelog -p @semantic-release/git@7.1.0-beta.11 -p semantic-release@16.0.0-beta.46 semantic-release
+          command: npx -p semantic-release -p @semantic-release/changelog -p @semantic-release/git semantic-release
   sync_with_beta:
     docker: *node_environment
     steps:

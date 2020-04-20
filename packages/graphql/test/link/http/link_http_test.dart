@@ -610,12 +610,12 @@ void main() {
 
       expect(
         exception,
-        const TypeMatcher<UnhandledFailureWrapper>(),
+        const TypeMatcher<ClientException>(),
       );
 
       expect(
-        (exception as UnhandledFailureWrapper).failure,
-        const TypeMatcher<FormatException>(),
+        (exception as ClientException).message,
+        "Invalid response body: ",
       );
     });
 

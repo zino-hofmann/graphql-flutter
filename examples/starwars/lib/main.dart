@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import './client_provider.dart';
 import './episode/episode_page.dart';
@@ -8,15 +9,16 @@ import './reviews/review_page.dart';
 import './reviews/review_page_list.dart';
 
 String get host {
-  if (Platform.isAndroid) {
+// https://github.com/flutter/flutter/issues/36126#issuecomment-596215587
+  if (UniversalPlatform.isAndroid) {
     return '10.0.2.2';
   } else {
-    return 'localhost';
+    return '127.0.0.1';
   }
 }
 
-final String GRAPHQL_ENDPOINT = 'http://$host:3000/graphql';
-final String SUBSCRIPTION_ENDPOINT = 'ws://$host:3000/subscriptions';
+final graphqlEndpoint = 'http://$host:3000/graphql';
+final subscriptionEndpoint = 'ws://$host:3000/subscriptions';
 
 void main() => runApp(MyApp());
 
@@ -24,10 +26,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClientProvider(
-      uri: GRAPHQL_ENDPOINT,
-      subscriptionUri: SUBSCRIPTION_ENDPOINT,
+      uri: graphqlEndpoint,
+      subscriptionUri: subscriptionEndpoint,
       child: MaterialApp(
-        title: 'Graphql Starwas Demo',
+        title: 'Graphql Starwars Demo',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),

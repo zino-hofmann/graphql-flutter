@@ -8,7 +8,10 @@ dependencies:
     path: ../../packages/graphql_flutter
   graphql:
     path: ../../packages/graphql
-  graphql_starwars_test_server: ^0.0.4
+  universal_platform: ^0.1.3
+    # https://github.com/flutter/flutter/issues/36126#issuecomment-596215587
+  graphql_starwars_test_server: 
+    git: git@github.com:micimize/angel-starwars-test-server.git
 
 flutter:
   uses-material-design: true
@@ -18,3 +21,12 @@ dependency_overrides:
     path: ../../packages/graphql_flutter
   graphql:
     path: ../../packages/graphql
+  graphql_server:
+    git:
+      url: git@github.com:micimize/angel.git
+      ref: typeerror2.8-fix
+      path: packages/graphql/graphql_server
+  graphql_parser:
+    git:
+      url: git@github.com:micimize/angel.git
+      path: packages/graphql/graphql_parser

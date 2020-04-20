@@ -43,20 +43,20 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   T _data;
   dynamic _error;
   StreamSubscription<FetchResult> _subscription;
+  GraphQLClient _client;
 
   ConnectivityResult _currentConnectivityResult;
   StreamSubscription<ConnectivityResult> _networkSubscription;
 
   void _initSubscription() {
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    assert(client != null);
+    assert(_client != null);
     final Operation operation = Operation(
       documentNode: parseString(widget.query),
       variables: widget.variables,
       operationName: widget.operationName,
     );
 
-    final Stream<FetchResult> stream = client.subscribe(operation);
+    final Stream<FetchResult> stream = _client.subscribe(operation);
 
     if (_subscription == null) {
       // Set the initial value for the first time.
@@ -88,7 +88,12 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initSubscription();
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    if (client != _client) {
+      _client = client;
+      _initSubscription();
+    }
   }
 
   @override
