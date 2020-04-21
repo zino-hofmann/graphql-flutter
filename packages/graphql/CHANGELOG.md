@@ -1,3 +1,11 @@
+# [3.1.0-beta.4](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2020-04-21)
+
+
+### Bug Fixes
+
+* **examples:** rebuilt & tested starwars example ([f8e19f1](https://github.com/zino-app/graphql-flutter/commit/f8e19f1e1f6d41a68c8bd54cd4b2613be7c81f10))
+* **packaging:** don't commit .flutter-plugins-dependencies ([0857030](https://github.com/zino-app/graphql-flutter/commit/0857030d390e131d132c3d0d5984693a4462ae22))
+
 # [3.1.0-beta.3](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.2...v3.1.0-beta.3) (2020-04-20)
 
 
