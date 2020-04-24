@@ -13,6 +13,8 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
                 documentNode: parseString(r'''
                   query ReadRepositories($nRepositories: Int!, $after: String) {
                       viewer {
+                        id
+                        __typename
                         repositories(first: $nRepositories, after: $after) {
                           pageInfo {
                             endCursor
@@ -53,11 +55,6 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
   void fetchMore({String after}) {
     add(GraphqlFetchMoreEvent(
         options: FetchMoreOptions(
-//      variables: ReportListArguments(
-//          pagination: PaginationInput(
-//        limit: limit,
-//        offset: offset,
-//      )).toJson(),
       variables: <String, dynamic>{'nRepositories': 5, 'after': after},
       updateQuery: (dynamic previousResultData, dynamic fetchMoreResultData) {
         final List<dynamic> repos = <dynamic>[
