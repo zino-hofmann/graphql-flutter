@@ -13,10 +13,14 @@ abstract class GraphqlBloc<T> extends Bloc<GraphqlEvent<T>, GraphqlState<T>> {
   ObservableQuery result;
   WatchQueryOptions options;
 
-  GraphqlBloc({this.client, @required this.options}) {
+  GraphqlBloc({@required this.client, @required this.options}) {
     result = client.watchQuery(options);
 
     result.stream.listen((QueryResult result) {
+      if (result.loading && result.data == null) {
+        add(GraphqlLoadingEvent<T>(result: result));
+      }
+
       if (!result.loading && result.data != null) {
         add(
           GraphqlLoadedEvent<T>(
@@ -51,10 +55,14 @@ abstract class GraphqlBloc<T> extends Bloc<GraphqlEvent<T>, GraphqlState<T>> {
   void _refetch() => result.refetch();
 
   @override
-  GraphqlState<T> get initialState => GraphqlLoading<T>();
+  GraphqlState<T> get initialState => GraphqlInitialState<T>();
 
   @override
   Stream<GraphqlState<T>> mapEventToState(GraphqlEvent<T> event) async* {
+    if (event is GraphqlLoadingEvent<T>) {
+      yield GraphqlLoadingState<T>(result: event.result);
+    }
+
     if (event is GraphqlLoadedEvent<T>) {
       yield GraphqlLoaded<T>(data: event.data, result: event.result);
     }
