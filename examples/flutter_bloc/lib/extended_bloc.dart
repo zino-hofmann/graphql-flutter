@@ -54,7 +54,7 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
                 builder: (_, state) {
                   Widget child = Container();
 
-                  if (state is GraphqlLoading) {
+                  if (state is GraphqlLoadingState) {
                     child = Center(child: CircularProgressIndicator());
                   }
 

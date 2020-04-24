@@ -7,7 +7,13 @@ abstract class GraphqlState<T> {
   const GraphqlState({@required this.data});
 }
 
-class GraphqlLoading<T> extends GraphqlState<T> {}
+class GraphqlInitialState<T> extends GraphqlState<T> {}
+
+class GraphqlLoadingState<T> extends GraphqlState<T> {
+  final QueryResult result;
+
+  GraphqlLoadingState({@required this.result}) : super(data: null);
+}
 
 class GraphqlErrorState<T> extends GraphqlState<T> {
   final OperationException error;
