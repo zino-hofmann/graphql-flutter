@@ -167,17 +167,20 @@ class PersistedQueriesLink extends Link {
         ));
   } 
 
-  StreamSubscription _attachListener(StreamController<FetchResult> controller, Stream<FetchResult> stream, Function retry) {
+  StreamSubscription _attachListener(StreamController<FetchResult> controller,
+      Stream<FetchResult> stream, Function retry) {
     return stream.listen(
       (data) {
-        retry(response: data, callback: () => 
-          controller.add(data)
-        );
+        retry(response: data, callback: () => controller.add(data));
       },
       onError: (err) {
-        retry(networkError: ex.translateFailure(err), callback: () => 
-          controller.addError(err)
-        );
+        if (err is UnhandledFailureWrapper) {
+          controller.addError(err);
+        } else {
+          retry(
+              networkError: ex.translateFailure(err),
+              callback: () => controller.addError(err));
+        }
       },
       onDone: () {
         controller.close();
