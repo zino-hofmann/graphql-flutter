@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_flutter/src/widgets/query.dart';
 import 'package:http/http.dart';
@@ -84,7 +85,7 @@ void main() {
     setUp(() async {
       mockHttpClient = MockHttpClient();
       httpLink = HttpLink(
-        uri: 'https://unused/graphql',
+        'https://unused/graphql',
         httpClient: mockHttpClient,
       );
       client = ValueNotifier(
@@ -110,7 +111,13 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page))
         ..setVariables({'foo': 1})
@@ -133,7 +140,13 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page))
         ..setFetchPolicy(null)
@@ -155,11 +168,20 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(any,
+            headers: anyNamed('headers'), body: anyNamed('body')),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page)).setVariables({'foo': 2});
       await tester.pump();
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     testWidgets('issues a new network request when fetch policy changes',
@@ -173,13 +195,25 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
 
       tester
           .state<PageState>(find.byWidget(page))
           .setFetchPolicy(FetchPolicy.cacheFirst);
       await tester.pump();
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     testWidgets('issues a new network request when error policy changes',
@@ -193,13 +227,25 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
 
       tester
           .state<PageState>(find.byWidget(page))
           .setErrorPolicy(ErrorPolicy.none);
       await tester.pump();
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
     });
 
     testWidgets(
@@ -215,7 +261,13 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.post(
+          any,
+          headers: anyNamed('headers'),
+          body: anyNamed('body'),
+        ),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page))
         ..setFetchPolicy(null)
