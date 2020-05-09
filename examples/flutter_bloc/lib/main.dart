@@ -44,9 +44,7 @@ class MyApp extends StatelessWidget {
   }
 
   GraphQLClient _client() {
-    final HttpLink _httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
-    );
+    final HttpLink _httpLink = HttpLink('https://api.github.com/graphql');
 
     final AuthLink _authLink = AuthLink(
       getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',

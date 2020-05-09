@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
   graphql:
     path: ../../packages/graphql
   cupertino_icons: ^0.1.2
