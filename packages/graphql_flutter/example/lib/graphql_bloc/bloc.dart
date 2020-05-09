@@ -22,7 +22,7 @@ class Bloc {
     _toggleStarSubject.listen((Repo t) async {
       _toggleStarLoadingSubject.add(t.id);
       // @todo handle error
-      final QueryResult _ = await _mutateToggleStar(t);
+      final _ = await _mutateToggleStar(t);
 
       _repoSubject.add(_repoSubject.value.map((Repo e) {
         if (e.id != t.id) {
@@ -72,7 +72,7 @@ class Bloc {
   );
 
   Future<QueryResult> _mutateToggleStar(Repo repo) async {
-    final MutationOptions _options = MutationOptions(
+    final _options = MutationOptions(
       documentNode:
           gql(repo.viewerHasStarred ? mutations.removeStar : mutations.addStar),
       variables: <String, String>{
@@ -82,7 +82,7 @@ class Bloc {
 //      errorPolicy: widget.options.errorPolicy,
     );
 
-    final QueryResult result = await _client.mutate(_options);
+    final result = await _client.mutate(_options);
     return result;
   }
 
@@ -94,7 +94,7 @@ class Bloc {
 //    if (fetchPolicy == FetchPolicy.cacheFirst) {
 //      fetchPolicy = FetchPolicy.cacheAndNetwork;
 //    }
-    final WatchQueryOptions _options = WatchQueryOptions(
+    final _options = WatchQueryOptions(
       documentNode: parseString(queries.readRepositories),
       variables: <String, dynamic>{
         'nRepositories': nRepositories,
@@ -106,7 +106,7 @@ class Bloc {
 //      context: widget.options.context,
     );
 
-    final QueryResult result = await _client.query(_options);
+    final result = await _client.query(_options);
 
     if (result.hasException) {
       _repoSubject.addError(result.exception);
@@ -114,7 +114,7 @@ class Bloc {
     }
 
     // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-    final List<dynamic> repositories =
+    final repositories =
         result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
     _repoSubject.add(repositories
