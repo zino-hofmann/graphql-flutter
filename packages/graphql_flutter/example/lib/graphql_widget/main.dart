@@ -95,7 +95,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                documentNode: gql(queries.readRepositories),
+                document: gql(queries.readRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                 },
@@ -174,7 +174,7 @@ class StarrableRepository extends StatelessWidget {
   Widget build(BuildContext context) {
     return Mutation(
       options: MutationOptions(
-        documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
+        document: gql(starred ? mutations.removeStar : mutations.addStar),
         update: (Cache cache, QueryResult result) {
           if (result.hasException) {
             print(result.exception);

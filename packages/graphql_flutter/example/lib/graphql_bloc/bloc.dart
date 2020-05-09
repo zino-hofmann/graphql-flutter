@@ -73,7 +73,7 @@ class Bloc {
 
   Future<QueryResult> _mutateToggleStar(Repo repo) async {
     final MutationOptions _options = MutationOptions(
-      documentNode:
+      document:
           gql(repo.viewerHasStarred ? mutations.removeStar : mutations.addStar),
       variables: <String, String>{
         'starrableId': repo.id,
@@ -95,7 +95,7 @@ class Bloc {
 //      fetchPolicy = FetchPolicy.cacheAndNetwork;
 //    }
     final WatchQueryOptions _options = WatchQueryOptions(
-      documentNode: parseString(queries.readRepositories),
+      document: parseString(queries.readRepositories),
       variables: <String, dynamic>{
         'nRepositories': nRepositories,
       },

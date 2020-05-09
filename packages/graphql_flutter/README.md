@@ -131,7 +131,6 @@ API key, IAM, and Federated provider authorization could be accomplished through
 - Making a custom link: [Comment on Issue 173](https://github.com/zino-app/graphql-flutter/issues/173#issuecomment-464435942)
 - AWS JS SDK `auth-link.ts`: [aws-mobile-appsync-sdk-js:auth-link.ts](https://github.com/awslabs/aws-mobile-appsync-sdk-js/blob/master/packages/aws-appsync-auth-link/src/auth-link.ts)
 
-
 ### Offline Cache
 
 The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
@@ -225,7 +224,7 @@ In your widget:
 // ...
 Query(
   options: QueryOptions(
-    documentNode: gql(readRepositories), // this is the query string you just created
+    document: gql(readRepositories), // this is the query string you just created
     variables: {
       'nRepositories': 50,
     },
@@ -330,7 +329,7 @@ The syntax for mutations is fairly similar to that of a query. The only differen
 
 Mutation(
   options: MutationOptions(
-    documentNode: gql(addStar), // this is the mutation string you just created
+    document: gql(addStar), // this is the mutation string you just created
     // you can update the cache based on results
     update: (Cache cache, QueryResult result) {
       return cache;
@@ -385,7 +384,7 @@ With a bit more context (taken from **[the complete mutation example `StarrableR
 // bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 Mutation(
   options: MutationOptions(
-    documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
+    document: gql(starred ? mutations.removeStar : mutations.addStar),
     // will be called for both optimistic and final results
     update: (Cache cache, QueryResult result) {
       if (result.hasException) {
@@ -558,7 +557,7 @@ import 'dart:io' show File;
 String filePath = '/aboslute/path/to/file.ext';
 final QueryResult r = await graphQLClientClient.mutate(
   MutationOptions(
-    documentNode: gql(uploadMutation),
+    document: gql(uploadMutation),
     variables: {
       'files': [File(filePath)],
     },
@@ -572,14 +571,14 @@ This is currently our roadmap, please feel free to request additions/changes.
 
 | Feature                 | Progress |
 | :---------------------- | :------: |
-| Queries                 |    ✅     |
-| Mutations               |    ✅     |
-| Subscriptions           |    ✅     |
-| Query polling           |    ✅     |
-| In memory cache         |    ✅     |
-| Offline cache sync      |    ✅     |
-| GraphQL pload           |    ✅     |
-| Optimistic results      |    ✅     |
+| Queries                 |    ✅    |
+| Mutations               |    ✅    |
+| Subscriptions           |    ✅    |
+| Query polling           |    ✅    |
+| In memory cache         |    ✅    |
+| Offline cache sync      |    ✅    |
+| GraphQL pload           |    ✅    |
+| Optimistic results      |    ✅    |
 | Client state management |    🔜    |
 | Modularity              |    🔜    |
 

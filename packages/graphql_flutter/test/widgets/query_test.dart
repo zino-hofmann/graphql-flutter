@@ -23,7 +23,7 @@ class Page extends StatefulWidget {
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
-  }): super(key: key);
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => PageState();
@@ -64,15 +64,13 @@ class PageState extends State<Page> {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: query,
+        document: query,
         variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
       ),
-      builder: (QueryResult result, {
-        Refetch refetch,
-        FetchMore fetchMore
-      }) => Container(),
+      builder: (QueryResult result, {Refetch refetch, FetchMore fetchMore}) =>
+          Container(),
     );
   }
 }
@@ -159,8 +157,7 @@ void main() {
 
       verify(mockHttpClient.send(any)).called(1);
 
-      tester.state<PageState>(find.byWidget(page))
-        .setVariables({'foo': 2});
+      tester.state<PageState>(find.byWidget(page)).setVariables({'foo': 2});
       await tester.pump();
       verify(mockHttpClient.send(any)).called(1);
     });
@@ -178,8 +175,9 @@ void main() {
 
       verify(mockHttpClient.send(any)).called(1);
 
-      tester.state<PageState>(find.byWidget(page))
-        .setFetchPolicy(FetchPolicy.cacheFirst);
+      tester
+          .state<PageState>(find.byWidget(page))
+          .setFetchPolicy(FetchPolicy.cacheFirst);
       await tester.pump();
       verify(mockHttpClient.send(any)).called(1);
     });
@@ -197,13 +195,15 @@ void main() {
 
       verify(mockHttpClient.send(any)).called(1);
 
-      tester.state<PageState>(find.byWidget(page))
-        .setErrorPolicy(ErrorPolicy.none);
+      tester
+          .state<PageState>(find.byWidget(page))
+          .setErrorPolicy(ErrorPolicy.none);
       await tester.pump();
       verify(mockHttpClient.send(any)).called(1);
     });
 
-    testWidgets('does not issues new network request when policies are effectively unchanged',
+    testWidgets(
+        'does not issues new network request when policies are effectively unchanged',
         (WidgetTester tester) async {
       final page = Page(
         fetchPolicy: FetchPolicy.cacheAndNetwork,

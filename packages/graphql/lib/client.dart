@@ -10,3 +10,6 @@ export 'package:graphql/src/core/query_options.dart';
 export 'package:graphql/src/core/query_result.dart';
 export 'package:graphql/src/exceptions/exceptions.dart';
 export 'package:graphql/src/graphql_client.dart';
+
+export 'package:gql_link/gql_link.dart';
+export 'package:gql_http_link/gql_http_link.dart';

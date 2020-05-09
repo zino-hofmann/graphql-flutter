@@ -13,7 +13,7 @@ class PagingReviews extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: gql(r'''
+        document: gql(r'''
           query Reviews($page: Int!) {
             reviews(page: $page) {
               page

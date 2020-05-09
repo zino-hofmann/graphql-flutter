@@ -44,6 +44,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   T _data;
   dynamic _error;
   StreamSubscription<Response> _subscription;
+  GraphQLClient _client;
 
   ConnectivityResult _currentConnectivityResult;
   StreamSubscription<ConnectivityResult> _networkSubscription;
@@ -59,7 +60,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
       variables: widget.variables,
     );
 
-    final Stream<Response> stream = client.subscribe(request);
+    final Stream<Response> stream = _client.subscribe(request);
 
     if (_subscription == null) {
       // Set the initial value for the first time.

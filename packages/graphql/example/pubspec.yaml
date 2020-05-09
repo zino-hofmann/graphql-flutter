@@ -7,8 +7,5 @@ environment:
 
 dependencies:
   args:
-  gql_link: ^0.2.3
-  gql_http_link: ^0.2.7
   graphql:
     path: ..
-

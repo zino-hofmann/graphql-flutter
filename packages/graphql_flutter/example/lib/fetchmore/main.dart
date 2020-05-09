@@ -82,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                documentNode: gql(queries.searchRepositories),
+                document: gql(queries.searchRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                   'query': _searchQuery,
