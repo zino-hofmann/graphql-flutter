@@ -16,7 +16,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
+      'https://api.github.com/graphql',
     );
 
     final authLink = AuthLink(
