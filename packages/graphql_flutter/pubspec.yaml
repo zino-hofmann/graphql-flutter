@@ -9,12 +9,11 @@ authors:
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
 dependencies:
   graphql: ^3.0.1-beta.2
+  gql_exec: ^0.2.2
   flutter:
     sdk: flutter
   meta: ^1.1.6
-  path: ^1.6.2
   path_provider: ^1.1.0
-  rxdart: ^0.23.1
   connectivity: ^0.4.4
 dev_dependencies:
   pedantic: ^1.8.0+1

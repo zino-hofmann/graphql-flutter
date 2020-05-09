@@ -1,13 +1,12 @@
 import 'dart:async';
 
+import 'package:gql_exec/gql_exec.dart';
+import 'package:gql_link/gql_link.dart';
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/link/fetch_result.dart';
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
 import 'package:meta/meta.dart';
 
 /// The default [Policies] to set for each client action
@@ -64,7 +63,7 @@ class DefaultPolicies {
   );
 }
 
-/// The link is a [Link] over which GraphQL documents will be resolved into a [FetchResult].
+/// The link is a [Link] over which GraphQL documents will be resolved into a [Response].
 /// The cache is the initial [Cache] to use in the data store.
 class GraphQLClient {
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
@@ -83,7 +82,7 @@ class GraphQLClient {
   /// The default [Policies] to set for each client action
   DefaultPolicies defaultPolicies;
 
-  /// The [Link] over which GraphQL documents will be resolved into a [FetchResult].
+  /// The [Link] over which GraphQL documents will be resolved into a [Response].
   final Link link;
 
   /// The initial [Cache] to use in the data store.
@@ -115,7 +114,7 @@ class GraphQLClient {
 
   /// This subscribes to a GraphQL subscription according to the options specified and returns a
   /// [Stream] which either emits received data or an error.
-  Stream<FetchResult> subscribe(Operation operation) {
-    return execute(link: link, operation: operation);
+  Stream<Response> subscribe(Request request) {
+    return link.request(request);
   }
 }

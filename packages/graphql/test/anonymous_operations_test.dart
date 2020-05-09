@@ -1,13 +1,14 @@
 import 'package:gql/language.dart';
+import 'package:gql_exec/gql_exec.dart';
+import 'package:gql_link/gql_link.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:http/http.dart' as http;
 
 import 'package:graphql/client.dart';
 
 import './helpers.dart';
 
-class MockHttpClient extends Mock implements http.Client {}
+class MockLink extends Mock implements Link {}
 
 void main() {
   const String readRepositories = r'''{
@@ -33,86 +34,77 @@ void main() {
   }
 ''';
 
-  HttpLink httpLink;
-  AuthLink authLink;
-  Link link;
+  MockLink link;
   GraphQLClient graphQLClientClient;
-  MockHttpClient mockHttpClient;
+
   group('simple json', () {
     setUp(() {
-      mockHttpClient = MockHttpClient();
-
-      httpLink = HttpLink(
-          uri: 'https://api.github.com/graphql', httpClient: mockHttpClient);
-
-      authLink = AuthLink(
-        getToken: () async => 'Bearer my-special-bearer-token',
-      );
-
-      link = authLink.concat(httpLink);
+      link = MockLink();
 
       graphQLClientClient = GraphQLClient(
         cache: getTestCache(),
         link: link,
       );
     });
+
     group('query', () {
       test('successful query', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
           documentNode: parseString(readRepositories),
           variables: <String, dynamic>{},
         );
+
         when(
-          mockHttpClient.send(any),
-        ).thenAnswer((Invocation a) async {
-          return simpleResponse(body: r'''
-{
-  "data": {
-    "viewer": {
-      "repositories": {
-        "nodes": [
-          {
-            "__typename": "Repository",
-            "id": "MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==",
-            "name": "pq",
-            "viewerHasStarred": false
-          },
-          {
-            "__typename": "Repository",
-            "id": "MDEwOlJlcG9zaXRvcnkzMjkyNDQ0Mw==",
-            "name": "go-evercookie",
-            "viewerHasStarred": false
-          },
-          {
-            "__typename": "Repository",
-            "id": "MDEwOlJlcG9zaXRvcnkzNTA0NjgyNA==",
-            "name": "watchbot",
-            "viewerHasStarred": false
-          }
-        ]
-      }
-    }
-  }
-}
-        ''');
-        });
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'viewer': {
+                    'repositories': {
+                      'nodes': [
+                        {
+                          '__typename': 'Repository',
+                          'id': 'MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==',
+                          'name': 'pq',
+                          'viewerHasStarred': false,
+                        },
+                        {
+                          '__typename': 'Repository',
+                          'id': 'MDEwOlJlcG9zaXRvcnkzMjkyNDQ0Mw==',
+                          'name': 'go-evercookie',
+                          'viewerHasStarred': false,
+                        },
+                        {
+                          '__typename': 'Repository',
+                          'id': 'MDEwOlJlcG9zaXRvcnkzNTA0NjgyNA==',
+                          'name': 'watchbot',
+                          'viewerHasStarred': false,
+                        },
+                      ],
+                    },
+                  },
+                },
+              ),
+            ],
+          ),
+        );
+
         final QueryResult r = await graphQLClientClient.query(_options);
 
-        final http.Request capt = verify(mockHttpClient.send(captureAny))
-            .captured
-            .first as http.Request;
-        expect(capt.method, 'post');
-        expect(capt.url.toString(), 'https://api.github.com/graphql');
-        expect(
-          capt.headers,
-          <String, String>{
-            'accept': '*/*',
-            'content-type': 'application/json; charset=utf-8',
-            'Authorization': 'Bearer my-special-bearer-token',
-          },
+        verify(
+          link.request(
+            Request(
+              operation: Operation(
+                document: parseString(readRepositories),
+                operationName: null,
+              ),
+              variables: <String, dynamic>{},
+              context: Context(),
+            ),
+          ),
         );
-        expect(await capt.finalize().bytesToString(),
-            r'{"operationName":null,"variables":{},"query":"query {\n  viewer {\n    repositories(last: 42) {\n      nodes {\n        __typename\n        id\n        name\n        viewerHasStarred\n      }\n    }\n  }\n}"}');
 
         expect(r.exception, isNull);
         expect(r.data, isNotNull);
@@ -136,30 +128,41 @@ void main() {
     });
     group('mutation', () {
       test('successful mutation', () async {
-        final MutationOptions _options =
-            MutationOptions(documentNode: parseString(addStar));
-        when(mockHttpClient.send(any)).thenAnswer((Invocation a) async =>
-            simpleResponse(
-                body:
-                    '{"data":{"action":{"starrable":{"viewerHasStarred":true}}}}'));
+        final MutationOptions _options = MutationOptions(
+          documentNode: parseString(addStar),
+        );
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'action': {
+                    'starrable': {
+                      'viewerHasStarred': true,
+                    },
+                  },
+                },
+              ),
+            ],
+          ),
+        );
 
         final QueryResult response = await graphQLClientClient.mutate(_options);
 
-        final http.Request request = verify(mockHttpClient.send(captureAny))
-            .captured
-            .first as http.Request;
-        expect(request.method, 'post');
-        expect(request.url.toString(), 'https://api.github.com/graphql');
-        expect(
-          request.headers,
-          <String, String>{
-            'accept': '*/*',
-            'content-type': 'application/json; charset=utf-8',
-            'Authorization': 'Bearer my-special-bearer-token',
-          },
+        verify(
+          link.request(
+            Request(
+              operation: Operation(
+                document: parseString(addStar),
+              ),
+              variables: <String, dynamic>{},
+              context: Context(),
+            ),
+          ),
         );
-        expect(await request.finalize().bytesToString(),
-            r'{"operationName":null,"variables":{},"query":"mutation {\n  action: addStar(input: {starrableId: \"some_repo\"}) {\n    starrable {\n      viewerHasStarred\n    }\n  }\n}"}');
 
         expect(response.exception, isNull);
         expect(response.data, isNotNull);

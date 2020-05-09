@@ -1,5 +1,5 @@
+import 'package:gql_exec/gql_exec.dart';
 import 'package:graphql/src/exceptions/_base_exceptions.dart';
-import './graphql_error.dart';
 
 class OperationException implements Exception {
   /// Any graphql errors returned from the operation

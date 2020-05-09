@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/widgets.dart';
 import 'package:gql/language.dart';
+import 'package:gql_exec/gql_exec.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
@@ -42,7 +43,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   bool _loading = true;
   T _data;
   dynamic _error;
-  StreamSubscription<FetchResult> _subscription;
+  StreamSubscription<Response> _subscription;
 
   ConnectivityResult _currentConnectivityResult;
   StreamSubscription<ConnectivityResult> _networkSubscription;
@@ -50,13 +51,15 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   void _initSubscription() {
     final GraphQLClient client = GraphQLProvider.of(context).value;
     assert(client != null);
-    final Operation operation = Operation(
-      documentNode: parseString(widget.query),
+    final Request request = Request(
+      operation: Operation(
+        document: parseString(widget.query),
+        operationName: widget.operationName,
+      ),
       variables: widget.variables,
-      operationName: widget.operationName,
     );
 
-    final Stream<FetchResult> stream = client.subscribe(operation);
+    final Stream<Response> stream = client.subscribe(request);
 
     if (_subscription == null) {
       // Set the initial value for the first time.
@@ -109,7 +112,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     super.dispose();
   }
 
-  void _onData(final FetchResult message) {
+  void _onData(final Response message) {
     setState(() {
       _loading = false;
       _data = message.data as T;
@@ -121,7 +124,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
     setState(() {
       _loading = false;
       _data = null;
-      _error = (error is SubscriptionError) ? error.payload : error;
+      _error = error;
     });
   }
 

@@ -1,5 +1,6 @@
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
+import 'package:gql_exec/gql_exec.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
@@ -101,7 +102,7 @@ class BaseOptions extends RawOperationData {
   ErrorPolicy get errorPolicy => policies.error;
 
   /// Context to be passed to link execution chain.
-  Map<String, dynamic> context;
+  Context context;
 }
 
 /// Query options.
@@ -115,7 +116,7 @@ class QueryOptions extends BaseOptions {
     ErrorPolicy errorPolicy,
     Object optimisticResult,
     this.pollInterval,
-    Map<String, dynamic> context,
+    Context context,
   }) : super(
           policies: Policies(fetch: fetchPolicy, error: errorPolicy),
           // ignore: deprecated_member_use_from_same_package
@@ -144,7 +145,7 @@ class MutationOptions extends BaseOptions {
     Map<String, dynamic> variables,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
-    Map<String, dynamic> context,
+    Context context,
     this.onCompleted,
     this.update,
     this.onError,
@@ -262,7 +263,7 @@ class WatchQueryOptions extends QueryOptions {
     int pollInterval,
     this.fetchResults = false,
     this.eagerlyFetchResults,
-    Map<String, dynamic> context,
+    Context context,
   }) : super(
           // ignore: deprecated_member_use_from_same_package
           document: document,
