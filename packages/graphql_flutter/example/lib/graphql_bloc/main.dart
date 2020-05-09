@@ -54,7 +54,7 @@ class _MyHomePageState extends State<GraphQLBlocPatternScreen> {
                   );
                 }
 
-                final List<Repo> repositories = snapshot.data;
+                final repositories = snapshot.data;
 
                 return Expanded(
                   child: ListView.builder(
@@ -84,7 +84,7 @@ class StarrableRepository extends StatelessWidget {
   final Repo repository;
 
   Map<String, Object> extractRepositoryData(Map<String, Object> data) {
-    final Map<String, Object> action = data['action'] as Map<String, Object>;
+    final action = data['action'] as Map<String, Object>;
 
     if (action == null) {
       return null;
@@ -101,7 +101,7 @@ class StarrableRepository extends StatelessWidget {
       stream: bloc.toggleStarLoadingStream,
       initialData: null,
       builder: (BuildContext context, AsyncSnapshot<String> result) {
-        final bool loading = repository.id == result.data;
+        final loading = repository.id == result.data;
         return ListTile(
           leading: viewerHasStarred
               ? const Icon(

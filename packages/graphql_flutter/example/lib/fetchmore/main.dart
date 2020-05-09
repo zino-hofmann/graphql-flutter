@@ -11,18 +11,18 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HttpLink httpLink = HttpLink(
+    final httpLink = HttpLink(
       uri: 'https://api.github.com/graphql',
     );
 
-    final AuthLink authLink = AuthLink(
+    final authLink = AuthLink(
       // ignore: undefined_identifier
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    Link link = authLink.concat(httpLink);
+    final link = authLink.concat(httpLink);
 
-    final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
+    final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: InMemoryCache(),
         link: link,
@@ -51,13 +51,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String _searchQuery = "flutter";
+  String _searchQuery = 'flutter';
   int nRepositories = 10;
 
   void changeQuery(String query) {
     setState(() {
       print(query);
-      _searchQuery = query ?? "flutter";
+      _searchQuery = query ?? 'flutter';
     });
   }
 
@@ -108,18 +108,18 @@ class _MyHomePageState extends State<MyHomePage> {
                 }
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                final List<dynamic> repositories =
+                final repositories =
                     (result.data['search']['nodes'] as List<dynamic>);
 
                 final Map pageInfo = result.data['search']['pageInfo'];
                 final String fetchMoreCursor = pageInfo['endCursor'];
-                FetchMoreOptions opts = FetchMoreOptions(
+                final opts = FetchMoreOptions(
                   variables: {'cursor': fetchMoreCursor},
                   updateQuery: (previousResultData, fetchMoreResultData) {
                     // this is where you combine your previous data and response
                     // in this case, we want to display previous repos plus next repos
                     // so, we combine data in both into a single list of repos
-                    final List<dynamic> repos = [
+                    final repos = [
                       ...previousResultData['search']['nodes'] as List<dynamic>,
                       ...fetchMoreResultData['search']['nodes'] as List<dynamic>
                     ];
@@ -157,7 +157,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
-                            Text("Load More"),
+                            Text('Load More'),
                           ],
                         ),
                         onPressed: () {

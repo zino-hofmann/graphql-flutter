@@ -15,18 +15,19 @@ class GraphQLWidgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final HttpLink httpLink = HttpLink(
+    final httpLink = HttpLink(
       uri: 'https://api.github.com/graphql',
     );
 
-    final AuthLink authLink = AuthLink(
+    final authLink = AuthLink(
       // ignore: undefined_identifier
       getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
-    Link link = authLink.concat(httpLink);
+    var link = authLink.concat(httpLink);
+
     if (ENABLE_WEBSOCKETS) {
-      final WebSocketLink websocketLink = WebSocketLink(
+      final websocketLink = WebSocketLink(
         url: 'ws://localhost:8080/ws/graphql',
         config: SocketClientConfig(
             autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
@@ -35,7 +36,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
       link = link.concat(websocketLink);
     }
 
-    final ValueNotifier<GraphQLClient> client = ValueNotifier<GraphQLClient>(
+    final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: OptimisticCache(
           dataIdFromObject: typenameDataIdFromObject,
@@ -109,8 +110,8 @@ class _MyHomePageState extends State<MyHomePage> {
                   }
 
                   // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
-                  final List<LazyCacheMap> repositories = (result.data['viewer']
-                          ['repositories']['nodes'] as List<dynamic>)
+                  final repositories = (result.data['viewer']['repositories']
+                          ['nodes'] as List<dynamic>)
                       .cast<LazyCacheMap>();
 
                   return Expanded(
@@ -153,7 +154,7 @@ class StarrableRepository extends StatelessWidget {
   final Map<String, Object> repository;
 
   Map<String, Object> extractRepositoryData(Object data) {
-    final Map<String, Object> action =
+    final action =
         (data as Map<String, Object>)['action'] as Map<String, Object>;
     if (action == null) {
       return null;
@@ -179,9 +180,8 @@ class StarrableRepository extends StatelessWidget {
           if (result.hasException) {
             print(result.exception);
           } else {
-            final Map<String, Object> updated =
-                Map<String, Object>.from(repository)
-                  ..addAll(extractRepositoryData(result.data));
+            final updated = Map<String, Object>.from(repository)
+              ..addAll(extractRepositoryData(result.data));
             cache.write(typenameDataIdFromObject(updated), updated);
           }
         },
