@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/events.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
@@ -32,7 +32,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       }
     } catch (_, stackTrace) {
       print('$_ $stackTrace');
-      yield currentState;
+      yield state;
     }
   }
 
@@ -43,8 +43,8 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       final queryResults =
           await this.githubRepository.getRepositories(numOfRepositories);
 
-      if (queryResults.hasErrors) {
-        yield ReposNotLoaded(queryResults.errors);
+      if (queryResults.hasException) {
+        yield ReposNotLoaded(queryResults.exception.graphqlErrors);
         return;
       }
 
@@ -101,9 +101,9 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
 
       final queryResults = await githubRepository.toggleRepoStar(repo);
 
-      if (queryResults.hasErrors) {
+      if (queryResults.hasException) {
         // @TODO Improve error handling here, may be introduce a hasError Method
-        yield ReposNotLoaded(queryResults.errors);
+        yield ReposNotLoaded(queryResults.exception.graphqlErrors);
         return;
       }
 

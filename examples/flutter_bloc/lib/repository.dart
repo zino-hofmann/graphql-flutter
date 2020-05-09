@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
 import 'package:graphql_flutter_bloc_example/graphql_operation/mutations/mutations.dart'
@@ -15,7 +16,7 @@ class GithubRepository {
 
   Future<QueryResult> getRepositories(int numOfRepositories) async {
     final WatchQueryOptions _options = WatchQueryOptions(
-      document: queries.readRepositories,
+      documentNode: parseString(queries.readRepositories),
       variables: <String, dynamic>{
         'nRepositories': numOfRepositories,
       },
@@ -31,7 +32,7 @@ class GithubRepository {
         repo.viewerHasStarred ? mutations.removeStar : mutations.addStar;
 
     final MutationOptions _options = MutationOptions(
-      document: document,
+      documentNode: parseString(document),
       variables: <String, String>{
         'starrableId': repo.id,
       },

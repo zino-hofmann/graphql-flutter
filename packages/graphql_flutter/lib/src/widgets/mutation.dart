@@ -5,7 +5,7 @@ import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef RunMutation = void Function(
+typedef RunMutation = MultiSourceResult Function(
   Map<String, dynamic> variables, {
   Object optimisticResult,
 });
@@ -63,9 +63,6 @@ class MutationState extends State<Mutation> {
 
   // TODO is it possible to extract shared logic into mixin
   void _initQuery() {
-    client = GraphQLProvider.of(context).value;
-    assert(client != null);
-
     observableQuery?.close();
     observableQuery = client.watchQuery(_providedOptions.copy());
   }
@@ -73,7 +70,12 @@ class MutationState extends State<Mutation> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initQuery();
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    if (client != this.client) {
+      this.client = client;
+      _initQuery();
+    }
   }
 
   @override

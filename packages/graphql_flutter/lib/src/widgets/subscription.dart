@@ -91,7 +91,12 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initSubscription();
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    if (client != _client) {
+      _client = client;
+      _initSubscription();
+    }
   }
 
   @override
