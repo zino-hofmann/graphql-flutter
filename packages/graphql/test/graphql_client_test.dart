@@ -52,7 +52,7 @@ void main() {
     group('query', () {
       test('successful response', () async {
         final WatchQueryOptions _options = WatchQueryOptions(
-          documentNode: parseString(readRepositories),
+          document: parseString(readRepositories),
           variables: <String, dynamic>{
             'nRepositories': 42,
           },
@@ -135,7 +135,7 @@ void main() {
 
         final QueryResult r = await graphQLClientClient.query(
           WatchQueryOptions(
-            documentNode: parseString(readRepositories),
+            document: parseString(readRepositories),
           ),
         );
 
@@ -158,7 +158,7 @@ void main() {
 
         final QueryResult r = await graphQLClientClient.query(
           WatchQueryOptions(
-            documentNode: parseString(readRepositories),
+            document: parseString(readRepositories),
           ),
         );
 
@@ -180,7 +180,7 @@ void main() {
     group('mutation', () {
       test('successful mutation', () async {
         final MutationOptions _options = MutationOptions(
-          documentNode: parseString(addStar),
+          document: parseString(addStar),
         );
 
         when(

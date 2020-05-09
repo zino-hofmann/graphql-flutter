@@ -106,7 +106,7 @@ class QueryManager {
     // create a new request to execute
     final Request request = Request(
       operation: Operation(
-        document: options.documentNode,
+        document: options.document,
         operationName: options.operationName,
       ),
       variables: options.variables,
