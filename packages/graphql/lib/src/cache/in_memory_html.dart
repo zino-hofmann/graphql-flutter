@@ -12,12 +12,13 @@ import 'package:graphql/src/utilities/helpers.dart' show deeplyMergeLeft;
 class InMemoryCache implements Cache {
   InMemoryCache({
     this.storagePrefix = '',
-  }) {
-    masterKey = storagePrefix ?? '' + '_graphql_cache';
-  }
+  });
 
-  final String storagePrefix;
-  String masterKey;
+  final FutureOr<String> storagePrefix;
+
+  Future<String> masterKey() async {
+    return await storagePrefix ?? '' + '_graphql_cache';
+  }
 
   @protected
   HashMap<String, dynamic> data = HashMap<String, dynamic>();
@@ -68,12 +69,12 @@ class InMemoryCache implements Cache {
   }
 
   Future<dynamic> _writeToStorage() async {
-    window.localStorage[masterKey] = jsonEncode(data);
+    window.localStorage[await masterKey()] = jsonEncode(data);
   }
 
   Future<HashMap<String, dynamic>> _readFromStorage() async {
     try {
-      final decoded = jsonDecode(window.localStorage[masterKey]);
+      final decoded = jsonDecode(window.localStorage[await masterKey()]);
       return HashMap.from(decoded);
     } catch (error) {
       // TODO: handle error
