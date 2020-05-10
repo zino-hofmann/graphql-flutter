@@ -1,3 +1,15 @@
+# [3.1.0-beta.5](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.4...v3.1.0-beta.5) (2020-05-10)
+
+
+### Bug Fixes
+
+* **packaging:** upgrade rxdart ([20364a9](https://github.com/zino-app/graphql-flutter/commit/20364a9bbea6f2fb8f90001e7301990486b5263d))
+
+
+### Features
+
+* **graphql:** custom auth headerKey ([167fac5](https://github.com/zino-app/graphql-flutter/commit/167fac5366160aa8384c3d87c900b38b065f6d59))
+
 # [3.1.0-beta.4](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2020-04-21)
 
 
