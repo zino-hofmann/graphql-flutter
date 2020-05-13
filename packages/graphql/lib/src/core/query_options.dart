@@ -346,7 +346,7 @@ class FetchMoreOptions {
         assert(updateQuery != null),
         this.documentNode =
             // ignore: deprecated_member_use_from_same_package
-            documentNode ?? document != null ? parseString(document) : null;
+            documentNode ?? (document != null ? parseString(document) : null);
 
   DocumentNode documentNode;
 
