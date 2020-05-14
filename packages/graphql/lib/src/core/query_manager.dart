@@ -287,15 +287,20 @@ class QueryManager {
   ///
   /// rebroadcast queries inherit `optimistic`
   /// from the triggering state-change
+  // TODO  ^ no longer true. I would like to recoup the entity-wise
+  // TODO cache state optimistic awareness
   void rebroadcastQueries() {
     for (ObservableQuery query in queries.values) {
       if (query.isRebroadcastSafe) {
-        final dynamic cachedData = cache.read(query.options.toKey());
+        // TODO use queryId everywhere or nah
+        final dynamic cachedData =
+            cache.readQuery(query.options.asRequest, optimistic: true);
         if (cachedData != null) {
           query.addResult(
             mapFetchResultToQueryResult(
               Response(data: cachedData),
               query.options,
+              // TODO maybe entirely wrong
               source: QueryResultSource.Cache,
             ),
           );

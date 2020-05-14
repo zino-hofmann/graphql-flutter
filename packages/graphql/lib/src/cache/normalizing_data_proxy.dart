@@ -9,25 +9,40 @@ import './data_proxy.dart';
 
 typedef DataIdResolver = String Function(Map<String, Object> object);
 
-/// Implements the core normalization api leveraged by the cache and proxy
+/// Implements the core (de)normalization api leveraged by the cache and proxy,
 ///
-/// `read` and `write` must still be supplied by the implementing class
+/// [readNormalized] and [writeNormalized] must still be supplied by the implementing class
 abstract class NormalizingDataProxy extends GraphQLDataProxy {
+  /// `typePolicies` to pass down to `normalize`
   Map<String, TypePolicy> typePolicies;
+
+  /// Whether to add `__typenames` automatically
   bool addTypename;
 
+  /// Optional `dataIdFromObject` function to pass through to [normalize]
   DataIdResolver dataIdFromObject;
 
-  dynamic read(String rootId, {bool optimistic});
+  /// Read normaized data from the cache
+  ///
+  /// Called from [readQuery] and [readFragment], which handle denormalization.
+  ///
+  /// The key differentiating factor for an implementing `cache` or `proxy`
+  /// is usually how they handle [optimistic] reads.
+  @protected
+  dynamic readNormalized(String rootId, {bool optimistic});
 
-  void write(String dataId, dynamic value);
+  /// Write normalized data into the cache.
+  ///
+  /// Called from [writeQuery] and [writeFragment]
+  @protected
+  void writeNormalized(String dataId, dynamic value);
 
   Map<String, dynamic> readQuery(
     Request request, {
     bool optimistic = true,
   }) =>
       denormalize(
-        reader: (dataId) => read(dataId, optimistic: optimistic),
+        reader: (dataId) => readNormalized(dataId, optimistic: optimistic),
         query: request.operation.document,
         operationName: request.operation.operationName,
         variables: request.variables,
@@ -43,7 +58,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     bool optimistic = true,
   }) =>
       denormalizeFragment(
-        reader: (dataId) => read(dataId, optimistic: optimistic),
+        reader: (dataId) => readNormalized(dataId, optimistic: optimistic),
         fragment: fragment,
         idFields: idFields,
         fragmentName: fragmentName,
@@ -53,14 +68,13 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         dataIdFromObject: dataIdFromObject,
       );
 
-  /// [normalize] the given `data` into the cache using graphql metadata from `request`
   void writeQuery(
     Request request,
     Map<String, dynamic> data, {
     String queryId,
   }) =>
       normalize(
-        writer: (dataId, value) => write(dataId, value),
+        writer: (dataId, value) => writeNormalized(dataId, value),
         query: request.operation.document,
         operationName: request.operation.operationName,
         variables: request.variables,
@@ -78,7 +92,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     String queryId,
   }) =>
       normalizeFragment(
-        writer: (dataId, value) => write(dataId, value),
+        writer: (dataId, value) => writeNormalized(dataId, value),
         fragment: fragment,
         idFields: idFields,
         data: data,

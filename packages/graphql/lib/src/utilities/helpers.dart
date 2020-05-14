@@ -61,6 +61,8 @@ Map<String, dynamic> _recursivelyAddAll(
 /// ]));
 /// // { keyA: a2, keyB: b3 }
 /// ```
+///
+/// Conflicting [List]s are overwritten like scalars
 Map<String, dynamic> deeplyMergeLeft(
   Iterable<Map<String, dynamic>> maps,
 ) {

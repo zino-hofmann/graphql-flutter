@@ -10,6 +10,4 @@ overridePrint(testFn(List<String> log)) => () {
       return Zone.current.fork(specification: spec).run(() => testFn(log));
     };
 
-NormalizedInMemoryCache getTestCache() => NormalizedInMemoryCache(
-      dataIdFromObject: typenameDataIdFromObject,
-    );
+GraphQLCache getTestCache() => GraphQLCache();

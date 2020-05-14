@@ -1,43 +1,13 @@
-import 'dart:collection';
-
 import 'package:graphql/src/cache/normalizing_data_proxy.dart';
 import 'package:meta/meta.dart';
-
-import 'package:graphql/src/cache/data_proxy.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/store.dart';
 
-export './data_proxy.dart';
+import 'package:graphql/src/cache/_optimistic_transactions.dart';
 
-typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
-
-class OptimisticPatch extends Object {
-  OptimisticPatch(this.id, this.data);
-  String id;
-  HashMap<String, dynamic> data;
-}
-
-class OptimisticProxy extends NormalizingDataProxy {
-  OptimisticProxy(this.cache);
-
-  GraphQLCache cache;
-
-  HashMap<String, dynamic> data = HashMap<String, dynamic>();
-
-  @override
-  dynamic read(String rootId, {bool optimistic = true}) {
-    if (!optimistic) {
-      return cache.read(rootId, optimistic: false);
-    }
-    // the cache calls `patch.data.containsKey(rootId)`,
-    // so this is not an infinite loop
-    return data[rootId] ?? cache.read(rootId, optimistic: true);
-  }
-
-  @override
-  void write(String dataId, dynamic value) => data[dataId] = value;
-}
+export 'package:graphql/src/cache/store.dart';
+export 'package:graphql/src/cache/data_proxy.dart';
 
 class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
@@ -45,24 +15,30 @@ class GraphQLCache extends NormalizingDataProxy {
     this.dataIdFromObject,
   }) : store = store ?? InMemoryStore();
 
+  /// Stores the underlying normalized data
   @protected
   final Store store;
 
   final DataIdResolver dataIdFromObject;
 
+  /// List of patches recorded through [recordOptimisticTransaction]
+  ///
+  /// They are applied in ascending order,
+  /// thus data in `last` will overwrite that in `first`
+  /// if there is a conflict
   @protected
-  List<OptimisticPatch> optimisticPatches = <OptimisticPatch>[];
+  List<OptimisticPatch> optimisticPatches = [];
 
-  /// Reads and dereferences an entity from the first valid optimistic layer,
+  /// Reads dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
-  Object read(String rootId, {bool optimistic = true}) {
+  Object readNormalized(String rootId, {bool optimistic = true}) {
     Object value = store.get(rootId);
 
     if (!optimistic) {
       return value;
     }
 
-    for (OptimisticPatch patch in optimisticPatches) {
+    for (final patch in optimisticPatches) {
       if (patch.data.containsKey(rootId)) {
         final Object patchData = patch.data[rootId];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
@@ -79,9 +55,8 @@ class GraphQLCache extends NormalizingDataProxy {
     return value;
   }
 
-  void write(String dataId, dynamic value) => store.put(dataId, value);
-
-  OptimisticProxy get _proxy => OptimisticProxy(this);
+  void writeNormalized(String dataId, dynamic value) =>
+      store.put(dataId, value);
 
   String _parentPatchId(String id) {
     final List<String> parts = id.split('.');
@@ -93,7 +68,7 @@ class GraphQLCache extends NormalizingDataProxy {
 
   bool _patchExistsFor(String id) =>
       optimisticPatches.firstWhere(
-        (OptimisticPatch patch) => patch.id == id,
+        (patch) => patch.id == id,
         orElse: () => null,
       ) !=
       null;
@@ -107,7 +82,8 @@ class GraphQLCache extends NormalizingDataProxy {
     return parentId == null || _patchExistsFor(parentId);
   }
 
-  /// Add a given patch using the given [transform]
+  // TODO does patch hierachy still makes sense
+  /// Record the given [transaction] into a patch with the id [addId]
   ///
   /// 1 level of hierarchical optimism is supported:
   /// * if a patch has the id `$queryId.child`, it will be removed with `$queryId`
@@ -120,21 +96,22 @@ class GraphQLCache extends NormalizingDataProxy {
     CacheTransaction transaction,
     String addId,
   ) {
-    final OptimisticProxy patch = transaction(_proxy) as OptimisticProxy;
+    final _proxy = transaction(OptimisticProxy(this)) as OptimisticProxy;
     if (_safeToAdd(addId)) {
-      optimisticPatches.add(OptimisticPatch(addId, patch.data));
+      optimisticPatches.add(_proxy.asPatch(addId));
     }
   }
 
   /// Remove a given patch from the list
   ///
   /// This will also remove all "nested" patches, such as `$queryId.update`
+  /// (see [recordOptimisticTransaction])
+  ///
   /// This allows for hierarchical optimism that is automatically cleaned up
   /// without having to tightly couple optimistic changes
   void removeOptimisticPatch(String removeId) {
     optimisticPatches.removeWhere(
-      (OptimisticPatch patch) =>
-          patch.id == removeId || _parentPatchId(patch.id) == removeId,
+      (patch) => patch.id == removeId || _parentPatchId(patch.id) == removeId,
     );
   }
 }
