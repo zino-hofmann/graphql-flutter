@@ -45,7 +45,7 @@ dev_dependencies:
 
 To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
 
-In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `InMemoryCache`.
+In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `GraphQLCache`.
 
 ```dart
 // ...
@@ -61,7 +61,7 @@ final AuthLink _authLink = AuthLink(
 final Link _link = _authLink.concat(_httpLink);
 
 final GraphQLClient _client = GraphQLClient(
-        cache: InMemoryCache(),
+        cache: GraphQLCache(),
         link: _link,
     );
 
@@ -201,7 +201,7 @@ if (isStarred) {
 ### AST documents
 
 > We are deprecating `document` and recommend you update your application to use
-`document` instead. `document` will be removed from the api in a future version.
+> `document` instead. `document` will be removed from the api in a future version.
 
 For example:
 
@@ -224,7 +224,7 @@ With [`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen) you can par
 
 ```graphql
 mutation AddStar($starrableId: ID!) {
-  action: addStar(input: {starrableId: $starrableId}) {
+  action: addStar(input: { starrableId: $starrableId }) {
     starrable {
       viewerHasStarred
     }
@@ -265,13 +265,11 @@ final ErrorLink errorLink = ErrorLink(errorHandler: (ErrorResponse response) {
 
 ### `PersistedQueriesLink` (experimental)
 
-To improve performance you can make use of a concept introduced by [Apollo](https://www.apollographql.com/) called [Automatic persisted queries](https://www.apollographql.com/docs/apollo-server/performance/apq/) (or short "APQ") to send smaller requests and even enabled CDN caching for your GraphQL API. 
+To improve performance you can make use of a concept introduced by [Apollo](https://www.apollographql.com/) called [Automatic persisted queries](https://www.apollographql.com/docs/apollo-server/performance/apq/) (or short "APQ") to send smaller requests and even enabled CDN caching for your GraphQL API.
 
 **ATTENTION:** This also requires you to have a GraphQL server that supports APQ, like [Apollo's GraphQL Server](https://www.apollographql.com/docs/apollo-server/) and will only work for queries (but not for mutations or subscriptions).
 
-
 You can than use it simply by prepending a `PersistedQueriesLink` to your normal `HttpLink`:
-
 
 ```dart
 final PersistedQueriesLink _apqLink = PersistedQueriesLink(
@@ -285,7 +283,6 @@ final HttpLink _httpLink = HttpLink(
 
 final Link _link = _apqLink.concat(_httpLink);
 ```
-
 
 [build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
 [build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter

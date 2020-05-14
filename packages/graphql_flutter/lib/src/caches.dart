@@ -9,8 +9,8 @@ import 'package:graphql/client.dart' as client;
 final FutureOr<String> flutterStoragePrefix =
     (() async => (await getApplicationDocumentsDirectory()).path)();
 
-class InMemoryCache extends client.InMemoryCache {
-  InMemoryCache({
+class GraphQLCache extends client.GraphQLCache {
+  GraphQLCache({
     FutureOr<String> storagePrefix,
   }) : super(storagePrefix: storagePrefix ?? flutterStoragePrefix);
 }

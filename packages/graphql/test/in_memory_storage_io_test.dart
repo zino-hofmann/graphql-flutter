@@ -10,7 +10,7 @@ import 'helpers.dart';
 void main() {
   group('In memory exception handling', () {
     test('FileSystemException', overridePrint((List<String> log) async {
-      final InMemoryCache cache = InMemoryCache(
+      final GraphQLCache cache = GraphQLCache(
         storagePrefix: Future.error(FileSystemException()),
       );
       await cache.restore();

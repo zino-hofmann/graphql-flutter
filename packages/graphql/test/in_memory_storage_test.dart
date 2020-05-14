@@ -41,7 +41,7 @@ final Map<String, Object> eData = <String, Object>{
 void main() {
   group('Normalizes writes', () {
     test('.write .read round trip', () async {
-      final InMemoryCache cache = InMemoryCache();
+      final GraphQLCache cache = GraphQLCache();
       cache.write(aKey, aData);
       await cache.save();
       cache.reset();
@@ -51,7 +51,7 @@ void main() {
 
     test('.write avoids overriding a superset with a subset of a field (#155)',
         () async {
-      final InMemoryCache cache = InMemoryCache();
+      final GraphQLCache cache = GraphQLCache();
       cache.write(aKey, aData);
 
       final Map<String, Object> anotherAData = <String, Object>{
@@ -73,7 +73,7 @@ void main() {
     });
 
     test('.write does not mutate input', () async {
-      final InMemoryCache cache = InMemoryCache();
+      final GraphQLCache cache = GraphQLCache();
       cache.write(aKey, aData);
       final Map<String, Object> anotherAData = <String, Object>{
         'a': <String, Object>{
@@ -97,7 +97,7 @@ void main() {
     });
 
     test('saving concurrently wont error', () async {
-      final InMemoryCache cache = InMemoryCache();
+      final GraphQLCache cache = GraphQLCache();
       cache.write(aKey, aData);
       cache.write(bKey, bData);
       cache.write(cKey, cData);

@@ -22,7 +22,7 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
     final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: InMemoryCache(),
+        cache: GraphQLCache(),
         link: link,
       ),
     );

@@ -26,7 +26,7 @@ GraphQLClient client() {
   );
 
   return GraphQLClient(
-    cache: InMemoryCache(),
+    cache: GraphQLCache(),
     link: _link,
   );
 }

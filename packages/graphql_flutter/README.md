@@ -51,7 +51,7 @@ Find the migration from version 2 to version 3 [here](./../../changelog-v2-v3.md
 
 ## Usage
 
-To use the client it first needs to be initialized with a link and cache. For this example, we will be using an `HttpLink` as our link and `InMemoryCache` as our cache. If your endpoint requires authentication you can concatenate the `AuthLink`, it resolves the credentials using a future, so you can authenticate asynchronously.
+To use the client it first needs to be initialized with a link and cache. For this example, we will be using an `HttpLink` as our link and `GraphQLCache` as our cache. If your endpoint requires authentication you can concatenate the `AuthLink`, it resolves the credentials using a future, so you can authenticate asynchronously.
 
 > For this example we will use the public GitHub API.
 
@@ -75,7 +75,7 @@ void main() {
 
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
-      cache: InMemoryCache(),
+      cache: GraphQLCache(),
       link: link,
     ),
   );

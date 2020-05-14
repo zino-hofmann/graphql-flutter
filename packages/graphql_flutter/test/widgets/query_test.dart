@@ -90,7 +90,7 @@ void main() {
       );
       client = ValueNotifier(
         GraphQLClient(
-          cache: InMemoryCache(storagePrefix: 'test'),
+          cache: GraphQLCache(storagePrefix: 'test'),
           link: httpLink,
         ),
       );

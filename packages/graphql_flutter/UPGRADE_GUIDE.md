@@ -25,7 +25,7 @@ void main() {
 -  Client(
 -    endPoint: 'https://api.github.com/graphql',
 +  GraphQLClient(
-      cache: InMemoryCache(),
+      cache: GraphQLCache(),
 -      apiToken: '<YOUR_GITHUB_PERSONAL_ACCESS_TOKEN>',
 +      link: link,
     ),
@@ -103,4 +103,3 @@ Mutation(
 ```
 
 That's it! You should now be able to use the latest version of our library.
-
