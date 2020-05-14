@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:test/test.dart';
-import 'package:graphql/src/cache/in_memory.dart';
+import 'package:graphql/src/cache/cache.dart';
 
 const String aKey = 'aKey';
 const String bKey = 'bKey';
