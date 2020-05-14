@@ -1,6 +1,7 @@
 /// Optimistic proxying and patching classes and typedefs used by `./cache.dart`
 import 'dart:collection';
 
+import 'package:graphql/internal.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/cache/normalizing_data_proxy.dart';
@@ -43,8 +44,20 @@ class OptimisticProxy extends NormalizingDataProxy {
     return data[rootId] ?? cache.readNormalized(rootId, optimistic: true);
   }
 
-  @override
-  void writeNormalized(String dataId, dynamic value) => data[dataId] = value;
+  // TODO consider using store for optimistic patches
+  /// Write normalized data into the patch,
+  /// deeply merging maps with existing values
+  ///
+  /// Called from [writeQuery] and [writeFragment].
+  void writeNormalized(String dataId, dynamic value) {
+    if (value is Map<String, Object>) {
+      final existing = data[dataId];
+      data[dataId] =
+          existing != null ? deeplyMergeLeft([existing, value]) : value;
+    } else {
+      data[dataId] = value;
+    }
+  }
 
   OptimisticPatch asPatch(String id) => OptimisticPatch(id, data);
 }

@@ -44,6 +44,7 @@ Map<String, dynamic> _recursivelyAddAll(
         value,
       );
     } else {
+      // Lists and nulls overwrite target as if they were normal scalars
       target[key] = value;
     }
   });

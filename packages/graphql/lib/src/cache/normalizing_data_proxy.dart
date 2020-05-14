@@ -19,6 +19,8 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// Whether to add `__typenames` automatically
   bool addTypename;
 
+  bool get _addTypename => addTypename ?? true;
+
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   DataIdResolver dataIdFromObject;
 
@@ -33,7 +35,8 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   /// Write normalized data into the cache.
   ///
-  /// Called from [writeQuery] and [writeFragment]
+  /// Called from [writeQuery] and [writeFragment].
+  /// Implementors are expected to handle deep merging results themselves
   @protected
   void writeNormalized(String dataId, dynamic value);
 
@@ -47,7 +50,8 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         operationName: request.operation.operationName,
         variables: request.variables,
         typePolicies: typePolicies,
-        addTypename: addTypename,
+        addTypename: _addTypename,
+        returnPartialData: true,
       );
 
   Map<String, dynamic> readFragment({
@@ -64,7 +68,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         fragmentName: fragmentName,
         variables: variables,
         typePolicies: typePolicies,
-        addTypename: addTypename,
+        addTypename: _addTypename,
         dataIdFromObject: dataIdFromObject,
       );
 

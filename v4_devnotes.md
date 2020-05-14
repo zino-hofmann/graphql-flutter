@@ -35,3 +35,6 @@ pagination works by taking multiple data events and running user defined update
 you can give mutations the same fetch policies
 
 queries, mutations and subscriptions all run through the same controller
+
+
+note: contribute better error messages on `operationName != operation.name` to normalize

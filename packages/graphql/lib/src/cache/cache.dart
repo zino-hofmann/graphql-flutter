@@ -5,6 +5,7 @@ import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/cache/store.dart';
 
 import 'package:graphql/src/cache/_optimistic_transactions.dart';
+import 'package:normalize/normalize.dart';
 
 export 'package:graphql/src/cache/store.dart';
 export 'package:graphql/src/cache/data_proxy.dart';
@@ -13,13 +14,18 @@ class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
     Store store,
     this.dataIdFromObject,
+    this.addTypename = true,
+    this.typePolicies = const {},
   }) : store = store ?? InMemoryStore();
 
   /// Stores the underlying normalized data
   @protected
   final Store store;
 
+  /// `typePolicies` to pass down to `normalize`
+  final Map<String, TypePolicy> typePolicies;
   final DataIdResolver dataIdFromObject;
+  final bool addTypename;
 
   /// List of patches recorded through [recordOptimisticTransaction]
   ///
@@ -52,11 +58,25 @@ class GraphQLCache extends NormalizingDataProxy {
         }
       }
     }
+
     return value;
   }
 
-  void writeNormalized(String dataId, dynamic value) =>
+  /// Write normalized data into the cache,
+  /// deeply merging maps with existing values
+  ///
+  /// Called from [writeQuery] and [writeFragment].
+  void writeNormalized(String dataId, dynamic value) {
+    if (value is Map<String, Object>) {
+      final existing = store.get(dataId);
+      store.put(
+        dataId,
+        existing != null ? deeplyMergeLeft([existing, value]) : value,
+      );
+    } else {
       store.put(dataId, value);
+    }
+  }
 
   String _parentPatchId(String id) {
     final List<String> parts = id.split('.');

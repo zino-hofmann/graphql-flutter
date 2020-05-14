@@ -6,17 +6,13 @@ import 'package:meta/meta.dart';
 const String rawOperationKey = 'rawOperationKey';
 
 class TestCase {
-  TestCase(
-    String operationName, {
+  TestCase({
     @required this.data,
     @required String operation,
     Map<String, dynamic> variables = const <String, dynamic>{},
     this.normalizedEntities,
   }) : request = Request(
-          operation: Operation(
-            document: parseString(operation),
-            operationName: operationName,
-          ),
+          operation: Operation(document: parseString(operation)),
           variables: variables,
           context: Context(),
         );
@@ -31,7 +27,6 @@ class TestCase {
 }
 
 final basicTest = TestCase(
-  'basicTestOperation',
   operation: r'''{
     a {
       __typename
@@ -83,12 +78,12 @@ final basicTest = TestCase(
         'id': 9,
         'dField': {'field': true}
       },
+      'aField': {'field': false}
     },
-    'aField': {'field': false}
   },
 );
 
-final Map updatedCValue = {
+final updatedCValue = <String, dynamic>{
   '__typename': 'C',
   'id': 6,
   'new': 'field',
@@ -111,7 +106,6 @@ final Map updatedCBasicTestData = deeplyMergeLeft([
 ]);
 
 final basicTestSubsetAValue = TestCase(
-  'basicTestSubsetAValue',
   operation: r'''{
     a {
       __typename
@@ -149,7 +143,7 @@ final Map updatedSubsetOperationData = {
   'a': {
     '__typename': 'A',
     'id': 1,
-    'list': basicTest.data['a']['list'],
+    'list': basicTestSubsetAValue.data['a']['list'],
     'b': {
       '__typename': 'B',
       'id': 5,
@@ -164,11 +158,11 @@ final Map updatedSubsetOperationData = {
       'id': 10,
       'dField': {'field': true}
     },
+    'aField': {'field': false}
   },
-  'aField': {'field': false}
 };
 
-final cyclicalTest = TestCase('cyclicalTestOperation', operation: r'''{
+final cyclicalTest = TestCase(operation: r'''{
     a {
       __typename
       id
@@ -211,9 +205,9 @@ final cyclicalTest = TestCase('cyclicalTestOperation', operation: r'''{
   },
 ]);
 
-Map get cyclicalObjOperationData {
-  Map a;
-  Map b;
+Map<String, dynamic> get cyclicalObjOperationData {
+  Map<String, dynamic> a;
+  Map<String, dynamic> b;
   a = {
     '__typename': 'A',
     'id': 1,

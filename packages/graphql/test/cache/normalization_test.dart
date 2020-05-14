@@ -10,7 +10,10 @@ void main() {
     final GraphQLCache cache = getTestCache();
     test('.writeQuery .readQuery round trip', () {
       cache.writeQuery(basicTest.request, basicTest.data);
-      expect(cache.readQuery(basicTest.request), equals(basicTest.data));
+      expect(
+        cache.readQuery(basicTest.request),
+        equals(basicTest.data),
+      );
     });
     test('updating nested normalized data changes top level operation', () {
       cache.writeNormalized('C:6', updatedCValue);
@@ -21,9 +24,13 @@ void main() {
     });
     test('updating subset query only partially overrides superset query', () {
       cache.writeQuery(
-          basicTestSubsetAValue.request, basicTestSubsetAValue.data);
-      expect(cache.readQuery(basicTest.request),
-          equals(updatedSubsetOperationData));
+        basicTestSubsetAValue.request,
+        basicTestSubsetAValue.data,
+      );
+      expect(
+        cache.readQuery(basicTest.request),
+        equals(updatedSubsetOperationData),
+      );
     });
   });
 
