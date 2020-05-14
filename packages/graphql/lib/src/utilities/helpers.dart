@@ -1,6 +1,3 @@
-import 'package:graphql/src/cache/lazy_cache_map.dart'
-    show LazyDereferencingMap, unwrapMap;
-
 bool notNull(Object any) {
   return any != null;
 }
@@ -36,8 +33,7 @@ Map<String, dynamic> _recursivelyAddAll(
   Map<String, dynamic> target,
   Map<String, dynamic> source,
 ) {
-  target = Map.from(unwrapMap(target));
-  source = unwrapMap(source);
+  target = Map.from(target);
   source.forEach((String key, dynamic value) {
     if (target.containsKey(key) &&
         target[key] is Map &&
@@ -65,8 +61,6 @@ Map<String, dynamic> _recursivelyAddAll(
 /// ]));
 /// // { keyA: a2, keyB: b3 }
 /// ```
-///
-/// All given [LazyDereferencingMap] instances will be unwrapped
 Map<String, dynamic> deeplyMergeLeft(
   Iterable<Map<String, dynamic>> maps,
 ) {

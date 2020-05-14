@@ -1,17 +1,16 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_link/gql_link.dart';
+
 import 'package:graphql/src/cache/cache.dart';
-import 'package:graphql/src/cache/normalized_in_memory.dart'
-    show NormalizedInMemoryCache;
-import 'package:graphql/src/cache/optimistic.dart' show OptimisticCache;
 import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/exceptions/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
-import 'package:meta/meta.dart';
 
 class QueryManager {
   QueryManager({
@@ -24,7 +23,7 @@ class QueryManager {
   }
 
   final Link link;
-  final Cache cache;
+  final GraphQLCache cache;
 
   QueryScheduler scheduler;
   int idCounter = 1;
@@ -81,7 +80,11 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) {
+    // create a new request to execute
+    final request = options.asRequest;
+
     final QueryResult eagerResult = _resolveQueryEagerly(
+      request,
       queryId,
       options,
     );
@@ -93,26 +96,17 @@ class QueryManager {
       networkResult:
           (shouldStopAtCache(options.fetchPolicy) && !eagerResult.loading)
               ? null
-              : _resolveQueryOnNetwork(queryId, options),
+              : _resolveQueryOnNetwork(request, queryId, options),
     );
   }
 
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
   Future<QueryResult> _resolveQueryOnNetwork(
+    Request request,
     String queryId,
     BaseOptions options,
   ) async {
-    // create a new request to execute
-    final Request request = Request(
-      operation: Operation(
-        document: options.document,
-        operationName: options.operationName,
-      ),
-      variables: options.variables,
-      context: options.context ?? Context(),
-    );
-
     Response response;
     QueryResult queryResult;
 
@@ -126,10 +120,10 @@ class QueryManager {
 
       // save the data from response to the cache
       if (response.data != null && options.fetchPolicy != FetchPolicy.noCache) {
-        cache.write(
-          // TODO: think of an alternative to the old toKey(),
-          request.hashCode.toString(),
+        cache.writeQuery(
+          request,
           response.data,
+          queryId: queryId,
         );
       }
 
@@ -151,17 +145,13 @@ class QueryManager {
     }
 
     // cleanup optimistic results
-    cleanupOptimisticResults(queryId);
-    if (options.fetchPolicy != FetchPolicy.noCache &&
-        cache is NormalizedInMemoryCache) {
+    cache.removeOptimisticPatch(queryId);
+    if (options.fetchPolicy != FetchPolicy.noCache) {
       // normalize results if previously written
-      queryResult.data = cache.read(
-        // TODO: think of an alternative to the old toKey(),
-        request.hashCode.toString(),
-      );
+      queryResult.data = cache.readQuery(request);
     }
 
-    addQueryResult(queryId, queryResult);
+    addQueryResult(request, queryId, queryResult);
 
     return queryResult;
   }
@@ -169,6 +159,7 @@ class QueryManager {
   /// Add an eager cache response to the stream if possible,
   /// based on `fetchPolicy` and `optimisticResults`
   QueryResult _resolveQueryEagerly(
+    Request request,
     String queryId,
     BaseOptions options,
   ) {
@@ -179,6 +170,7 @@ class QueryManager {
     try {
       if (options.optimisticResult != null) {
         queryResult = _getOptimisticQueryResult(
+          request,
           queryId,
           cacheKey: cacheKey,
           optimisticResult: options.optimisticResult,
@@ -189,7 +181,7 @@ class QueryManager {
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
           !queryResult.optimistic) {
-        final dynamic data = cache.read(cacheKey);
+        final dynamic data = cache.readQuery(request, optimistic: false);
         // we only push an eager query with data
         if (data != null) {
           queryResult = QueryResult(
@@ -225,7 +217,7 @@ class QueryManager {
     // This is undefined-ish behavior/edge case, but still better than just
     // ignoring a provided optimisticResult.
     // Would probably be better to add it ignoring the cache in such cases
-    addQueryResult(queryId, queryResult);
+    addQueryResult(request, queryId, queryResult);
     return queryResult;
   }
 
@@ -244,15 +236,17 @@ class QueryManager {
 
   /// Add a result to the query specified by `queryId`, if it exists
   void addQueryResult(
+    Request request,
     String queryId,
     QueryResult queryResult, {
     bool writeToCache = false,
   }) {
     final ObservableQuery observableQuery = getQuery(queryId);
     if (writeToCache) {
-      cache.write(
-        observableQuery.options.toKey(),
+      cache.writeQuery(
+        request,
         queryResult.data,
+        queryId: observableQuery.options.toKey(),
       );
     }
 
@@ -263,18 +257,22 @@ class QueryManager {
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
   QueryResult _getOptimisticQueryResult(
+    Request request,
     String queryId, {
     @required String cacheKey,
     @required Object optimisticResult,
   }) {
-    assert(cache is OptimisticCache,
-        "can't optimisticly update non-optimistic cache");
-
-    (cache as OptimisticCache).addOptimisiticPatch(
-        queryId, (Cache cache) => cache..write(cacheKey, optimisticResult));
+    cache.writeQuery(
+      request,
+      optimisticResult,
+      queryId: queryId,
+    );
 
     final QueryResult queryResult = QueryResult(
-      data: cache.read(cacheKey),
+      data: cache.readQuery(
+        request,
+        optimistic: true,
+      ),
       source: QueryResultSource.OptimisticResult,
     );
     return queryResult;
@@ -282,9 +280,7 @@ class QueryManager {
 
   /// Remove the optimistic patch for `cacheKey`, if any
   void cleanupOptimisticResults(String cacheKey) {
-    if (cache is OptimisticCache) {
-      (cache as OptimisticCache).removeOptimisticPatch(cacheKey);
-    }
+    cache.removeOptimisticPatch(cacheKey);
   }
 
   /// Push changed data from cache to query streams

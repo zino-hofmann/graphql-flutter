@@ -18,6 +18,7 @@ dependencies:
   gql_http_link: ^0.2.9
   gql_transform_link: ^0.1.5
   quiver: ">=2.0.0 <3.0.0"
+  normalize: ^0.2.0
 dev_dependencies:
   pedantic: ^1.8.0+1
   mockito: ^4.0.0

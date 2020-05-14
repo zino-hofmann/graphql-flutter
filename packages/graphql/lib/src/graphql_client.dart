@@ -86,7 +86,7 @@ class GraphQLClient {
   final Link link;
 
   /// The initial [Cache] to use in the data store.
-  final Cache cache;
+  final GraphQLCache cache;
 
   QueryManager queryManager;
 

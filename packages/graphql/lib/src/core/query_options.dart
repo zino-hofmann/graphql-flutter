@@ -1,11 +1,14 @@
+import 'package:graphql/src/cache/cache.dart';
+import 'package:meta/meta.dart';
+
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
 import 'package:gql_exec/gql_exec.dart';
+
 import 'package:graphql/client.dart';
 import 'package:graphql/internal.dart';
 import 'package:graphql/src/core/raw_operation_data.dart';
 import 'package:graphql/src/utilities/helpers.dart';
-import 'package:meta/meta.dart';
 
 /// Parse GraphQL query strings into the standard GraphQL AST.
 DocumentNode gql(String query) => parseString(query);
@@ -100,6 +103,17 @@ class BaseOptions extends RawOperationData {
 
   /// Context to be passed to link execution chain.
   Context context;
+
+  // TODO consider inverting this relationship
+  /// Resolve these options into a request
+  Request get asRequest => Request(
+        operation: Operation(
+          document: document,
+          operationName: operationName,
+        ),
+        variables: variables,
+        context: context ?? Context(),
+      );
 }
 
 /// Query options.
@@ -126,7 +140,10 @@ class QueryOptions extends BaseOptions {
 }
 
 typedef OnMutationCompleted = void Function(dynamic data);
-typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
+typedef OnMutationUpdate = void Function(
+  GraphQLDataProxy cache,
+  QueryResult result,
+);
 typedef OnError = void Function(OperationException error);
 
 /// Mutation options
@@ -154,7 +171,7 @@ class MutationOptions extends BaseOptions {
 
 class MutationCallbacks {
   final MutationOptions options;
-  final Cache cache;
+  final GraphQLCache cache;
   final String queryId;
 
   MutationCallbacks({
@@ -205,12 +222,13 @@ class MutationCallbacks {
   void _optimisticUpdate(QueryResult result) {
     final String patchId = _patchId;
     // this is also done in query_manager, but better safe than sorry
-    assert(cache is OptimisticCache,
-        "can't optimisticly update non-optimistic cache");
-    (cache as OptimisticCache).addOptimisiticPatch(patchId, (Cache cache) {
-      options.update(cache, result);
-      return cache;
-    });
+    cache.recordOptimisticTransaction(
+      (GraphQLDataProxy cache) {
+        options.update(cache, result);
+        return cache;
+      },
+      patchId,
+    );
   }
 
   // optimistic patches will be cleaned up by the query_manager

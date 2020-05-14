@@ -161,6 +161,8 @@ class ObservableQuery {
 
     QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
 
+    final request = options.asRequest;
+
     try {
       // combine the query with the new query, using the function provided by the user
       fetchMoreResult.data = fetchMoreOptions.updateQuery(
@@ -168,8 +170,10 @@ class ObservableQuery {
         fetchMoreResult.data,
       );
       assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+
       // stream the new results and rebuild
       queryManager.addQueryResult(
+        request,
         queryId,
         fetchMoreResult,
         writeToCache: true,
@@ -185,6 +189,7 @@ class ObservableQuery {
         );
 
         queryManager.addQueryResult(
+          request,
           queryId,
           latestResult,
           writeToCache: true,
