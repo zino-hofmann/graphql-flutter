@@ -21,6 +21,10 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   bool get _addTypename => addTypename ?? true;
 
+  /// Used for testing
+  @protected
+  bool get returnPartialData => false;
+
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   DataIdResolver dataIdFromObject;
 
@@ -51,7 +55,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         variables: request.variables,
         typePolicies: typePolicies,
         addTypename: _addTypename,
-        returnPartialData: true,
+        returnPartialData: returnPartialData,
       );
 
   Map<String, dynamic> readFragment({
@@ -70,6 +74,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         typePolicies: typePolicies,
         addTypename: _addTypename,
         dataIdFromObject: dataIdFromObject,
+        returnPartialData: returnPartialData,
       );
 
   void writeQuery(

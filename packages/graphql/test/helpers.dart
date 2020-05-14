@@ -10,4 +10,8 @@ overridePrint(testFn(List<String> log)) => () {
       return Zone.current.fork(specification: spec).run(() => testFn(log));
     };
 
-GraphQLCache getTestCache() => GraphQLCache();
+class TestCache extends GraphQLCache {
+  bool get returnPartialData => true;
+}
+
+GraphQLCache getTestCache() => TestCache();

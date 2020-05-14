@@ -83,6 +83,15 @@ final basicTest = TestCase(
   },
 );
 
+final updatedCFragment = parseString(r'''
+fragment partialC on C {
+  __typename 
+  id
+  new
+  cField
+}
+''');
+
 final updatedCValue = <String, dynamic>{
   '__typename': 'C',
   'id': 6,
