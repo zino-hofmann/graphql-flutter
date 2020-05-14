@@ -1,66 +1,140 @@
-import "package:meta/meta.dart";
+import 'dart:collection';
 
-import 'package:gql_exec/gql_exec.dart' show Request;
-import 'package:gql/ast.dart' show DocumentNode;
+import 'package:graphql/src/cache/normalizing_data_proxy.dart';
+import 'package:meta/meta.dart';
 
-import './data_proxy.dart';
+import 'package:graphql/src/cache/data_proxy.dart';
 
-abstract class Cache {
-  dynamic read(String key) {}
+import 'package:graphql/src/utilities/helpers.dart';
+import 'package:graphql/src/cache/store.dart';
 
-  void write(
-    String key,
-    dynamic value,
-  ) {}
+export './data_proxy.dart';
 
-  Future<void> save() async {}
+typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
 
-  void restore() {}
-
-  void reset() {}
+class OptimisticPatch extends Object {
+  OptimisticPatch(this.id, this.data);
+  String id;
+  HashMap<String, dynamic> data;
 }
 
-class ReadRequest extends Request {
-  /// The root query id to read from the store
+class OptimisticProxy extends NormalizingDataProxy {
+  OptimisticProxy(this.cache);
+
+  GraphQLCache cache;
+
+  HashMap<String, dynamic> data = HashMap<String, dynamic>();
+
+  @override
+  dynamic read(String rootId, {bool optimistic = true}) {
+    if (!optimistic) {
+      return cache.read(rootId, optimistic: false);
+    }
+    // the cache calls `patch.data.containsKey(rootId)`,
+    // so this is not an infinite loop
+    return data[rootId] ?? cache.read(rootId, optimistic: true);
+  }
+
+  @override
+  void write(String dataId, dynamic value) => data[dataId] = value;
+}
+
+class GraphQLCache extends NormalizingDataProxy {
+  GraphQLCache({
+    Store store,
+    this.dataIdFromObject,
+  }) : store = store ?? InMemoryStore();
+
+  @protected
+  final Store store;
+
+  final DataIdResolver dataIdFromObject;
+
+  @protected
+  List<OptimisticPatch> optimisticPatches = <OptimisticPatch>[];
+
+  /// Reads and dereferences an entity from the first valid optimistic layer,
+  /// defaulting to the base internal HashMap.
+  Object read(String rootId, {bool optimistic = true}) {
+    Object value = store.get(rootId);
+
+    if (!optimistic) {
+      return value;
+    }
+
+    for (OptimisticPatch patch in optimisticPatches) {
+      if (patch.data.containsKey(rootId)) {
+        final Object patchData = patch.data[rootId];
+        if (value is Map<String, Object> && patchData is Map<String, Object>) {
+          value = deeplyMergeLeft([
+            value as Map<String, Object>,
+            patchData,
+          ]);
+        } else {
+          // Overwrite if not mergable
+          value = patchData;
+        }
+      }
+    }
+    return value;
+  }
+
+  void write(String dataId, dynamic value) => store.put(dataId, value);
+
+  OptimisticProxy get _proxy => OptimisticProxy(this);
+
+  String _parentPatchId(String id) {
+    final List<String> parts = id.split('.');
+    if (parts.length > 1) {
+      return parts.first;
+    }
+    return null;
+  }
+
+  bool _patchExistsFor(String id) =>
+      optimisticPatches.firstWhere(
+        (OptimisticPatch patch) => patch.id == id,
+        orElse: () => null,
+      ) !=
+      null;
+
+  /// avoid race conditions from slow updates
   ///
-  /// defaults to the root query of the graphql schema
-  String rootId;
+  /// if a server result is returned before an optimistic update is finished,
+  /// that update is discarded
+  bool _safeToAdd(String id) {
+    final String parentId = _parentPatchId(id);
+    return parentId == null || _patchExistsFor(parentId);
+  }
 
-  /// Whether to include optimistic results
-  bool optimistic;
-
-  ///  Previous result of this query, if any
-  // dynamic previousResult;
-
-}
-
-class WriteRequest extends Request {
-  /// The data id to read from the store
-  String dataId;
-
-  /// Whether to write as an optimistic patch
-  bool optimistic;
-
-  /// Result to write
-  dynamic result;
-}
-
-// Restore, reset, extract should be on store
-
-abstract class GrahpQLCache extends GraphQLDataProxy {
-  // required to implement
-  // core API
-  dynamic read(ReadRequest request);
-
-  void write(WriteRequest request);
-
-  ///If called with only one argument, removes the entire entity
-  /// identified by dataId.
+  /// Add a given patch using the given [transform]
   ///
-  /// If called with a [fieldName] as well, removes all
-  /// fields of the identified entity whose store names match fieldName.
-  bool evict(String dataId, [String fieldName]);
+  /// 1 level of hierarchical optimism is supported:
+  /// * if a patch has the id `$queryId.child`, it will be removed with `$queryId`
+  /// * if the update somehow fails to complete before the root response is removed,
+  ///   It will still be called, but the result will not be added.
+  ///
+  /// This allows for multiple optimistic treatments of a query,
+  /// without having to tightly couple optimistic changes
+  void recordOptimisticTransaction(
+    CacheTransaction transaction,
+    String addId,
+  ) {
+    final OptimisticProxy patch = transaction(_proxy) as OptimisticProxy;
+    if (_safeToAdd(addId)) {
+      optimisticPatches.add(OptimisticPatch(addId, patch.data));
+    }
+  }
 
-  // optimistic API
-  void removeOptimisticPatch(String id);
+  /// Remove a given patch from the list
+  ///
+  /// This will also remove all "nested" patches, such as `$queryId.update`
+  /// This allows for hierarchical optimism that is automatically cleaned up
+  /// without having to tightly couple optimistic changes
+  void removeOptimisticPatch(String removeId) {
+    optimisticPatches.removeWhere(
+      (OptimisticPatch patch) =>
+          patch.id == removeId || _parentPatchId(patch.id) == removeId,
+    );
+  }
 }
