@@ -1,3 +1,10 @@
+# [3.1.0-beta.6](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.5...v3.1.0-beta.6) (2020-05-16)
+
+
+### Bug Fixes
+
+* **packaging:** correct dependencies, remove authors ([a22d504](https://github.com/zino-app/graphql-flutter/commit/a22d5041a556cca8fa52ab59119ff8fd7ad652ec))
+
 # [3.1.0-beta.5](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.4...v3.1.0-beta.5) (2020-05-10)
 
 
