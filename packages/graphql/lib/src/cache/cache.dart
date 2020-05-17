@@ -1,4 +1,4 @@
-import 'package:graphql/src/cache/normalizing_data_proxy.dart';
+import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/utilities/helpers.dart';

@@ -16,9 +16,14 @@ dependencies:
   gql_exec: ^0.2.2
   gql_link: ^0.3.0
   gql_http_link: ^0.2.9
+  gql_websocket_link: ^0.1.1-alpha
   gql_transform_link: ^0.1.5
+  gql_error_link:  ^0.1.1-alpha
+  gql_dedupe_link: ^1.0.10
+
   quiver: ">=2.0.0 <3.0.0"
   normalize: ^0.2.0
+
 dev_dependencies:
   pedantic: ^1.8.0+1
   mockito: ^4.0.0
@@ -26,3 +31,4 @@ dev_dependencies:
   test_coverage: ^0.3.0+1
 environment:
   sdk: ">=2.6.0 <3.0.0"
+
