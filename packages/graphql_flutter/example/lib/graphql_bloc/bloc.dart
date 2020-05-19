@@ -1,4 +1,3 @@
-import 'package:gql/language.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -65,9 +64,7 @@ class Bloc {
   static final Link _link = _authLink.concat(_httpLink);
 
   static final GraphQLClient _client = GraphQLClient(
-    cache: NormalizedInMemoryCache(
-      dataIdFromObject: typenameDataIdFromObject,
-    ),
+    cache: GraphQLCache(),
     link: _link,
   );
 
@@ -78,8 +75,6 @@ class Bloc {
       variables: <String, String>{
         'starrableId': repo.id,
       },
-//      fetchPolicy: widget.options.fetchPolicy,
-//      errorPolicy: widget.options.errorPolicy,
     );
 
     final result = await _client.mutate(_options);
@@ -89,21 +84,13 @@ class Bloc {
   Future<void> _queryRepo({int nRepositories = 50}) async {
     // null is loading
     _repoSubject.add(null);
-//    FetchPolicy fetchPolicy = widget.options.fetchPolicy;
-//
-//    if (fetchPolicy == FetchPolicy.cacheFirst) {
-//      fetchPolicy = FetchPolicy.cacheAndNetwork;
-//    }
     final _options = WatchQueryOptions(
-      document: parseString(queries.readRepositories),
+      document: gql(queries.readRepositories),
       variables: <String, dynamic>{
         'nRepositories': nRepositories,
       },
-//      fetchPolicy: fetchPolicy,
-//      errorPolicy: widget.options.errorPolicy,
       pollInterval: 4,
       fetchResults: true,
-//      context: widget.options.context,
     );
 
     final result = await _client.query(_options);

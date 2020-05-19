@@ -27,20 +27,14 @@ class GraphQLWidgetScreen extends StatelessWidget {
     var link = authLink.concat(httpLink);
 
     if (ENABLE_WEBSOCKETS) {
-      final websocketLink = WebSocketLink(
-        url: 'ws://localhost:8080/ws/graphql',
-        config: SocketClientConfig(
-            autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-      );
+      final websocketLink = WebSocketLink('ws://localhost:8080/ws/graphql');
 
       link = link.concat(websocketLink);
     }
 
     final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: OptimisticCache(
-          dataIdFromObject: typenameDataIdFromObject,
-        ),
+        cache: GraphQLCache(),
         link: link,
       ),
     );
@@ -111,15 +105,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
                   final repositories = (result.data['viewer']['repositories']
-                          ['nodes'] as List<dynamic>)
-                      .cast<LazyCacheMap>();
+                      ['nodes'] as List<dynamic>);
 
                   return Expanded(
                     child: ListView.builder(
                       itemCount: repositories.length,
                       itemBuilder: (BuildContext context, int index) {
                         return StarrableRepository(
-                            repository: repositories[index]);
+                          repository: repositories[index],
+                          optimistic: result.source ==
+                              QueryResultSource.OptimisticResult,
+                        );
                       },
                     ),
                   );
@@ -149,9 +145,11 @@ class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
     Key key,
     @required this.repository,
+    @required this.optimistic,
   }) : super(key: key);
 
   final Map<String, Object> repository;
+  final bool optimistic;
 
   Map<String, Object> extractRepositoryData(Object data) {
     final action =
@@ -163,7 +161,6 @@ class StarrableRepository extends StatelessWidget {
   }
 
   bool get starred => repository['viewerHasStarred'] as bool;
-  bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 
   Map<String, dynamic> get expectedResult => <String, dynamic>{
         'action': <String, dynamic>{
@@ -176,13 +173,27 @@ class StarrableRepository extends StatelessWidget {
     return Mutation(
       options: MutationOptions(
         document: gql(starred ? mutations.removeStar : mutations.addStar),
-        update: (Cache cache, QueryResult result) {
+        update: (cache, QueryResult result) {
           if (result.hasException) {
             print(result.exception);
           } else {
             final updated = Map<String, Object>.from(repository)
               ..addAll(extractRepositoryData(result.data));
-            cache.write(typenameDataIdFromObject(updated), updated);
+            cache.writeFragment(
+              fragment: gql('''
+                  fragment fields on Repository {
+                    __typename
+                    id
+                    name
+                    viewerHasStarred
+                  }
+                '''),
+              idFields: {
+                '__typename': updated['__typename'],
+                'id': updated['id'],
+              },
+              data: updated,
+            );
           }
         },
         onError: (OperationException error) {

@@ -15,7 +15,7 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
     final authLink = AuthLink(
       // ignore: undefined_identifier
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
     final link = authLink.concat(httpLink);

@@ -12,9 +12,7 @@ String uuidFromObject(Object object) {
   return null;
 }
 
-final OptimisticCache cache = OptimisticCache(
-  dataIdFromObject: uuidFromObject,
-);
+final GraphQLCache cache = GraphQLCache();
 
 ValueNotifier<GraphQLClient> clientFor({
   @required String uri,
@@ -23,11 +21,7 @@ ValueNotifier<GraphQLClient> clientFor({
   Link link = HttpLink(uri: uri);
   if (subscriptionUri != null) {
     final WebSocketLink websocketLink = WebSocketLink(
-      url: subscriptionUri,
-      config: SocketClientConfig(
-        autoReconnect: true,
-        inactivityTimeout: Duration(seconds: 30),
-      ),
+      subscriptionUri,
     );
 
     link = link.concat(websocketLink);
