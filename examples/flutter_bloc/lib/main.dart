@@ -53,9 +53,7 @@ class MyApp extends StatelessWidget {
     final Link _link = _authLink.concat(_httpLink);
 
     return GraphQLClient(
-      cache: OptimisticCache(
-        dataIdFromObject: typenameDataIdFromObject,
-      ),
+      cache: GraphQLCache(),
       link: _link,
     );
   }
