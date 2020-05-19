@@ -7,8 +7,9 @@ import 'package:graphql/src/cache/store.dart';
 import 'package:graphql/src/cache/_optimistic_transactions.dart';
 import 'package:normalize/normalize.dart';
 
-export 'package:graphql/src/cache/store.dart';
 export 'package:graphql/src/cache/data_proxy.dart';
+export 'package:graphql/src/cache/store.dart';
+export 'package:graphql/src/cache/hive_store.dart';
 
 class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
