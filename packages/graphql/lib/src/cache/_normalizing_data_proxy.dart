@@ -16,10 +16,15 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// `typePolicies` to pass down to `normalize`
   Map<String, TypePolicy> typePolicies;
 
-  /// Whether to add `__typenames` automatically
-  bool addTypename;
-
-  bool get _addTypename => addTypename ?? true;
+  /// Whether to add `__typename` automatically.
+  ///
+  /// This is `false` by default because [gql] automatically adds `__typename` already.
+  ///
+  /// If [addTypename] is true, it is important for the client
+  /// to add `__typename` to each request automatically as well.
+  /// Otherwise, a round trip to the cache will nullify results unless
+  /// [returnPartialData] is `true`
+  bool addTypename = false;
 
   /// Used for testing
   @protected
@@ -54,7 +59,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         operationName: request.operation.operationName,
         variables: request.variables,
         typePolicies: typePolicies,
-        addTypename: _addTypename,
+        addTypename: addTypename ?? false,
         returnPartialData: returnPartialData,
       );
 
@@ -72,16 +77,15 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         fragmentName: fragmentName,
         variables: variables,
         typePolicies: typePolicies,
-        addTypename: _addTypename,
+        addTypename: addTypename ?? false,
         dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
       );
 
   void writeQuery(
     Request request,
-    Map<String, dynamic> data, {
-    String queryId,
-  }) =>
+    Map<String, dynamic> data,
+  ) =>
       normalize(
         writer: (dataId, value) => writeNormalized(dataId, value),
         query: request.operation.document,
@@ -98,7 +102,6 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     @required Map<String, dynamic> data,
     String fragmentName,
     Map<String, dynamic> variables,
-    String queryId,
   }) =>
       normalizeFragment(
         writer: (dataId, value) => writeNormalized(dataId, value),

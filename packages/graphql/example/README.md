@@ -1,4 +1,4 @@
-# Example Dart Application 
+# `graphql` Example Application 
 
 This is a simple command line application to showcase how you can use the Dart GraphQL Client, without flutter. 
 

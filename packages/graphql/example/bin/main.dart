@@ -1,8 +1,6 @@
 import 'dart:io' show stdout, stderr, exit;
 
 import 'package:args/args.dart';
-import 'package:gql_http_link/gql_http_link.dart';
-import 'package:gql_link/gql_link.dart';
 import 'package:graphql/client.dart';
 
 import './graphql_operation/mutations/mutations.dart';
@@ -55,7 +53,8 @@ void query() async {
       result.data['viewer']['repositories']['nodes'] as List<dynamic>;
 
   repositories.forEach(
-      (dynamic f) => {stdout.writeln('Id: ${f['id']} Name: ${f['name']}')});
+    (dynamic f) => {stdout.writeln('Id: ${f['id']} Name: ${f['name']}')},
+  );
 
   exit(0);
 }

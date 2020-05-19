@@ -31,11 +31,7 @@ abstract class GraphQLDataProxy {
   ///
   /// Conceptually, this can be thought of as providing a manual execution result
   /// in the form of `data`
-  void writeQuery(
-    Request request,
-    Map<String, dynamic> data, {
-    String queryId,
-  });
+  void writeQuery(Request request, Map<String, dynamic> data);
 
   /// Writes a GraphQL fragment to any arbitrary id.
   ///
@@ -47,6 +43,5 @@ abstract class GraphQLDataProxy {
     @required Map<String, dynamic> data,
     String fragmentName,
     Map<String, dynamic> variables,
-    String queryId,
   });
 }

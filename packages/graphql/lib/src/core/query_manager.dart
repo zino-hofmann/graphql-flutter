@@ -120,11 +120,7 @@ class QueryManager {
 
       // save the data from response to the cache
       if (response.data != null && options.fetchPolicy != FetchPolicy.noCache) {
-        cache.writeQuery(
-          request,
-          response.data,
-          queryId: queryId,
-        );
+        cache.writeQuery(request, response.data);
       }
 
       queryResult = mapFetchResultToQueryResult(
@@ -171,7 +167,6 @@ class QueryManager {
       if (options.optimisticResult != null) {
         queryResult = _getOptimisticQueryResult(
           request,
-          queryId,
           cacheKey: cacheKey,
           optimisticResult: options.optimisticResult,
         );
@@ -234,7 +229,9 @@ class QueryManager {
     return null;
   }
 
-  /// Add a result to the query specified by `queryId`, if it exists
+  /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists
+  ///
+  /// Queries are registered via [setQuery] and [watchQuery]
   void addQueryResult(
     Request request,
     String queryId,
@@ -246,7 +243,6 @@ class QueryManager {
       cache.writeQuery(
         request,
         queryResult.data,
-        queryId: observableQuery.options.toKey(),
       );
     }
 
@@ -257,16 +253,11 @@ class QueryManager {
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
   QueryResult _getOptimisticQueryResult(
-    Request request,
-    String queryId, {
+    Request request, {
     @required String cacheKey,
     @required Object optimisticResult,
   }) {
-    cache.writeQuery(
-      request,
-      optimisticResult,
-      queryId: queryId,
-    );
+    cache.writeQuery(request, optimisticResult);
 
     final QueryResult queryResult = QueryResult(
       data: cache.readQuery(

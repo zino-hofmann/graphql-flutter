@@ -15,7 +15,6 @@ class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
     Store store,
     this.dataIdFromObject,
-    this.addTypename = true,
     this.typePolicies = const {},
   }) : store = store ?? InMemoryStore();
 
@@ -26,7 +25,6 @@ class GraphQLCache extends NormalizingDataProxy {
   /// `typePolicies` to pass down to `normalize`
   final Map<String, TypePolicy> typePolicies;
   final DataIdResolver dataIdFromObject;
-  final bool addTypename;
 
   /// List of patches recorded through [recordOptimisticTransaction]
   ///

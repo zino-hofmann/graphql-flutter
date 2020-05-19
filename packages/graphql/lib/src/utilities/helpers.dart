@@ -1,3 +1,7 @@
+import 'package:gql/ast.dart';
+import 'package:gql/language.dart';
+import 'package:normalize/normalize.dart';
+
 bool notNull(Object any) {
   return any != null;
 }
@@ -70,3 +74,16 @@ Map<String, dynamic> deeplyMergeLeft(
   // prepend an empty literal for functional immutability
   return (<Map<String, dynamic>>[{}]..addAll(maps)).reduce(_recursivelyAddAll);
 }
+
+/// Parse a GraphQL [document] into a [DocumentNode],
+/// automatically adding `__typename`s
+///
+/// If you want to provide your own document parser or builder,
+/// keep in mind that default cache normalization depends heavily on `__typename`s,
+/// So you should probably include an [AddTypenameVistor] [transform]
+DocumentNode gql(String document) => transform(
+      parseString(document),
+      [
+        AddTypenameVisitor(),
+      ],
+    );
