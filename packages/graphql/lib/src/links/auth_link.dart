@@ -4,11 +4,11 @@ import 'package:meta/meta.dart';
 import "package:gql_exec/gql_exec.dart";
 import "package:gql_http_link/gql_http_link.dart";
 import "package:gql_link/gql_link.dart";
+import "package:gql_error_link/gql_error_link.dart";
 import "package:gql_transform_link/gql_transform_link.dart";
 
-import "./error_link.dart";
-
-// TODO temporarily taken from gql https://github.com/gql-dart/gql/pull/103
+// Mostly taken from
+// https://github.com/gql-dart/gql/blob/master/examples/gql_example_http_auth_link/lib/http_auth_link.dart
 class AuthLink extends Link {
   Link _link;
   String _token;
