@@ -154,10 +154,7 @@ class ObservableQuery {
     );
 
     // stream old results with a loading indicator
-    addResult(QueryResult(
-      data: latestResult.data,
-      loading: true,
-    ));
+    addResult(QueryResult.loading(data: latestResult.data));
 
     QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
 
