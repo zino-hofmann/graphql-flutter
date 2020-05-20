@@ -2,55 +2,59 @@ import 'dart:async' show FutureOr;
 
 import 'package:graphql/client.dart';
 import 'package:graphql/src/exceptions.dart';
+import 'package:meta/meta.dart';
 
 /// The source of the result data contained
 ///
-/// * [Loading]: No data has been specified from any source
-/// * [Cache]: A result has been eagerly resolved from the cache
-/// * [OptimisticResult]: An optimistic result has been specified
+/// * [loading]: No data has been specified from any source
+/// * [cache]: A result has been eagerly resolved from the cache
+/// * [optimisticResult]: An optimistic result has been specified
 ///     May include eager results from the cache.
-/// * [Network]: The query has been resolved on the network
+/// * [network]: The query has been resolved on the network
 ///
-/// Both [OptimisticResult] and [Cache] sources are considered "Eager" results.
+/// Both [optimisticResult] and [cache] sources are considered "Eager" results.
 enum QueryResultSource {
   /// No data has been specified from any source
-  Loading,
+  loading,
 
   /// A result has been eagerly resolved from the cache
-  Cache,
+  cache,
 
   /// An optimistic result has been specified.
   /// May include eager results from the cache
-  OptimisticResult,
+  optimisticResult,
 
   /// The query has been resolved on the network
-  Network,
+  network,
 }
 
 extension on QueryResultSource {
-  /// Whether this result source is considered "eager" (is [Cache] or [OptimisticResult])
+  /// Whether this result source is considered "eager" (is [cache] or [optimisticResult])
   bool get isEager => _eagerSources.contains(this);
 }
 
 final _eagerSources = {
-  QueryResultSource.Cache,
-  QueryResultSource.OptimisticResult
+  QueryResultSource.cache,
+  QueryResultSource.optimisticResult
 };
 
 class QueryResult {
   QueryResult({
     this.data,
     this.exception,
-    bool loading,
-    bool optimistic,
-    QueryResultSource source,
-  })  : timestamp = DateTime.now(),
-        this.source = source ??
-            ((loading == true)
-                ? QueryResultSource.Loading
-                : (optimistic == true)
-                    ? QueryResultSource.OptimisticResult
-                    : null);
+    @required this.source,
+  }) : timestamp = DateTime.now();
+
+  factory QueryResult.loading() =>
+      QueryResult(source: QueryResultSource.loading);
+
+  factory QueryResult.optimistic({
+    Map<String, dynamic> data,
+  }) =>
+      QueryResult(
+        data: data,
+        source: QueryResultSource.optimisticResult,
+      );
 
   DateTime timestamp;
 
@@ -66,12 +70,12 @@ class QueryResult {
   OperationException exception;
 
   /// Whether [data] has yet to be specified from either the cache or network
-  bool get isLoading => source == QueryResultSource.Loading;
+  bool get isLoading => source == QueryResultSource.loading;
 
   /// Whether an optimistic result has been specified.
   ///
   /// May include eager results from the cache.
-  bool get isOptimistic => source == QueryResultSource.OptimisticResult;
+  bool get isOptimistic => source == QueryResultSource.optimisticResult;
 
   /// Whether the response includes an [exception]
   bool get hasException => (exception != null);
@@ -82,10 +86,10 @@ class MultiSourceResult {
     this.eagerResult,
     this.networkResult,
   }) : assert(
-          eagerResult.source != QueryResultSource.Network,
+          eagerResult.source != QueryResultSource.network,
           'An eager result cannot be gotten from the network',
         ) {
-    eagerResult ??= QueryResult(loading: true);
+    eagerResult ??= QueryResult.loading();
   }
 
   QueryResult eagerResult;
