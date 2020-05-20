@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:graphql/src/exceptions/exceptions.dart';
+import 'package:graphql/src/exceptions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
@@ -185,7 +185,7 @@ class ObservableQuery {
         latestResult.exception = coalesceErrors(
           exception: latestResult.exception,
           graphqlErrors: fetchMoreResult.exception.graphqlErrors,
-          clientException: fetchMoreResult.exception.clientException,
+          linkException: fetchMoreResult.exception.linkException,
         );
 
         queryManager.addQueryResult(

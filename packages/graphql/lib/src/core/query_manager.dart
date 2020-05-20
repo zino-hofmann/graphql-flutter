@@ -9,7 +9,7 @@ import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/exceptions/exceptions.dart';
+import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
 class QueryManager {
@@ -130,13 +130,15 @@ class QueryManager {
       );
     } catch (failure) {
       // TODO: handle Link exceptions
+      // TODO can we model this transformation as a link
 
       // we set the source to indicate where the source of failure
       queryResult ??= QueryResult(source: QueryResultSource.Network);
 
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
-        clientException: translateFailure(failure),
+        linkException:
+            failure is LinkException ? failure : UnknownException(failure),
       );
     }
 
@@ -190,7 +192,7 @@ class QueryManager {
           queryResult = QueryResult(
             source: QueryResultSource.Cache,
             exception: OperationException(
-              clientException: CacheMissException(
+              linkException: CacheMissException(
                 'Could not find that request in the cache. (FetchPolicy.cacheOnly)',
                 cacheKey,
               ),
@@ -201,7 +203,8 @@ class QueryManager {
     } catch (failure) {
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
-        clientException: translateFailure(failure),
+        linkException:
+            failure is LinkException ? failure : UnknownException(failure),
       );
     }
 
