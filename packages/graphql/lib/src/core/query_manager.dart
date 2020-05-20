@@ -94,7 +94,7 @@ class QueryManager {
     return MultiSourceResult(
       eagerResult: eagerResult,
       networkResult:
-          (shouldStopAtCache(options.fetchPolicy) && !eagerResult.loading)
+          (shouldStopAtCache(options.fetchPolicy) && !eagerResult.isLoading)
               ? null
               : _resolveQueryOnNetwork(request, queryId, options),
     );
@@ -126,14 +126,14 @@ class QueryManager {
       queryResult = mapFetchResultToQueryResult(
         response,
         options,
-        source: QueryResultSource.Network,
+        source: QueryResultSource.network,
       );
     } catch (failure) {
       // TODO: handle Link exceptions
       // TODO can we model this transformation as a link
 
       // we set the source to indicate where the source of failure
-      queryResult ??= QueryResult(source: QueryResultSource.Network);
+      queryResult ??= QueryResult(source: QueryResultSource.network);
 
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
@@ -163,7 +163,7 @@ class QueryManager {
   ) {
     final String cacheKey = options.toKey();
 
-    QueryResult queryResult = QueryResult(loading: true);
+    QueryResult queryResult = QueryResult.loading();
 
     try {
       if (options.optimisticResult != null) {
@@ -177,20 +177,20 @@ class QueryManager {
       // if we haven't already resolved results optimistically,
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
-          !queryResult.optimistic) {
+          !queryResult.isOptimistic) {
         final dynamic data = cache.readQuery(request, optimistic: false);
         // we only push an eager query with data
         if (data != null) {
           queryResult = QueryResult(
             data: data,
-            source: QueryResultSource.Cache,
+            source: QueryResultSource.cache,
           );
         }
 
         if (options.fetchPolicy == FetchPolicy.cacheOnly &&
-            queryResult.loading) {
+            queryResult.isLoading) {
           queryResult = QueryResult(
-            source: QueryResultSource.Cache,
+            source: QueryResultSource.cache,
             exception: OperationException(
               linkException: CacheMissException(
                 'Could not find that request in the cache. (FetchPolicy.cacheOnly)',
@@ -267,7 +267,7 @@ class QueryManager {
         request,
         optimistic: true,
       ),
-      source: QueryResultSource.OptimisticResult,
+      source: QueryResultSource.optimisticResult,
     );
     return queryResult;
   }
@@ -295,7 +295,7 @@ class QueryManager {
               Response(data: cachedData),
               query.options,
               // TODO maybe entirely wrong
-              source: QueryResultSource.Cache,
+              source: QueryResultSource.cache,
             ),
           );
         }

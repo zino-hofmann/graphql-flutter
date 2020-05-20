@@ -187,7 +187,7 @@ class MutationCallbacks {
   OnData get onCompleted {
     if (options.onCompleted != null) {
       return (QueryResult result) {
-        if (!result.loading && !result.optimistic) {
+        if (!result.isLoading && !result.isOptimistic) {
           return options.onCompleted(result.data);
         }
       };
@@ -198,7 +198,7 @@ class MutationCallbacks {
   OnData get onError {
     if (options.onError != null) {
       return (QueryResult result) {
-        if (!result.loading &&
+        if (!result.isLoading &&
             result.hasException &&
             options.errorPolicy != ErrorPolicy.ignore) {
           return options.onError(result.exception);
@@ -240,7 +240,7 @@ class MutationCallbacks {
 
       // wrap update logic to handle optimism
       void updateOnData(QueryResult result) {
-        if (result.optimistic) {
+        if (result.isOptimistic) {
           return optimisticUpdate(result);
         } else {
           return widgetUpdate(cache, result);
