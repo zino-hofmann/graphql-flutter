@@ -90,7 +90,7 @@ void main() {
       );
       client = ValueNotifier(
         GraphQLClient(
-          cache: GraphQLCache(storagePrefix: 'test'),
+          cache: GraphQLCache(store: HiveStore()),
           link: httpLink,
         ),
       );

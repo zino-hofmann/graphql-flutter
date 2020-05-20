@@ -107,13 +107,12 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
         return;
       }
 
-      var mutatedRepo =
-          extractRepositoryData(queryResults.data) as LazyCacheMap;
+      var mutatedRepo = extractRepositoryData(queryResults.data);
 
       final notloadingRepo = Repo(
         id: repo.id,
         name: repo.name,
-        viewerHasStarred: mutatedRepo.data['viewerHasStarred'],
+        viewerHasStarred: mutatedRepo['viewerHasStarred'],
         isLoading: false,
       );
 
