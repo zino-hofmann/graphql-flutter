@@ -30,6 +30,10 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   @protected
   bool get returnPartialData => false;
 
+  /// Flag used to request a (re)broadcast from the [QueryManager]
+  @protected
+  bool broadcastRequested;
+
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   DataIdResolver dataIdFromObject;
 
@@ -83,18 +87,23 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       );
 
   void writeQuery(
-    Request request,
+    Request request, {
     Map<String, dynamic> data,
-  ) =>
-      normalize(
-        writer: (dataId, value) => writeNormalized(dataId, value),
-        query: request.operation.document,
-        operationName: request.operation.operationName,
-        variables: request.variables,
-        data: data,
-        typePolicies: typePolicies,
-        dataIdFromObject: dataIdFromObject,
-      );
+    bool broadcast = true,
+  }) {
+    normalize(
+      writer: (dataId, value) => writeNormalized(dataId, value),
+      query: request.operation.document,
+      operationName: request.operation.operationName,
+      variables: request.variables,
+      data: data,
+      typePolicies: typePolicies,
+      dataIdFromObject: dataIdFromObject,
+    );
+    if (broadcast ?? true) {
+      broadcastRequested = true;
+    }
+  }
 
   void writeFragment({
     @required DocumentNode fragment,
@@ -102,15 +111,20 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     @required Map<String, dynamic> data,
     String fragmentName,
     Map<String, dynamic> variables,
-  }) =>
-      normalizeFragment(
-        writer: (dataId, value) => writeNormalized(dataId, value),
-        fragment: fragment,
-        idFields: idFields,
-        data: data,
-        fragmentName: fragmentName,
-        variables: variables,
-        typePolicies: typePolicies,
-        dataIdFromObject: dataIdFromObject,
-      );
+    bool broadcast = true,
+  }) {
+    normalizeFragment(
+      writer: (dataId, value) => writeNormalized(dataId, value),
+      fragment: fragment,
+      idFields: idFields,
+      data: data,
+      fragmentName: fragmentName,
+      variables: variables,
+      typePolicies: typePolicies,
+      dataIdFromObject: dataIdFromObject,
+    );
+    if (broadcast ?? true) {
+      broadcastRequested = true;
+    }
+  }
 }

@@ -25,15 +25,21 @@ abstract class GraphQLDataProxy {
     bool optimistic,
   });
 
-  /// Writes a GraphQL query to the root query id.
+  /// Writes a GraphQL query to the root query id,
+  /// then [broadcast] changes to watchers unless `broadcast: false`
   ///
-  /// [normalize] the given `data` into the cache using graphql metadata from `request`
+  /// [normalize] the given [data] into the cache using graphql metadata from [request]
   ///
   /// Conceptually, this can be thought of as providing a manual execution result
-  /// in the form of `data`
-  void writeQuery(Request request, Map<String, dynamic> data);
+  /// in the form of [data]
+  void writeQuery(
+    Request request, {
+    Map<String, dynamic> data,
+    bool broadcast,
+  });
 
   /// Writes a GraphQL fragment to any arbitrary id.
+  /// then [broadcast] changes to watchers unless `broadcast: false`
   ///
   /// If there is more than one fragment in the provided document
   /// then a `fragmentName` must be provided to select the correct fragment.
@@ -43,5 +49,6 @@ abstract class GraphQLDataProxy {
     @required Map<String, dynamic> data,
     String fragmentName,
     Map<String, dynamic> variables,
+    bool broadcast,
   });
 }

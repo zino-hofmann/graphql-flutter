@@ -26,6 +26,26 @@ class GraphQLCache extends NormalizingDataProxy {
   final Map<String, TypePolicy> typePolicies;
   final DataIdResolver dataIdFromObject;
 
+  /// tracks the number of ongoing transactions to prevent
+  /// rebroadcasts until they are completed
+  @protected
+  int inflightOptimisticTransactions = 0;
+
+  /// Whether a cache operation has requested a broadcast and it is safe to do.
+  ///
+  /// The caller must [claimExectution] to clear the [broadcastRequested] flag.
+  ///
+  /// This is not meant to be called outside of the [QueryManager]
+  bool shouldBroadcast({bool claimExecution = false}) {
+    if (inflightOptimisticTransactions == 0 && this.broadcastRequested) {
+      if (claimExecution) {
+        this.broadcastRequested = false;
+      }
+      return true;
+    }
+    return false;
+  }
+
   /// List of patches recorded through [recordOptimisticTransaction]
   ///
   /// They are applied in ascending order,
@@ -115,10 +135,13 @@ class GraphQLCache extends NormalizingDataProxy {
     CacheTransaction transaction,
     String addId,
   ) {
+    inflightOptimisticTransactions += 1;
     final _proxy = transaction(OptimisticProxy(this)) as OptimisticProxy;
     if (_safeToAdd(addId)) {
       optimisticPatches.add(_proxy.asPatch(addId));
+      broadcastRequested = broadcastRequested || _proxy.broadcastRequested;
     }
+    inflightOptimisticTransactions -= 1;
   }
 
   /// Remove a given patch from the list
@@ -132,5 +155,6 @@ class GraphQLCache extends NormalizingDataProxy {
     optimisticPatches.removeWhere(
       (patch) => patch.id == removeId || _parentPatchId(patch.id) == removeId,
     );
+    broadcastRequested = true;
   }
 }
