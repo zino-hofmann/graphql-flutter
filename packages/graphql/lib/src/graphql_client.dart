@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'dart:async';
 
 import 'package:gql_exec/gql_exec.dart';
@@ -7,61 +8,10 @@ import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
-import 'package:meta/meta.dart';
 
-/// The default [Policies] to set for each client action
-class DefaultPolicies {
-  /// The default [Policies] for watchQuery.
-  /// Defaults to
-  /// ```
-  /// Policies(
-  ///   FetchPolicy.cacheAndNetwork,
-  ///   ErrorPolicy.none,
-  /// )
-  /// ```
-  Policies watchQuery;
+import 'package:graphql/src/core/fetch_more.dart';
 
-  /// The default [Policies] for query.
-  /// Defaults to
-  /// ```
-  /// Policies(
-  ///   FetchPolicy.cacheFirst,
-  ///   ErrorPolicy.none,
-  /// )
-  /// ```
-  Policies query;
-
-  /// The default [Policies] for mutate.
-  /// Defaults to
-  /// ```
-  /// Policies(
-  ///   FetchPolicy.networkOnly,
-  ///   ErrorPolicy.none,
-  /// )
-  /// ```
-  Policies mutate;
-  DefaultPolicies({
-    Policies watchQuery,
-    Policies query,
-    Policies mutate,
-  })  : this.watchQuery = _watchQueryDefaults.withOverrides(watchQuery),
-        this.query = _queryDefaults.withOverrides(query),
-        this.mutate = _mutateDefaults.withOverrides(mutate);
-
-  static final _watchQueryDefaults = Policies.safe(
-    FetchPolicy.cacheAndNetwork,
-    ErrorPolicy.none,
-  );
-
-  static final _queryDefaults = Policies.safe(
-    FetchPolicy.cacheFirst,
-    ErrorPolicy.none,
-  );
-  static final _mutateDefaults = Policies.safe(
-    FetchPolicy.networkOnly,
-    ErrorPolicy.none,
-  );
-}
+import 'package:graphql/src/core/policies.dart' show DefaultPolicies;
 
 /// The link is a [Link] over which GraphQL documents will be resolved into a [Response].
 /// The cache is the initial [Cache] to use in the data store.
@@ -117,4 +67,18 @@ class GraphQLClient {
   Stream<Response> subscribe(Request request) {
     return link.request(request);
   }
+
+  /// Fetch more results and then merge them with the given [previousResult]
+  /// according to [FetchMoreOptions.updateQuery].
+  Future<QueryResult> fetchMore(
+    FetchMoreOptions fetchMoreOptions, {
+    @required QueryOptions originalOptions,
+    @required QueryResult previousResult,
+  }) =>
+      fetchMoreImplementation(
+        fetchMoreOptions,
+        originalOptions: originalOptions,
+        previousResult: previousResult,
+        queryManager: queryManager,
+      );
 }

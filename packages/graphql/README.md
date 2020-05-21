@@ -18,7 +18,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql: ^3.0.0
+  graphql: ^4.0.0-rc1
 ```
 
 And then import it inside your dart code:
@@ -45,13 +45,13 @@ dev_dependencies:
 
 To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
 
-In our example below, we will be using the Github Public API. In our example below, we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `GraphQLCache`.
+In our example below, we will be using the Github Public API. we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `GraphQLCache`.
 
 ```dart
 // ...
 
 final HttpLink _httpLink = HttpLink(
-    uri: 'https://api.github.com/graphql',
+    'https://api.github.com/graphql',
 );
 
 final AuthLink _authLink = AuthLink(

@@ -1,11 +1,11 @@
 import 'dart:async';
-
-import 'package:graphql/src/exceptions.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/fetch_more.dart';
 import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
 typedef OnData = void Function(QueryResult result);
@@ -22,6 +22,11 @@ enum QueryLifecycle {
   CLOSED
 }
 
+/// An Observable/Stream-based API returned from `watchQuery` for use in reactive programming
+///
+/// Modelled closely after [Apollo's ObservableQuery][apollo_oq]
+///
+/// [apollo_oq]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ObservableQuery/
 class ObservableQuery {
   ObservableQuery({
     @required this.queryManager,
@@ -39,6 +44,7 @@ class ObservableQuery {
   // set to true when eagerly fetched to prevent back-to-back queries
   bool _latestWasEagerlyFetched = false;
 
+  /// The identity of this query within the [QueryManager]
   final String queryId;
   final QueryManager queryManager;
 
@@ -136,67 +142,21 @@ class ObservableQuery {
     return allResults;
   }
 
-  /// fetch more results and then merge them according to the updateQuery method.
-  /// the results will then be added to to stream for the widget to re-build
-  void fetchMore(FetchMoreOptions fetchMoreOptions) async {
-    // fetch more and udpate
+  /// fetch more results and then merge them with the [latestResult]
+  /// according to [FetchMoreOptions.updateQuery].
+  /// The results will then be added to to stream for the widget to re-build
+  Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
     assert(fetchMoreOptions.updateQuery != null);
 
-    final combinedOptions = QueryOptions(
-      fetchPolicy: FetchPolicy.noCache,
-      errorPolicy: options.errorPolicy,
-      document: fetchMoreOptions.document ?? options.document,
-      context: options.context,
-      variables: {
-        ...options.variables,
-        ...fetchMoreOptions.variables,
-      },
-    );
-
-    // stream old results with a loading indicator
     addResult(QueryResult.loading(data: latestResult.data));
 
-    QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
-
-    final request = options.asRequest;
-
-    try {
-      // combine the query with the new query, using the function provided by the user
-      fetchMoreResult.data = fetchMoreOptions.updateQuery(
-        latestResult.data,
-        fetchMoreResult.data,
-      );
-      assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
-
-      // stream the new results and rebuild
-      queryManager.addQueryResult(
-        request,
-        queryId,
-        fetchMoreResult,
-        writeToCache: true,
-      );
-    } catch (error) {
-      if (fetchMoreResult.hasException) {
-        // because the updateQuery failure might have been because of these errors,
-        // we just add them to the old errors
-        latestResult.exception = coalesceErrors(
-          exception: latestResult.exception,
-          graphqlErrors: fetchMoreResult.exception.graphqlErrors,
-          linkException: fetchMoreResult.exception.linkException,
-        );
-
-        queryManager.addQueryResult(
-          request,
-          queryId,
-          latestResult,
-          writeToCache: true,
-        );
-        return;
-      } else {
-        // TODO merge results OperationException
-        rethrow;
-      }
-    }
+    return fetchMoreImplementation(
+      fetchMoreOptions,
+      originalOptions: options,
+      queryManager: queryManager,
+      previousResult: latestResult,
+      queryId: queryId,
+    );
   }
 
   /// add a result to the stream,
@@ -213,7 +173,7 @@ class ObservableQuery {
       result.source ??= latestResult.source;
     }
 
-    if (lifecycle == QueryLifecycle.PENDING && result.optimistic != true) {
+    if (lifecycle == QueryLifecycle.PENDING && !result.isOptimistic) {
       lifecycle = QueryLifecycle.COMPLETED;
     }
 
@@ -232,14 +192,12 @@ class ObservableQuery {
     StreamSubscription<QueryResult> subscription;
 
     subscription = stream.listen((QueryResult result) async {
-      if (!result.loading) {
+      if (!result.isLoading) {
         for (final callback in callbacks) {
           await callback(result);
         }
 
-        queryManager.rebroadcastQueries();
-
-        if (!result.optimistic) {
+        if (!result.isOptimistic) {
           await subscription.cancel();
           _onDataSubscriptions.remove(subscription);
 

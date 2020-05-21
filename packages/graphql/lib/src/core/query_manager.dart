@@ -9,6 +9,7 @@ import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
@@ -27,6 +28,8 @@ class QueryManager {
 
   QueryScheduler scheduler;
   int idCounter = 1;
+
+  /// [ObservableQuery] registry
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
@@ -120,7 +123,7 @@ class QueryManager {
 
       // save the data from response to the cache
       if (response.data != null && options.fetchPolicy != FetchPolicy.noCache) {
-        cache.writeQuery(request, response.data);
+        cache.writeQuery(request, data: response.data);
       }
 
       queryResult = mapFetchResultToQueryResult(
@@ -143,6 +146,7 @@ class QueryManager {
 
     // cleanup optimistic results
     cache.removeOptimisticPatch(queryId);
+
     if (options.fetchPolicy != FetchPolicy.noCache) {
       // normalize results if previously written
       queryResult.data = cache.readQuery(request);
@@ -160,15 +164,13 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) {
-    final String cacheKey = options.toKey();
-
     QueryResult queryResult = QueryResult.loading();
 
     try {
       if (options.optimisticResult != null) {
         queryResult = _getOptimisticQueryResult(
           request,
-          cacheKey: cacheKey,
+          queryId: queryId,
           optimisticResult: options.optimisticResult,
         );
       }
@@ -192,8 +194,8 @@ class QueryManager {
             source: QueryResultSource.cache,
             exception: OperationException(
               linkException: CacheMissException(
-                'Could not find that request in the cache. (FetchPolicy.cacheOnly)',
-                cacheKey,
+                'Could not resolve the given request against the cache. (FetchPolicy.cacheOnly)',
+                request,
               ),
             ),
           );
@@ -209,11 +211,12 @@ class QueryManager {
     // If not a regular eager cache resolution,
     // will either be loading, or optimistic.
     //
-    // if there's an optimistic result, we add it regardless of fetchPolicy
+    // if there's an optimistic result, we add it regardless of fetchPolicy.
     // This is undefined-ish behavior/edge case, but still better than just
     // ignoring a provided optimisticResult.
     // Would probably be better to add it ignoring the cache in such cases
     addQueryResult(request, queryId, queryResult);
+
     return queryResult;
   }
 
@@ -231,6 +234,7 @@ class QueryManager {
   }
 
   /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists
+  /// Will [maybeRebroadcastQueries] if the cache has flagged the need to
   ///
   /// Queries are registered via [setQuery] and [watchQuery]
   void addQueryResult(
@@ -239,26 +243,32 @@ class QueryManager {
     QueryResult queryResult, {
     bool writeToCache = false,
   }) {
-    final ObservableQuery observableQuery = getQuery(queryId);
     if (writeToCache) {
       cache.writeQuery(
         request,
-        queryResult.data,
+        data: queryResult.data,
       );
     }
+
+    final ObservableQuery observableQuery = getQuery(queryId);
 
     if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.addResult(queryResult);
     }
+
+    maybeRebroadcastQueries(exclude: observableQuery);
   }
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
   QueryResult _getOptimisticQueryResult(
     Request request, {
-    @required String cacheKey,
+    @required String queryId,
     @required Object optimisticResult,
   }) {
-    cache.writeQuery(request, optimisticResult);
+    cache.recordOptimisticTransaction(
+      (proxy) => proxy..writeQuery(request, data: optimisticResult),
+      queryId,
+    );
 
     final QueryResult queryResult = QueryResult(
       data: cache.readQuery(
@@ -267,26 +277,27 @@ class QueryManager {
       ),
       source: QueryResultSource.optimisticResult,
     );
+
     return queryResult;
   }
 
-  /// Remove the optimistic patch for `cacheKey`, if any
-  void cleanupOptimisticResults(String cacheKey) {
-    cache.removeOptimisticPatch(cacheKey);
-  }
-
-  /// Push changed data from cache to query streams
+  /// Push changed data from cache to query streams.
+  /// [exclude] is used to skip a query if it was recently executed
+  /// (normally the query that caused the rebroadcast)
   ///
-  /// rebroadcast queries inherit `optimistic`
-  /// from the triggering state-change
-  // TODO  ^ no longer true. I would like to recoup the entity-wise
-  // TODO cache state optimistic awareness
-  void rebroadcastQueries() {
+  /// Returns whether a broadcast was executed, which depends on the state of the cache.
+  /// If there are multiple in-flight cache updates, we wait until they all complete
+  bool maybeRebroadcastQueries({ObservableQuery exclude}) {
+    final shouldBroadast = cache.shouldBroadcast(claimExecution: true);
+    if (!shouldBroadast) {
+      return false;
+    }
     for (ObservableQuery query in queries.values) {
-      if (query.isRebroadcastSafe) {
-        // TODO use queryId everywhere or nah
-        final dynamic cachedData =
-            cache.readQuery(query.options.asRequest, optimistic: true);
+      if (query != exclude && query.isRebroadcastSafe) {
+        final dynamic cachedData = cache.readQuery(
+          query.options.asRequest,
+          optimistic: true,
+        );
         if (cachedData != null) {
           query.addResult(
             mapFetchResultToQueryResult(
@@ -299,6 +310,7 @@ class QueryManager {
         }
       }
     }
+    return true;
   }
 
   void setQuery(ObservableQuery observableQuery) {

@@ -3,17 +3,17 @@
 import 'package:meta/meta.dart';
 
 import 'package:gql_link/gql_link.dart' show LinkException;
-import 'package:gql_exec/gql_exec.dart' show GraphQLError;
+import 'package:gql_exec/gql_exec.dart' show GraphQLError, Request;
 
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
 
 /// A failure to find a response from  the cache when cacheOnly=true
 @immutable
 class CacheMissException extends LinkException {
-  CacheMissException(this.message, this.missingKey) : super(null);
+  CacheMissException(this.message, this.request) : super(null);
 
   final String message;
-  final String missingKey;
+  final Request request;
 }
 
 //

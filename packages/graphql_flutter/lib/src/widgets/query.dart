@@ -74,7 +74,7 @@ class QueryState extends State<Query> {
 
     final optionsWithOverrides = _options;
     optionsWithOverrides.policies = client.defaultPolicies.watchQuery
-      .withOverrides(optionsWithOverrides.policies);
+        .withOverrides(optionsWithOverrides.policies);
 
     if (!observableQuery.options.areEqualTo(optionsWithOverrides)) {
       _initQuery();
@@ -91,7 +91,7 @@ class QueryState extends State<Query> {
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
       key: Key(observableQuery?.options?.toKey()),
-      initialData: observableQuery?.latestResult ?? QueryResult(loading: true),
+      initialData: observableQuery?.latestResult ?? QueryResult.loading(),
       stream: observableQuery.stream,
       builder: (
         BuildContext buildContext,

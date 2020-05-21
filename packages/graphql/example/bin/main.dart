@@ -16,6 +16,11 @@ ArgResults argResults;
 
 // client - create a graphql client
 GraphQLClient client() {
+  /// `graphql/client.dart` leverages the [gql_link][1] interface,
+  /// re-exporting `HttpLink`, `WebsocketLink`, `ErrorLink`, and `DedupeLink`,
+  /// in addition to the links we define ourselves (`AuthLink`)
+  ///
+  /// [1]: https://pub.dev/packages/gql_link
   final Link _link = HttpLink(
     'https://api.github.com/graphql',
     defaultHeaders: {
@@ -37,7 +42,7 @@ void query() async {
 
   final QueryOptions options = QueryOptions(
     document: gql(readRepositories),
-    variables: <String, dynamic>{
+    variables: {
       'nRepositories': nRepositories,
     },
   );
