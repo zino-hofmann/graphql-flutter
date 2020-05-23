@@ -1,17 +1,10 @@
 import 'package:meta/meta.dart';
 import 'dart:async';
 
-import 'package:gql_exec/gql_exec.dart';
-import 'package:gql_link/gql_link.dart';
+import 'package:graphql/src/core/core.dart';
 import 'package:graphql/src/cache/cache.dart';
-import 'package:graphql/src/core/observable_query.dart';
-import 'package:graphql/src/core/query_manager.dart';
-import 'package:graphql/src/core/query_options.dart';
-import 'package:graphql/src/core/query_result.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
-
-import 'package:graphql/src/core/policies.dart' show DefaultPolicies;
 
 /// The link is a [Link] over which GraphQL documents will be resolved into a [Response].
 /// The cache is the initial [Cache] to use in the data store.

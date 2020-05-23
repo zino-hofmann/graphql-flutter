@@ -1,14 +1,10 @@
-import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/_base_options.dart';
-import 'package:graphql/src/core/_data_class.dart';
 import 'package:meta/meta.dart';
 
 import 'package:gql/ast.dart';
 import 'package:gql_exec/gql_exec.dart';
 
 import 'package:graphql/client.dart';
-import 'package:graphql/internal.dart';
-import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/core/policies.dart';
 
 /// Query options.
@@ -34,33 +30,10 @@ class QueryOptions extends BaseOptions {
 
   /// The time interval (in milliseconds) on which this query should be
   /// re-fetched from the server.
-  final int pollInterval;
+  int pollInterval;
 
   @override
   List<Object> get properties => [...super.properties, pollInterval];
-}
-
-extension on QueryOptions {
-  QueryOptions copyWith({
-    DocumentNode document,
-    String operationName,
-    Map<String, dynamic> variables,
-    Context context,
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    Object optimisticResult,
-    int pollInterval,
-  }) =>
-      QueryOptions(
-        document: document ?? this.document,
-        operationName: operationName ?? this.operationName,
-        variables: variables ?? this.variables,
-        context: context ?? this.context,
-        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
-        errorPolicy: errorPolicy ?? this.errorPolicy,
-        optimisticResult: optimisticResult ?? this.optimisticResult,
-        pollInterval: pollInterval ?? this.pollInterval,
-      );
 }
 
 class SubscriptionOptions extends BaseOptions {
@@ -81,30 +54,7 @@ class SubscriptionOptions extends BaseOptions {
           context: context,
           optimisticResult: optimisticResult,
         );
-
-  SubscriptionOptions copyWith({
-    DocumentNode document,
-    String operationName,
-    Map<String, dynamic> variables,
-    Context context,
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    Object optimisticResult,
-  }) =>
-      SubscriptionOptions(
-        document: document ?? this.document,
-        operationName: operationName ?? this.operationName,
-        variables: variables ?? this.variables,
-        context: context ?? this.context,
-        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
-        errorPolicy: errorPolicy ?? this.errorPolicy,
-        optimisticResult: optimisticResult ?? this.optimisticResult,
-      );
 }
-
-/// Mutation options
-
-// ObservableQuery options
 
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
@@ -131,38 +81,43 @@ class WatchQueryOptions extends QueryOptions {
         );
 
   /// Whether or not to fetch results
-  final bool fetchResults;
+  bool fetchResults;
 
-  final bool eagerlyFetchResults;
+  bool eagerlyFetchResults;
 
   @override
   List<Object> get properties =>
       [...super.properties, fetchResults, eagerlyFetchResults];
 
-  WatchQueryOptions copyWith({
-    DocumentNode document,
-    String operationName,
-    Map<String, dynamic> variables,
-    Context context,
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    Object optimisticResult,
-    int pollInterval,
-    bool fetchResults,
-    bool eagerlyFetchResults,
-  }) =>
-      WatchQueryOptions(
-        document: document ?? this.document,
-        operationName: operationName ?? this.operationName,
-        variables: variables ?? this.variables,
-        context: context ?? this.context,
-        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
-        errorPolicy: errorPolicy ?? this.errorPolicy,
-        optimisticResult: optimisticResult ?? this.optimisticResult,
-        pollInterval: pollInterval ?? this.pollInterval,
-        fetchResults: fetchResults ?? this.fetchResults,
-        eagerlyFetchResults: eagerlyFetchResults ?? this.eagerlyFetchResults,
+  WatchQueryOptions copy() => WatchQueryOptions(
+        document: document,
+        operationName: operationName,
+        variables: variables,
+        fetchPolicy: fetchPolicy,
+        errorPolicy: errorPolicy,
+        optimisticResult: optimisticResult,
+        pollInterval: pollInterval,
+        fetchResults: fetchResults,
+        eagerlyFetchResults: eagerlyFetchResults,
+        context: context,
       );
+}
+
+/// options for fetchmore operations
+class FetchMoreOptions {
+  FetchMoreOptions({
+    @required this.document,
+    this.variables = const <String, dynamic>{},
+    @required this.updateQuery,
+  }) : assert(updateQuery != null);
+
+  DocumentNode document;
+
+  final Map<String, dynamic> variables;
+
+  /// Strategy for merging the fetchMore result data
+  /// with the result data already in the cache
+  UpdateQuery updateQuery;
 }
 
 /// merge fetchMore result data with earlier result data

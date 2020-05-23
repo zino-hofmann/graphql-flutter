@@ -1,7 +1,7 @@
 /// Optimistic proxying and patching classes and typedefs used by `./cache.dart`
 import 'dart:collection';
 
-import 'package:graphql/internal.dart';
+import 'package:graphql/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/cache/_normalizing_data_proxy.dart';

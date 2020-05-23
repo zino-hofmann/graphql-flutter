@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
@@ -8,23 +7,6 @@ import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
-
-/// options for fetchmore operations
-class FetchMoreOptions {
-  FetchMoreOptions({
-    @required this.document,
-    this.variables = const <String, dynamic>{},
-    @required this.updateQuery,
-  }) : assert(updateQuery != null);
-
-  DocumentNode document;
-
-  final Map<String, dynamic> variables;
-
-  /// Strategy for merging the fetchMore result data
-  /// with the result data already in the cache
-  UpdateQuery updateQuery;
-}
 
 /// Fetch more results and then merge them with [previousResult]
 /// according to [FetchMoreOptions.updateQuery]

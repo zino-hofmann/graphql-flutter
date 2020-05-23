@@ -1,28 +1,22 @@
 import 'package:meta/meta.dart';
 import "package:collection/collection.dart";
 
-/// Similar to Equatable using the same approach as `gql`'s data classes
-@immutable
-abstract class DataClass {
-  const DataClass();
+/// Helper for making mutable data clases
+abstract class MutableDataClass {
+  const MutableDataClass();
 
+  /// identifying properties for the inheriting class
   @protected
   List<Object> get properties;
 
-  @override
-  bool operator ==(Object other) =>
+  /// [properties] based equality check
+  bool equal(MutableDataClass other) =>
       identical(this, other) ||
-      (other is DataClass &&
-          runtimeType == other.runtimeType &&
+      (runtimeType == other.runtimeType &&
           const ListEquality<Object>(
             DeepCollectionEquality(),
-          ).equals(
+          ).equal(
             other.properties,
             properties,
           ));
-
-  @override
-  int get hashCode => const ListEquality<Object>(
-        DeepCollectionEquality(),
-      ).hash(properties);
 }

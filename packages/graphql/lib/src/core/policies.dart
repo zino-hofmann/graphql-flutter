@@ -157,7 +157,7 @@ class DefaultPolicies {
       (o is DefaultPolicies &&
           const ListEquality<Object>(
             DeepCollectionEquality(),
-          ).equals(
+          ).equal(
             o._getChildren(),
             _getChildren(),
           ));

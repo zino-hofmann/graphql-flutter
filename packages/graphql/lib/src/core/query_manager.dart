@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:graphql/src/core/_base_options.dart';
 import 'package:meta/meta.dart';
 
 import 'package:gql_exec/gql_exec.dart';
@@ -8,6 +7,8 @@ import 'package:gql_link/gql_link.dart' show Link;
 
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
+import 'package:graphql/src/core/_base_options.dart';
+import 'package:graphql/src/core/mutation_options.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
@@ -53,7 +54,7 @@ class QueryManager {
       // not sure why query id is '0', may be needs improvements
       // once the mutation has been process successfully, execute callbacks
       // before returning the results
-      final mutationCallbacks = MutationCallbacks(
+      final mutationCallbacks = MutationCallbackHandler(
         cache: cache,
         options: options,
         queryId: '0',

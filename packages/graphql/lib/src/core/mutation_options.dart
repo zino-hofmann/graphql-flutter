@@ -47,31 +47,6 @@ class MutationOptions extends BaseOptions {
   @override
   List<Object> get properties =>
       [...super.properties, onCompleted, update, onError];
-
-  MutationOptions copyWith({
-    DocumentNode document,
-    String operationName,
-    Map<String, dynamic> variables,
-    Context context,
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    Object optimisticResult,
-    OnMutationCompleted onCompleted,
-    OnMutationUpdate update,
-    OnError onError,
-  }) =>
-      MutationOptions(
-        document: document ?? this.document,
-        operationName: operationName ?? this.operationName,
-        variables: variables ?? this.variables,
-        context: context ?? this.context,
-        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
-        errorPolicy: errorPolicy ?? this.errorPolicy,
-        optimisticResult: optimisticResult ?? this.optimisticResult,
-        onCompleted: onCompleted ?? this.onCompleted,
-        update: update ?? this.update,
-        onError: onError ?? this.onError,
-      );
 }
 
 /// Handles execution of mutation `update`, `onCompleted`, and `onError` callbacks

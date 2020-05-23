@@ -12,7 +12,7 @@ void main() {
       cache.writeQuery(basicTest.request, basicTest.data);
       expect(
         cache.readQuery(basicTest.request),
-        equals(basicTest.data),
+        equal(basicTest.data),
       );
     });
     test('updating nested normalized fragment changes top level operation', () {
@@ -26,7 +26,7 @@ void main() {
       );
       expect(
         cache.readQuery(basicTest.request),
-        equals(updatedCBasicTestData),
+        equal(updatedCBasicTestData),
       );
     });
 
@@ -37,7 +37,7 @@ void main() {
       );
       expect(
         cache.readQuery(basicTest.request),
-        equals(updatedSubsetOperationData),
+        equal(updatedSubsetOperationData),
       );
     });
   });
@@ -48,7 +48,7 @@ void main() {
       cache.writeQuery(cyclicalTest.request, cyclicalTest.data);
       for (final normalized in cyclicalTest.normalizedEntities) {
         final dataId = "${normalized['__typename']}:${normalized['id']}";
-        expect(cache.readNormalized(dataId), equals(normalized));
+        expect(cache.readNormalized(dataId), equal(normalized));
       }
     });
   });
@@ -60,7 +60,7 @@ void main() {
       cache.writeQuery(cyclicalTest.request, cyclicalTest.data);
       for (final normalized in cyclicalTest.normalizedEntities) {
         final dataId = "${normalized['__typename']}:${normalized['id']}";
-        expect(cache.readNormalized(dataId), equals(normalized));
+        expect(cache.readNormalized(dataId), equal(normalized));
       }
     });
   });
@@ -82,7 +82,7 @@ void main() {
           );
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equals(basicTest.data),
+            equal(basicTest.data),
           );
         },
       );
@@ -104,7 +104,7 @@ void main() {
           );
           expect(
             cache.readQuery(basicTest.request),
-            equals(updatedCBasicTestData),
+            equal(updatedCBasicTestData),
           );
         },
       );
@@ -122,7 +122,7 @@ void main() {
           );
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equals(updatedSubsetOperationData),
+            equal(updatedSubsetOperationData),
           );
         },
       );
@@ -134,7 +134,7 @@ void main() {
           cache.removeOptimisticPatch('3');
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equals(basicTest.data),
+            equal(basicTest.data),
           );
         },
       );
