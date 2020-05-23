@@ -57,8 +57,11 @@ class GraphQLClient {
 
   /// This subscribes to a GraphQL subscription according to the options specified and returns a
   /// [Stream] which either emits received data or an error.
-  Stream<Response> subscribe(Request request) {
-    return link.request(request);
+  Stream<QueryResult> subscribe(SubscriptionOptions options) {
+    options.policies = defaultPolicies.subscribe.withOverrides(
+      options.policies,
+    );
+    return queryManager.subscribe(options);
   }
 
   /// Fetch more results and then merge them with the given [previousResult]

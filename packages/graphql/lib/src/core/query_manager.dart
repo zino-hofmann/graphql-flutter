@@ -45,6 +45,53 @@ class QueryManager {
     return observableQuery;
   }
 
+  Stream<QueryResult> subscribe(SubscriptionOptions options) async* {
+    final request = options.asRequest;
+
+    if (options.optimisticResult != null) {
+      // TODO optimisticResults for streams just skip the cache for now
+      yield QueryResult.optimistic(data: options.optimisticResult);
+    } else if (options.fetchPolicy != FetchPolicy.noCache) {
+      final cacheResult = cache.readQuery(request, optimistic: true);
+      if (cacheResult != null) {
+        yield QueryResult(
+          source: QueryResultSource.cache,
+          data: options.optimisticResult,
+        );
+      }
+    }
+
+    yield* link.request(request).map((response) {
+      QueryResult queryResult;
+      try {
+        if (response.data != null &&
+            options.fetchPolicy != FetchPolicy.noCache) {
+          cache.writeQuery(request, data: response.data);
+        }
+        queryResult = mapFetchResultToQueryResult(
+          response,
+          options,
+          source: QueryResultSource.network,
+        );
+      } catch (failure) {
+        // we set the source to indicate where the source of failure
+        queryResult ??= QueryResult(source: QueryResultSource.network);
+
+        queryResult.exception = coalesceErrors(
+          exception: queryResult.exception,
+          linkException: translateFailure(failure),
+        );
+      }
+
+      if (options.fetchPolicy != FetchPolicy.noCache) {
+        // normalize results if previously written
+        queryResult.data = cache.readQuery(request);
+      }
+
+      return queryResult;
+    });
+  }
+
   Future<QueryResult> query(QueryOptions options) {
     return fetchQuery('0', options);
   }
@@ -134,9 +181,6 @@ class QueryManager {
         source: QueryResultSource.network,
       );
     } catch (failure) {
-      // TODO: handle Link exceptions
-      // TODO can we model this transformation as a link
-
       // we set the source to indicate where the source of failure
       queryResult ??= QueryResult(source: QueryResultSource.network);
 

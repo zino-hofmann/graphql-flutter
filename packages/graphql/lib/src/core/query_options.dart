@@ -34,6 +34,18 @@ class QueryOptions extends BaseOptions {
 
   @override
   List<Object> get properties => [...super.properties, pollInterval];
+
+  WatchQueryOptions asWatchQueryOptions({bool fetchResults = true}) =>
+      WatchQueryOptions(
+        document: document,
+        variables: variables,
+        fetchPolicy: fetchPolicy,
+        errorPolicy: errorPolicy,
+        pollInterval: pollInterval,
+        fetchResults: fetchResults ?? true,
+        context: context,
+        optimisticResult: optimisticResult,
+      );
 }
 
 class SubscriptionOptions extends BaseOptions {
@@ -54,6 +66,9 @@ class SubscriptionOptions extends BaseOptions {
           context: context,
           optimisticResult: optimisticResult,
         );
+
+  /// An optimistic first result to eagerly add to the subscription stream
+  Object optimisticResult;
 }
 
 class WatchQueryOptions extends QueryOptions {

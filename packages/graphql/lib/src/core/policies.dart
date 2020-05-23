@@ -112,13 +112,25 @@ class DefaultPolicies {
   /// ```
   final Policies mutate;
 
+  /// The default [Policies] for subscribe.
+  /// Defaults to
+  /// ```
+  /// Policies(
+  ///   FetchPolicy.cacheAndNetwork,
+  ///   ErrorPolicy.none,
+  /// )
+  /// ```
+  final Policies subscribe;
+
   DefaultPolicies({
     Policies watchQuery,
     Policies query,
     Policies mutate,
-  })  : this.watchQuery = _watchQueryDefaults.withOverrides(watchQuery),
-        this.query = _queryDefaults.withOverrides(query),
-        this.mutate = _mutateDefaults.withOverrides(mutate);
+    Policies subscribe,
+  })  : watchQuery = _watchQueryDefaults.withOverrides(watchQuery),
+        query = _queryDefaults.withOverrides(query),
+        mutate = _mutateDefaults.withOverrides(mutate),
+        subscribe = _watchQueryDefaults.withOverrides(subscribe);
 
   static final _watchQueryDefaults = Policies.safe(
     FetchPolicy.cacheAndNetwork,
@@ -138,17 +150,20 @@ class DefaultPolicies {
     Policies watchQuery,
     Policies query,
     Policies mutate,
+    Policies subscribe,
   }) =>
       DefaultPolicies(
         watchQuery: watchQuery,
         query: query,
         mutate: mutate,
+        subscribe: subscribe,
       );
 
   List<Object> _getChildren() => [
         watchQuery,
         query,
         mutate,
+        subscribe,
       ];
 
   @override
@@ -157,7 +172,7 @@ class DefaultPolicies {
       (o is DefaultPolicies &&
           const ListEquality<Object>(
             DeepCollectionEquality(),
-          ).equal(
+          ).equals(
             o._getChildren(),
             _getChildren(),
           ));

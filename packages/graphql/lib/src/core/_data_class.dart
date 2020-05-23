@@ -15,7 +15,7 @@ abstract class MutableDataClass {
       (runtimeType == other.runtimeType &&
           const ListEquality<Object>(
             DeepCollectionEquality(),
-          ).equal(
+          ).equals(
             other.properties,
             properties,
           ));
