@@ -1,3 +1,6 @@
+import 'package:meta/meta.dart';
+import "package:collection/collection.dart";
+
 /// [FetchPolicy] determines where the client may return a result from. The options are:
 /// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
 /// - cacheAndNetwork: return result from cache first (if it exists), then return network result once it's available.
@@ -39,12 +42,13 @@ enum ErrorPolicy {
 /// Container for supplying a [fetch] and [error] policy.
 ///
 /// If either are `null`, the appropriate policy will be selected from [DefaultPolicies]
+@immutable
 class Policies {
   /// Specifies the [FetchPolicy] to be used.
-  FetchPolicy fetch;
+  final FetchPolicy fetch;
 
   /// Specifies the [ErrorPolicy] to be used.
-  ErrorPolicy error;
+  final ErrorPolicy error;
 
   Policies({
     this.fetch,
@@ -62,11 +66,21 @@ class Policies {
         overrides?.error ?? error,
       );
 
+  Policies copyWith({FetchPolicy fetch, ErrorPolicy error}) =>
+      Policies(fetch: fetch, error: error);
+
   operator ==(Object other) =>
-      other is Policies && fetch == other.fetch && error == other.error;
+      identical(this, other) ||
+      (other is Policies && fetch == other.fetch && error == other.error);
+
+  @override
+  int get hashCode => const ListEquality<Object>(
+        DeepCollectionEquality(),
+      ).hash([fetch, error]);
 }
 
 /// The default [Policies] to set for each client action
+@immutable
 class DefaultPolicies {
   /// The default [Policies] for watchQuery.
   /// Defaults to
@@ -76,7 +90,7 @@ class DefaultPolicies {
   ///   ErrorPolicy.none,
   /// )
   /// ```
-  Policies watchQuery;
+  final Policies watchQuery;
 
   /// The default [Policies] for query.
   /// Defaults to
@@ -86,7 +100,7 @@ class DefaultPolicies {
   ///   ErrorPolicy.none,
   /// )
   /// ```
-  Policies query;
+  final Policies query;
 
   /// The default [Policies] for mutate.
   /// Defaults to
@@ -96,7 +110,8 @@ class DefaultPolicies {
   ///   ErrorPolicy.none,
   /// )
   /// ```
-  Policies mutate;
+  final Policies mutate;
+
   DefaultPolicies({
     Policies watchQuery,
     Policies query,
@@ -118,4 +133,39 @@ class DefaultPolicies {
     FetchPolicy.networkOnly,
     ErrorPolicy.none,
   );
+
+  DefaultPolicies copyWith({
+    Policies watchQuery,
+    Policies query,
+    Policies mutate,
+  }) =>
+      DefaultPolicies(
+        watchQuery: watchQuery,
+        query: query,
+        mutate: mutate,
+      );
+
+  List<Object> _getChildren() => [
+        watchQuery,
+        query,
+        mutate,
+      ];
+
+  @override
+  bool operator ==(Object o) =>
+      identical(this, o) ||
+      (o is DefaultPolicies &&
+          const ListEquality<Object>(
+            DeepCollectionEquality(),
+          ).equals(
+            o._getChildren(),
+            _getChildren(),
+          ));
+
+  @override
+  int get hashCode => const ListEquality<Object>(
+        DeepCollectionEquality(),
+      ).hash(
+        _getChildren(),
+      );
 }
