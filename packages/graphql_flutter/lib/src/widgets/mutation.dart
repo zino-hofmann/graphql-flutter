@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:graphql/client.dart';
-import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
@@ -54,7 +53,7 @@ class MutationState extends State<Mutation> {
   bool _setNewOptions() {
     final _cached = __cachedOptions;
     final _new = _providedOptions;
-    if (_cached == null || !_new.areEqualTo(_cached)) {
+    if (_cached == null || !_new.equal(_cached)) {
       __cachedOptions = _new;
       return true;
     }
@@ -94,7 +93,7 @@ class MutationState extends State<Mutation> {
     Map<String, dynamic> variables, {
     Object optimisticResult,
   }) {
-    final mutationCallbacks = MutationCallbacks(
+    final mutationCallbacks = MutationCallbackHandler(
       cache: client.cache,
       queryId: observableQuery.queryId,
       options: widget.options,
@@ -118,11 +117,7 @@ class MutationState extends State<Mutation> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
-      // we give the stream builder a key so that
-      // toggling mutations at the same place in the tree,
-      // such as is done in the example, won't result in bugs
-      key: Key(observableQuery?.options?.toKey()),
-      initialData: observableQuery?.latestResult ?? QueryResult(),
+      initialData: observableQuery?.latestResult ?? QueryResult(source: null),
       stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,
