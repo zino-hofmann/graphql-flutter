@@ -140,7 +140,7 @@ void main() {
         );
 
         expect(
-          (r.exception.clientException as UnhandledFailureWrapper).failure,
+          r.exception.linkException.originalException,
           e,
         );
 
@@ -163,7 +163,7 @@ void main() {
         );
 
         expect(
-          (r.exception.clientException as UnhandledFailureWrapper).failure,
+          r.exception.linkException.originalException,
           e,
         );
 

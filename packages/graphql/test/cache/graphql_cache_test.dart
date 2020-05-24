@@ -9,10 +9,10 @@ void main() {
   group('Normalizes writes', () {
     final GraphQLCache cache = getTestCache();
     test('.writeQuery .readQuery round trip', () {
-      cache.writeQuery(basicTest.request, basicTest.data);
+      cache.writeQuery(basicTest.request, data: basicTest.data);
       expect(
         cache.readQuery(basicTest.request),
-        equal(basicTest.data),
+        equals(basicTest.data),
       );
     });
     test('updating nested normalized fragment changes top level operation', () {
@@ -26,18 +26,18 @@ void main() {
       );
       expect(
         cache.readQuery(basicTest.request),
-        equal(updatedCBasicTestData),
+        equals(updatedCBasicTestData),
       );
     });
 
     test('updating subset query only partially overrides superset query', () {
       cache.writeQuery(
         basicTestSubsetAValue.request,
-        basicTestSubsetAValue.data,
+        data: basicTestSubsetAValue.data,
       );
       expect(
         cache.readQuery(basicTest.request),
-        equal(updatedSubsetOperationData),
+        equals(updatedSubsetOperationData),
       );
     });
   });
@@ -45,10 +45,10 @@ void main() {
   group('Handles cyclical references', () {
     final GraphQLCache cache = getTestCache();
     test('lazily reads cyclical references', () {
-      cache.writeQuery(cyclicalTest.request, cyclicalTest.data);
+      cache.writeQuery(cyclicalTest.request, data: cyclicalTest.data);
       for (final normalized in cyclicalTest.normalizedEntities) {
         final dataId = "${normalized['__typename']}:${normalized['id']}";
-        expect(cache.readNormalized(dataId), equal(normalized));
+        expect(cache.readNormalized(dataId), equals(normalized));
       }
     });
   });
@@ -57,10 +57,10 @@ void main() {
     final GraphQLCache cache = getTestCache();
     test('correctly reads cyclical references', () {
       cyclicalTest.data = cyclicalObjOperationData;
-      cache.writeQuery(cyclicalTest.request, cyclicalTest.data);
+      cache.writeQuery(cyclicalTest.request, data: cyclicalTest.data);
       for (final normalized in cyclicalTest.normalizedEntities) {
         final dataId = "${normalized['__typename']}:${normalized['id']}";
-        expect(cache.readNormalized(dataId), equal(normalized));
+        expect(cache.readNormalized(dataId), equals(normalized));
       }
     });
   });
@@ -76,13 +76,13 @@ void main() {
             (proxy) => proxy
               ..writeQuery(
                 basicTest.request,
-                basicTest.data,
+                data: basicTest.data,
               ),
             '1',
           );
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equal(basicTest.data),
+            equals(basicTest.data),
           );
         },
       );
@@ -104,7 +104,7 @@ void main() {
           );
           expect(
             cache.readQuery(basicTest.request),
-            equal(updatedCBasicTestData),
+            equals(updatedCBasicTestData),
           );
         },
       );
@@ -116,13 +116,13 @@ void main() {
             (proxy) => proxy
               ..writeQuery(
                 basicTestSubsetAValue.request,
-                basicTestSubsetAValue.data,
+                data: basicTestSubsetAValue.data,
               ),
             '3',
           );
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equal(updatedSubsetOperationData),
+            equals(updatedSubsetOperationData),
           );
         },
       );
@@ -134,7 +134,7 @@ void main() {
           cache.removeOptimisticPatch('3');
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equal(basicTest.data),
+            equals(basicTest.data),
           );
         },
       );

@@ -1,5 +1,6 @@
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql/language.dart';
+import 'package:graphql/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
 
 const String rawOperationKey = 'rawOperationKey';
