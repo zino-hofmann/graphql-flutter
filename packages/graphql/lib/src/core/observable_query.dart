@@ -8,6 +8,7 @@ import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
+/// Side effect to register for execution when data is received
 typedef OnData = void Function(QueryResult result);
 
 /// Lifecycle states for [ObservableQuery.lifecycle]
@@ -42,8 +43,10 @@ enum QueryLifecycle {
 }
 
 /// An Observable/Stream-based API for both queries and mutations.
+///
 /// Returned from [GraphQLClient.watchQuery] for use in reactive programming,
 /// for instance in `graphql_flutter` widgets.
+/// It is modelled closely after [Apollo's ObservableQuery][apollo_oq]
 ///
 /// [ObservableQuery]'s core api/usage is to [fetchResults], then listen to the [stream].
 /// [fetchResults] will be called on instantiation if [options.eagerlyFetchResults] is set,
@@ -51,18 +54,11 @@ enum QueryLifecycle {
 ///
 /// Beyond that, [ObservableQuery] is a bit of a kitchen sink:
 /// * There are [refetch] and [fetchMore] methods for fetching more results
-/// * [onData]
-///
-///
-/// It has
-///
-/// Results can be [refetch]ed,
-///
-/// It is currently used
+/// * An [onData] method for registering callbacks (namely for mutations)
 /// * [lifecycle] for tracking  polling, side effect, an inflight execution state
 /// * [latestResult] – the most recent result from this operation
 ///
-/// Modelled closely after [Apollo's ObservableQuery][apollo_oq]
+/// And a handful of internally leveraged methods.
 ///
 /// [apollo_oq]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ObservableQuery/
 class ObservableQuery {
@@ -84,8 +80,11 @@ class ObservableQuery {
 
   /// The identity of this query within the [QueryManager]
   final String queryId;
+
+  @protected
   final QueryManager queryManager;
 
+  @protected
   QueryScheduler get scheduler => queryManager.scheduler;
 
   final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
@@ -125,9 +124,15 @@ class ObservableQuery {
     if (_isRefetchSafe) {
       return queryManager.refetchQuery(queryId);
     }
-    return Future<QueryResult>.error(Exception('Query is not refetch safe'));
+    return Future<QueryResult>.error(
+      Exception('Query is not refetch safe'),
+    );
   }
 
+  /// Whether it is safe to rebroadcast results due to cache
+  /// changes based on [lifecycle].
+  ///
+  /// Called internally by the [QueryManager]
   bool get isRebroadcastSafe {
     switch (lifecycle) {
       case QueryLifecycle.pending:
@@ -162,6 +167,9 @@ class ObservableQuery {
     }
   }
 
+  /// Fetch results based on [options.fetchPolicy]
+  ///
+  /// Will [startPolling] if [options.pollInterval] is set
   MultiSourceResult fetchResults() {
     final MultiSourceResult allResults =
         queryManager.fetchQueryAsMultiSourceResult(queryId, options);
@@ -199,9 +207,13 @@ class ObservableQuery {
     );
   }
 
-  /// add a result to the stream,
-  /// copying `loading` and `optimistic`
-  /// from the `latestResult` if they aren't set.
+  /// Add a [result] to the [stream] unless it was created
+  /// before [lasestResult].
+  ///
+  /// Copies the [QueryResult.source] from the [latestResult]
+  /// if it is set to `null`.
+  ///
+  /// Called internally by the [QueryManager]
   void addResult(QueryResult result) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
@@ -213,7 +225,7 @@ class ObservableQuery {
       result.source ??= latestResult.source;
     }
 
-    if (lifecycle == QueryLifecycle.pending && !result.isOptimistic) {
+    if (lifecycle == QueryLifecycle.pending && result.isConcrete) {
       lifecycle = QueryLifecycle.completed;
     }
 
@@ -260,6 +272,9 @@ class ObservableQuery {
     _onDataSubscriptions.add(subscription);
   }
 
+  /// Poll the server periodically for results.
+  ///
+  /// Will be called by [fetchResults] automatically if [options.pollInterval] is set
   void startPolling(int pollInterval) {
     if (options.fetchPolicy == FetchPolicy.cacheFirst ||
         options.fetchPolicy == FetchPolicy.cacheOnly) {
