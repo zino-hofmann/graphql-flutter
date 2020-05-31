@@ -10,7 +10,7 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 
 typedef OnData = void Function(QueryResult result);
 
-/// lifecycle states for [ObservableQuery.lifecycle]
+/// Lifecycle states for [ObservableQuery.lifecycle]
 enum QueryLifecycle {
   /// No results have been requested or fetched
   unexecuted,
@@ -39,40 +39,6 @@ enum QueryLifecycle {
   /// [ObservableQuery.close] was called and all activity
   /// from this [ObservableQuery] has ceased.
   closed
-}
-
-extension DeprecatedQueryLifecycle on QueryLifecycle {
-  /// No data has been specified from any source
-  @Deprecated(
-      'Use `QueryLifecycle.unexecuted` instead. Will be removed in 5.0.0')
-  static const UNEXECUTED = QueryLifecycle.unexecuted;
-
-  @Deprecated('Use `QueryLifecycle.pending` instead. Will be removed in 5.0.0')
-  static QueryLifecycle get PENDING => QueryLifecycle.pending;
-
-  @Deprecated('Use `QueryLifecycle.polling` instead. Will be removed in 5.0.0')
-  static QueryLifecycle get POLLING => QueryLifecycle.polling;
-
-  @Deprecated(
-      'Use `QueryLifecycle.pollingStopped` instead. Will be removed in 5.0.0')
-  static QueryLifecycle get POLLING_STOPPED => QueryLifecycle.pollingStopped;
-
-  @Deprecated(
-      'Use `QueryLifecycle.sideEffectsPending` instead. Will be removed in 5.0.0')
-  static QueryLifecycle get SIDE_EFFECTS_PENDING =>
-      QueryLifecycle.sideEffectsPending;
-
-  @Deprecated(
-      'Use `QueryLifecycle.sideEffectsBlocking` instead. Will be removed in 5.0.0')
-  static const SIDE_EFFECTS_BLOCKING = QueryLifecycle.sideEffectsBlocking;
-
-  @Deprecated(
-      'Use `QueryLifecycle.completed` instead. Will be removed in 5.0.0')
-  static QueryLifecycle get COMPLETED => QueryLifecycle.completed;
-
-  @Deprecated(
-      'Use `QueryLifecycle.completed` instead. Will be removed in 5.0.0')
-  static QueryLifecycle get CLOSED => QueryLifecycle.closed;
 }
 
 /// An Observable/Stream-based API for both queries and mutations.
@@ -148,7 +114,7 @@ class ObservableQuery {
       case QueryLifecycle.closed:
       case QueryLifecycle.unexecuted:
       case QueryLifecycle.sideEffectsPending:
-      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+      case QueryLifecycle.sideEffectsBlocking:
         return false;
     }
     return false;
