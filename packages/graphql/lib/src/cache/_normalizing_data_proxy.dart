@@ -32,7 +32,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   /// Flag used to request a (re)broadcast from the [QueryManager]
   @protected
-  bool broadcastRequested;
+  bool broadcastRequested = false;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   DataIdResolver dataIdFromObject;

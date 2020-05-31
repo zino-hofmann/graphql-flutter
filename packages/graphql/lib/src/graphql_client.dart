@@ -35,6 +35,50 @@ class GraphQLClient {
 
   /// This registers a query in the [QueryManager] and returns an [ObservableQuery]
   /// based on the provided [WatchQueryOptions].
+  ///
+  /// {@tool snippet}
+  ///
+  /// Basic usage
+  /// ```dart
+  ///
+  /// result = client.watchQuery(WatchQueryOptions(
+  ///  options: QueryOptions(
+  ///    document: gql(r'''
+  ///      query HeroForEpisode($ep: Episode!) {
+  ///        hero(episode: $ep) {
+  ///          __typename
+  ///          name
+  ///          ... on Droid {
+  ///            primaryFunction
+  ///          }
+  ///          ... on Human {
+  ///            height
+  ///            homePlanet
+  ///          }
+  ///        }
+  ///      }
+  ///    '''),
+  ///    variables: <String, String>{
+  ///      'ep': episodeToJson(episode),
+  ///    },
+  ///  ),
+  /// ));
+  ///
+  /// result.stream.listen((QueryResult result) {
+  ///   if (!result.loading && result.data != null) {
+  ///     add(
+  ///       GraphqlLoadedEvent<T>(
+  ///         data: parseData(result.data as Map<String, dynamic>),
+  ///         result: result,
+  ///       ),
+  ///     );
+  ///   }
+  ///   if (result.hasException) {
+  ///     add(GraphqlErrorEvent(error: result.exception, result: result));
+  ///   }
+  /// });
+  /// ```
+  /// {@end-tool}
   ObservableQuery watchQuery(WatchQueryOptions options) {
     options.policies =
         defaultPolicies.watchQuery.withOverrides(options.policies);
