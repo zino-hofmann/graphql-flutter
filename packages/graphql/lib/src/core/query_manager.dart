@@ -48,6 +48,7 @@ class QueryManager {
   Stream<QueryResult> subscribe(SubscriptionOptions options) async* {
     final request = options.asRequest;
 
+    // Add optimistic or cache-based result to the stream if any
     if (options.optimisticResult != null) {
       // TODO optimisticResults for streams just skip the cache for now
       yield QueryResult.optimistic(data: options.optimisticResult);
@@ -92,9 +93,7 @@ class QueryManager {
     });
   }
 
-  Future<QueryResult> query(QueryOptions options) {
-    return fetchQuery('0', options);
-  }
+  Future<QueryResult> query(QueryOptions options) => fetchQuery('0', options);
 
   Future<QueryResult> mutate(MutationOptions options) {
     return fetchQuery('0', options).then((result) async {
@@ -164,11 +163,7 @@ class QueryManager {
 
     try {
       // execute the request through the provided link(s)
-      response = await link
-          .request(
-            request,
-          )
-          .first;
+      response = await link.request(request).first;
 
       // save the data from response to the cache
       if (response.data != null && options.fetchPolicy != FetchPolicy.noCache) {

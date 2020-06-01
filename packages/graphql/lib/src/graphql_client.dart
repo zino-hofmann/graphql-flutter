@@ -37,46 +37,43 @@ class GraphQLClient {
   /// based on the provided [WatchQueryOptions].
   ///
   /// {@tool snippet}
-  ///
   /// Basic usage
+  ///
   /// ```dart
+  /// final observableQuery = client.watchQuery(
+  ///   WatchQueryOptions(
+  ///     document: gql(
+  ///       r'''
+  ///       query HeroForEpisode($ep: Episode!) {
+  ///         hero(episode: $ep) {
+  ///           name
+  ///         }
+  ///       }
+  ///       ''',
+  ///     ),
+  ///     variables: {'ep': 'NEWHOPE'},
+  ///   ),
+  /// );
   ///
-  /// result = client.watchQuery(WatchQueryOptions(
-  ///  options: QueryOptions(
-  ///    document: gql(r'''
-  ///      query HeroForEpisode($ep: Episode!) {
-  ///        hero(episode: $ep) {
-  ///          __typename
-  ///          name
-  ///          ... on Droid {
-  ///            primaryFunction
-  ///          }
-  ///          ... on Human {
-  ///            height
-  ///            homePlanet
-  ///          }
-  ///        }
-  ///      }
-  ///    '''),
-  ///    variables: <String, String>{
-  ///      'ep': episodeToJson(episode),
-  ///    },
-  ///  ),
-  /// ));
-  ///
-  /// result.stream.listen((QueryResult result) {
-  ///   if (!result.loading && result.data != null) {
-  ///     add(
-  ///       GraphqlLoadedEvent<T>(
-  ///         data: parseData(result.data as Map<String, dynamic>),
-  ///         result: result,
-  ///       ),
-  ///     );
-  ///   }
-  ///   if (result.hasException) {
-  ///     add(GraphqlErrorEvent(error: result.exception, result: result));
+  /// /// Listen to the stream of results. This will include:
+  /// /// * `options.optimisitcResult` if passed
+  /// /// * The result from the server (if `options.fetchPolicy` includes networking)
+  /// /// * rebroadcast results from edits to the cache
+  /// observableQuery.stream.listen((QueryResult result) {
+  ///   if (!result.isLoading && result.data != null) {
+  ///     if (result.hasException) {
+  ///       print(result.exception);
+  ///       return;
+  ///     }
+  ///     if (result.isLoading) {
+  ///       print('loading');
+  ///       return;
+  ///     }
+  ///     doSomethingWithMyQueryResult(myCustomParser(result.data));
   ///   }
   /// });
+  /// // ... cleanup:
+  /// observableQuery.close();
   /// ```
   /// {@end-tool}
   ObservableQuery watchQuery(WatchQueryOptions options) {

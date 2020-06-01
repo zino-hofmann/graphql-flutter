@@ -98,6 +98,8 @@ class WatchQueryOptions extends QueryOptions {
   /// Whether or not to fetch results
   bool fetchResults;
 
+  /// Whether to [fetchResults] immediately on instantiation.
+  /// Defaults to [fetchResults].
   bool eagerlyFetchResults;
 
   @override
@@ -118,17 +120,17 @@ class WatchQueryOptions extends QueryOptions {
       );
 }
 
-/// options for fetchmore operations
+/// options for fetchMore operations
 class FetchMoreOptions {
   FetchMoreOptions({
-    @required this.document,
+    this.document,
     this.variables = const <String, dynamic>{},
     @required this.updateQuery,
   }) : assert(updateQuery != null);
 
   DocumentNode document;
 
-  final Map<String, dynamic> variables;
+  Map<String, dynamic> variables;
 
   /// Strategy for merging the fetchMore result data
   /// with the result data already in the cache
@@ -140,3 +142,23 @@ typedef dynamic UpdateQuery(
   dynamic previousResultData,
   dynamic fetchMoreResultData,
 );
+
+extension WithType on Request {
+  OperationType get type {
+    final definitions = operation.document.definitions
+        .whereType<OperationDefinitionNode>()
+        .toList();
+    if (operation.operationName != null) {
+      definitions.removeWhere(
+        (node) => node.name.value != operation.operationName,
+      );
+    }
+    // TODO differentiate error types, add exception
+    assert(definitions.length == 1);
+    return definitions.first.type;
+  }
+
+  bool get isQuery => type == OperationType.query;
+  bool get isMutation => type == OperationType.mutation;
+  bool get isSubscription => type == OperationType.subscription;
+}
