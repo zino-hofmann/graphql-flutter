@@ -9,3 +9,6 @@ dependencies:
   args:
   graphql:
     path: ..
+
+executables:
+  example: example

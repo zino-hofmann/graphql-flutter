@@ -1,26 +1,31 @@
+/// Example functions for calling the Github GraphQL API
+///
+/// ### Queries
+/// * [readRepositories()]
+///
+/// ### Mutations:
+/// * [starRepository(id)]
+/// * [removeStarFromRepository(id)]
+///
+/// To run the example, create a file `lib/local.dart` with the content:
+/// ```dart
+/// const String YOUR_PERSONAL_ACCESS_TOKEN =
+///    '<YOUR_PERSONAL_ACCESS_TOKEN>';
+/// ```
 import 'dart:io' show stdout, stderr, exit;
-
-import 'package:args/args.dart';
 import 'package:graphql/client.dart';
 
-import './graphql_operation/mutations/mutations.dart';
-import './graphql_operation/queries/readRepositories.dart';
-
-// to run the example, create a file ../local.dart with the content:
-// const String YOUR_PERSONAL_ACCESS_TOKEN =
-//    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 // ignore: uri_does_not_exist
 import './local.dart';
 
-ArgResults argResults;
-
-// client - create a graphql client
-GraphQLClient client() {
-  /// `graphql/client.dart` leverages the [gql_link][1] interface,
-  /// re-exporting `HttpLink`, `WebsocketLink`, `ErrorLink`, and `DedupeLink`,
-  /// in addition to the links we define ourselves (`AuthLink`)
-  ///
-  /// [1]: https://pub.dev/packages/gql_link
+/// Get an authenticated [GraphQLClient] for the github api
+///
+/// `graphql/client.dart` leverages the [gql_link][1] interface,
+/// re-exporting [HttpLink], [WebsocketLink], [ErrorLink], and [DedupeLink],
+/// in addition to the links we define ourselves (`AuthLink`)
+///
+/// [1]: https://pub.dev/packages/gql_link
+GraphQLClient getGithubGraphQLClient() {
   final Link _link = HttpLink(
     'https://api.github.com/graphql',
     defaultHeaders: {
@@ -34,14 +39,29 @@ GraphQLClient client() {
   );
 }
 
-// query example - fetch all your github repositories
-void query() async {
-  final GraphQLClient _client = client();
+/// query example - fetch all your github repositories
+void readRepositories() async {
+  final GraphQLClient _client = getGithubGraphQLClient();
 
   const int nRepositories = 50;
 
   final QueryOptions options = QueryOptions(
-    document: gql(readRepositories),
+    document: gql(
+      r'''
+        query ReadRepositories($nRepositories: Int!) {
+          viewer {
+            repositories(last: $nRepositories) {
+              nodes {
+                __typename
+                id
+                name
+                viewerHasStarred
+              }
+            }
+          }
+        }
+      ''',
+    ),
     variables: {
       'nRepositories': nRepositories,
     },
@@ -71,10 +91,20 @@ void starRepository(String repositoryID) async {
     exit(2);
   }
 
-  final GraphQLClient _client = client();
+  final GraphQLClient _client = getGithubGraphQLClient();
 
   final MutationOptions options = MutationOptions(
-    document: gql(addStar),
+    document: gql(
+      r'''
+        mutation AddStar($starrableId: ID!) {
+          action: addStar(input: {starrableId: $starrableId}) {
+            starrable {
+              viewerHasStarred
+            }
+          }
+        }
+      ''',
+    ),
     variables: <String, dynamic>{
       'starrableId': repositoryID,
     },
@@ -104,10 +134,20 @@ void removeStarFromRepository(String repositoryID) async {
     exit(2);
   }
 
-  final GraphQLClient _client = client();
+  final GraphQLClient _client = getGithubGraphQLClient();
 
   final MutationOptions options = MutationOptions(
-    document: gql(removeStar),
+    document: gql(
+      r'''
+        mutation RemoveStar($starrableId: ID!) {
+          action: removeStar(input: {starrableId: $starrableId}) {
+            starrable {
+              viewerHasStarred
+            }
+          }
+        }
+      ''',
+    ),
     variables: <String, dynamic>{
       'starrableId': repositoryID,
     },
@@ -128,27 +168,4 @@ void removeStarFromRepository(String repositoryID) async {
   }
 
   exit(0);
-}
-
-void main(List<String> arguments) {
-  final ArgParser parser = ArgParser()
-    ..addOption('action', abbr: 'a', defaultsTo: 'fetch')
-    ..addOption('id', defaultsTo: '');
-
-  argResults = parser.parse(arguments);
-
-  final String action = argResults['action'] as String;
-  final String id = argResults['id'] as String;
-
-  switch (action) {
-    case 'star':
-      starRepository(id);
-      break;
-    case 'unstar':
-      removeStarFromRepository(id);
-      break;
-    default:
-      query();
-      break;
-  }
 }
