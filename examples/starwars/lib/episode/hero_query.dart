@@ -40,7 +40,7 @@ class HeroForEpisode extends StatelessWidget {
           return Text(result.exception.toString());
         }
 
-        if (result.loading) {
+        if (result.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );
