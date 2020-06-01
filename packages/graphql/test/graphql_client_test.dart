@@ -102,7 +102,7 @@ void main() {
             Request(
               operation: Operation(
                 document: parseString(readRepositories),
-                operationName: 'ReadRepositories',
+                //operationName: 'ReadRepositories',
               ),
               variables: <String, dynamic>{
                 'nRepositories': 42,
@@ -208,7 +208,7 @@ void main() {
             Request(
               operation: Operation(
                 document: parseString(addStar),
-                operationName: 'AddStar',
+                //operationName: 'AddStar',
               ),
               variables: <String, dynamic>{},
               context: Context(),

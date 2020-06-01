@@ -22,7 +22,7 @@ class MutationOptions extends BaseOptions {
   MutationOptions({
     @required DocumentNode document,
     String operationName,
-    Map<String, dynamic> variables,
+    Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Context context,

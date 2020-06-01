@@ -12,7 +12,7 @@ class QueryOptions extends BaseOptions {
   QueryOptions({
     @required DocumentNode document,
     String operationName,
-    Map<String, dynamic> variables,
+    Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Object optimisticResult,
@@ -52,7 +52,7 @@ class SubscriptionOptions extends BaseOptions {
   SubscriptionOptions({
     @required DocumentNode document,
     String operationName,
-    Map<String, dynamic> variables,
+    Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Object optimisticResult,
@@ -75,7 +75,7 @@ class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
     @required DocumentNode document,
     String operationName,
-    Map<String, dynamic> variables,
+    Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Object optimisticResult,
@@ -124,7 +124,7 @@ class WatchQueryOptions extends QueryOptions {
 class FetchMoreOptions {
   FetchMoreOptions({
     this.document,
-    this.variables = const <String, dynamic>{},
+    this.variables = const {},
     @required this.updateQuery,
   }) : assert(updateQuery != null);
 

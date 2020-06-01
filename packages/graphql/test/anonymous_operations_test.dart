@@ -158,7 +158,7 @@ void main() {
               operation: Operation(
                 document: parseString(addStar),
               ),
-              variables: <String, dynamic>{},
+              variables: {},
               context: Context(),
             ),
           ),

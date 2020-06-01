@@ -11,8 +11,8 @@ import 'package:graphql/src/core/policies.dart';
 abstract class BaseOptions extends MutableDataClass {
   BaseOptions({
     @required this.document,
+    this.variables = const {},
     this.operationName,
-    this.variables,
     Context context,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
