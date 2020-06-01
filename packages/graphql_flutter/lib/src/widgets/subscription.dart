@@ -14,6 +14,56 @@ typedef OnSubscriptionResult = void Function(
 
 typedef SubscriptionBuilder = Widget Function(QueryResult result);
 
+/// Creats a subscription with [GraphQLClient.subscribe].
+///
+/// The [builder] is passed a [QueryResult] with only the **most recent**
+/// `data`. [ResultAccumulator] can be used to accumulate results.
+///
+/// [onSubscriptionResult] can be used to react to changes,
+/// and has access to the `client`.
+///
+/// {@tool snippet}
+///
+/// Excerpt from the starwars example using [ResultAccumulator]
+///
+/// ```dart
+/// class ReviewFeed extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Subscription(
+///       options: SubscriptionOptions(
+///         document: gql(
+///           r'''
+///             subscription reviewAdded {
+///               reviewAdded {
+///                 stars, commentary, episode
+///               }
+///             }
+///           ''',
+///         ),
+///       ),
+///       builder: (result) {
+///         if (result.hasException) {
+///           return Text(result.exception.toString());
+///         }
+///
+///         if (result.isLoading) {
+///           return Center(
+///             child: const CircularProgressIndicator(),
+///           );
+///         }
+///         return ResultAccumulator.appendUniqueEntries(
+///           latest: result.data,
+///           builder: (context, {results}) => DisplayReviews(
+///             reviews: results.reversed.toList(),
+///           ),
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
 class Subscription<T> extends StatefulWidget {
   const Subscription({
     @required this.options,
@@ -38,9 +88,6 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   StreamSubscription<ConnectivityResult> _networkSubscription;
 
   void _initSubscription() {
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    assert(client != null);
-
     stream = client.subscribe(widget.options);
 
     if (widget.onSubscriptionResult != null) {
@@ -114,7 +161,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   }
 
   @override
-  Widget build(final BuildContext context) {
+  Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
       initialData: widget.options?.optimisticResult != null
           ? QueryResult.optimistic(data: widget.options?.optimisticResult)

@@ -114,7 +114,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         return StarrableRepository(
                           repository: repositories[index],
                           optimistic: result.source ==
-                              QueryResultSource.OptimisticResult,
+                              QueryResultSource.optimisticResult,
                         );
                       },
                     ),
@@ -123,16 +123,14 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ENABLE_WEBSOCKETS
-                ? Subscription<Map<String, dynamic>>(
-                    'test', queries.testSubscription, builder: ({
-                    bool loading,
-                    Map<String, dynamic> payload,
-                    dynamic error,
-                  }) {
-                    return loading
+                ? Subscription(
+                    options: SubscriptionOptions(
+                      document: gql(queries.testSubscription),
+                    ),
+                    builder: (result) => result.isLoading
                         ? const Text('Loading...')
-                        : Text(payload.toString());
-                  })
+                        : Text(result.data.toString()),
+                  )
                 : const Text(''),
           ],
         ),
