@@ -551,16 +551,18 @@ mutation($files: [Upload!]!) {
 ```
 
 ```dart
-import 'dart:io' show File;
+import 'package:http/http.dart';
 
 // ...
 
 String filePath = '/aboslute/path/to/file.ext';
+final file = await multipartFileFrom(File(filePath));
+
 final QueryResult r = await graphQLClientClient.mutate(
   MutationOptions(
     documentNode: gql(uploadMutation),
     variables: {
-      'files': [File(filePath)],
+      'files': [file],
     },
   )
 );

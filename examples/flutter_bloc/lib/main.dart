@@ -15,6 +15,10 @@ import 'local.dart';
 
 void main() => runApp(MyApp());
 
+final OptimisticCache cache = OptimisticCache(
+  dataIdFromObject: typenameDataIdFromObject,
+);
+
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -55,9 +59,7 @@ class MyApp extends StatelessWidget {
     final Link _link = _authLink.concat(_httpLink);
 
     return GraphQLClient(
-      cache: OptimisticCache(
-        dataIdFromObject: typenameDataIdFromObject,
-      ),
+      cache: cache,
       link: _link,
     );
   }
