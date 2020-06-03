@@ -1,3 +1,13 @@
+<<<<<<< HEAD
+=======
+## [3.0.2](https://github.com/zino-app/graphql-flutter/compare/v3.0.1...v3.0.2) (2020-05-18)
+
+
+### Bug Fixes
+
+* **client:** FetchMoreOptions bug with operator precedence ([f8e05af](https://github.com/zino-app/graphql-flutter/commit/f8e05af52f9720eed612f13b513d25f2456a8726))
+
+>>>>>>> f34504b... github thinks changelog was deleted
 # [3.1.0-beta.6](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.5...v3.1.0-beta.6) (2020-05-16)
 
 
@@ -34,6 +44,16 @@
 * **style:** use curly braces ([42f4da4](https://github.com/zino-app/graphql-flutter/commit/42f4da4cb5ddb9f76c34a5946eb1bf662d138cbf))
 * **tests:** don't factor tests into coverage scores ([4a9bcd4](https://github.com/zino-app/graphql-flutter/commit/4a9bcd4c708e955dbfcd432f0ce803541a343487))
 
+<<<<<<< HEAD
+=======
+## [3.0.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.0...v3.0.1) (2020-04-20)
+
+
+### Bug Fixes
+
+* **style:** use curly braces ([42f4da4](https://github.com/zino-app/graphql-flutter/commit/42f4da4cb5ddb9f76c34a5946eb1bf662d138cbf))
+
+>>>>>>> f34504b... github thinks changelog was deleted
 # [3.1.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.1...v3.1.0-beta.2) (2020-04-12)
 
 
@@ -246,6 +266,7 @@ there is no way to override min sdk version outside of a project
 
 See [GitHub Releases](https://github.com/zino-app/graphql-flutter/releases).
 
+<<<<<<< HEAD
 ### [1.0.1-beta] - April 27 2019
 
 We now have a (beta) stand-alone client!
@@ -854,3 +875,11 @@ n/a
 #### Docs
 
 - Initial documentation.
+=======
+* Loosened `initPayload` to `dynamic` to support many use-cases,
+  Removed `InitOperation`'s excessive and inconsistent json encoding.
+  Old implmentation can still be utilized as `legacyInitPayload`
+  until deprecation
+
+* Fixed broken anonymous operations
+>>>>>>> f34504b... github thinks changelog was deleted
