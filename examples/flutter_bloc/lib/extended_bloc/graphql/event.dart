@@ -10,6 +10,12 @@ class GraphqlErrorEvent<T> extends GraphqlEvent<T> {
   GraphqlErrorEvent({@required this.error, @required this.result});
 }
 
+class GraphqlLoadingEvent<T> extends GraphqlEvent<T> {
+  final QueryResult result;
+
+  GraphqlLoadingEvent({@required this.result});
+}
+
 class GraphqlLoadedEvent<T> extends GraphqlEvent<T> {
   final T data;
   final QueryResult result;
