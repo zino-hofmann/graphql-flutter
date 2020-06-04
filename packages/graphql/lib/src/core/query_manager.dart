@@ -161,13 +161,15 @@ class QueryManager {
     Response response;
     QueryResult queryResult;
 
+    final writeToCache = options.fetchPolicy != FetchPolicy.noCache;
+
     try {
       // execute the request through the provided link(s)
       response = await link.request(request).first;
 
       // save the data from response to the cache
-      if (response.data != null && options.fetchPolicy != FetchPolicy.noCache) {
-        cache.writeQuery(request, data: response.data);
+      if (response.data != null && writeToCache) {
+        await cache.writeQuery(request, data: response.data);
       }
 
       queryResult = mapFetchResultToQueryResult(
@@ -188,7 +190,7 @@ class QueryManager {
     // cleanup optimistic results
     cache.removeOptimisticPatch(queryId);
 
-    if (options.fetchPolicy != FetchPolicy.noCache) {
+    if (writeToCache) {
       // normalize results if previously written
       queryResult.data = cache.readQuery(request);
     }
@@ -275,7 +277,7 @@ class QueryManager {
   }
 
   /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists
-  /// Will [maybeRebroadcastQueries] if the cache has flagged the need to
+  /// Will [maybeRebroadcastQueries] from [addResult] if the cache has flagged the need to
   ///
   /// Queries are registered via [setQuery] and [watchQuery]
   void addQueryResult(
@@ -296,8 +298,6 @@ class QueryManager {
     if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.addResult(queryResult);
     }
-
-    maybeRebroadcastQueries(exclude: observableQuery);
   }
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
@@ -330,9 +330,11 @@ class QueryManager {
   /// If there are multiple in-flight cache updates, we wait until they all complete
   bool maybeRebroadcastQueries({ObservableQuery exclude}) {
     final shouldBroadast = cache.shouldBroadcast(claimExecution: true);
+
     if (!shouldBroadast) {
       return false;
     }
+
     for (ObservableQuery query in queries.values) {
       if (query != exclude && query.isRebroadcastSafe) {
         final dynamic cachedData = cache.readQuery(
@@ -344,9 +346,9 @@ class QueryManager {
             mapFetchResultToQueryResult(
               Response(data: cachedData),
               query.options,
-              // TODO maybe entirely wrong
               source: QueryResultSource.cache,
             ),
+            fromRebroadcast: true,
           );
         }
       }

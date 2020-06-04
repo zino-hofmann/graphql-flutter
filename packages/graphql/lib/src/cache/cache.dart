@@ -11,6 +11,11 @@ export 'package:graphql/src/cache/data_proxy.dart';
 export 'package:graphql/src/cache/store.dart';
 export 'package:graphql/src/cache/hive_store.dart';
 
+/// Optimmistic GraphQL Entity cache with [normalize] [TypePolicy] support
+/// and configurable [store].
+///
+/// **NOTE**: The default [InMemoryStore] does _not_ persist to disk.
+/// The recommended store for persistent environments is the [HiveStore].
 class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
     Store store,
@@ -18,12 +23,14 @@ class GraphQLCache extends NormalizingDataProxy {
     this.typePolicies = const {},
   }) : store = store ?? InMemoryStore();
 
-  /// Stores the underlying normalized data
+  /// Stores the underlying normalized data. Defaults to an [InMemoryStore]
   @protected
   final Store store;
 
-  /// `typePolicies` to pass down to `normalize`
+  /// `typePolicies` to pass down to [normalize]
   final Map<String, TypePolicy> typePolicies;
+
+  /// Optional `dataIdFromObject` function to pass through to [normalize]
   final DataIdResolver dataIdFromObject;
 
   /// tracks the number of ongoing transactions to prevent

@@ -77,7 +77,7 @@ void main() {
         final results = QueryResult(
           data: decodeGithubResponse['data'],
           exception: null,
-          loading: false,
+          source: QueryResultSource.network,
         );
 
         when(

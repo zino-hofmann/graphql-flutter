@@ -91,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Query(
               options: QueryOptions(
                 document: gql(queries.readRepositories),
-                variables: <String, dynamic>{
+                variables: {
                   'nRepositories': nRepositories,
                 },
                 //pollInterval: 10,
@@ -149,9 +149,8 @@ class StarrableRepository extends StatelessWidget {
   final Map<String, Object> repository;
   final bool optimistic;
 
-  Map<String, Object> extractRepositoryData(Object data) {
-    final action =
-        (data as Map<String, Object>)['action'] as Map<String, Object>;
+  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
+    final action = data['action'] as Map<String, Object>;
     if (action == null) {
       return null;
     }
@@ -161,8 +160,13 @@ class StarrableRepository extends StatelessWidget {
   bool get starred => repository['viewerHasStarred'] as bool;
 
   Map<String, dynamic> get expectedResult => <String, dynamic>{
-        'action': <String, dynamic>{
-          'starrable': <String, dynamic>{'viewerHasStarred': !starred}
+        'action': {
+          '__typename': 'AddStarPayload',
+          'starrable': {
+            '__typename': 'Repository',
+            'id': repository['id'],
+            'viewerHasStarred': !starred,
+          }
         }
       };
 
@@ -171,26 +175,30 @@ class StarrableRepository extends StatelessWidget {
     return Mutation(
       options: MutationOptions(
         document: gql(starred ? mutations.removeStar : mutations.addStar),
-        update: (cache, QueryResult result) {
+        update: (cache, result) {
           if (result.hasException) {
             print(result.exception);
           } else {
-            final updated = Map<String, Object>.from(repository)
-              ..addAll(extractRepositoryData(result.data));
+            final updated = {
+              ...repository,
+              ...extractRepositoryData(result.data),
+            };
             cache.writeFragment(
-              fragment: gql('''
+              fragment: gql(
+                '''
                   fragment fields on Repository {
-                    __typename
                     id
                     name
                     viewerHasStarred
                   }
-                '''),
+                ''',
+              ),
               idFields: {
                 '__typename': updated['__typename'],
                 'id': updated['id'],
               },
               data: updated,
+              broadcast: false,
             );
           }
         },
@@ -243,15 +251,13 @@ class StarrableRepository extends StatelessWidget {
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
-          trailing: result.loading || optimistic
+          trailing: result.isLoading || optimistic
               ? const CircularProgressIndicator()
               : null,
           title: Text(repository['name'] as String),
           onTap: () {
             toggleStar(
-              <String, dynamic>{
-                'starrableId': repository['id'],
-              },
+              {'starrableId': repository['id']},
               optimisticResult: expectedResult,
             );
           },

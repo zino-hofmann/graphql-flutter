@@ -6,8 +6,15 @@ import 'package:graphql/src/cache/cache.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
 
+/// Universal GraphQL Client with configurable caching and [link][] system.
+/// modelled after the [`apollo-client`][ac].
+///
 /// The link is a [Link] over which GraphQL documents will be resolved into a [Response].
-/// The cache is the initial [Cache] to use in the data store.
+/// The cache is the [GraphQLCache] to use for caching results and optimistic updates.
+///
+///
+/// [ac]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ApolloClient/
+/// [link]: https://github.com/gql-dart/gql/tree/master/links/gql_link
 class GraphQLClient {
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
   GraphQLClient({
@@ -84,6 +91,44 @@ class GraphQLClient {
 
   /// This resolves a single query according to the [QueryOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
+  ///
+  /// {@tool snippet}
+  /// Basic usage
+  ///
+  /// ```dart
+  /// final QueryResult result = await client.query(
+  ///   QueryOptions(
+  ///     document: gql(
+  ///       r'''
+  ///       query ReadRepositories($nRepositories: Int!) {
+  ///         viewer {
+  ///           repositories(last: $nRepositories) {
+  ///             nodes {
+  ///               __typename
+  ///               id
+  ///               name
+  ///               viewerHasStarred
+  ///             }
+  ///           }
+  ///         }
+  ///       }
+  ///     ''',
+  ///     ),
+  ///     variables: {
+  ///       'nRepositories': 50,
+  ///     },
+  ///   ),
+  /// );
+  ///
+  /// if (result.hasException) {
+  ///   print(result.exception.toString());
+  /// }
+  ///
+  /// final List<dynamic> repositories =
+  ///     result.data['viewer']['repositories']['nodes'] as List<dynamic>;
+  /// ```
+  /// {@end-tool}
+
   Future<QueryResult> query(QueryOptions options) {
     options.policies = defaultPolicies.query.withOverrides(options.policies);
     return queryManager.query(options);
@@ -98,6 +143,40 @@ class GraphQLClient {
 
   /// This subscribes to a GraphQL subscription according to the options specified and returns a
   /// [Stream] which either emits received data or an error.
+  ///
+  /// {@tool snippet}
+  /// Basic usage
+  ///
+  /// ```dart
+  /// subscription = client.subscribe(
+  ///   SubscriptionOptions(
+  ///     document: gql(
+  ///       r'''
+  ///         subscription reviewAdded {
+  ///           reviewAdded {
+  ///             stars, commentary, episode
+  ///           }
+  ///         }
+  ///       ''',
+  ///     ),
+  ///   ),
+  /// );
+  ///
+  /// subscription.listen((result) {
+  ///   if (result.hasException) {
+  ///     print(result.exception.toString());
+  ///     return;
+  ///   }
+  ///
+  ///   if (result.isLoading) {
+  ///     print('awaiting results');
+  ///     return;
+  ///   }
+  ///
+  ///   print('Rew Review: ${result.data}');
+  /// });
+  /// ```
+  /// {@end-tool}
   Stream<QueryResult> subscribe(SubscriptionOptions options) {
     options.policies = defaultPolicies.subscribe.withOverrides(
       options.policies,
@@ -107,6 +186,7 @@ class GraphQLClient {
 
   /// Fetch more results and then merge them with the given [previousResult]
   /// according to [FetchMoreOptions.updateQuery].
+  @experimental
   Future<QueryResult> fetchMore(
     FetchMoreOptions fetchMoreOptions, {
     @required QueryOptions originalOptions,

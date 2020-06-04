@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
@@ -87,8 +88,14 @@ class ObservableQuery {
   @protected
   QueryScheduler get scheduler => queryManager.scheduler;
 
-  final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      <StreamSubscription<QueryResult>>{};
+  /// callbacks registered with [onData]
+  List<OnData> _onDataCallbacks = [];
+
+  /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
+  ///
+  /// Automatically appended as an [OnData]
+  void _maybeRebroadcast(QueryResult result) =>
+      queryManager.maybeRebroadcastQueries(exclude: this);
 
   /// The most recently seen result from this operation's stream
   QueryResult latestResult;
@@ -177,7 +184,7 @@ class ObservableQuery {
 
     // if onData callbacks have been registered,
     // they are waited on by default
-    lifecycle = _onDataSubscriptions.isNotEmpty
+    lifecycle = _onDataCallbacks.isNotEmpty
         ? QueryLifecycle.sideEffectsPending
         : QueryLifecycle.pending;
 
@@ -214,7 +221,7 @@ class ObservableQuery {
   /// if it is set to `null`.
   ///
   /// Called internally by the [QueryManager]
-  void addResult(QueryResult result) {
+  void addResult(QueryResult result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
         latestResult.timestamp.isAfter(result.timestamp)) {
@@ -231,8 +238,13 @@ class ObservableQuery {
 
     latestResult = result;
 
+    // TODO should callbacks be applied before or after streaming
     if (!controller.isClosed) {
       controller.add(result);
+    }
+
+    if (result.isNotLoading) {
+      _applyCallbacks(result, fromRebroadcast: fromRebroadcast);
     }
   }
 
@@ -245,31 +257,44 @@ class ObservableQuery {
   /// handling the resolution of [lifecycle] from
   /// [QueryLifecycle.sideEffectsBlocking] to [QueryLifecycle.completed]
   /// as appropriate
-  void onData(Iterable<OnData> callbacks) {
-    callbacks ??= const <OnData>[];
-    StreamSubscription<QueryResult> subscription;
+  void onData(Iterable<OnData> callbacks) =>
+      _onDataCallbacks.addAll(callbacks ?? []);
 
-    subscription = stream.where((result) => result.isNotLoading).listen(
-      (QueryResult result) async {
-        for (final callback in callbacks) {
-          await callback(result);
+  /// Applies [onData] callbacks at the end of [addResult]
+  ///
+  /// [fromRebroadcast] is used to avoid the super-edge case of infinite rebroadcasts
+  /// (not sure if it's even possible)
+  void _applyCallbacks(QueryResult result,
+      {bool fromRebroadcast = false}) async {
+    final callbacks = [
+      ..._onDataCallbacks,
+      if (!fromRebroadcast) _maybeRebroadcast
+    ];
+    for (final callback in callbacks) {
+      await callback(result);
+    }
+
+    if (this == null || lifecycle == QueryLifecycle.closed) {
+      // .close(force: true) was called
+      return;
+    }
+
+    if (result.isConcrete) {
+      // avoid removing new callbacks
+      _onDataCallbacks.removeWhere((cb) => callbacks.contains(cb));
+
+      // if there are new callbacks, there is maybe another inflight mutation
+      if (_onDataCallbacks.isEmpty) {
+        if (lifecycle == QueryLifecycle.sideEffectsBlocking) {
+          lifecycle = QueryLifecycle.completed;
+          close();
         }
-
-        if (result.isConcrete) {
-          await subscription.cancel();
-          _onDataSubscriptions.remove(subscription);
-
-          if (_onDataSubscriptions.isEmpty) {
-            if (lifecycle == QueryLifecycle.sideEffectsBlocking) {
-              lifecycle = QueryLifecycle.completed;
-              close();
-            }
-          }
+        if (lifecycle == QueryLifecycle.sideEffectsPending) {
+          lifecycle = QueryLifecycle.completed;
+          close();
         }
-      },
-    );
-
-    _onDataSubscriptions.add(subscription);
+      }
+    }
   }
 
   /// Poll the server periodically for results.
@@ -331,10 +356,6 @@ class ObservableQuery {
     // `fromManager` is used by the query manager when it wants to close a query to avoid infinite loops
     if (!fromManager) {
       queryManager.closeQuery(this, fromQuery: true);
-    }
-
-    for (StreamSubscription<QueryResult> subscription in _onDataSubscriptions) {
-      await subscription.cancel();
     }
 
     stopPolling();

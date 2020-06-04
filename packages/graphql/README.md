@@ -18,7 +18,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql: ^4.0.0-rc1
+  graphql: ^4.0.0-alpha
 ```
 
 And then import it inside your dart code:
@@ -29,7 +29,7 @@ import 'package:graphql/client.dart';
 
 ## Migration Guide
 
-Find the migration from version 2 to version 3 [here](./../../changelog-v2-v3.md).
+Find the migration from version 3 to version 4 [here](./../../changelog-v3-v4.md).
 
 ### Parsing at build-time
 
@@ -61,7 +61,10 @@ final AuthLink _authLink = AuthLink(
 final Link _link = _authLink.concat(_httpLink);
 
 final GraphQLClient _client = GraphQLClient(
-        cache: GraphQLCache(),
+        cache: GraphQLCache(
+          // The default store is the InMemoryStore, which does NOT persist to disk
+          store: HiveStore(),
+        ),
         link: _link,
     );
 
