@@ -1,3 +1,12 @@
+# [3.1.0-beta.7](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.6...v3.1.0-beta.7) (2020-06-04)
+
+
+### Bug Fixes
+
+* **ci:** add changelog back ([3e63c3e](https://github.com/zino-app/graphql-flutter/commit/3e63c3eddf142c99918d58fcd9a8828106327eec))
+* **ci:** Sync master into beta ([2a0507e](https://github.com/zino-app/graphql-flutter/commit/2a0507ec3ea492ff0cc748fab80ee2258efe0b56))
+* **client:** FetchMoreOptions bug with operator precedence ([f8e05af](https://github.com/zino-app/graphql-flutter/commit/f8e05af52f9720eed612f13b513d25f2456a8726))
+
 ## [3.0.2](https://github.com/zino-app/graphql-flutter/compare/v3.0.1...v3.0.2) (2020-05-18)
 
 
