@@ -1,7 +1,7 @@
+// ignore_for_file: deprecated_member_use_from_same_package
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/observable_query.dart';
-import 'package:meta/meta.dart';
 
 import 'package:gql/ast.dart';
 import 'package:gql_exec/gql_exec.dart';
@@ -20,7 +20,9 @@ typedef OnError = void Function(OperationException error);
 
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    @required DocumentNode document,
+    DocumentNode document,
+    @Deprecated('Use `document` instead. Will be removed in 5.0.0')
+        DocumentNode documentNode,
     String operationName,
     Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
@@ -30,10 +32,11 @@ class MutationOptions extends BaseOptions {
     this.onCompleted,
     this.update,
     this.onError,
-  }) : super(
+  })  : assert(document ?? documentNode != null, 'document must not be null'),
+        super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
-          document: document,
+          document: document ?? documentNode,
           operationName: operationName,
           variables: variables,
           context: context,

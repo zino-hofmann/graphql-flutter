@@ -1,3 +1,4 @@
+// ignore_for_file: deprecated_member_use_from_same_package
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:meta/meta.dart';
 
@@ -10,7 +11,9 @@ import 'package:graphql/src/core/policies.dart';
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    @required DocumentNode document,
+    DocumentNode document,
+    @Deprecated('Use `document` instead. Will be removed in 5.0.0')
+        DocumentNode documentNode,
     String operationName,
     Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
@@ -18,10 +21,11 @@ class QueryOptions extends BaseOptions {
     Object optimisticResult,
     this.pollInterval,
     Context context,
-  }) : super(
+  })  : assert(document ?? documentNode != null, 'document must not be null'),
+        super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
-          document: document,
+          document: document ?? documentNode,
           operationName: operationName,
           variables: variables,
           context: context,
@@ -74,6 +78,8 @@ class SubscriptionOptions extends BaseOptions {
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
     @required DocumentNode document,
+    @Deprecated('Use `document` instead. Will be removed in 5.0.0')
+        DocumentNode documentNode,
     String operationName,
     Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
@@ -83,9 +89,10 @@ class WatchQueryOptions extends QueryOptions {
     this.fetchResults = false,
     bool eagerlyFetchResults,
     Context context,
-  })  : eagerlyFetchResults = eagerlyFetchResults ?? fetchResults,
+  })  : assert(document ?? documentNode != null, 'document must not be null'),
+        eagerlyFetchResults = eagerlyFetchResults ?? fetchResults,
         super(
-          document: document,
+          document: document ?? documentNode,
           operationName: operationName,
           variables: variables,
           fetchPolicy: fetchPolicy,
@@ -123,10 +130,14 @@ class WatchQueryOptions extends QueryOptions {
 /// options for fetchMore operations
 class FetchMoreOptions {
   FetchMoreOptions({
-    this.document,
+    DocumentNode document,
+    @Deprecated('Use `document` instead. Will be removed in 5.0.0')
+        DocumentNode documentNode,
     this.variables = const {},
     @required this.updateQuery,
-  }) : assert(updateQuery != null);
+  })  : assert(updateQuery != null),
+        assert(document ?? documentNode != null, 'document must not be null'),
+        this.document = document ?? documentNode;
 
   DocumentNode document;
 

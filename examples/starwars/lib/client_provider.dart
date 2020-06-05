@@ -25,7 +25,6 @@ ValueNotifier<GraphQLClient> clientFor({
     );
 
     link = Link.split((request) => request.isSubscription, websocketLink, link);
-    ;
   }
 
   return ValueNotifier<GraphQLClient>(

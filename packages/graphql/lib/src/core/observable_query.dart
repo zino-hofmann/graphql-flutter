@@ -23,7 +23,7 @@ enum QueryLifecycle {
   /// Polling for results periodically
   polling,
 
-  /// [Observab]
+  /// Was polling but [ObservableQuery.stopPolling()] was called
   pollingStopped,
 
   /// Results are being fetched, and will trigger

@@ -29,7 +29,11 @@ class GraphQLWidgetScreen extends StatelessWidget {
     if (ENABLE_WEBSOCKETS) {
       final websocketLink = WebSocketLink('ws://localhost:8080/ws/graphql');
 
-      link = link.concat(websocketLink);
+      link = Link.split(
+        (request) => request.isSubscription,
+        websocketLink,
+        link,
+      );
     }
 
     final client = ValueNotifier<GraphQLClient>(
