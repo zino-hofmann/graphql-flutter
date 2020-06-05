@@ -1,3 +1,8 @@
+# 4.0.0-alpha.1 (2020-06-05)
+
+See the [v4 changelog](../../changelog-v3-v4.md)
+
+
 # [3.1.0-beta.4](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2020-04-21)
 
 
