@@ -32,7 +32,10 @@ class MutationOptions extends BaseOptions {
     this.onCompleted,
     this.update,
     this.onError,
-  })  : assert(document ?? documentNode != null, 'document must not be null'),
+  })  : assert(
+          (document ?? documentNode) != null,
+          'document must not be null',
+        ),
         super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,

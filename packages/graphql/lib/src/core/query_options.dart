@@ -21,7 +21,10 @@ class QueryOptions extends BaseOptions {
     Object optimisticResult,
     this.pollInterval,
     Context context,
-  })  : assert(document ?? documentNode != null, 'document must not be null'),
+  })  : assert(
+          (document ?? documentNode) != null,
+          'document must not be null',
+        ),
         super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -89,7 +92,10 @@ class WatchQueryOptions extends QueryOptions {
     this.fetchResults = false,
     bool eagerlyFetchResults,
     Context context,
-  })  : assert(document ?? documentNode != null, 'document must not be null'),
+  })  : assert(
+          (document ?? documentNode) != null,
+          'document must not be null',
+        ),
         eagerlyFetchResults = eagerlyFetchResults ?? fetchResults,
         super(
           document: document ?? documentNode,
@@ -136,7 +142,10 @@ class FetchMoreOptions {
     this.variables = const {},
     @required this.updateQuery,
   })  : assert(updateQuery != null),
-        assert(document ?? documentNode != null, 'document must not be null'),
+        assert(
+          (document ?? documentNode) != null,
+          'document must not be null',
+        ),
         this.document = document ?? documentNode;
 
   DocumentNode document;
