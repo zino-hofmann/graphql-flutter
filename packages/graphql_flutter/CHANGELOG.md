@@ -1,4 +1,4 @@
-# 4.0.0-alpha.1 (2020-06-05)
+# 4.0.0-alpha.0 (2020-06-07)
 
 See the [v4 changelog](../../changelog-v3-v4.md)
 
