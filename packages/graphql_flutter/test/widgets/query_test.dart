@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel, MethodCall;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -13,6 +16,23 @@ final query = gql("""
     foo
   }
 """);
+
+/// https://flutter.dev/docs/cookbook/persistence/reading-writing-files#testing
+Future<void> mockApplicationDocumentsDirectory() async {
+// Create a temporary directory.
+  final directory = await Directory.systemTemp.createTemp();
+
+  // Mock out the MethodChannel for the path_provider plugin.
+  const MethodChannel('plugins.flutter.io/path_provider')
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+    // If you're getting the apps documents directory, return the path to the
+    // temp directory on the test environment instead.
+    if (methodCall.method == 'getApplicationDocumentsDirectory') {
+      return directory.path;
+    }
+    return null;
+  });
+}
 
 class Page extends StatefulWidget {
   final Map<String, dynamic> variables;
@@ -77,12 +97,18 @@ class PageState extends State<Page> {
 }
 
 void main() {
+  setUpAll(() async {
+    await mockApplicationDocumentsDirectory();
+  });
+
   group('Query', () {
     MockHttpClient mockHttpClient;
     HttpLink httpLink;
     ValueNotifier<GraphQLClient> client;
 
     setUp(() async {
+      await initHiveForFlutter();
+
       mockHttpClient = MockHttpClient();
       httpLink = HttpLink(
         'https://unused/graphql',

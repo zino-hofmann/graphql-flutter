@@ -9,3 +9,5 @@ export 'package:graphql_flutter/src/widgets/mutation.dart';
 export 'package:graphql_flutter/src/widgets/query.dart';
 export 'package:graphql_flutter/src/widgets/subscription.dart';
 export 'package:graphql_flutter/src/widgets/result_accumulator.dart';
+
+export 'package:graphql_flutter/src/hive_init.dart';

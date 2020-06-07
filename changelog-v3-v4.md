@@ -11,13 +11,14 @@ v4 aims to solve a number of sore spots, particularly with caching, largely by l
 - **`Store`** is now a seperate concern:
 
 ```dart
+/// Only necessary on flutter
+await initHiveForFlutter();
+
 GraphQLCache(
   // The default store is the InMemoryStore, which does NOT persist to disk
   store: await HiveStore.open(),
 )
 ```
-
-and persistence is broken into a seperate `Store` concern.
 
 ## We now use the [gql_link system](https://github.com/gql-dart/gql/tree/master/links/gql_link)
 

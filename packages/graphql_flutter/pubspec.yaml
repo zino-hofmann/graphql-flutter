@@ -15,14 +15,16 @@ dependencies:
   flutter:
     sdk: flutter
   meta: ^1.1.6
-  path_provider: ^1.1.0
+  path_provider: ^1.6.10
   connectivity: ^0.4.4
+
 dev_dependencies:
   pedantic: ^1.8.0+1
   mockito: ^4.0.0
   flutter_test:
     sdk: flutter
   test: ^1.5.3
+
 environment:
   sdk: ">=2.6.0 <3.0.0"
 
