@@ -8,6 +8,9 @@
 
 # GraphQL Flutter
 
+## :mega: [`v4` is now in open alpha](https://github.com/zino-app/graphql-flutter/pull/648) :mega:
+
+
 ## About this project
 
 GraphQL brings many benefits, both to the client: devices will need fewer requests, and therefore reduce data usage. And to the programmer: requests are arguable, they have the same structure as the request.
