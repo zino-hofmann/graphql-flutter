@@ -112,6 +112,8 @@ class QueryManager {
         await callback(result);
       }
 
+      maybeRebroadcastQueries();
+
       return result;
     });
   }
