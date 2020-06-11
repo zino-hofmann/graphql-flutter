@@ -11,6 +11,26 @@ import './helpers.dart';
 class MockLink extends Mock implements Link {}
 
 void main() {
+  const String readSingle = r'''
+  query ReadSingle($id: ID!) {
+    single(id: $id) {
+      id,
+      __typename,
+      name
+    }
+  }
+''';
+
+  const String writeSingle = r'''
+  mutation WriteSingle($id: ID!, $name: String!) {
+    updateSingle(id: $id, name: $name) {
+      id,
+      __typename,
+      name
+    }
+  }
+''';
+
   const String readRepositories = r'''
   query ReadRepositories($nRepositories: Int!) {
     viewer {
@@ -178,6 +198,68 @@ void main() {
 //    test('partially success query with some errors', {});
     });
     group('mutation', () {
+      test('query stream notified', () async {
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'single': {'id': '1', '__typename': 'Single', 'name': 'foo'},
+                },
+              ),
+            ],
+          ),
+        );
+
+        final ObservableQuery observable = await graphQLClientClient.watchQuery(
+            WatchQueryOptions(document: parseString(readSingle), eagerlyFetchResults: true, variables: {'id': '1'}));
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'updateSingle': {'id': '1', '__typename': 'Single', 'name': 'bar'},
+                },
+              ),
+            ],
+          ),
+        );
+
+        bool result = false;
+
+        observable.stream.listen((event) {
+          if (event.data != null && event.data['single']['name'] == 'bar') {
+            result = true;
+          }
+        });
+
+        final hit = Future.doWhile(() async {
+          if (result) {
+            return false;
+          }
+
+          await Future.delayed(Duration(milliseconds: 10));
+
+          return true;
+        });
+
+        final variables = {'id': '1', 'name': 'bar'};
+
+        final QueryResult response =
+            await graphQLClientClient.mutate(MutationOptions(document: parseString(writeSingle), variables: variables));
+
+        expect(response.data['updateSingle']['name'], variables['name']);
+
+        await Future.any([hit, Future.delayed(const Duration(seconds: 3))]);
+
+        expect(result, true);
+      });
+
       test('successful mutation', () async {
         final MutationOptions _options = MutationOptions(
           document: parseString(addStar),
