@@ -199,65 +199,79 @@ void main() {
     });
     group('mutation', () {
       test('query stream notified', () async {
+        final initialQueryResponse = Response(
+          data: <String, dynamic>{
+            'single': {
+              'id': '1',
+              '__typename': 'Single',
+              'name': 'initialQueryName',
+            },
+          },
+        );
         when(
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
-            [
-              Response(
-                data: <String, dynamic>{
-                  'single': {'id': '1', '__typename': 'Single', 'name': 'foo'},
-                },
-              ),
-            ],
+            [initialQueryResponse],
           ),
         );
 
         final ObservableQuery observable = await graphQLClientClient.watchQuery(
-            WatchQueryOptions(document: parseString(readSingle), eagerlyFetchResults: true, variables: {'id': '1'}));
+          WatchQueryOptions(
+            document: parseString(readSingle),
+            eagerlyFetchResults: true,
+            variables: {'id': '1'},
+          ),
+        );
 
-        when(
-          link.request(any),
-        ).thenAnswer(
-          (_) => Stream.fromIterable(
+        expect(
+          observable.stream,
+          emitsInOrder(
             [
-              Response(
-                data: <String, dynamic>{
-                  'updateSingle': {'id': '1', '__typename': 'Single', 'name': 'bar'},
-                },
+              // we have no optimistic result
+              isA<QueryResult>().having(
+                (result) => result.isLoading,
+                'loading result',
+                true,
               ),
+              isA<QueryResult>().having(
+                (result) => result.data['single']['name'],
+                'initial query result',
+                'initialQueryName',
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data['single']['name'],
+                'result caused by mutation',
+                'newNameFromMutation',
+              )
             ],
           ),
         );
 
-        bool result = false;
+        final mutationResponseWithNewName = Response(
+          data: <String, dynamic>{
+            'updateSingle': {
+              'id': '1',
+              '__typename': 'Single',
+              'name': 'newNameFromMutation',
+            },
+          },
+        );
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [mutationResponseWithNewName],
+          ),
+        );
 
-        observable.stream.listen((event) {
-          if (event.data != null && event.data['single']['name'] == 'bar') {
-            result = true;
-          }
-        });
+        final variables = {'id': '1', 'name': 'newNameFromMutation'};
 
-        final hit = Future.doWhile(() async {
-          if (result) {
-            return false;
-          }
-
-          await Future.delayed(Duration(milliseconds: 10));
-
-          return true;
-        });
-
-        final variables = {'id': '1', 'name': 'bar'};
-
-        final QueryResult response =
-            await graphQLClientClient.mutate(MutationOptions(document: parseString(writeSingle), variables: variables));
+        final QueryResult response = await graphQLClientClient.mutate(
+            MutationOptions(
+                document: parseString(writeSingle), variables: variables));
 
         expect(response.data['updateSingle']['name'], variables['name']);
-
-        await Future.any([hit, Future.delayed(const Duration(seconds: 3))]);
-
-        expect(result, true);
       });
 
       test('successful mutation', () async {
