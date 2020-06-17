@@ -1,3 +1,7 @@
+# 4.0.0-alpha.1 (2020-06-17)
+* **client:** `maybeRebroadcast` on `mutation` ([75393c2](https://github.com/zino-app/graphql-flutter/commit/75393c2763c8b232aea7a719fa54d53a5885f995))
+
+
 # 4.0.0-alpha.0 (2020-06-07)
 
 See the [v4 changelog](../../changelog-v3-v4.md)
