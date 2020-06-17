@@ -11,6 +11,26 @@ import './helpers.dart';
 class MockLink extends Mock implements Link {}
 
 void main() {
+  const String readSingle = r'''
+  query ReadSingle($id: ID!) {
+    single(id: $id) {
+      id,
+      __typename,
+      name
+    }
+  }
+''';
+
+  const String writeSingle = r'''
+  mutation WriteSingle($id: ID!, $name: String!) {
+    updateSingle(id: $id, name: $name) {
+      id,
+      __typename,
+      name
+    }
+  }
+''';
+
   const String readRepositories = r'''
   query ReadRepositories($nRepositories: Int!) {
     viewer {
@@ -178,6 +198,82 @@ void main() {
 //    test('partially success query with some errors', {});
     });
     group('mutation', () {
+      test('query stream notified', () async {
+        final initialQueryResponse = Response(
+          data: <String, dynamic>{
+            'single': {
+              'id': '1',
+              '__typename': 'Single',
+              'name': 'initialQueryName',
+            },
+          },
+        );
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [initialQueryResponse],
+          ),
+        );
+
+        final ObservableQuery observable = await graphQLClientClient.watchQuery(
+          WatchQueryOptions(
+            document: parseString(readSingle),
+            eagerlyFetchResults: true,
+            variables: {'id': '1'},
+          ),
+        );
+
+        expect(
+          observable.stream,
+          emitsInOrder(
+            [
+              // we have no optimistic result
+              isA<QueryResult>().having(
+                (result) => result.isLoading,
+                'loading result',
+                true,
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data['single']['name'],
+                'initial query result',
+                'initialQueryName',
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data['single']['name'],
+                'result caused by mutation',
+                'newNameFromMutation',
+              )
+            ],
+          ),
+        );
+
+        final mutationResponseWithNewName = Response(
+          data: <String, dynamic>{
+            'updateSingle': {
+              'id': '1',
+              '__typename': 'Single',
+              'name': 'newNameFromMutation',
+            },
+          },
+        );
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [mutationResponseWithNewName],
+          ),
+        );
+
+        final variables = {'id': '1', 'name': 'newNameFromMutation'};
+
+        final QueryResult response = await graphQLClientClient.mutate(
+            MutationOptions(
+                document: parseString(writeSingle), variables: variables));
+
+        expect(response.data['updateSingle']['name'], variables['name']);
+      });
+
       test('successful mutation', () async {
         final MutationOptions _options = MutationOptions(
           document: parseString(addStar),
