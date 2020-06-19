@@ -319,5 +319,65 @@ void main() {
         expect(viewerHasStarred, true);
       });
     });
+
+    group('subscription', () {
+      test('results', () async {
+        final responses = [
+          {
+            'id': '1',
+            'name': 'first',
+          },
+          {
+            'id': '2',
+            'name': 'second',
+          },
+        ].map((item) => Response(
+              data: <String, dynamic>{
+                'item': {
+                  '__typename': 'Item',
+                  ...item,
+                },
+              },
+            ));
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(responses),
+        );
+
+        final stream = graphQLClientClient.subscribe(
+          SubscriptionOptions(
+            document: parseString(
+              r'''
+                subscription {
+                  item {
+                    id
+                    name
+                  }
+                }
+              ''',
+            ),
+          ),
+        );
+
+        expect(
+          stream,
+          emitsInOrder(
+            [
+              isA<QueryResult>().having(
+                (result) => result.data['item']['name'],
+                'first subscription item',
+                'first',
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data['item']['name'],
+                'second subscription item',
+                'second',
+              )
+            ],
+          ),
+        );
+      });
+    });
   });
 }
