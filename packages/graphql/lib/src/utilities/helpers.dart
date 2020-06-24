@@ -13,7 +13,7 @@ Map<String, dynamic> _recursivelyAddAll(
   target = Map.from(target);
   source.forEach((String key, dynamic value) {
     if (target.containsKey(key) &&
-        target[key] is Map &&
+        target[key] is Map<String, dynamic> &&
         value != null &&
         value is Map<String, dynamic>) {
       target[key] = _recursivelyAddAll(
