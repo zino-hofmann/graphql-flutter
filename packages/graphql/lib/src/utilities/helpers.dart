@@ -10,10 +10,10 @@ Map<String, dynamic> _recursivelyAddAll(
   Map<String, dynamic> target,
   Map<String, dynamic> source,
 ) {
-  target = Map.from(target);
+  target = Map<String, dynamic>.from(target);
   source.forEach((String key, dynamic value) {
     if (target.containsKey(key) &&
-        target[key] is Map &&
+        target[key] is Map<String, dynamic> &&
         value != null &&
         value is Map<String, dynamic>) {
       target[key] = _recursivelyAddAll(
