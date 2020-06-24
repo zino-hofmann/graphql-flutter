@@ -12,12 +12,17 @@ String uuidFromObject(Object object) {
   return null;
 }
 
-final GraphQLCache cache = GraphQLCache();
+ GraphQLCache _cache;
 
-ValueNotifier<GraphQLClient> clientFor({
+Future<GraphQLCache> get cache async {
+_cache ??= GraphQLCache(store: await HiveStore.open());
+return _cache;
+}
+
+Future<ValueNotifier<GraphQLClient>> clientFor({
   @required String uri,
   String subscriptionUri,
-}) {
+}) async {
   Link link = HttpLink(uri);
   if (subscriptionUri != null) {
     final WebSocketLink websocketLink = WebSocketLink(
@@ -29,7 +34,7 @@ ValueNotifier<GraphQLClient> clientFor({
 
   return ValueNotifier<GraphQLClient>(
     GraphQLClient(
-      cache: cache,
+      cache: await cache,
       link: link,
     ),
   );

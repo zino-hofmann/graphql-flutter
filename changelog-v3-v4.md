@@ -12,7 +12,10 @@ v4 aims to solve a number of sore spots, particularly with caching, largely by l
 
 ```dart
 /// Only necessary on flutter
-await initHiveForFlutter();
+void main() async {
+  await initHiveForFlutter();
+  runApp(MyApp());
+}
 
 GraphQLCache(
   // The default store is the InMemoryStore, which does NOT persist to disk
