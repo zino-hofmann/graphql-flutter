@@ -178,7 +178,7 @@ class MutationCallbacks {
   // callbacks will be called against each result in the stream,
   // which should then rebroadcast queries with the appropriate optimism
   Iterable<OnData> get callbacks =>
-      <OnData>[onCompleted, update, onError].where(notNull);
+      <OnData>[onError, update, onCompleted].where(notNull);
 
   // Todo: probably move this to its own class
   OnData get onCompleted {
