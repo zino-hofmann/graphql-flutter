@@ -3,8 +3,11 @@ import 'package:graphql/client.dart';
 
 import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/bloc.dart';
 import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/event.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/state.dart';
 
 class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
+  static int defaultLimit = 5;
+
   RepositoriesBloc({GraphQLClient client, WatchQueryOptions options})
       : super(
           client: client,
@@ -31,7 +34,7 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
                     }                
                 '''),
                 variables: <String, dynamic>{
-                  'nRepositories': 5,
+                  'nRepositories': defaultLimit,
                   'after': null,
                   'affiliations': [
                     'OWNER',
@@ -50,6 +53,15 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
   @override
   Map<String, dynamic> parseData(Map<String, dynamic> data) {
     return data;
+  }
+
+  @override
+  bool shouldFetchMore(int i, int threshold) {
+    return state is GraphqlLoadedState &&
+        state.data['viewer']['repositories']['nodes'].length %
+                RepositoriesBloc.defaultLimit ==
+            0 &&
+        i == state.data['viewer']['repositories']['nodes'].length - threshold;
   }
 
   void fetchMore({String after}) {
