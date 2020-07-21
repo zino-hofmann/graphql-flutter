@@ -6,6 +6,8 @@ import 'package:path_provider/path_provider.dart'
     show getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
 
+import 'package:graphql/client.dart' show HiveStore;
+
 /// Initializes Hive with the path from [getApplicationDocumentsDirectory].
 ///
 /// You can provide a [subDir] where the boxes should be stored.
@@ -13,7 +15,7 @@ import 'package:path/path.dart' show join;
 /// Extracted from [`hive_flutter` source][github]
 ///
 /// [github]: https://github.com/hivedb/hive/blob/5bf355496650017409fef4e9905e8826c5dc5bf3/hive_flutter/lib/src/hive_extensions.dart
-Future<void> initHiveForFlutter([String subDir]) async {
+Future<void> initHiveForFlutter({String subDir,  Iterable<String> boxes = const [ HiveStore.defaultBoxName ] }) async {
   WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
     var appDir = await getApplicationDocumentsDirectory();
@@ -23,4 +25,9 @@ Future<void> initHiveForFlutter([String subDir]) async {
     }
     Hive.init(path);
   }
+
+  for (var box in boxes){
+    await Hive.openBox(box);
+  }
+
 }
