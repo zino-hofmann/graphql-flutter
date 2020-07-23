@@ -12,8 +12,6 @@ String uuidFromObject(Object object) {
   return null;
 }
 
-final GraphQLCache cache = GraphQLCache();
-
 ValueNotifier<GraphQLClient> clientFor({
   @required String uri,
   String subscriptionUri,
@@ -29,7 +27,7 @@ ValueNotifier<GraphQLClient> clientFor({
 
   return ValueNotifier<GraphQLClient>(
     GraphQLClient(
-      cache: cache,
+      cache: GraphQLCache(store: HiveStore()),
       link: link,
     ),
   );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:universal_platform/universal_platform.dart';
 
 import './client_provider.dart';
@@ -18,7 +19,10 @@ String get host {
 final graphqlEndpoint = 'http://$host:3000/graphql';
 final subscriptionEndpoint = 'ws://$host:3000/subscriptions';
 
-void main() => runApp(MyApp());
+void main() async {
+  await initHiveForFlutter();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
