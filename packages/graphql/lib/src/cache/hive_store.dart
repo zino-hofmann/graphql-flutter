@@ -25,8 +25,13 @@ class HiveStore extends Store {
   @protected
   final Box box;
 
-  /// Creates a HiveStore inititalized with [box],
-  HiveStore(this.box);
+  /// Creates a HiveStore inititalized with the given [box], defaulting to `Hive.box(defaultBoxName)`
+  /// 
+  /// **N.B.**: [box] must already be [opened] with either [openBox], [open], or `initHiveForFlutter` from `graphql_flutter`.
+  /// This lets us decouple the async initialization logic, making store usage elsewhere much more straightforward.
+  /// 
+  /// [opened]: https://docs.hivedb.dev/#/README?id=open-a-box
+  HiveStore([ Box box ]): this.box = box ?? Hive.box(defaultBoxName);
 
   @override
   Map<String, dynamic> get(String dataId) {

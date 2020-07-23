@@ -142,10 +142,6 @@ class FetchMoreOptions {
     this.variables = const {},
     @required this.updateQuery,
   })  : assert(updateQuery != null),
-        assert(
-          (document ?? documentNode) != null,
-          'document must not be null',
-        ),
         this.document = document ?? documentNode;
 
   DocumentNode document;
