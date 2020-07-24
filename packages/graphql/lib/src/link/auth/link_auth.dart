@@ -16,10 +16,11 @@ class AuthLink extends Link {
             Future<void> onListen() async {
               try {
                 final String token = await getToken();
-                if (token != null)
+                if (token != null) {
                   operation.setContext(<String, Map<String, String>>{
                     'headers': <String, String>{'Authorization': token}
                   });
+                }
               } catch (error) {
                 controller.addError(error);
               }
