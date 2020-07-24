@@ -11,7 +11,7 @@ dependencies:
   gql: ^0.12.0
   gql_exec: ^0.2.2
   gql_link: ^0.3.0
-  gql_http_link: 0.2.11-alpha+1594319799546
+  gql_http_link: ^0.2.11-alpha+1594319799546
   gql_websocket_link: ^0.1.1-alpha
   gql_transform_link: ^0.1.5
   gql_error_link: ^0.1.1-alpha

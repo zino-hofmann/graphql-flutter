@@ -22,7 +22,7 @@ void main() async {
 
 GraphQLCache(
   // The default store is the InMemoryStore, which does NOT persist to disk
-  store: await HiveStore.open(),
+  store: GraphQLCache(store: HiveStore()),
 )
 ```
 
