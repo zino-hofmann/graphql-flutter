@@ -11,17 +11,16 @@ dependencies:
   gql: ^0.12.0
   gql_exec: ^0.2.2
   gql_link: ^0.3.0
-  gql_http_link: ^0.2.9
+  gql_http_link: 0.2.11-alpha+1594319799546
   gql_websocket_link: ^0.1.1-alpha
   gql_transform_link: ^0.1.5
-  gql_error_link:  ^0.1.1-alpha
+  gql_error_link: ^0.1.1-alpha
   gql_dedupe_link: ^1.0.10
 
   hive: ^1.3.0
   normalize: ^0.2.0
   http: ^0.12.1
   collection: ^1.14.12
-
 
 dev_dependencies:
   pedantic: ^1.8.0+1
@@ -31,4 +30,3 @@ dev_dependencies:
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
-

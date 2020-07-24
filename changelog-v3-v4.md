@@ -5,7 +5,10 @@ v4 aims to solve a number of sore spots, particularly with caching, largely by l
 ## Cache overhaul
 
 - There is now only a single `GraphQLCache`, which leverages [normalize](https://pub.dev/packages/normalize),
-  Giving us a much more `apollo`ish api including `typePolicies`
+  Giving us a much more `apollo`ish API.
+  - [`typePolicies`]
+  - [direct cache access] via `readQuery`, `writeQuery`, `readFragment`, and `writeFragment` 
+  All of which can which can be used for [local state management]
 - `LazyCacheMap` has been deleted
 - `GraphQLCache` marks itself for rebroadcasting (should fix some related issues)
 - **`Store`** is now a seperate concern:
@@ -140,3 +143,7 @@ class MyQuery {
   }
 }
 ```
+
+[local state management]: https://www.apollographql.com/docs/tutorial/local-state/#update-local-data
+[`typePolicies`]: https://www.apollographql.com/docs/react/caching/cache-configuration/#the-typepolicy-type
+[direct cache access]: https://www.apollographql.com/docs/react/caching/cache-interaction/
