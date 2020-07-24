@@ -34,7 +34,7 @@ class Query extends StatefulWidget {
 
 class QueryState extends State<Query> {
   ObservableQuery observableQuery;
-
+  GraphQLClient _client;
   WatchQueryOptions get _options {
     final QueryOptions options = widget.options;
 
@@ -53,24 +53,32 @@ class QueryState extends State<Query> {
   }
 
   void _initQuery() {
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    assert(client != null);
-
     observableQuery?.close();
-    observableQuery = client.watchQuery(_options);
+    observableQuery = _client.watchQuery(_options);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _initQuery();
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+    assert(client != null);
+    if (client != _client) {
+      _client = client;
+      _initQuery();
+    }
   }
 
   @override
   void didUpdateWidget(Query oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (!observableQuery.options.areEqualTo(_options)) {
+    final GraphQLClient client = GraphQLProvider.of(context).value;
+
+    final optionsWithOverrides = _options;
+    optionsWithOverrides.policies = client.defaultPolicies.watchQuery
+      .withOverrides(optionsWithOverrides.policies);
+
+    if (!observableQuery.options.areEqualTo(optionsWithOverrides)) {
       _initQuery();
     }
   }

@@ -22,6 +22,8 @@ class Operation extends RawOperationData {
     return Operation(
       documentNode: options.documentNode,
       variables: options.variables,
+      // initalize extensions - is required for APQ to work
+      extensions: {},
     );
   }
 
@@ -45,6 +47,12 @@ class Operation extends RawOperationData {
 
   bool get isSubscription => isOfType(
         OperationType.subscription,
+        documentNode,
+        operationName,
+      );
+
+  bool get isQuery => isOfType(
+        OperationType.query,
         documentNode,
         operationName,
       );

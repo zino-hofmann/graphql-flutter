@@ -21,6 +21,7 @@ class HttpLink extends Link {
   HttpLink({
     @required String uri,
     bool includeExtensions,
+    bool useGETForQueries = false,
 
     /// pass on customized httpClient, especially handy for mocking and testing
     Client httpClient,
@@ -48,6 +49,7 @@ class HttpLink extends Link {
             final HttpConfig linkConfig = HttpConfig(
               http: HttpQueryOptions(
                 includeExtensions: includeExtensions,
+                useGETForQueries: useGETForQueries,
               ),
               options: fetchOptions,
               credentials: credentials,
@@ -58,10 +60,14 @@ class HttpLink extends Link {
             HttpConfig contextConfig;
 
             if (context != null) {
+              // TODO: for backwards-compatability fallback to overall context for http options
+              dynamic httpContext = context['http'] ?? context ?? {};
               // TODO: refactor context to use a [HttpConfig] object to avoid dynamic types
               contextConfig = HttpConfig(
                 http: HttpQueryOptions(
-                  includeExtensions: context['includeExtensions'] as bool,
+                  includeQuery: httpContext['includeQuery'] as bool,
+                  includeExtensions: httpContext['includeExtensions'] as bool,
+                  useGETForQueries: httpContext['useGETForQueries'] as bool,
                 ),
                 options: context['fetchOptions'] as Map<String, dynamic>,
                 credentials: context['credentials'] as Map<String, dynamic>,
@@ -69,15 +75,11 @@ class HttpLink extends Link {
               );
             }
 
-            final HttpHeadersAndBody httpHeadersAndBody =
-                _selectHttpOptionsAndBody(
-              operation,
+            final HttpConfig config = _mergeHttpConfigs(
               fallbackHttpConfig,
               linkConfig,
               contextConfig,
             );
-
-            final Map<String, String> httpHeaders = httpHeadersAndBody.headers;
 
             StreamController<FetchResult> controller;
 
@@ -86,16 +88,14 @@ class HttpLink extends Link {
 
               try {
                 // httpOptionsAndBody.body as String
-                final BaseRequest request = await _prepareRequest(
-                    parsedUri, httpHeadersAndBody.body, httpHeaders);
+                final BaseRequest request = await _prepareRequest(parsedUri, operation, config);
 
                 response = await fetcher.send(request);
 
                 operation.setContext(<String, StreamedResponse>{
                   'response': response,
                 });
-                final FetchResult parsedResponse =
-                    await _parseResponse(response);
+                final FetchResult parsedResponse = await _parseResponse(response);
 
                 controller.add(parsedResponse);
               } catch (failure) {
@@ -163,18 +163,31 @@ Future<Map<String, MultipartFile>> _getFileMap(
 
 Future<BaseRequest> _prepareRequest(
   Uri uri,
-  Map<String, dynamic> body,
-  Map<String, String> httpHeaders,
+  Operation operation,
+  HttpConfig config,
 ) async {
+  final httpHeaders = config.headers;
+  final body = _buildBody(operation, config);
+
   final Map<String, MultipartFile> fileMap = await _getFileMap(body);
   if (fileMap.isEmpty) {
-    final Request r = Request('post', uri);
+    if (operation.isQuery && config.http.useGETForQueries) {
+      config.options['method'] = 'GET';
+    }
+
+    final httpMethod = config.options['method']?.toString()?.toUpperCase() ?? 'POST';
+    if (httpMethod == 'GET') {
+      uri = uri.replace(queryParameters: body.map((k, v) => MapEntry(k, v is String ? v : json.encode(v))));
+    }
+    final Request r = Request(httpMethod, uri);
     r.headers.addAll(httpHeaders);
-    r.body = json.encode(body);
+    if (httpMethod != 'GET') {
+      r.body = json.encode(body);
+    }
     return r;
   }
 
-  final MultipartRequest r = MultipartRequest('post', uri);
+  final MultipartRequest r = MultipartRequest('POST', uri);
   r.headers.addAll(httpHeaders);
   r.fields['operations'] = json.encode(body, toEncodable: (dynamic object) {
     if (object is MultipartFile) {
@@ -217,97 +230,67 @@ Future<BaseRequest> _prepareRequest(
   return r;
 }
 
-HttpHeadersAndBody _selectHttpOptionsAndBody(
-  Operation operation,
+HttpConfig _mergeHttpConfigs(
   HttpConfig fallbackConfig, [
   HttpConfig linkConfig,
   HttpConfig contextConfig,
 ]) {
-  final Map<String, dynamic> options = <String, dynamic>{
-    'headers': <String, String>{},
-    'credentials': <String, dynamic>{},
-  };
-  final HttpQueryOptions http = HttpQueryOptions();
-
   // http options
+  final HttpQueryOptions httpQueryOptions = HttpQueryOptions();
 
   // initialize with fallback http options
-  http.addAll(fallbackConfig.http);
+  httpQueryOptions.addAll(fallbackConfig.http);
 
   // inject the configured http options
   if (linkConfig.http != null) {
-    http.addAll(linkConfig.http);
+    httpQueryOptions.addAll(linkConfig.http);
   }
 
   // override with context http options
   if (contextConfig.http != null) {
-    http.addAll(contextConfig.http);
+    httpQueryOptions.addAll(contextConfig.http);
   }
 
-  // options
+  return HttpConfig(
+    http: httpQueryOptions,
+    options: {
+      ...fallbackConfig.options,
+      ...(linkConfig != null ? linkConfig.options ?? {} : {}),
+      ...(contextConfig != null ? contextConfig.options ?? {} : {}),
+    },
+    credentials: {
+      ...fallbackConfig.credentials,
+      ...(linkConfig != null ? linkConfig.credentials ?? {} : {}),
+      ...(contextConfig != null ? contextConfig.credentials ?? {} : {}),
+    },
+    headers: {
+      ...fallbackConfig.headers,
+      ...(linkConfig != null ? linkConfig.headers ?? {} : {}),
+      ...(contextConfig != null ? contextConfig.headers ?? {} : {}),
+    },
+  );
+}
 
-  // initialize with fallback options
-  options.addAll(fallbackConfig.options);
-
-  // inject the configured options
-  if (linkConfig.options != null) {
-    options.addAll(linkConfig.options);
-  }
-
-  // override with context options
-  if (contextConfig.options != null) {
-    options.addAll(contextConfig.options);
-  }
-
-  // headers
-
-  // initialze with fallback headers
-  options['headers'].addAll(fallbackConfig.headers);
-
-  // inject the configured headers
-  if (linkConfig.headers != null) {
-    options['headers'].addAll(linkConfig.headers);
-  }
-
-  // inject the context headers
-  if (contextConfig.headers != null) {
-    options['headers'].addAll(contextConfig.headers);
-  }
-
-  // credentials
-
-  // initialze with fallback credentials
-  options['credentials'].addAll(fallbackConfig.credentials);
-
-  // inject the configured credentials
-  if (linkConfig.credentials != null) {
-    options['credentials'].addAll(linkConfig.credentials);
-  }
-
-  // inject the context credentials
-  if (contextConfig.credentials != null) {
-    options['credentials'].addAll(contextConfig.credentials);
-  }
-
+Map<String, dynamic> _buildBody(
+  Operation operation,
+  HttpConfig config,
+) {
   // the body depends on the http options
   final Map<String, dynamic> body = <String, dynamic>{
     'operationName': operation.operationName,
     'variables': operation.variables,
-  };
+  }; 
 
   // not sending the query (i.e persisted queries)
-  if (http.includeExtensions) {
+  if (config.http.includeExtensions) {
     body['extensions'] = operation.extensions;
   }
 
-  if (http.includeQuery) {
+  if (config.http.includeQuery) {
     body['query'] = printNode(operation.documentNode);
   }
 
-  return HttpHeadersAndBody(
-    headers: options['headers'] as Map<String, String>,
-    body: body,
-  );
+  return body;
 }
 
 Future<FetchResult> _parseResponse(StreamedResponse response) async {
@@ -318,9 +301,15 @@ Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final Uint8List responseByte = await response.stream.toBytes();
   final String decodedBody = encoding.decode(responseByte);
 
-  final Map<String, dynamic> jsonResponse =
-      json.decode(decodedBody) as Map<String, dynamic>;
-  final FetchResult fetchResult = FetchResult();
+  Map<String, dynamic> jsonResponse;
+  try {
+      jsonResponse = json.decode(decodedBody) as Map<String, dynamic>;
+  } catch(e) {
+    throw ClientException('Invalid response body: $decodedBody');
+  }
+  final FetchResult fetchResult = FetchResult(
+    statusCode: statusCode,
+  );
 
   if (jsonResponse['errors'] != null) {
     fetchResult.errors =

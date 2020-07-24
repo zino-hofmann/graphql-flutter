@@ -282,8 +282,8 @@ class SocketClient {
         config.queryAndMutationTimeout != null;
 
     response.onListen = () {
-      final Stream<SocketConnectionState>
-          waitForConnectedStateWithoutTimeout = _connectionStateController
+      final Stream<SocketConnectionState> waitForConnectedStateWithoutTimeout =
+          _connectionStateController
               .startWith(
                   waitForConnection ? null : SocketConnectionState.CONNECTED)
               .where((SocketConnectionState state) =>

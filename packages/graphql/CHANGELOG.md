@@ -1,3 +1,12 @@
+# [3.1.0-beta.7](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.6...v3.1.0-beta.7) (2020-06-04)
+
+
+### Bug Fixes
+
+* **ci:** add changelog back ([3e63c3e](https://github.com/zino-app/graphql-flutter/commit/3e63c3eddf142c99918d58fcd9a8828106327eec))
+* **ci:** Sync master into beta ([2a0507e](https://github.com/zino-app/graphql-flutter/commit/2a0507ec3ea492ff0cc748fab80ee2258efe0b56))
+* **client:** FetchMoreOptions bug with operator precedence ([f8e05af](https://github.com/zino-app/graphql-flutter/commit/f8e05af52f9720eed612f13b513d25f2456a8726))
+
 ## [3.0.2](https://github.com/zino-app/graphql-flutter/compare/v3.0.1...v3.0.2) (2020-05-18)
 
 
@@ -5,12 +14,88 @@
 
 * **client:** FetchMoreOptions bug with operator precedence ([f8e05af](https://github.com/zino-app/graphql-flutter/commit/f8e05af52f9720eed612f13b513d25f2456a8726))
 
+# [3.1.0-beta.6](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.5...v3.1.0-beta.6) (2020-05-16)
+
+
+### Bug Fixes
+
+* **packaging:** correct dependencies, remove authors ([a22d504](https://github.com/zino-app/graphql-flutter/commit/a22d5041a556cca8fa52ab59119ff8fd7ad652ec))
+
+# [3.1.0-beta.5](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.4...v3.1.0-beta.5) (2020-05-10)
+
+
+### Bug Fixes
+
+* **packaging:** upgrade rxdart ([20364a9](https://github.com/zino-app/graphql-flutter/commit/20364a9bbea6f2fb8f90001e7301990486b5263d))
+
+
+### Features
+
+* **graphql:** custom auth headerKey ([167fac5](https://github.com/zino-app/graphql-flutter/commit/167fac5366160aa8384c3d87c900b38b065f6d59))
+
+# [3.1.0-beta.4](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.3...v3.1.0-beta.4) (2020-04-21)
+
+
+### Bug Fixes
+
+* **examples:** rebuilt & tested starwars example ([f8e19f1](https://github.com/zino-app/graphql-flutter/commit/f8e19f1e1f6d41a68c8bd54cd4b2613be7c81f10))
+* **packaging:** don't commit .flutter-plugins-dependencies ([0857030](https://github.com/zino-app/graphql-flutter/commit/0857030d390e131d132c3d0d5984693a4462ae22))
+
+# [3.1.0-beta.3](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.2...v3.1.0-beta.3) (2020-04-20)
+
+
+### Bug Fixes
+
+* **flutter:** Query.didUpdateWidget and policy overrides ([32f6172](https://github.com/zino-app/graphql-flutter/commit/32f617240b9a2a7ddb00e8d654384c89e6770c76))
+* **style:** use curly braces ([42f4da4](https://github.com/zino-app/graphql-flutter/commit/42f4da4cb5ddb9f76c34a5946eb1bf662d138cbf))
+* **tests:** don't factor tests into coverage scores ([4a9bcd4](https://github.com/zino-app/graphql-flutter/commit/4a9bcd4c708e955dbfcd432f0ce803541a343487))
+
 ## [3.0.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.0...v3.0.1) (2020-04-20)
 
 
 ### Bug Fixes
 
 * **style:** use curly braces ([42f4da4](https://github.com/zino-app/graphql-flutter/commit/42f4da4cb5ddb9f76c34a5946eb1bf662d138cbf))
+
+# [3.1.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v3.1.0-beta.1...v3.1.0-beta.2) (2020-04-12)
+
+
+### Bug Fixes
+
+* **flutter:** widgets make unnecessary requests when dependencies change ([31936ff](https://github.com/zino-app/graphql-flutter/commit/31936ff2c3cf8cc2dcf6b017868fec71320f080a))
+
+# [3.1.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.1-beta.3...v3.1.0-beta.1) (2020-03-30)
+
+
+### Bug Fixes
+
+* **examples/starwars:** use git dependency for graphql_starwars_test_server ([0facc48](https://github.com/zino-app/graphql-flutter/commit/0facc4880b3cfcb6abe9f4e7ed5609b97f3fab42))
+
+
+### Features
+
+* **examples/starwars:** add web support ([f52b1db](https://github.com/zino-app/graphql-flutter/commit/f52b1dbc5bbafd0933e2b5b51b8f09c18462bd0b))
+
+## [3.0.1-beta.3](https://github.com/zino-app/graphql-flutter/compare/v3.0.1-beta.2...v3.0.1-beta.3) (2020-03-10)
+
+
+### Bug Fixes
+
+* **release:** RunMutation return type definition ([9cb9658](https://github.com/zino-app/graphql-flutter/commit/9cb9658f745139080e435856682ea0148d814098))
+
+## [3.0.1-beta.2](https://github.com/zino-app/graphql-flutter/compare/v3.0.1-beta.1...v3.0.1-beta.2) (2020-02-14)
+
+
+### Bug Fixes
+
+* **client:** Throw a ClientException on non-json responses, to be ([7d538e1](https://github.com/zino-app/graphql-flutter/commit/7d538e16dd626d2ff7c4f963031ff6c825f24269)), closes [#552](https://github.com/zino-app/graphql-flutter/issues/552)
+
+## [3.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.0.0...v3.0.1-beta.1) (2020-01-21)
+
+
+### Bug Fixes
+
+* **client:** translateNetworkFailure when no route to host ([e8b6322](https://github.com/zino-app/graphql-flutter/commit/e8b6322cc537df8cbc829be0f6182bdfdf6d0779))
 
 # [3.0.0](https://github.com/zino-app/graphql-flutter/compare/v2.1.0...v3.0.0) (2020-01-13)
 

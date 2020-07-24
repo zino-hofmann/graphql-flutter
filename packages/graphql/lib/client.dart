@@ -13,6 +13,7 @@ export 'package:graphql/src/graphql_client.dart';
 export 'package:graphql/src/link/auth/link_auth.dart';
 export 'package:graphql/src/link/error/link_error.dart';
 export 'package:graphql/src/link/fetch_result.dart';
+export 'package:graphql/src/link/apq/link_persisted_queries.dart';
 export 'package:graphql/src/link/http/link_http.dart';
 export 'package:graphql/src/link/link.dart';
 export 'package:graphql/src/link/operation.dart';

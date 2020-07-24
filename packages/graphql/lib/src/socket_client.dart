@@ -10,6 +10,15 @@ import 'package:uuid_enhanced/uuid.dart';
 
 import 'package:graphql/src/websocket/messages.dart';
 
+typedef GetInitPayload = FutureOr<dynamic> Function();
+
+class SubscriptionListener {
+  Function callback;
+  bool hasBeenTriggered = false;
+
+  SubscriptionListener(this.callback, this.hasBeenTriggered);
+}
+
 class SocketClientConfig {
   const SocketClientConfig({
     this.autoReconnect = true,
@@ -41,9 +50,16 @@ class SocketClientConfig {
 
   /// The initial payload that will be sent to the server upon connection.
   /// Can be null, but must be a valid json structure if provided.
-  final dynamic initPayload;
+  final GetInitPayload initPayload;
 
-  InitOperation get initOperation => InitOperation(initPayload);
+  Future<InitOperation> get initOperation async {
+    if (initPayload != null) {
+      dynamic payload = await initPayload();
+      return InitOperation(payload);
+    }
+
+    return InitOperation(null);
+  }
 }
 
 enum SocketConnectionState { NOT_CONNECTED, CONNECTING, CONNECTED }
@@ -75,11 +91,13 @@ class SocketClient {
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
 
-  final HashMap<String, Function> _subscriptionInitializers = HashMap();
+  final HashMap<String, SubscriptionListener> _subscriptionInitializers =
+      HashMap();
   bool _connectionWasLost = false;
 
   Timer _reconnectTimer;
   WebSocket _socket;
+
   @visibleForTesting
   WebSocket get socket => _socket;
   Stream<GraphQLSocketMessage> _messageStream;
@@ -91,6 +109,8 @@ class SocketClient {
   ///
   /// If this instance is disposed, this method does nothing.
   Future<void> _connect() async {
+    final InitOperation initOperation = await config.initOperation;
+
     if (_connectionStateController.isClosed) {
       return;
     }
@@ -105,7 +125,7 @@ class SocketClient {
       );
       _connectionStateController.value = SocketConnectionState.CONNECTED;
       print('Connected to websocket.');
-      _write(config.initOperation);
+      _write(initOperation);
 
       _messageStream =
           _socket.stream.map<GraphQLSocketMessage>(_parseSocketMessage);
@@ -138,8 +158,8 @@ class SocketClient {
           });
 
       if (_connectionWasLost) {
-        for (Function callback in _subscriptionInitializers.values) {
-          callback();
+        for (SubscriptionListener s in _subscriptionInitializers.values) {
+          s.callback();
         }
 
         _connectionWasLost = false;
@@ -163,6 +183,7 @@ class SocketClient {
     }
 
     _connectionWasLost = true;
+    _subscriptionInitializers.values.forEach((s) => s.hasBeenTriggered = false);
 
     if (_connectionStateController.value !=
         SocketConnectionState.NOT_CONNECTED) {
@@ -259,8 +280,8 @@ class SocketClient {
         config.queryAndMutationTimeout != null;
 
     final onListen = () {
-      final Stream<SocketConnectionState>
-          waitForConnectedStateWithoutTimeout = _connectionStateController
+      final Stream<SocketConnectionState> waitForConnectedStateWithoutTimeout =
+          _connectionStateController
               .startWith(
                   waitForConnection ? null : SocketConnectionState.CONNECTED)
               .where((SocketConnectionState state) =>
@@ -332,7 +353,10 @@ class SocketClient {
             .listen(
                 (GraphQLSocketMessage message) => response.addError(message));
 
-        _write(StartOperation(id, payload));
+        if (!_subscriptionInitializers[id].hasBeenTriggered) {
+          _write(StartOperation(id, payload));
+          _subscriptionInitializers[id].hasBeenTriggered = true;
+        }
       });
     };
 
@@ -348,7 +372,7 @@ class SocketClient {
       }
     };
 
-    _subscriptionInitializers[id] = onListen;
+    _subscriptionInitializers[id] = SubscriptionListener(onListen, false);
 
     return response.stream;
   }

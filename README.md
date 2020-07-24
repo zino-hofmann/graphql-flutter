@@ -49,18 +49,19 @@ External guides, tutorials, and other resources from the GraphQL Flutter communi
 
 This is currently our roadmap, please feel free to request additions/changes.
 
-| Feature                 | Progress |
-| :---------------------- | :------: |
-| Queries                 |    ✅    |
-| Mutations               |    ✅    |
-| Subscriptions           |    ✅    |
-| Query polling           |    ✅    |
-| In memory cache         |    ✅    |
-| Offline cache sync      |    ✅    |
-| GraphQL Upload          |    ✅    |
-| Optimistic results      |    ✅    |
-| Modularity              |    ✅    |
-| Client state management |    🔜    |
+| Feature                     | Progress |
+| :-------------------------- | :------: |
+| Queries                     |    ✅    |
+| Mutations                   |    ✅    |
+| Subscriptions               |    ✅    |
+| Query polling               |    ✅    |
+| In memory cache             |    ✅    |
+| Offline cache sync          |    ✅    |
+| GraphQL Upload              |    ✅    |
+| Optimistic results          |    ✅    |
+| Modularity                  |    ✅    |
+| Automatic Persisted Queries |    ✅    |
+| Client state management     |    🔜    |
 
 ## Contributing
 

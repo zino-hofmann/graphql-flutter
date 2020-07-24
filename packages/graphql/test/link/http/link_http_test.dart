@@ -99,7 +99,7 @@ void main() {
       );
       expect(
         captured.method,
-        'post',
+        'POST',
       );
       expect(
         captured.headers,
@@ -152,7 +152,7 @@ void main() {
       );
       expect(
         captured.method,
-        'post',
+        'POST',
       );
       expect(
         captured.headers,
@@ -204,7 +204,7 @@ void main() {
       );
       expect(
         captured.method,
-        'post',
+        'POST',
       );
       expect(
         captured.headers,
@@ -254,6 +254,163 @@ void main() {
       expect(
         captured.body,
         '{"operationName":null,"variables":{},"extensions":{"extension-1":"extension-value-1"},"query":"query {\\n  \\n}"}',
+      );
+    });
+
+    test('request as GET', () async {
+      link = HttpLink(
+        uri: '/graphql-test',
+        httpClient: client,
+        useGETForQueries: true,
+      );
+
+      when(
+        client.send(any),
+      ).thenAnswer(
+        (_) => Future.value(
+          http.StreamedResponse(
+            Stream.fromIterable(
+              [utf8.encode('{"data":{}}')],
+            ),
+            200,
+          ),
+        ),
+      );
+
+      await execute(
+        link: link,
+        operation: query,
+      ).first;
+
+      final http.Request captured = verify(
+        client.send(captureAny),
+      ).captured.single;
+
+      expect(
+        captured.url,
+        Uri.parse('/graphql-test?operationName=Operation&variables=%7B%7D&query=query+Operation+%7B%0A++%0A%7D'),
+      );
+      expect(
+        captured.method,
+        'GET',
+      );
+      expect(
+        captured.headers,
+        equals({
+          'accept': '*/*',
+          'content-type': 'application/json',
+        }),
+      );
+      expect(
+        captured.body,
+        '',
+      );
+    });
+
+    test('request with context as GET', () async {
+      link = HttpLink(
+        uri: '/graphql-test',
+        httpClient: client,
+      );
+
+      query.setContext({
+        'http': {
+          'useGETForQueries': true,
+        },
+      });
+
+      when(
+        client.send(any),
+      ).thenAnswer(
+        (_) => Future.value(
+          http.StreamedResponse(
+            Stream.fromIterable(
+              [utf8.encode('{"data":{}}')],
+            ),
+            200,
+          ),
+        ),
+      );
+
+      await execute(
+        link: link,
+        operation: query,
+      ).first;
+
+      final http.Request captured = verify(
+        client.send(captureAny),
+      ).captured.single;
+
+      expect(
+        captured.url,
+        Uri.parse('/graphql-test?operationName=Operation&variables=%7B%7D&query=query+Operation+%7B%0A++%0A%7D'),
+      );
+      expect(
+        captured.method,
+        'GET',
+      );
+      expect(
+        captured.headers,
+        equals({
+          'accept': '*/*',
+          'content-type': 'application/json',
+        }),
+      );
+      expect(
+        captured.body,
+        '',
+      );
+    });
+
+    test('request with options as GET', () async {
+      link = HttpLink(
+        uri: '/graphql-test',
+        httpClient: client,
+        fetchOptions: {
+          'method': 'GET'
+        },
+      );
+
+      when(
+        client.send(any),
+      ).thenAnswer(
+        (_) => Future.value(
+          http.StreamedResponse(
+            Stream.fromIterable(
+              [utf8.encode('{"data":{}}')],
+            ),
+            200,
+          ),
+        ),
+      );
+
+      await execute(
+        link: link,
+        operation: query,
+      ).first;
+
+      final http.Request captured = verify(
+        client.send(captureAny),
+      ).captured.single;
+
+      expect(
+        captured.url,
+        Uri.parse('/graphql-test?operationName=Operation&variables=%7B%7D&query=query+Operation+%7B%0A++%0A%7D'),
+      );
+      expect(
+        captured.method,
+        'GET',
+      );
+      expect(
+        captured.headers,
+        equals({
+          'accept': '*/*',
+          'content-type': 'application/json',
+        }),
+      );
+      expect(
+        captured.body,
+        '',
       );
     });
 
@@ -453,12 +610,12 @@ void main() {
 
       expect(
         exception,
-        const TypeMatcher<UnhandledFailureWrapper>(),
+        const TypeMatcher<ClientException>(),
       );
 
       expect(
-        (exception as UnhandledFailureWrapper).failure,
-        const TypeMatcher<FormatException>(),
+        (exception as ClientException).message,
+        "Invalid response body: ",
       );
     });
 
