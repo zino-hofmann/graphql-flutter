@@ -19,7 +19,7 @@ typedef QueryHashGenerator = String Function(DocumentNode query);
 typedef ShouldDisablePersistedQueries = bool Function(
   Request request,
   Response response, [
-  LinkException exception,
+  HttpLinkServerException exception,
 ]);
 
 extension on Operation {
@@ -52,7 +52,7 @@ class PersistedQueriesLink extends Link {
   Stream<Response> request(
     Request request, [
     NextLink forward,
-  ]) async* {
+  ]) {
     if (forward == null) {
       throw Exception(
         'PersistedQueryLink cannot be the last link in the chain.',
@@ -80,6 +80,7 @@ class PersistedQueriesLink extends Link {
     }
 
     StreamController<Response> controller;
+
     Future<void> onListen() async {
       if (hashError != null) {
         return controller.addError(hashError);
@@ -87,22 +88,18 @@ class PersistedQueriesLink extends Link {
 
       StreamSubscription subscription;
       bool retried = false;
-      Map<String, dynamic> originalFetchOptions;
       bool setFetchOptions = false;
 
       Function retry;
       retry = ({
         Response response,
-        NetworkException networkError,
+        HttpLinkServerException networkError,
         Function callback,
       }) {
-        coalesceErrors(
-          graphqlErrors: response.errors,
-          linkException: networkError,
-        );
         if (!retried && (response?.errors != null || networkError != null)) {
           retried = true;
 
+          // TODO triple check that the original wholesale disables the link
           // if the server doesn't support persisted queries, don't try anymore
           disabledDueToErrors = disableOnError(request, response, networkError);
 
@@ -117,12 +114,9 @@ class PersistedQueriesLink extends Link {
             operation.setContext({
               'http': {
                 'includeQuery': true,
-                'includeExtensions': disabledDueToErrors,
+                'includeExtensions': !disabledDueToErrors,
               },
             });
-            if (setFetchOptions) {
-              operation.setContext({'fetchOptions': originalFetchOptions});
-            }
             subscription =
                 _attachListener(controller, forward(operation), retry);
 
@@ -171,8 +165,11 @@ class PersistedQueriesLink extends Link {
   /// Default [disableOnError].
   ///
   /// Disables the link if [includesNotSupportedError(response)] or if `statusCode` is in `{ 400, 500 }`
-  static bool defaultDisableOnError(Request request, Response response,
-      [LinkException exception]) {
+  static bool defaultDisableOnError(
+    Request request,
+    Response response, [
+    HttpLinkServerException exception,
+  ]) {
     // if the server doesn't support persisted queries, don't try anymore
     if (includesNotSupportedError(response)) {
       return true;
@@ -203,10 +200,8 @@ class PersistedQueriesLink extends Link {
         retry(response: data, callback: () => controller.add(data));
       },
       onError: (err) {
-        if (err is NetworkException) {
-          retry(
-              networkError: ex.translateFailure(err),
-              callback: () => controller.addError(err));
+        if (err is HttpLinkServerException) {
+          retry(networkError: err, callback: () => controller.addError(err));
         } else {
           controller.addError(err);
         }
