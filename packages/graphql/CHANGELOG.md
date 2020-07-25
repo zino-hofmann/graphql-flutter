@@ -1,3 +1,12 @@
+# 4.0.0-alpha.2 (2020-07-24)
+* **client**: simplified AuthLink ([0b3fbd9](https://github.com/zino-app/graphql-flutter/commit/0b3fbd9a4d3d0f9bded2bd9a9fdf26e3bfe983df))
+* **docs**: direct cache access in changelog ([1f21927](https://github.com/zino-app/graphql-flutter/commit/1f2192710531a920be6c7df1b22da105c8cdc11c))
+* **examples**: starwars hivestore usage ([2f874ec](https://github.com/zino-app/graphql-flutter/commit/2f874ecde038e16332bb51243afb167ac0421e35))
+* **graphql**: `HiveStore` api improvements ([2d1a7f2](https://github.com/zino-app/graphql-flutter/commit/2d1a7f2e367f57f6ff2f968814045fb5edf15085))
+* **fix**: `FetchMoreOptions` was throwing without `document` ([2d1a7f2](https://github.com/zino-app/graphql-flutter/commit/2d1a7f2e367f57f6ff2f968814045fb5edf15085))
+* **fix**: `deeplyMergeLeft` type error ([65fdcb2](https://github.com/zino-app/graphql-flutter/commit/65fdcb2600257f8982496e5191424f42365f7f39))
+
+
 # 4.0.0-alpha.1 (2020-06-17)
 * **client:** `maybeRebroadcast` on `mutation` ([75393c2](https://github.com/zino-app/graphql-flutter/commit/75393c2763c8b232aea7a719fa54d53a5885f995))
 
