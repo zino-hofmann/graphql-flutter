@@ -69,7 +69,7 @@ void main() {
     });
 
     test('initial state is loading', () {
-      expect(repoBloc.initialState, ReposLoading());
+      expect(repoBloc.state, ReposLoading());
     });
 
     group('Fetch Repositories', () {

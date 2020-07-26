@@ -14,9 +14,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
   // this a bit of a hack
   List<Repo> githubRepositories;
 
-  MyGithubReposBloc({@required this.githubRepository});
-
-  MyGithubReposState get initialState => new ReposLoading();
+  MyGithubReposBloc({@required this.githubRepository}) : super(ReposLoading());
 
   @override
   Stream<MyGithubReposState> mapEventToState(

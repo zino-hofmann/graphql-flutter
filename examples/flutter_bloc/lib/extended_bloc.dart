@@ -21,7 +21,7 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
   void initState() {
     super.initState();
     _refreshCompleter = Completer<void>();
-    bloc = BlocProvider.of<RepositoriesBloc>(context);
+    bloc = BlocProvider.of<RepositoriesBloc>(context)..run();
   }
 
   Future _handleRefreshStart(Bloc bloc) {
@@ -54,22 +54,21 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
                 builder: (_, state) {
                   Widget child = Container();
 
-                  if (state is GraphqlLoadingState) {
+                  if (bloc.isLoading) {
                     child = Center(child: CircularProgressIndicator());
                   }
 
-                  if (state is GraphqlErrorState<Map<String, dynamic>>) {
+                  if (bloc.hasError) {
                     _handleRefreshEnd();
                     child = ListView(children: [
                       Text(
-                        parseOperationException(state.error),
+                        bloc.getError,
                         style: TextStyle(color: Theme.of(context).errorColor),
                       )
                     ]);
                   }
 
-                  if (state is GraphqlLoaded ||
-                      state is GraphqlFetchMoreState) {
+                  if (bloc.hasData) {
                     _handleRefreshEnd();
                     final itemCount =
                         state.data['viewer']['repositories']['nodes'].length;
@@ -96,9 +95,7 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
                           final pageInfo =
                               state.data['viewer']['repositories']['pageInfo'];
 
-                          if (index == itemCount - 1 &&
-                              state is GraphqlLoaded &&
-                              pageInfo['hasNextPage']) {
+                          if (bloc.shouldFetchMore(index, 1)) {
                             bloc.fetchMore(after: pageInfo['endCursor']);
                           }
 
@@ -109,8 +106,7 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
                             title: Text(node['name']),
                           );
 
-                          if (state is GraphqlFetchMoreState &&
-                              index == itemCount - 1) {
+                          if (bloc.isFetchingMore && index == itemCount - 1) {
                             tile = Column(
                               children: [
                                 tile,
@@ -136,24 +132,4 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
       ),
     );
   }
-}
-
-String parseOperationException(OperationException error) {
-  if (error.clientException != null) {
-    final exception = error.clientException;
-
-    if (exception is NetworkException) {
-      return 'Failed to connect to ${exception.uri}';
-    } else {
-      return exception.toString();
-    }
-  }
-
-  if (error.graphqlErrors != null && error.graphqlErrors.isNotEmpty) {
-    final errors = error.graphqlErrors;
-
-    return errors.first.message;
-  }
-
-  return 'Unknown error';
 }
