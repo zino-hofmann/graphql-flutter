@@ -8,8 +8,9 @@ import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 
-export 'package:gql_error_link/gql_error_link.dart';
-export 'package:gql_link/gql_link.dart';
+import 'package:gql_link/gql_link.dart';
+import 'package:gql_http_link/gql_http_link.dart';
+
 import 'package:graphql/src/exceptions/exceptions_next.dart' as ex;
 
 const VERSION = 1;
@@ -27,14 +28,14 @@ extension on Operation {
 }
 
 class PersistedQueriesLink extends Link {
-  bool disabledDueToErrors = true;
+  bool disabledDueToErrors = false;
 
   /// Adds a [HttpLinkMethod.get()] to context entry for hashed queries
   final bool useGETForHashedQueries;
 
   /// callback for hashing queries.
   ///
-  /// Defaults to [simpleSha256Hash]
+  /// Defaults to [defaultSha256Hash]
   final QueryHashGenerator getQueryHash;
 
   /// Called when [response] has errors to determine if the [PersistedQueriesLink] should be disabled
@@ -62,15 +63,25 @@ class PersistedQueriesLink extends Link {
     final operation = request.operation;
 
     var hashError;
-    if (disabledDueToErrors) {
+    if (!disabledDueToErrors) {
       try {
+        final doc = request.operation.document;
+        final hash = getQueryHash(doc);
+        // TODO awkward to inject the hash with a thunk like this
         request = request.withContextEntry(
           RequestExtensionsThunk(
-            (request) => {
-              'persistedQuery': {
-                'sha256Hash': getQueryHash(request.operation.document),
-                'version': VERSION,
-              },
+            (request) {
+              assert(
+                request.operation.document == doc,
+                'Request document altered after PersistedQueriesLink: '
+                '${printNode(request.operation.document)} != ${printNode(doc)}',
+              );
+              return {
+                'persistedQuery': {
+                  'sha256Hash': hash,
+                  'version': VERSION,
+                },
+              };
             },
           ),
         );
@@ -88,7 +99,7 @@ class PersistedQueriesLink extends Link {
 
       StreamSubscription subscription;
       bool retried = false;
-      bool setFetchOptions = false;
+      Request originalRequest = request;
 
       Function retry;
       retry = ({
@@ -104,21 +115,25 @@ class PersistedQueriesLink extends Link {
           disabledDueToErrors = disableOnError(request, response, networkError);
 
           // if its not found, we can try it again, otherwise just report the error
-          if (!disabledDueToErrors) {
+          if (!includesNotSupportedError(response) || disabledDueToErrors) {
             // need to recall the link chain
             if (subscription != null) {
               subscription.cancel();
             }
 
             // actually send the query this time
-            operation.setContext({
-              'http': {
-                'includeQuery': true,
-                'includeExtensions': !disabledDueToErrors,
-              },
-            });
-            subscription =
-                _attachListener(controller, forward(operation), retry);
+            final retryRequest = originalRequest.withContextEntry(
+              RequestSerializationInclusions(
+                query: true,
+                extensions: !disabledDueToErrors,
+              ),
+            );
+
+            subscription = _attachListener(
+              controller,
+              forward(retryRequest),
+              retry,
+            );
 
             return;
           }
@@ -128,26 +143,16 @@ class PersistedQueriesLink extends Link {
       };
 
       // don't send the query the first time
-      operation.setContext({
-        'http': {
-          'includeQuery': !disabledDueToErrors,
-          'includeExtensions': disabledDueToErrors,
-        },
-      });
+      request = request.withContextEntry(
+        RequestSerializationInclusions(
+          query: disabledDueToErrors,
+          extensions: !disabledDueToErrors,
+        ),
+      );
 
       // If requested, set method to GET if there are no mutations. Remember the
-      // original fetchOptions so we can restore them if we fall back to a
-      // non-hashed request.
-      if (useGETForHashedQueries && disabledDueToErrors && operation.isQuery) {
-        final context = operation.getContext();
-        originalFetchOptions = context['fetchOptions'] ?? {};
-        operation.setContext({
-          'fetchOptions': {
-            ...originalFetchOptions,
-            'method': 'GET',
-          },
-        });
-        setFetchOptions = true;
+      if (useGETForHashedQueries && !disabledDueToErrors && operation.isQuery) {
+        request = request.withContextEntry(HttpLinkMethod.get());
       }
 
       subscription = _attachListener(controller, forward(request), retry);
@@ -212,10 +217,4 @@ class PersistedQueriesLink extends Link {
       cancelOnError: true,
     );
   }
-}
-
-class _RetryHandler {
-  bool retried;
-
-  void Function() onGiveUp;
 }

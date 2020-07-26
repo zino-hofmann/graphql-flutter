@@ -30,3 +30,15 @@ dev_dependencies:
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
+
+dependency_overrides:
+  gql_link:
+    git:
+      url: git@github.com:micimize/gql.git
+      ref: apq_changes
+      path: links/gql_link
+  gql_http_link: 
+    git:
+      url: git@github.com:micimize/gql.git
+      ref: apq_changes
+      path: links/gql_http_link
