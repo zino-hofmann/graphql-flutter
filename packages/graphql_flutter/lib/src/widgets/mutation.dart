@@ -102,8 +102,7 @@ class MutationState extends State<Mutation> {
     return (observableQuery
           ..variables = variables
           ..options.optimisticResult = optimisticResult
-          ..onData(mutationCallbacks
-              .callbacks) // add callbacks to observable // interesting
+          ..onData(mutationCallbacks.callbacks) // add callbacks to observable
         )
         .fetchResults();
   }
