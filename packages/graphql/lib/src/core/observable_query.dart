@@ -289,9 +289,9 @@ class ObservableQuery {
           lifecycle = QueryLifecycle.completed;
           close();
         }
+        // the mutation has been completed, but disposal has not been requested
         if (lifecycle == QueryLifecycle.sideEffectsPending) {
           lifecycle = QueryLifecycle.completed;
-          close();
         }
       }
     }

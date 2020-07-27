@@ -1,3 +1,8 @@
+# 4.0.0-alpha.3 (2020-07-27)
+* **client**: don't close mutations after callbacks ([2ba6c74](https://github.com/zino-app/graphql-flutter/commit/2ba6c743a7317c3df05c3f1c5e8e3e3cd44d6827))
+* **examples**: update ios files for graphql_flutter/example ([5b6e3d0](https://github.com/zino-app/graphql-flutter/commit/5b6e3d06a7dc56888dcbfc4c395ea51985c10f1c))
+
+
 # 4.0.0-alpha.2 (2020-07-24)
 * **client**: simplified AuthLink ([0b3fbd9](https://github.com/zino-app/graphql-flutter/commit/0b3fbd9a4d3d0f9bded2bd9a9fdf26e3bfe983df))
 * **docs**: direct cache access in changelog ([1f21927](https://github.com/zino-app/graphql-flutter/commit/1f2192710531a920be6c7df1b22da105c8cdc11c))
