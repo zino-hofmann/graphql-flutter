@@ -64,7 +64,7 @@ typedef SubscriptionBuilder = Widget Function(QueryResult result);
 /// }
 /// ```
 /// {@end-tool}
-class Subscription<T> extends StatefulWidget {
+class Subscription extends StatefulWidget {
   const Subscription({
     @required this.options,
     @required this.builder,
@@ -77,10 +77,10 @@ class Subscription<T> extends StatefulWidget {
   final OnSubscriptionResult onSubscriptionResult;
 
   @override
-  _SubscriptionState<T> createState() => _SubscriptionState<T>();
+  _SubscriptionState createState() => _SubscriptionState();
 }
 
-class _SubscriptionState<T> extends State<Subscription<T>> {
+class _SubscriptionState extends State<Subscription> {
   Stream<QueryResult> stream;
   GraphQLClient client;
 
@@ -118,7 +118,7 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   }
 
   @override
-  void didUpdateWidget(Subscription<T> oldWidget) {
+  void didUpdateWidget(Subscription oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (!widget.options.equal(oldWidget.options)) {
