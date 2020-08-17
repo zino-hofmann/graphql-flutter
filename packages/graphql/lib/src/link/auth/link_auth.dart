@@ -18,7 +18,7 @@ class AuthLink extends Link {
                 final String token = await getToken();
                 if (token != null) {
                   operation.setContext(<String, Map<String, String>>{
-                    'headers': <String, String>{'Authorization': token}
+                    'headers': <String, String>{headerKey: token}
                   });
                 }
               } catch (error) {
