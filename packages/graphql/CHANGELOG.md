@@ -1,3 +1,8 @@
+# 4.0.0-alpha.4 (2020-07-27)
+* **client**: bring back old websocket link with gql adapter layer ([496d994](https://github.com/zino-app/graphql-flutter/commit/496d994e06148fbad1a394c7b3d68e43a8e8acaf))
+* **client**: multipart file support from `gql_http_link==0.3.0` ([c2733ca](https://github.com/zino-app/graphql-flutter/commit/c2733ca3d33b1b50afc5b2ef7809fd1f4aa41500))
+
+
 # 4.0.0-alpha.3 (2020-07-27)
 * **client**: don't close mutations after callbacks ([2ba6c74](https://github.com/zino-app/graphql-flutter/commit/2ba6c743a7317c3df05c3f1c5e8e3e3cd44d6827))
 * **examples**: update ios files for graphql_flutter/example ([5b6e3d0](https://github.com/zino-app/graphql-flutter/commit/5b6e3d06a7dc56888dcbfc4c395ea51985c10f1c))
