@@ -32,6 +32,9 @@ class OptimisticProxy extends NormalizingDataProxy {
 
   GraphQLCache cache;
 
+  @override
+  SanitizeVariables get sanitizeVariables => cache.sanitizeVariables;
+
   HashMap<String, dynamic> data = HashMap<String, dynamic>();
 
   @override

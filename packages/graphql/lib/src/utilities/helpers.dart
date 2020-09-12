@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
+import 'package:http/http.dart' show MultipartFile;
 import 'package:normalize/normalize.dart';
 
 bool notNull(Object any) {
@@ -60,3 +63,31 @@ DocumentNode gql(String document) => transform(
         AddTypenameVisitor(),
       ],
     );
+
+/// Convets [MultipartFile]s to a string representation containing hashCode. Default argument to [variableSanitizer]
+Object sanitizeFilesForCache(dynamic object) {
+  if (object is MultipartFile) {
+    return 'MultipartFile(filename=${object.filename} hashCode=${object.hashCode})';
+  }
+  return object.toJson();
+}
+
+typedef SanitizeVariables = Map<String, dynamic> Function(
+  Map<String, dynamic> variables,
+);
+
+/// Build a sanitizer for safely writing custom scalar inputs in variable arguments to the cache.
+///
+/// [sanitizeVariables] is passed to [jsonEncode] as `toEncodable`. The default is  [defaultSanitizeVariables],
+/// which convets [MultipartFile]s to a string representation containing hashCode)
+SanitizeVariables variableSanitizer(
+  Object Function(Object) sanitizeVariables,
+) =>
+    sanitizeVariables == null
+        ? (v) => v
+        : (variables) => jsonDecode(
+              jsonEncode(
+                variables,
+                toEncodable: sanitizeVariables,
+              ),
+            );

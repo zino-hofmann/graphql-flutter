@@ -11,6 +11,8 @@ export 'package:graphql/src/cache/data_proxy.dart';
 export 'package:graphql/src/cache/store.dart';
 export 'package:graphql/src/cache/hive_store.dart';
 
+typedef VariableEncoder = Object Function(Object t);
+
 /// Optimmistic GraphQL Entity cache with [normalize] [TypePolicy] support
 /// and configurable [store].
 ///
@@ -21,7 +23,14 @@ class GraphQLCache extends NormalizingDataProxy {
     Store store,
     this.dataIdFromObject,
     this.typePolicies = const {},
-  }) : store = store ?? InMemoryStore();
+
+    /// Input variable sanitizer for referencing custom scalar types in cache keys.
+    ///
+    /// Defaults to [sanitizeFilesForCache]. Can be set to `null` to disable sanitization.
+    /// If present, a sanitizer will be built with [variableSanitizer]
+    Object Function(Object) sanitizeVariables = sanitizeFilesForCache,
+  })  : sanitizeVariables = variableSanitizer(sanitizeVariables),
+        store = store ?? InMemoryStore();
 
   /// Stores the underlying normalized data. Defaults to an [InMemoryStore]
   @protected
@@ -32,6 +41,9 @@ class GraphQLCache extends NormalizingDataProxy {
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   final DataIdResolver dataIdFromObject;
+
+  @override
+  final SanitizeVariables sanitizeVariables;
 
   /// tracks the number of ongoing transactions to prevent
   /// rebroadcasts until they are completed

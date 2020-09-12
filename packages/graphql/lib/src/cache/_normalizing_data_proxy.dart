@@ -6,6 +6,7 @@ import 'package:gql/ast.dart' show DocumentNode;
 import 'package:normalize/normalize.dart';
 
 import './data_proxy.dart';
+import '../utilities/helpers.dart';
 
 typedef DataIdResolver = String Function(Map<String, Object> object);
 
@@ -53,6 +54,10 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   @protected
   void writeNormalized(String dataId, dynamic value);
 
+  /// Variable sanitizer for referencing custom scalar types in cache keys.
+  @protected
+  SanitizeVariables sanitizeVariables;
+
   Map<String, dynamic> readQuery(
     Request request, {
     bool optimistic = true,
@@ -61,7 +66,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         reader: (dataId) => readNormalized(dataId, optimistic: optimistic),
         query: request.operation.document,
         operationName: request.operation.operationName,
-        variables: request.variables,
+        variables: sanitizeVariables(request.variables),
         typePolicies: typePolicies,
         addTypename: addTypename ?? false,
         returnPartialData: returnPartialData,
@@ -79,7 +84,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         fragment: fragment,
         idFields: idFields,
         fragmentName: fragmentName,
-        variables: variables,
+        variables: sanitizeVariables(variables),
         typePolicies: typePolicies,
         addTypename: addTypename ?? false,
         dataIdFromObject: dataIdFromObject,
@@ -95,7 +100,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       writer: (dataId, value) => writeNormalized(dataId, value),
       query: request.operation.document,
       operationName: request.operation.operationName,
-      variables: request.variables,
+      variables: sanitizeVariables(request.variables),
       data: data,
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
@@ -119,7 +124,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       idFields: idFields,
       data: data,
       fragmentName: fragmentName,
-      variables: variables,
+      variables: sanitizeVariables(variables),
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
     );

@@ -2,6 +2,8 @@ import 'package:gql_exec/gql_exec.dart';
 import 'package:gql/language.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 
 const String rawOperationKey = 'rawOperationKey';
 
@@ -80,6 +82,52 @@ final basicTest = TestCase(
       },
       'aField': {'field': false}
     },
+  },
+);
+
+/// https://github.com/gql-dart/gql/blob/master/links/gql_http_link/test/multipart_upload_test.dart
+final fileVarsTest = TestCase(
+  data: {
+    "multipleUpload": [
+      {
+        "id": "r1odc4PAz",
+        "filename": "sample_upload.jpg",
+        "mimetype": "image/jpeg",
+        "path": "./uploads/r1odc4PAz-sample_upload.jpg"
+      },
+      {
+        "id": "5Ea18qlMur",
+        "filename": "sample_upload.txt",
+        "mimetype": "text/plain",
+        "path": "./uploads/5Ea18qlMur-sample_upload.txt"
+      }
+    ],
+  },
+  operation: r"""
+    mutation($files: [Upload!]!) {
+      multipleUpload(files: $files) {
+        id
+        filename
+        mimetype
+        path
+      }
+    }
+  """,
+  variables: {
+    'files': [
+      http.MultipartFile.fromBytes(
+        "",
+        [0, 1, 254, 255],
+        filename: "sample_upload.jpg",
+        contentType: MediaType("image", "jpeg"),
+      ),
+      http.MultipartFile.fromString(
+        "",
+        "just plain text",
+        filename: "sample_upload.txt",
+        contentType: MediaType("text", "plain"),
+      ),
+    ],
   },
 );
 

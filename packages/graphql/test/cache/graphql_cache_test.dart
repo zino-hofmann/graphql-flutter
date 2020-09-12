@@ -1,3 +1,4 @@
+import 'package:http/http.dart';
 import 'package:test/test.dart';
 
 import 'package:graphql/src/cache/cache.dart';
@@ -140,4 +141,15 @@ void main() {
       );
     },
   );
+
+  group('Handles MultipartFile variables', () {
+    final GraphQLCache cache = getTestCache();
+    test('.writeQuery .readQuery round trip', () {
+      cache.writeQuery(fileVarsTest.request, data: fileVarsTest.data);
+      expect(
+        cache.readQuery(fileVarsTest.request),
+        equals(fileVarsTest.data),
+      );
+    });
+  });
 }
