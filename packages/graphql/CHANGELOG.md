@@ -1,3 +1,6 @@
+# 4.0.0-alpha.5 (2020-09-12)
+* **cache**: sanitize multipart files for cache. ([4ceb800](https://github.com/zino-app/graphql-flutter/commit/4ceb8006baf4539ab423e3b3a229f194cc2eac45))
+
 # 4.0.0-alpha.4 (2020-09-05)
 * **client**: bring back old websocket link with gql adapter layer ([496d994](https://github.com/zino-app/graphql-flutter/commit/496d994e06148fbad1a394c7b3d68e43a8e8acaf))
 * **client**: multipart file support from `gql_http_link==0.3.0` ([c2733ca](https://github.com/zino-app/graphql-flutter/commit/c2733ca3d33b1b50afc5b2ef7809fd1f4aa41500))
