@@ -64,7 +64,7 @@ DocumentNode gql(String document) => transform(
       ],
     );
 
-/// Convets [MultipartFile]s to a string representation containing hashCode. Default argument to [variableSanitizer]
+/// Converts [MultipartFile]s to a string representation containing hashCode. Default argument to [variableSanitizer]
 Object sanitizeFilesForCache(dynamic object) {
   if (object is MultipartFile) {
     return 'MultipartFile(filename=${object.filename} hashCode=${object.hashCode})';
@@ -83,6 +83,7 @@ typedef SanitizeVariables = Map<String, dynamic> Function(
 SanitizeVariables variableSanitizer(
   Object Function(Object) sanitizeVariables,
 ) =>
+    // TODO use more efficient traversal method
     sanitizeVariables == null
         ? (v) => v
         : (variables) => jsonDecode(
