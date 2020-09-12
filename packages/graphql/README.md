@@ -74,6 +74,32 @@ final GraphQLClient _client = GraphQLClient(
 
 ### Combining Multiple Links
 
+`graphql` and `graphql_flutter` now use the [`gql_link`] system, which allows for any kind of routing you might need:
+![diagram](https://github.com/gql-dart/gql/blob/master/links/gql_link/assets/gql_link.svg)
+
+A quick rundown of the composition api:
+
+```dart
+Link.from([
+  // common links run before every request
+  AuthLink(getToken: commonAuthenticator),
+  DedupeLink(), // dedupe requests
+  ErrorLink(onException: reportClientException),
+]).split( // split terminating links, or they will break
+  (request) => request.isSubscription,
+  MyCustomSubscriptionAuthLink().concat(
+    WebsocketLink(mySubscriptionEndpoint),
+  ),
+  HttpLink(myAppEndpoint),
+);
+// adding links after here would be pointless, as they would never be accessed
+```
+
+When combining links, it is important to note that:
+
+- Terminating links like `HttpLink` and `WebsocketLink` must come at the end of a route, and will not call links following them.
+- Link order is very important. In `HttpLink(myEndpoint).concat(AuthLink(getToken: authenticate))`, the `AuthLink` will never be called.
+
 #### Using Concat
 
 ```dart
@@ -86,6 +112,15 @@ final Link _link = _authLink.concat(_httpLink);
 
 ```dart
 final Link _link = Link.from([_authLink, _httpLink]);
+```
+
+#### Using Links.split
+
+`Link.split` routes the request based on some condition.
+**NB**: `WebSocketLink` and other "terminating links" must be used with `split` when there are multiple.
+
+```dart
+link = Link.split((request) => request.isSubscription, websocketLink, link);
 ```
 
 Once you have initialized a client, you can run queries and mutations.
@@ -303,3 +338,4 @@ final Link _link = _apqLink.concat(_httpLink);
 [github-star-link]: https://github.com/zino-app/graphql-flutter/stargazers
 [discord-badge]: https://img.shields.io/discord/559455668810153989.svg?style=flat-square&logo=discord&logoColor=ffffff
 [discord-link]: https://discord.gg/tXTtBfC
+[`gql_link`]: https://github.com/gql-dart/gql/tree/master/links/gql_link
