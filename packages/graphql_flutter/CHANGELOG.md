@@ -1,3 +1,6 @@
+# 4.0.0-alpha.6 (2020-09-12)
+* **client**: fix subscription initial result from cache ([de66cff](https://github.com/zino-app/graphql-flutter/commit/de66cffab0c13f1d705bb4538f55a2e11b653a4f))
+
 # 4.0.0-alpha.5 (2020-09-12)
 * **cache**: sanitize multipart files for cache. ([4ceb800](https://github.com/zino-app/graphql-flutter/commit/4ceb8006baf4539ab423e3b3a229f194cc2eac45))
 
