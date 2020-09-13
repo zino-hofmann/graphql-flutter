@@ -57,7 +57,7 @@ class QueryManager {
       if (cacheResult != null) {
         yield QueryResult(
           source: QueryResultSource.cache,
-          data: options.optimisticResult,
+          data: cacheResult,
         );
       }
     }
