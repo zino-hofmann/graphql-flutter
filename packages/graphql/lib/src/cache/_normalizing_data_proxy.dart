@@ -31,7 +31,9 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   @protected
   bool get returnPartialData => false;
 
-  /// Flag used to request a (re)broadcast from the [QueryManager]
+  /// Flag used to request a (re)broadcast from the [QueryManager].
+  ///
+  /// This is set on every [writeQuery] and [writeFragment] by default.
   @protected
   bool broadcastRequested = false;
 
