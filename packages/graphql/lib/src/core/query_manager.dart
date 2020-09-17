@@ -34,6 +34,9 @@ class QueryManager {
   /// [ObservableQuery] registry
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
 
+  /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
+  bool rebroadcastLocked = false;
+
   ObservableQuery watchQuery(WatchQueryOptions options) {
     final ObservableQuery observableQuery = ObservableQuery(
       queryManager: this,
@@ -95,27 +98,28 @@ class QueryManager {
 
   Future<QueryResult> query(QueryOptions options) => fetchQuery('0', options);
 
-  Future<QueryResult> mutate(MutationOptions options) {
-    return fetchQuery('0', options).then((result) async {
-      // not sure why query id is '0', may be needs improvements
-      // once the mutation has been process successfully, execute callbacks
-      // before returning the results
-      final mutationCallbacks = MutationCallbackHandler(
-        cache: cache,
-        options: options,
-        queryId: '0',
-      );
+  Future<QueryResult> mutate(MutationOptions options) async {
+    final result = await fetchQuery('0', options);
+    // not sure why query id is '0', may be needs improvements
+    // once the mutation has been process successfully, execute callbacks
+    // before returning the results
+    final mutationCallbacks = MutationCallbackHandler(
+      cache: cache,
+      options: options,
+      queryId: '0',
+    );
 
-      final callbacks = mutationCallbacks.callbacks;
+    final callbacks = mutationCallbacks.callbacks;
 
-      for (final callback in callbacks) {
-        await callback(result);
-      }
+    for (final callback in callbacks) {
+      await callback(result);
+    }
 
-      maybeRebroadcastQueries();
+    /// [fetchQuery] attempts to broadcast from the observable,
+    /// but now we've called all our side effects.
+    maybeRebroadcastQueries();
 
-      return result;
-    });
+    return result;
   }
 
   Future<QueryResult> fetchQuery(
@@ -270,6 +274,17 @@ class QueryManager {
     return fetchQuery(queryId, options);
   }
 
+  @experimental
+  Future<List<QueryResult>> refetchSafeQueries() async {
+    rebroadcastLocked = true;
+    final results = await Future.wait(
+      queries.values.where((q) => q.isRefetchSafe).map((q) => q.refetch()),
+    );
+    rebroadcastLocked = false;
+    maybeRebroadcastQueries();
+    return results;
+  }
+
   ObservableQuery getQuery(String queryId) {
     if (queries.containsKey(queryId)) {
       return queries[queryId];
@@ -278,8 +293,9 @@ class QueryManager {
     return null;
   }
 
-  /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists
-  /// Will [maybeRebroadcastQueries] from [addResult] if the cache has flagged the need to
+  /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists.
+  ///
+  /// Will [maybeRebroadcastQueries] from [ObservableQuery.addResult] if the [cache] has flagged the need to.
   ///
   /// Queries are registered via [setQuery] and [watchQuery]
   void addQueryResult(
@@ -324,16 +340,26 @@ class QueryManager {
     return queryResult;
   }
 
+  /// Rebroadcast cached queries with changed underlying data if [cache.broadcastRequested] or [force].
+  ///
   /// Push changed data from cache to query streams.
   /// [exclude] is used to skip a query if it was recently executed
   /// (normally the query that caused the rebroadcast)
   ///
   /// Returns whether a broadcast was executed, which depends on the state of the cache.
   /// If there are multiple in-flight cache updates, we wait until they all complete
-  bool maybeRebroadcastQueries({ObservableQuery exclude}) {
+  ///
+  /// **Note on internal implementation details**:
+  /// There is sometimes confusion on when this is called, but rebroadcasts are requested
+  /// from every [addQueryResult] where `result.isNotLoading` as an [OnData] callback from [ObservableQuery].
+  bool maybeRebroadcastQueries({ObservableQuery exclude, bool force = false}) {
+    if (rebroadcastLocked && !force) {
+      return false;
+    }
+
     final shouldBroadast = cache.shouldBroadcast(claimExecution: true);
 
-    if (!shouldBroadast) {
+    if (!shouldBroadast && !force) {
       return false;
     }
 
