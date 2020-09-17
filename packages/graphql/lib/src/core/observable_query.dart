@@ -109,7 +109,10 @@ class ObservableQuery {
   Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.polling;
 
-  bool get _isRefetchSafe {
+  bool get isRefetchSafe {
+    if (!options.isQuery) {
+      return false;
+    }
     switch (lifecycle) {
       case QueryLifecycle.completed:
       case QueryLifecycle.polling:
@@ -127,13 +130,11 @@ class ObservableQuery {
   }
 
   /// Attempts to refetch, throwing error if not refetch safe
-  Future<QueryResult> refetch() {
-    if (_isRefetchSafe) {
+  Future<QueryResult> refetch() async {
+    if (isRefetchSafe) {
       return queryManager.refetchQuery(queryId);
     }
-    return Future<QueryResult>.error(
-      Exception('Query is not refetch safe'),
-    );
+    throw Exception('Query is not refetch safe');
   }
 
   /// Whether it is safe to rebroadcast results due to cache
@@ -264,8 +265,10 @@ class ObservableQuery {
   ///
   /// [fromRebroadcast] is used to avoid the super-edge case of infinite rebroadcasts
   /// (not sure if it's even possible)
-  void _applyCallbacks(QueryResult result,
-      {bool fromRebroadcast = false}) async {
+  void _applyCallbacks(
+    QueryResult result, {
+    bool fromRebroadcast = false,
+  }) async {
     final callbacks = [
       ..._onDataCallbacks,
       if (!fromRebroadcast) _maybeRebroadcast
