@@ -15,7 +15,7 @@ import 'package:graphql/src/core/fetch_more.dart';
 ///
 /// [ac]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ApolloClient/
 /// [link]: https://github.com/gql-dart/gql/tree/master/links/gql_link
-class GraphQLClient {
+class GraphQLClient implements GraphQLDataProxy {
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
   GraphQLClient({
     @required this.link,
@@ -173,7 +173,7 @@ class GraphQLClient {
   ///     return;
   ///   }
   ///
-  ///   print('Rew Review: ${result.data}');
+  ///   print('New Review: ${result.data}');
   /// });
   /// ```
   /// {@end-tool}
@@ -198,4 +198,61 @@ class GraphQLClient {
         previousResult: previousResult,
         queryManager: queryManager,
       );
+
+  /// pass through to [cache.readQuery]
+  readQuery(request, {optimistic}) =>
+      cache.readQuery(request, optimistic: optimistic);
+
+  /// pass through to [cache.readFragment]
+  readFragment({
+    @required fragment,
+    @required idFields,
+    fragmentName,
+    variables,
+    optimistic,
+  }) =>
+      cache.readFragment(
+        fragment: fragment,
+        idFields: idFields,
+        fragmentName: fragmentName,
+        variables: variables,
+        optimistic: optimistic,
+      );
+
+  /// pass through to [cache.writeQuery] and then rebroadcast any changes.
+  void writeQuery(request, {data, broadcast}) {
+    cache.writeQuery(request, data: data, broadcast: broadcast);
+    queryManager.maybeRebroadcastQueries();
+  }
+
+  /// pass through to [cache.writeFragment] and then rebroadcast any changes.
+  void writeFragment({
+    @required fragment,
+    @required idFields,
+    @required data,
+    fragmentName,
+    variables,
+    broadcast,
+  }) {
+    cache.writeFragment(
+      fragment: fragment,
+      idFields: idFields,
+      data: data,
+      fragmentName: fragmentName,
+      variables: variables,
+      broadcast: broadcast,
+    );
+    queryManager.maybeRebroadcastQueries();
+  }
+
+  /// Resets the contents of the store with [cache.store.reset()]
+  /// and then refetches of all queries unless [refetchQueries] is disabled
+  @experimental
+  Future<List<QueryResult>> resetStore({bool refetchQueries = true}) {
+    cache.store.reset();
+    if (refetchQueries) {
+      return queryManager.refetchSafeQueries();
+    }
+    return null;
+  }
 }
