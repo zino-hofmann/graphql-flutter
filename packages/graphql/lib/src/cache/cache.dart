@@ -33,7 +33,9 @@ class GraphQLCache extends NormalizingDataProxy {
         store = store ?? InMemoryStore();
 
   /// Stores the underlying normalized data. Defaults to an [InMemoryStore]
-  @protected
+  ///
+  /// **WARNING**: Directly editing the contents of the store will not automatically
+  /// rebroadcast operations.
   final Store store;
 
   /// `typePolicies` to pass down to [normalize]
@@ -45,8 +47,10 @@ class GraphQLCache extends NormalizingDataProxy {
   @override
   final SanitizeVariables sanitizeVariables;
 
-  /// tracks the number of ongoing transactions to prevent
-  /// rebroadcasts until they are completed
+  /// Tracks the number of ongoing transactions (cache updates)
+  /// to prevent rebroadcasts until they are completed.
+  ///
+  /// **NOTE**: Does not track network calls
   @protected
   int inflightOptimisticTransactions = 0;
 
@@ -56,9 +60,9 @@ class GraphQLCache extends NormalizingDataProxy {
   ///
   /// This is not meant to be called outside of the [QueryManager]
   bool shouldBroadcast({bool claimExecution = false}) {
-    if (inflightOptimisticTransactions == 0 && this.broadcastRequested) {
+    if (inflightOptimisticTransactions == 0 && broadcastRequested) {
       if (claimExecution) {
-        this.broadcastRequested = false;
+        broadcastRequested = false;
       }
       return true;
     }
