@@ -1,8 +1,24 @@
+# 4.0.0-alpha.7 (2020-09-17)
+
+`GraphQLClient` now `implements GraphQLDataProxy`, exposing `readQuery`, `writeQuery`, `readFragment`, and `writeFragment`. The writing methods also trigger rebroadcasts, closing #728.
+
+It also adds an experimental `client.resetStore({refetchQueries = true})` for refetching the results of all observed queries (not mutations), and expose `cache.store` with a **WARNING** about direct access.
+
+* **client**: cache proxy methods on cache, resetStore with optional refetchQueries ([ba7134a](https://github.com/zino-app/graphql-flutter/commit/ba7134aad4f755c420ebf0f600898c090df52da7))
+* **client**: refetchSafeQueries, clarify rebroadcast calls in docs ([e45b240](https://github.com/zino-app/graphql-flutter/commit/e45b240ae5992edb63e02ddd01ddc5dc9d955795))
+* **client**: expose store, cleanup ([6fc5e7e](https://github.com/zino-app/graphql-flutter/commit/6fc5e7e0878231ca2e3da465a16a8ef38906031e))
+* **client**: add isMutation etc helpers to Options types ([04e7888](https://github.com/zino-app/graphql-flutter/commit/04e7888e5c1d4f8a61e786a7e541bfaf0116accd))
+* **fix**: only queries are refetch safe ([1e93376](https://github.com/zino-app/graphql-flutter/commit/1e9337633d3c0b6ea61bc3d83fd7d9b1f2f20a7a))
+* **refactor**: clean up unused helpers, clarify shoudRebroadcast ([1cf6478](https://github.com/zino-app/graphql-flutter/commit/1cf6478262f9d1ad24d12ae4ddc9af5a85cf94e9))
+
+
 # 4.0.0-alpha.6 (2020-09-12)
 * **client**: fix subscription initial result from cache ([de66cff](https://github.com/zino-app/graphql-flutter/commit/de66cffab0c13f1d705bb4538f55a2e11b653a4f))
 
+
 # 4.0.0-alpha.5 (2020-09-12)
 * **cache**: sanitize multipart files for cache. ([4ceb800](https://github.com/zino-app/graphql-flutter/commit/4ceb8006baf4539ab423e3b3a229f194cc2eac45))
+
 
 # 4.0.0-alpha.4 (2020-09-05)
 * **client**: bring back old websocket link with gql adapter layer ([496d994](https://github.com/zino-app/graphql-flutter/commit/496d994e06148fbad1a394c7b3d68e43a8e8acaf))
