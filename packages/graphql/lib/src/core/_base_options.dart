@@ -7,6 +7,7 @@ import 'package:gql_exec/gql_exec.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/src/core/policies.dart';
 
+/// TODO refactor into [Request] container
 /// Base options.
 abstract class BaseOptions extends MutableDataClass {
   BaseOptions({
@@ -65,4 +66,21 @@ abstract class BaseOptions extends MutableDataClass {
         policies,
         context,
       ];
+
+  OperationType get type {
+    final definitions =
+        document.definitions.whereType<OperationDefinitionNode>().toList();
+    if (operationName != null) {
+      definitions.removeWhere(
+        (node) => node.name.value != operationName,
+      );
+    }
+    // TODO differentiate error types, add exception
+    assert(definitions.length == 1);
+    return definitions.first.type;
+  }
+
+  bool get isQuery => type == OperationType.query;
+  bool get isMutation => type == OperationType.mutation;
+  bool get isSubscription => type == OperationType.subscription;
 }
