@@ -1,3 +1,4 @@
+import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
 import 'package:test/test.dart';
 
 import 'package:graphql/src/cache/cache.dart';
@@ -16,17 +17,27 @@ void main() {
       );
     });
     test('updating nested normalized fragment changes top level operation', () {
+      final idFields = {
+        '__typename': updatedCValue['__typename'],
+        'id': updatedCValue['id'],
+      };
       cache.writeFragment(
         fragment: updatedCFragment,
-        idFields: {
-          '__typename': updatedCValue['__typename'],
-          'id': updatedCValue['id'],
-        },
+        idFields: idFields,
         data: updatedCValue,
       );
+
       expect(
         cache.readQuery(basicTest.request),
         equals(updatedCBasicTestData),
+      );
+
+      expect(
+        cache.readFragment(
+          fragment: updatedCFragment,
+          idFields: idFields,
+        ),
+        updatedCValue,
       );
     });
 
@@ -69,6 +80,49 @@ void main() {
     '.recordOptimisticTransaction',
     () {
       final GraphQLCache cache = getTestCache();
+
+      test(
+        'OptimisticCache.readQuery and .readFragment pass through',
+        () {
+          cache.writeQuery(basicTest.request, data: basicTest.data);
+          cache.broadcastRequested = false;
+          cache.recordOptimisticTransaction(
+            (proxy) {
+              expect(
+                proxy.readQuery(basicTest.request),
+                equals(basicTest.data),
+              );
+
+              final idFields = {
+                '__typename': originalCValue['__typename'],
+                'id': originalCValue['id'],
+              };
+
+              expect(
+                proxy.readFragment(
+                  fragment: originalCFragment,
+                  idFields: idFields,
+                ),
+                originalCValue,
+              );
+
+              expect(
+                (proxy as NormalizingDataProxy).broadcastRequested,
+                isFalse,
+              );
+
+              return proxy;
+            },
+            '1',
+          );
+
+          // no edits
+          expect(cache.broadcastRequested, isFalse);
+          expect(cache.optimisticPatches.first.id, equals('1'));
+          expect(cache.optimisticPatches.first.data, equals({}));
+        },
+      );
+
       test(
         '.writeQuery, .readQuery(optimistic: true) round trip',
         () {

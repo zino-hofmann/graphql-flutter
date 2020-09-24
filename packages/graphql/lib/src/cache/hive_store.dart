@@ -15,23 +15,29 @@ class HiveStore extends Store {
   /// If the box is already open, the instance is returned and all provided parameters are being ignored.
   static final openBox = Hive.openBox;
 
-  /// Create a [HiveStore] with a [Box] with the given [boxName] (defaults to [defaultBoxName])
-  /// box from [openBox(boxName)]
-  static Future<HiveStore> open([
+  /// Convenience factory for `HiveStore(await openBox(boxName ?? 'graphqlClientStore', path: path))`
+  ///
+  /// [boxName]  defaults to [defaultBoxName], [path] is optional.
+  /// For full configuration of a [Box] use [HiveStore()] in tandem with [openBox] / [Hive.openBox]
+  static Future<HiveStore> open({
     String boxName = defaultBoxName,
-  ]) async =>
-      HiveStore(await openBox(boxName));
+    String path,
+  }) async =>
+      HiveStore(await openBox(boxName, path: path));
 
-  @protected
+  /// Direct access to the underlying [Box].
+  ///
+  /// **WARNING**: Directly editing the contents of the store will not automatically
+  /// rebroadcast operations.
   final Box box;
 
   /// Creates a HiveStore inititalized with the given [box], defaulting to `Hive.box(defaultBoxName)`
-  /// 
+  ///
   /// **N.B.**: [box] must already be [opened] with either [openBox], [open], or `initHiveForFlutter` from `graphql_flutter`.
   /// This lets us decouple the async initialization logic, making store usage elsewhere much more straightforward.
-  /// 
+  ///
   /// [opened]: https://docs.hivedb.dev/#/README?id=open-a-box
-  HiveStore([ Box box ]): this.box = box ?? Hive.box(defaultBoxName);
+  HiveStore([Box box]) : this.box = box ?? Hive.box(defaultBoxName);
 
   @override
   Map<String, dynamic> get(String dataId) {
@@ -58,5 +64,5 @@ class HiveStore extends Store {
   @override
   Map<String, Map<String, dynamic>> toMap() => Map.unmodifiable(box.toMap());
 
-  void reset() => box.clear();
+  Future<void> reset() => box.clear();
 }

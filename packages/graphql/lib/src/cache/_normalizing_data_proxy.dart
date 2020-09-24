@@ -35,6 +35,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   ///
   /// This is set on every [writeQuery] and [writeFragment] by default.
   @protected
+  @visibleForTesting
   bool broadcastRequested = false;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]

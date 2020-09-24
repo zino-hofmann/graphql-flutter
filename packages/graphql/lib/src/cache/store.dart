@@ -36,6 +36,7 @@ class InMemoryStore extends Store {
   /// Normalized map that backs the store.
   /// Defaults to an empty [HashMap]
   @protected
+  @visibleForTesting
   final Map<String, dynamic> data;
 
   /// Creates an InMemoryStore inititalized with [data],

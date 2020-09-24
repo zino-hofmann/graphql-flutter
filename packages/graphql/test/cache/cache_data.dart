@@ -131,6 +131,19 @@ final fileVarsTest = TestCase(
   },
 );
 
+final originalCValue = <String, dynamic>{
+  '__typename': 'C',
+  'id': 6,
+  'cField': 'value',
+};
+final originalCFragment = parseString(r'''
+fragment partialC on C {
+  __typename 
+  id
+  cField
+}
+''');
+
 final updatedCFragment = parseString(r'''
 fragment partialC on C {
   __typename 

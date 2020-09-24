@@ -75,6 +75,7 @@ class GraphQLCache extends NormalizingDataProxy {
   /// thus data in `last` will overwrite that in `first`
   /// if there is a conflict
   @protected
+  @visibleForTesting
   List<OptimisticPatch> optimisticPatches = [];
 
   /// Reads dereferences an entity from the first valid optimistic layer,

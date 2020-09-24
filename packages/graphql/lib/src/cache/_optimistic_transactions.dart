@@ -15,7 +15,7 @@ typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
 /// An optimistic update recorded with [GraphQLCache.recordOptimisticTransaction],
 /// identifiable through it's [id].
 @immutable
-class OptimisticPatch extends Object {
+class OptimisticPatch {
   const OptimisticPatch(this.id, this.data);
   final String id;
   final HashMap<String, dynamic> data;
