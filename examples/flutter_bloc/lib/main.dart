@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql/client.dart';
+import 'package:graphql_flutter/graphql_flutter.dart' show initHiveForFlutter;
 
 import 'package:graphql_flutter_bloc_example/bloc.dart';
 import 'package:graphql_flutter_bloc_example/repository.dart';
@@ -13,7 +14,10 @@ import 'package:graphql_flutter_bloc_example/extended_bloc.dart';
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 import 'local.dart';
 
-void main() => runApp(MyApp());
+void main() async {
+  await initHiveForFlutter();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -44,7 +48,9 @@ class MyApp extends StatelessWidget {
   }
 
   GraphQLClient _client() {
-    final HttpLink _httpLink = HttpLink('https://api.github.com/graphql');
+    final HttpLink _httpLink = HttpLink(
+      'https://api.github.com/graphql',
+    );
 
     final AuthLink _authLink = AuthLink(
       getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
@@ -53,7 +59,9 @@ class MyApp extends StatelessWidget {
     final Link _link = _authLink.concat(_httpLink);
 
     return GraphQLClient(
-      cache: GraphQLCache(),
+      cache: GraphQLCache(
+        store: HiveStore(),
+      ),
       link: _link,
     );
   }

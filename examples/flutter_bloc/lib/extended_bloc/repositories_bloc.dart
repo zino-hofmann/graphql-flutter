@@ -3,8 +3,11 @@ import 'package:graphql/client.dart';
 
 import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/bloc.dart';
 import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/event.dart';
+import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/state.dart';
 
 class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
+  static int defaultLimit = 5;
+
   RepositoriesBloc({GraphQLClient client, WatchQueryOptions options})
       : super(
           client: client,
@@ -13,6 +16,8 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
                 document: parseString(r'''
                   query ReadRepositories($nRepositories: Int!, $after: String) {
                       viewer {
+                        id
+                        __typename
                         repositories(first: $nRepositories, after: $after) {
                           pageInfo {
                             endCursor
@@ -29,7 +34,7 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
                     }                
                 '''),
                 variables: <String, dynamic>{
-                  'nRepositories': 5,
+                  'nRepositories': defaultLimit,
                   'after': null,
                   'affiliations': [
                     'OWNER',
@@ -50,14 +55,18 @@ class RepositoriesBloc extends GraphqlBloc<Map<String, dynamic>> {
     return data;
   }
 
+  @override
+  bool shouldFetchMore(int i, int threshold) {
+    return state is GraphqlLoadedState &&
+        state.data['viewer']['repositories']['nodes'].length %
+                RepositoriesBloc.defaultLimit ==
+            0 &&
+        i == state.data['viewer']['repositories']['nodes'].length - threshold;
+  }
+
   void fetchMore({String after}) {
     add(GraphqlFetchMoreEvent(
         options: FetchMoreOptions(
-//      variables: ReportListArguments(
-//          pagination: PaginationInput(
-//        limit: limit,
-//        offset: offset,
-//      )).toJson(),
       variables: <String, dynamic>{'nRepositories': 5, 'after': after},
       updateQuery: (dynamic previousResultData, dynamic fetchMoreResultData) {
         final List<dynamic> repos = <dynamic>[

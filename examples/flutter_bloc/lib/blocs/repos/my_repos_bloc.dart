@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/events.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/states.dart';
@@ -14,9 +13,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
   // this a bit of a hack
   List<Repo> githubRepositories;
 
-  MyGithubReposBloc({@required this.githubRepository});
-
-  MyGithubReposState get initialState => new ReposLoading();
+  MyGithubReposBloc({@required this.githubRepository}) : super(ReposLoading());
 
   @override
   Stream<MyGithubReposState> mapEventToState(

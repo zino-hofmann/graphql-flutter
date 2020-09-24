@@ -131,3 +131,6 @@ unlinked_spec.ds
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
 **/test/.test_coverage.dart
+
+
+examples/flutter_bloc/ios/
