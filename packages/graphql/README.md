@@ -222,7 +222,7 @@ final QueryResult result = await _client.mutate(options);
 
 if (result.hasException) {
     print(result.exception.toString());
-    return
+    return;
 }
 
 final bool isStarred =

@@ -8,6 +8,9 @@
 
 # GraphQL Flutter
 
+## :mega: [`v4` is now in open alpha](https://github.com/zino-app/graphql-flutter/pull/648) :mega:
+
+
 ## About this project
 
 GraphQL brings many benefits, both to the client: devices will need fewer requests, and therefore reduce data usage. And to the programmer: requests are arguable, they have the same structure as the request.
@@ -34,6 +37,13 @@ Here are some examples you can follow:
 
 1. [Starwars Example](./examples/starwars)
 2. [`flutter_bloc` example](./examples/flutter_bloc)
+
+## Articles and Videos
+
+External guides, tutorials, and other resources from the GraphQL Flutter community 
+
+* [Ultimate toolchain to work with GraphQL in Flutter](https://medium.com/@v.ditsyak/ultimate-toolchain-to-work-with-graphql-in-flutter-13aef79c6484):  
+  An intro to using `graphql_flutter` with [`artemis`](https://pub.dev/packages/artemis) for code generation and [`graphql-faker`](https://github.com/APIs-guru/graphql-faker) for API prototyping
 
 ## Roadmap
 
