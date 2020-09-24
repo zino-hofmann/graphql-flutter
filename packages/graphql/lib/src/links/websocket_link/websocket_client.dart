@@ -113,6 +113,7 @@ class SocketClient {
       'graphql-ws',
     ],
     this.config = const SocketClientConfig(),
+    this.connect = WebSocket.connect,
     @visibleForTesting this.randomBytesForUuid,
   }) {
     _connect();
@@ -120,13 +121,18 @@ class SocketClient {
 
   Uint8List randomBytesForUuid;
   final String url;
-  final SocketClientConfig config;
   final Iterable<String> protocols;
+  final SocketClientConfig config;
+
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
 
   final HashMap<String, SubscriptionListener> _subscriptionInitializers =
       HashMap();
+
+  final Future<WebSocket> Function(String url, {Iterable<String> protocols})
+      connect;
+
   bool _connectionWasLost = false;
 
   Timer _reconnectTimer;
@@ -157,10 +163,7 @@ class SocketClient {
     print('Connecting to websocket: $url...');
 
     try {
-      socket = await WebSocket.connect(
-        url,
-        protocols: protocols,
-      );
+      socket = await connect(url, protocols: protocols);
       _connectionStateController.value = SocketConnectionState.connected;
       print('Connected to websocket.');
       _write(initOperation);
@@ -365,8 +368,7 @@ class SocketClient {
 
         final Stream<GraphQLSocketMessage> subscriptionComplete = addTimeout
             ? dataErrorComplete
-                .where((GraphQLSocketMessage message) =>
-                    message is SubscriptionComplete)
+                .where((message) => message is SubscriptionComplete)
                 .take(1)
                 .timeout(
                 config.queryAndMutationTimeout,
@@ -378,29 +380,22 @@ class SocketClient {
                 },
               )
             : dataErrorComplete
-                .where((GraphQLSocketMessage message) =>
-                    message is SubscriptionComplete)
+                .where((message) => message is SubscriptionComplete)
                 .take(1);
 
         subscriptionComplete.listen((_) => response.close());
 
         dataErrorComplete
-            .where(
-                (GraphQLSocketMessage message) => message is SubscriptionData)
+            .where((message) => message is SubscriptionData)
             .cast<SubscriptionData>()
-            .listen(
-              (SubscriptionData message) => response.add(
-                parse(
-                  message.toJson(),
-                ),
-              ),
-            );
+            .listen((message) => response.add(
+                  parse(message.toJson()),
+                ));
 
         dataErrorComplete
-            .where(
-                (GraphQLSocketMessage message) => message is SubscriptionError)
-            .listen(
-                (GraphQLSocketMessage message) => response.addError(message));
+            .where((message) => message is SubscriptionError)
+            .cast<SubscriptionError>()
+            .listen((message) => response.addError(message));
 
         if (!_subscriptionInitializers[id].hasBeenTriggered) {
           _write(
