@@ -20,7 +20,7 @@ class GithubRepository {
       variables: <String, dynamic>{
         'nRepositories': numOfRepositories,
       },
-      pollInterval: 4,
+      pollInterval: Duration(seconds: 4),
       fetchResults: true,
     );
 

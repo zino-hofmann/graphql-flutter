@@ -96,7 +96,7 @@ class SocketClientConfig {
   }
 }
 
-enum SocketConnectionState { NOT_CONNECTED, CONNECTING, CONNECTED }
+enum SocketConnectionState { notConnected, connecting, connected }
 
 /// Wraps a standard web socket instance to marshal and un-marshal the server /
 /// client payloads into dart object representation.
@@ -130,7 +130,8 @@ class SocketClient {
   bool _connectionWasLost = false;
 
   Timer _reconnectTimer;
-  WebSocket _socket;
+  @visibleForTesting
+  WebSocket socket;
 
   Stream<GraphQLSocketMessage> _messageStream;
 
@@ -152,20 +153,20 @@ class SocketClient {
       return;
     }
 
-    _connectionStateController.value = SocketConnectionState.CONNECTING;
+    _connectionStateController.value = SocketConnectionState.connecting;
     print('Connecting to websocket: $url...');
 
     try {
-      _socket = await WebSocket.connect(
+      socket = await WebSocket.connect(
         url,
         protocols: protocols,
       );
-      _connectionStateController.value = SocketConnectionState.CONNECTED;
+      _connectionStateController.value = SocketConnectionState.connected;
       print('Connected to websocket.');
       _write(initOperation);
 
       _messageStream =
-          _socket.stream.map<GraphQLSocketMessage>(_parseSocketMessage);
+          socket.stream.map<GraphQLSocketMessage>(_parseSocketMessage);
 
       if (config.inactivityTimeout != null) {
         _keepAliveSubscription = _messagesOfType<ConnectionKeepAlive>().timeout(
@@ -174,9 +175,9 @@ class SocketClient {
             print(
                 "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..");
             event.close();
-            _socket.close(WebSocketStatus.goingAway);
+            socket.close(WebSocketStatus.goingAway);
             _connectionStateController.value =
-                SocketConnectionState.NOT_CONNECTED;
+                SocketConnectionState.notConnected;
           },
         ).listen(null);
       }
@@ -203,7 +204,7 @@ class SocketClient {
       }
 
       if (config.onConnectOrReconnect != null) {
-        config.onConnectOrReconnect(_socket);
+        config.onConnectOrReconnect(socket);
       }
     } catch (e) {
       onConnectionLost(e);
@@ -227,8 +228,8 @@ class SocketClient {
     _subscriptionInitializers.values.forEach((s) => s.hasBeenTriggered = false);
 
     if (_connectionStateController.value !=
-        SocketConnectionState.NOT_CONNECTED) {
-      _connectionStateController.value = SocketConnectionState.NOT_CONNECTED;
+        SocketConnectionState.notConnected) {
+      _connectionStateController.value = SocketConnectionState.notConnected;
     }
 
     if (config.autoReconnect && !_connectionStateController.isClosed) {
@@ -258,7 +259,7 @@ class SocketClient {
     print('Disposing socket client..');
     _reconnectTimer?.cancel();
     await Future.wait([
-      _socket?.close(),
+      socket?.close(),
       _keepAliveSubscription?.cancel(),
       _messageSubscription?.cancel(),
       _connectionStateController?.close(),
@@ -293,8 +294,8 @@ class SocketClient {
   }
 
   void _write(final GraphQLSocketMessage message) {
-    if (_connectionStateController.value == SocketConnectionState.CONNECTED) {
-      _socket.add(
+    if (_connectionStateController.value == SocketConnectionState.connected) {
+      socket.add(
         json.encode(
           message,
           toEncodable: (dynamic m) => m.toJson(),
@@ -325,9 +326,9 @@ class SocketClient {
       final Stream<SocketConnectionState> waitForConnectedStateWithoutTimeout =
           _connectionStateController
               .startWith(
-                  waitForConnection ? null : SocketConnectionState.CONNECTED)
+                  waitForConnection ? null : SocketConnectionState.connected)
               .where((SocketConnectionState state) =>
-                  state == SocketConnectionState.CONNECTED)
+                  state == SocketConnectionState.connected)
               .take(1);
 
       final Stream<SocketConnectionState> waitForConnectedState = addTimeout
@@ -419,8 +420,8 @@ class SocketClient {
       _subscriptionInitializers.remove(id);
 
       sub?.cancel();
-      if (_connectionStateController.value == SocketConnectionState.CONNECTED &&
-          _socket != null) {
+      if (_connectionStateController.value == SocketConnectionState.connected &&
+          socket != null) {
         _write(StopOperation(id));
       }
     };

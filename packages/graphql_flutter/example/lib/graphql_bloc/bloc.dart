@@ -89,7 +89,7 @@ class Bloc {
       variables: <String, dynamic>{
         'nRepositories': nRepositories,
       },
-      pollInterval: 4,
+      pollInterval: Duration(seconds: 4),
       fetchResults: true,
     );
 

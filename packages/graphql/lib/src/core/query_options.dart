@@ -37,7 +37,7 @@ class QueryOptions extends BaseOptions {
 
   /// The time interval (in milliseconds) on which this query should be
   /// re-fetched from the server.
-  int pollInterval;
+  Duration pollInterval;
 
   @override
   List<Object> get properties => [...super.properties, pollInterval];
@@ -88,7 +88,7 @@ class WatchQueryOptions extends QueryOptions {
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
     Object optimisticResult,
-    int pollInterval,
+    Duration pollInterval,
     this.fetchResults = false,
     bool eagerlyFetchResults,
     Context context,

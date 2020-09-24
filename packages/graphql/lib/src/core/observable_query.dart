@@ -189,7 +189,7 @@ class ObservableQuery {
         ? QueryLifecycle.sideEffectsPending
         : QueryLifecycle.pending;
 
-    if (options.pollInterval != null && options.pollInterval > 0) {
+    if (options.pollInterval != null && options.pollInterval > Duration.zero) {
       startPolling(options.pollInterval);
     }
 
@@ -303,7 +303,7 @@ class ObservableQuery {
   /// Poll the server periodically for results.
   ///
   /// Will be called by [fetchResults] automatically if [options.pollInterval] is set
-  void startPolling(int pollInterval) {
+  void startPolling(Duration pollInterval) {
     if (options.fetchPolicy == FetchPolicy.cacheFirst ||
         options.fetchPolicy == FetchPolicy.cacheOnly) {
       throw Exception(
