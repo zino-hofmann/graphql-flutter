@@ -6,10 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_flutter/src/widgets/query.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
-class MockHttpClient extends Mock implements Client {}
+class MockHttpClient extends Mock implements http.Client {}
 
 final query = gql("""
   query Foo {
@@ -138,10 +138,16 @@ void main() {
       ));
 
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
 
@@ -167,10 +173,16 @@ void main() {
       ));
 
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
 
@@ -195,17 +207,32 @@ void main() {
       ));
 
       verify(
-        mockHttpClient.post(any,
-            headers: anyNamed('headers'), body: anyNamed('body')),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
       ).called(1);
 
       tester.state<PageState>(find.byWidget(page)).setVariables({'foo': 2});
       await tester.pump();
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
     });
@@ -222,10 +249,16 @@ void main() {
       ));
 
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
 
@@ -234,10 +267,16 @@ void main() {
           .setFetchPolicy(FetchPolicy.cacheFirst);
       await tester.pump();
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
     });
@@ -254,10 +293,16 @@ void main() {
       ));
 
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
 
@@ -266,10 +311,16 @@ void main() {
           .setErrorPolicy(ErrorPolicy.none);
       await tester.pump();
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
     });
@@ -288,10 +339,16 @@ void main() {
       ));
 
       verify(
-        mockHttpClient.post(
-          any,
-          headers: anyNamed('headers'),
-          body: anyNamed('body'),
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
         ),
       ).called(1);
 

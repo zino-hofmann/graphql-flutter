@@ -94,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   return Text(result.exception.toString());
                 }
 
-                if (result.loading && result.data == null) {
+                if (result.isLoading && result.data == null) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
                               : const Icon(Icons.star_border),
                           title: Text(repository['name'] as String),
                         ),
-                      if (result.loading)
+                      if (result.isLoading)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
