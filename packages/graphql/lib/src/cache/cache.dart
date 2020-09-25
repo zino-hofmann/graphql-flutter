@@ -10,14 +10,22 @@ import 'package:normalize/normalize.dart';
 export 'package:graphql/src/cache/data_proxy.dart';
 export 'package:graphql/src/cache/store.dart';
 export 'package:graphql/src/cache/hive_store.dart';
+export 'package:graphql/src/cache/fragment.dart';
 
 typedef VariableEncoder = Object Function(Object t);
 
-/// Optimmistic GraphQL Entity cache with [normalize] [TypePolicy] support
+/// Optimistic GraphQL Entity cache with [normalize] [TypePolicy] support
 /// and configurable [store].
 ///
 /// **NOTE**: The default [InMemoryStore] does _not_ persist to disk.
 /// The recommended store for persistent environments is the [HiveStore].
+///
+/// [dataIdFromObject] and [typePolicies] are passed down to [normalize] operations, which say:
+/// > IDs are determined by the following:
+/// >
+/// > 1. If a `TypePolicy` is provided for the given type, it's `TypePolicy.keyFields` are used.
+/// > 2. If a `dataIdFromObject` funciton is provided, the result is used.
+/// > 3. The `id` or `_id` field (respectively) are used.
 class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
     Store store,

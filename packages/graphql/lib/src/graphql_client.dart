@@ -204,18 +204,12 @@ class GraphQLClient implements GraphQLDataProxy {
       cache.readQuery(request, optimistic: optimistic);
 
   /// pass through to [cache.readFragment]
-  readFragment({
-    @required fragment,
-    @required idFields,
-    fragmentName,
-    variables,
+  readFragment(
+    fragmentRequest, {
     optimistic,
   }) =>
       cache.readFragment(
-        fragment: fragment,
-        idFields: idFields,
-        fragmentName: fragmentName,
-        variables: variables,
+        fragmentRequest,
         optimistic: optimistic,
       );
 
@@ -226,21 +220,15 @@ class GraphQLClient implements GraphQLDataProxy {
   }
 
   /// pass through to [cache.writeFragment] and then rebroadcast any changes.
-  void writeFragment({
-    @required fragment,
-    @required idFields,
-    @required data,
-    fragmentName,
-    variables,
+  void writeFragment(
+    fragmentRequest, {
     broadcast,
+    data,
   }) {
     cache.writeFragment(
-      fragment: fragment,
-      idFields: idFields,
-      data: data,
-      fragmentName: fragmentName,
-      variables: variables,
+      fragmentRequest,
       broadcast: broadcast,
+      data: data,
     );
     queryManager.maybeRebroadcastQueries();
   }

@@ -22,8 +22,9 @@ void main() {
         'id': updatedCValue['id'],
       };
       cache.writeFragment(
-        fragment: updatedCFragment,
-        idFields: idFields,
+        updatedCFragment.asRequest(
+          idFields: idFields,
+        ),
         data: updatedCValue,
       );
 
@@ -34,8 +35,9 @@ void main() {
 
       expect(
         cache.readFragment(
-          fragment: updatedCFragment,
-          idFields: idFields,
+          updatedCFragment.asRequest(
+            idFields: idFields,
+          ),
         ),
         updatedCValue,
       );
@@ -99,10 +101,9 @@ void main() {
               };
 
               expect(
-                proxy.readFragment(
-                  fragment: originalCFragment,
+                proxy.readFragment(originalCFragment.asRequest(
                   idFields: idFields,
-                ),
+                )),
                 originalCValue,
               );
 
@@ -147,11 +148,10 @@ void main() {
           cache.recordOptimisticTransaction(
             (proxy) => proxy
               ..writeFragment(
-                fragment: updatedCFragment,
-                idFields: {
+                updatedCFragment.asRequest(idFields: {
                   '__typename': updatedCValue['__typename'],
                   'id': updatedCValue['id'],
-                },
+                }),
                 data: updatedCValue,
               ),
             '2',

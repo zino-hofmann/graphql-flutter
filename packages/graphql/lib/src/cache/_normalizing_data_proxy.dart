@@ -1,8 +1,7 @@
+import 'package:graphql/src/cache/fragment.dart';
 import "package:meta/meta.dart";
 
 import 'package:gql_exec/gql_exec.dart' show Request;
-import 'package:gql/ast.dart' show DocumentNode;
-
 import 'package:normalize/normalize.dart';
 
 import './data_proxy.dart';
@@ -75,23 +74,22 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         returnPartialData: returnPartialData,
       );
 
-  Map<String, dynamic> readFragment({
-    @required DocumentNode fragment,
-    @required Map<String, dynamic> idFields,
-    String fragmentName,
-    Map<String, dynamic> variables,
+  Map<String, dynamic> readFragment(
+    FragmentRequest fragmentRequest, {
     bool optimistic = true,
   }) =>
       denormalizeFragment(
+        // provided from cache
         reader: (dataId) => readNormalized(dataId, optimistic: optimistic),
-        fragment: fragment,
-        idFields: idFields,
-        fragmentName: fragmentName,
-        variables: sanitizeVariables(variables),
         typePolicies: typePolicies,
-        addTypename: addTypename ?? false,
         dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
+        addTypename: addTypename ?? false,
+        // provided from request
+        fragment: fragmentRequest.fragment.document,
+        idFields: fragmentRequest.idFields,
+        fragmentName: fragmentRequest.fragment.fragmentName,
+        variables: sanitizeVariables(fragmentRequest.variables),
       );
 
   void writeQuery(
@@ -113,23 +111,23 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     }
   }
 
-  void writeFragment({
-    @required DocumentNode fragment,
-    @required Map<String, dynamic> idFields,
+  void writeFragment(
+    FragmentRequest request, {
     @required Map<String, dynamic> data,
-    String fragmentName,
-    Map<String, dynamic> variables,
     bool broadcast = true,
   }) {
     normalizeFragment(
+      // provided from cache
       writer: (dataId, value) => writeNormalized(dataId, value),
-      fragment: fragment,
-      idFields: idFields,
-      data: data,
-      fragmentName: fragmentName,
-      variables: sanitizeVariables(variables),
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
+      // provided from request
+      fragment: request.fragment.document,
+      idFields: request.idFields,
+      fragmentName: request.fragment.fragmentName,
+      variables: sanitizeVariables(request.variables),
+      // data
+      data: data,
     );
     if (broadcast ?? true) {
       broadcastRequested = true;

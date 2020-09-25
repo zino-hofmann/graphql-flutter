@@ -1,5 +1,6 @@
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql/language.dart';
+import 'package:graphql/client.dart' show Fragment;
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
@@ -136,22 +137,30 @@ final originalCValue = <String, dynamic>{
   'id': 6,
   'cField': 'value',
 };
-final originalCFragment = parseString(r'''
-fragment partialC on C {
-  __typename 
-  id
-  cField
-}
-''');
+final originalCFragment = Fragment(
+  document: parseString(
+    r'''
+      fragment partialC on C {
+        __typename 
+        id
+        cField
+      }
+    ''',
+  ),
+);
 
-final updatedCFragment = parseString(r'''
-fragment partialC on C {
-  __typename 
-  id
-  new
-  cField
-}
-''');
+final updatedCFragment = Fragment(
+  document: parseString(
+    r'''
+      fragment partialC on C {
+        __typename 
+        id
+        new
+        cField
+      }
+    ''',
+  ),
+);
 
 final updatedCValue = <String, dynamic>{
   '__typename': 'C',
