@@ -379,4 +379,99 @@ void main() {
       });
     });
   });
+
+  group('direct cache access', () {
+    setUp(() {
+      link = MockLink();
+
+      client = GraphQLClient(
+        cache: getTestCache(),
+        link: link,
+      );
+    });
+
+    test('all methods with exposition', () {
+      /// entity identifiers for normalization
+      final idFields = {'__typename': 'MyType', 'id': 1};
+
+      /// The direct cache API uses `gql_link` Requests directly
+      /// These can also be obtained via `options.asRequest` from any `Options` object,
+      /// or via `Operation(document: gql(...)).asRequest()`
+      final queryRequest = Request(
+        operation: Operation(
+          document: gql(
+            r'''{
+              someField {
+                __typename,
+                id,
+                myField
+              }
+            }''',
+          ),
+        ),
+      );
+
+      final queryData = {
+        'someField': {
+          ...idFields,
+          'myField': 'originalValue',
+        },
+      };
+
+      /// `broadcast: true` (the default) would rebroadcast cache updates to all safe instances of `ObservableQuery`
+      /// **NOTE**: only `GraphQLClient` can immediately call for a query rebroadcast. if you request a rebroadcast directly
+      /// from the cache, it still has to wait for the client to check in on it
+      client.writeQuery(queryRequest, data: queryData, broadcast: false);
+
+      /// `optimistic: true` (the default) integrates optimistic data
+      /// written to the cache into your read.
+      expect(
+          client.readQuery(queryRequest, optimistic: false), equals(queryData));
+
+      /// While fragments are never executed themselves, we provide a `gql_link`-like API for consistency.
+      /// These can also be obtained via `Fragment(document: gql(...)).asRequest()`.
+      final fragmentRequest = FragmentRequest(
+          fragment: Fragment(
+            document: gql(
+              r'''
+                fragment mySmallSubset on MyType {
+                  myField,
+                  someNewField
+                }
+              ''',
+            ),
+          ),
+          idFields: idFields);
+
+      /// We've specified `idFields` and are only editing a subset of the data
+      final fragmentData = {
+        'myField': 'updatedValue',
+        'someNewField': [
+          {'newData': false}
+        ],
+      };
+
+      /// We didn't disable `broadcast`, so all instances of `ObservableQuery` will be notified of any changes
+      client.writeFragment(fragmentRequest, data: fragmentData);
+
+      /// __typename is automatically included in all reads
+      expect(
+        client.readFragment(fragmentRequest),
+        equals({
+          '__typename': 'MyType',
+          ...fragmentData,
+        }),
+      );
+
+      final updatedQueryData = {
+        'someField': {
+          ...idFields,
+          'myField': 'updatedValue',
+        },
+      };
+
+      /// `myField` is updated, but we don't have `someNewField`, as expected.
+      expect(client.readQuery(queryRequest), equals(updatedQueryData));
+    });
+  });
 }

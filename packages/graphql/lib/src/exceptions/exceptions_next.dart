@@ -31,6 +31,8 @@ class UnknownException extends LinkException {
   ) : super(originalException);
 }
 
+/// Container for both [graphqlErrors] returned from the server
+/// and any [linkException] that caused a failure.
 class OperationException implements Exception {
   /// Any graphql errors returned from the operation
   List<GraphQLError> graphqlErrors = [];

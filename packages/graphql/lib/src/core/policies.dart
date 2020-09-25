@@ -32,7 +32,6 @@ bool shouldStopAtCache(FetchPolicy fetchPolicy) =>
 ///  but doesn't save the errors or report them to your UI.
 /// - all: Using the all policy is the best way to notify your users of potential issues while still showing as much data as possible from your server.
 ///  It saves both data and errors into the Apollo Cache so your UI can use them.
-
 enum ErrorPolicy {
   none,
   ignore,

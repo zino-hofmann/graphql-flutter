@@ -12,34 +12,46 @@
 
 # GraphQL Flutter
 
-## Table of Contents
+`graphql_flutter` provides an idiomatic flutter API and widgets for [`graphql/client.dart`](https://pub.dev/packages/graphql). They are co-developed [on github](https://github.com/zino-app/graphql-flutter), where you can find more in-depth examples. We also have a lively community on [discord][discord-link].
 
-- [Installation](#installation)
-- [Usage](#usage)
-  - [GraphQL Provider](#graphql-provider)
-  - [Offline Cache](#offline-cache)
-    - [Normalization](#normalization)
-    - [Optimism](#optimism)
-  - [Queries](#queries)
-    - [Fetch More (Pagination)](#fetch-more-pagination)
-  - [Mutations](#mutations)
-    - [Mutations with optimism](#mutations-with-optimism)
-  - [Exceptions](#exceptions)
-  - [Subscriptions (Experimental)](#subscriptions-experimental)
-  - [GraphQL Consumer](#graphql-consumer)
-  - [GraphQL Upload](#graphql-upload)
-- [Roadmap](#roadmap)
+This guide is mostly focused on setup, widgets, and flutter-specific considerations. For more in-depth details on the `graphql` API, see the [`graphql` README](../graphql/README.md)
+
+- [GraphQL Flutter](#graphql-flutter)
+  - [Installation](#installation)
+  - [Migration Guide](#migration-guide)
+  - [Usage](#usage)
+    - [GraphQL Provider](#graphql-provider)
+    - [Query](#query)
+      - [Fetch More (Pagination)](#fetch-more-pagination)
+    - [Mutations](#mutations)
+      - [Optimism](#optimism)
+    - [Subscriptions](#subscriptions)
+    - [GraphQL Consumer](#graphql-consumer)
+
+**Useful sections in the [`graphql` README](../graphql/README.md):**
+
+- [in-depth link guide](../graphql/README.md#links)
+- [Policies](../graphql/README.md#exceptions)
+- [Exceptions](../graphql/README.md#exceptions)
+- [AWS AppSync Support](../graphql/README.md#aws-appsync-support)
+- [GraphQL Upload](../graphql/README.md#graphql-upload)
+- [Parsing ASTs at build-time](../graphql/README.md##parsing-asts-at-build-time)
+
+**Useful API Docs:**
+
+- [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLCache-class.html)
+- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLDataProxy-class.html) (direct cache access)
 
 ## Installation
 
-First, depends on the library by adding this to your packages `pubspec.yaml`:
+First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^3.0.0
+  graphql: ^4.0.0-beta
 ```
 
-Now inside your Dart code, you can import it.
+And then import it inside your dart code:
 
 ```dart
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -51,18 +63,23 @@ Find the migration from version 2 to version 3 [here](./../../changelog-v2-v3.md
 
 ## Usage
 
-To use the client it first needs to be initialized with a link and cache. For this example, we will be using an `HttpLink` as our link and `GraphQLCache` as our cache. If your endpoint requires authentication you can concatenate the `AuthLink`, it resolves the credentials using a future, so you can authenticate asynchronously.
+To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
 
-> For this example we will use the public GitHub API.
+In our example below, we will be using the Github Public API. we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `GraphQLCache`.
 
 ```dart
 ...
 
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-void main() {
+void main() async {
+
+  // We're using HiveStore for persistence,
+  // so we need to initialize Hive.
+  await initHiveForFlutter();
+
   final HttpLink httpLink = HttpLink(
-    uri: 'https://api.github.com/graphql',
+    'https://api.github.com/graphql',
   );
 
   final AuthLink authLink = AuthLink(
@@ -75,8 +92,9 @@ void main() {
 
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
-      cache: GraphQLCache(),
       link: link,
+      // The default store is the InMemoryStore, which does NOT persist to disk
+      store: GraphQLCache(store: HiveStore()),
     ),
   );
 
@@ -88,7 +106,7 @@ void main() {
 
 ### GraphQL Provider
 
-In order to use the client, you `Query` and `Mutation` widgets to be wrapped with the `GraphQLProvider` widget.
+In order to use the client, your `Query` and `Mutation` widgets must be wrapped with the `GraphQLProvider` widget.
 
 > We recommend wrapping your `MaterialApp` with the `GraphQLProvider` widget.
 
@@ -106,99 +124,7 @@ In order to use the client, you `Query` and `Mutation` widgets to be wrapped wit
   ...
 ```
 
-### AWS AppSync Support
-
-#### Cognito Pools
-
-To use with an AppSync GraphQL API that is authorized with AWS Cognito User Pools, simply pass the JWT token for your Cognito user session in to the `AuthLink`:
-
-```dart
-// Where `session` is a CognitorUserSession
-// from amazon_cognito_identity_dart_2
-final token = session.getAccessToken().getJwtToken();
-
-final AuthLink authLink = AuthLink(
-  getToken: () => token,
-);
-```
-
-See more: [Issue #209](https://github.com/zino-app/graphql-flutter/issues/209)
-
-#### Other Authorization Types
-
-API key, IAM, and Federated provider authorization could be accomplished through custom links, but it is not known to be supported. Anyone wanting to implement this can reference AWS' JS SDK `AuthLink` implementation.
-
-- Making a custom link: [Comment on Issue 173](https://github.com/zino-app/graphql-flutter/issues/173#issuecomment-464435942)
-- AWS JS SDK `auth-link.ts`: [aws-mobile-appsync-sdk-js:auth-link.ts](https://github.com/awslabs/aws-mobile-appsync-sdk-js/blob/master/packages/aws-appsync-auth-link/src/auth-link.ts)
-
-### Offline Cache
-
-The in-memory cache can automatically be saved to and restored from offline storage. Setting it up is as easy as wrapping your app with the `CacheProvider` widget.
-
-> It is required to place the `CacheProvider` widget is inside the `GraphQLProvider` widget, because `GraphQLProvider` makes client available through the build context.
-
-```dart
-...
-
-class MyApp extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return GraphQLProvider(
-      client: client,
-      child: CacheProvider(
-        child: MaterialApp(
-          title: 'Flutter Demo',
-          ...
-        ),
-      ),
-    );
-  }
-}
-
-...
-```
-
-#### Normalization
-
-To enable [apollo-like normalization](https://www.apollographql.com/docs/react/caching/cache-configuration/#data-normalization), use a `NormalizedInMemoryCache` or `OptimisticCache`:
-
-```dart
-ValueNotifier<GraphQLClient> client = ValueNotifier(
-  GraphQLClient(
-    cache: NormalizedInMemoryCache(
-      dataIdFromObject: typenameDataIdFromObject,
-    ),
-    link: link,
-  ),
-);
-```
-
-`dataIdFromObject` is required and has no defaults. Our implementation is similar to Apollo's, requiring a function to return a universally unique string or `null`. The predefined `typenameDataIdFromObject` we provide is similar to apollo's default:
-
-```dart
-String typenameDataIdFromObject(Object object) {
-  if (object is Map<String, Object> &&
-      object.containsKey('__typename') &&
-      object.containsKey('id')) {
-    return "${object['__typename']}/${object['id']}";
-  }
-  return null;
-}
-```
-
-However, note that **`graphql-flutter` does not inject \_\_typename into operations** the way Apollo does, so if you aren't careful to request them in your query, this normalization scheme is not possible.
-
-Unlike Apollo, we don't have a real client-side document parser and resolver, so **operations leveraging normalization can have additional fields not specified in the query**. There are a couple of ideas for constraining this (leveraging `json_serializable`, or just implementing the resolver), but for now, the normalized cache uses a [`LazyCacheMap`](lib/src/cache/lazy_cache_map.dart), which wraps underlying data with a lazy denormalizer to allow for cyclical references. It has the same API as a normal `HashMap`, but is currently a bit hard to debug with, as a descriptive debug representation is currently unavailable.
-
-NOTE: A `LazyCacheMap` can be modified, but this does not affect the underlying entities in the cache. If references are added to the map, they will still dereference against the cache normally.
-
-#### Optimism
-
-The `OptimisticCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(Cache cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache. You can tell which entities in the cache are optimistic through the `.isOptimistic` flag on `LazyCacheMap`, though note that **this is only the case for optimistic entities and not their containing operations/maps**.
-
-`QueryResults` also, have an `optimistic` flag, but I would recommend looking at the data itself, as many situations make it unusable (such as toggling mutations like in the example below). [Mutation usage examples](#mutations-with-optimism)
-
-### Queries
+### Query
 
 Creating a query is as simple as creating a multiline string:
 
@@ -228,7 +154,7 @@ Query(
     variables: {
       'nRepositories': 50,
     },
-    pollInterval: 10,
+    pollInterval: Duration(seconds: 10),
   ),
   // Just like in apollo refetch() could be used to manually trigger a refetch
   // while fetchMore() can be used for pagination purpose
@@ -237,7 +163,7 @@ Query(
         return Text(result.exception.toString());
     }
 
-    if (result.loading) {
+    if (result.isLoading) {
       return Text('Loading');
     }
 
@@ -331,7 +257,7 @@ Mutation(
   options: MutationOptions(
     document: gql(addStar), // this is the mutation string you just created
     // you can update the cache based on results
-    update: (Cache cache, QueryResult result) {
+    update: (GraphQLDataProxy cache, QueryResult result) {
       return cache;
     },
     // or do something with the result.data on completion
@@ -356,9 +282,14 @@ Mutation(
 ...
 ```
 
-#### Mutations with optimism
+`graphql` also provides [file upload](../graphql/README.md#graphql-upload) support as well.
 
-If you're using an [OptimisticCache](#optimism), you can provide an `optimisticResult`:
+#### Optimism
+
+`GraphQLCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(GraphQLDataProxy cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache state.
+
+A complete and well-commented rundown of how exactly one interfaces with the `proxy` provided to `update` can be fount in the
+[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLDataProxy-class.html)
 
 ```dart
 ...
@@ -380,45 +311,43 @@ FlutterWidget(
 With a bit more context (taken from **[the complete mutation example `StarrableRepository`](example/lib/graphql_widget/main.dart)**):
 
 ```dart
-// bool get starred => repository['viewerHasStarred'] as bool;
-// bool get optimistic => (repository as LazyCacheMap).isOptimistic;
+// final Map<String, Object> repository;
+// final bool optimistic;
+// Map<String, Object> extractRepositoryData(Map<String, Object> data);
+// Map<String, dynamic> get expectedResult;
 Mutation(
   options: MutationOptions(
     document: gql(starred ? mutations.removeStar : mutations.addStar),
-    // will be called for both optimistic and final results
-    update: (Cache cache, QueryResult result) {
+    update: (cache, result) {
       if (result.hasException) {
-        print(['optimistic', result.exception.toString()]);
+        print(result.exception);
       } else {
-        final Map<String, Object> updated =
-            Map<String, Object>.from(repository)
-              ..addAll(extractRepositoryData(result.data));
-        cache.write(typenameDataIdFromObject(updated), updated);
+        final updated = {
+          ...repository,
+          ...extractRepositoryData(result.data),
+        };
+        cache.writeFragment(
+          Fragment(
+              document: gql(
+            '''
+              fragment fields on Repository {
+                id
+                name
+                viewerHasStarred
+              }
+            ''',
+            // helper for constructing FragmentRequest
+          )).asRequest(idFields: {
+            '__typename': updated['__typename'],
+            'id': updated['id'],
+          }),
+          data: updated,
+          broadcast: false,
+        );
       }
     },
-    // will only be called for final result
-    onCompleted: (dynamic resultData) {
-      showDialog<AlertDialog>(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text(
-              extractRepositoryData(resultData)['viewerHasStarred'] as bool
-                  ? 'Thanks for your star!'
-                  : 'Sorry you changed your mind!',
-            ),
-            actions: <Widget>[
-              SimpleDialogOption(
-                child: const Text('Dismiss'),
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-              )
-            ],
-          );
-        },
-      );
-    },
+    onError: (OperationException error) { },
+    onCompleted: (dynamic resultData) { },
   ),
   builder: (RunMutation toggleStar, QueryResult result) {
     return ListTile(
@@ -428,83 +357,71 @@ Mutation(
               color: Colors.amber,
             )
           : const Icon(Icons.star_border),
-      trailing: result.loading || optimistic
+      trailing: result.isLoading || optimistic
           ? const CircularProgressIndicator()
           : null,
       title: Text(repository['name'] as String),
       onTap: () {
         toggleStar(
-          { 'starrableId': repository['id'] },
-          optimisticResult: {
-            'action': {
-              'starrable': {'viewerHasStarred': !starred}
-            }
-          },
+          {'starrableId': repository['id']},
+          optimisticResult: expectedResult,
         );
       },
     );
   },
-);
+)
 ```
 
-### Exceptions
+### Subscriptions
 
-If there were problems encountered during a query or mutation, the `QueryResult` will have an `OperationException` in the `exception` field:
+The syntax for subscriptions is again similar to a query, however, it utilizes WebSockets and dart Streams to provide real-time updates from a server.
+
+To use subscriptions, a subscription-consuming link **must** be split from your `HttpLink` or other terminating link route:
 
 ```dart
-class OperationException implements Exception {
-  /// Any graphql errors returned from the operation
-  List<GraphQLError> graphqlErrors = [];
-
-  /// Errors encountered during execution such as network or cache errors
-  ClientException clientException;
-}
+link = Link.split((request) => request.isSubscription, websocketLink, link);
 ```
 
-Example usage:
+Then you can `subscribe` to any `subscription`s provided by your server schema:
 
 ```dart
-if (result.hasException) {
-    if (result.exception.clientException is NetworkException) {
-        // handle network issues, maybe
+final subscriptionDocument = gql(
+  r'''
+    subscription reviewAdded {
+      reviewAdded {
+        stars, commentary, episode
+      }
     }
-    return Text(result.exception.toString())
-}
-```
+  ''',
+);
 
-### Subscriptions (Experimental)
-
-The syntax for subscriptions is again similar to a query, however, this utilizes WebSockets and dart Streams to provide real-time updates from a server.
-Before subscriptions can be performed a global instance of `socketClient` needs to be initialized.
-
-> We are working on moving this into the same `GraphQLProvider` structure as the http client. Therefore this api might change in the near future.
-
-```dart
-socketClient = await SocketClient.connect('ws://coolserver.com/graphql');
-```
-
-Once the `socketClient` has been initialized it can be used by the `Subscription` `Widget`
-
-```dart
 class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
         child: Subscription(
-          operationName,
-          query,
-          variables: variables,
-          builder: ({
-            bool loading,
-            dynamic payload,
-            dynamic error,
-          }) {
-            if (payload != null) {
-              return Text(payload['requestSubscription']['requestData']);
-            } else {
-              return Text('Data not found');
+          options: SubscriptionOptions(
+            document: subscriptionDocument,
+          ),
+          builder: (result) {
+            if (result.hasException) {
+              return Text(result.exception.toString());
             }
+
+            if (result.isLoading) {
+              return Center(
+                child: const CircularProgressIndicator(),
+              );
+            }
+            // ResultAccumulator is a provided helper widget for collating subscription results.
+            // careful though! It is stateful and will discard your results if the state is disposed
+            return ResultAccumulator.appendUniqueEntries(
+              latest: result.data,
+              builder: (context, {results}) => DisplayReviews(
+                reviews: results.reversed.toList(),
+              ),
+            );
           }
         ),
       )
@@ -515,7 +432,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
 ### GraphQL Consumer
 
-You can always access the client directly from the `GraphQLProvider` but to make it even easier you can also use them `GraphQLConsumer` widget.
+If you want to use the `client` directly, say for some its
+[direct cache update](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLDataProxy-class.html) methods,
+You can use `GraphQLConsumer` to grab it from any `context` descended from a `GraphQLProvider`:
 
 ```dart
   ...
@@ -532,61 +451,6 @@ You can always access the client directly from the `GraphQLProvider` but to make
 
   ...
 ```
-
-### GraphQL Upload
-
-We support GraphQL Upload spec as proposed at
-https://github.com/jaydenseric/graphql-multipart-request-spec
-
-```grapql
-mutation($files: [Upload!]!) {
-  multipleUpload(files: $files) {
-    id
-    filename
-    mimetype
-    path
-  }
-}
-```
-
-```dart
-import "package:http/http.dart" show Multipartfile;
-
-// ...
-
-final myFile = MultipartFile.fromString(
-  "",
-  "just plain text",
-  filename: "sample_upload.txt",
-  contentType: MediaType("text", "plain"),
-);
-
-final result = await graphQLClient.mutate(
-  MutationOptions(
-    document: gql(uploadMutation),
-    variables: {
-      'files': [myFile],
-    },
-  )
-);
-```
-
-## Roadmap
-
-This is currently our roadmap, please feel free to request additions/changes.
-
-| Feature                 | Progress |
-| :---------------------- | :------: |
-| Queries                 |    ✅    |
-| Mutations               |    ✅    |
-| Subscriptions           |    ✅    |
-| Query polling           |    ✅    |
-| In memory cache         |    ✅    |
-| Offline cache sync      |    ✅    |
-| GraphQL pload           |    ✅    |
-| Optimistic results      |    ✅    |
-| Client state management |    🔜    |
-| Modularity              |    🔜    |
 
 [build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
 [build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
