@@ -18,7 +18,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql: ^4.0.0-alpha
+  graphql: ^4.0.0-beta
 ```
 
 And then import it inside your dart code:
@@ -31,16 +31,6 @@ import 'package:graphql/client.dart';
 
 Find the migration from version 3 to version 4 [here](./../../changelog-v3-v4.md).
 
-### Parsing at build-time
-
-To parse documents at build-time use `ast_builder` from
-[`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen):
-
-```yaml
-dev_dependencies:
-  gql_code_gen: ^0.1.0
-```
-
 ## Usage
 
 To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
@@ -51,11 +41,11 @@ In our example below, we will be using the Github Public API. we are going to us
 // ...
 
 final HttpLink _httpLink = HttpLink(
-    'https://api.github.com/graphql',
+  'https://api.github.com/graphql',
 );
 
 final AuthLink _authLink = AuthLink(
-    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+  getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
 );
 
 final Link _link = _authLink.concat(_httpLink);
@@ -70,57 +60,6 @@ final GraphQLClient _client = GraphQLClient(
 
 // ...
 
-```
-
-### Combining Multiple Links
-
-`graphql` and `graphql_flutter` now use the [`gql_link`] system, which allows for any kind of routing you might need:
-![diagram](https://github.com/gql-dart/gql/blob/master/links/gql_link/assets/gql_link.svg)
-
-A quick rundown of the composition api:
-
-```dart
-Link.from([
-  // common links run before every request
-  AuthLink(getToken: commonAuthenticator),
-  DedupeLink(), // dedupe requests
-  ErrorLink(onException: reportClientException),
-]).split( // split terminating links, or they will break
-  (request) => request.isSubscription,
-  MyCustomSubscriptionAuthLink().concat(
-    WebsocketLink(mySubscriptionEndpoint),
-  ),
-  HttpLink(myAppEndpoint),
-);
-// adding links after here would be pointless, as they would never be accessed
-```
-
-When combining links, it is important to note that:
-
-- Terminating links like `HttpLink` and `WebsocketLink` must come at the end of a route, and will not call links following them.
-- Link order is very important. In `HttpLink(myEndpoint).concat(AuthLink(getToken: authenticate))`, the `AuthLink` will never be called.
-
-#### Using Concat
-
-```dart
-final Link _link = _authLink.concat(_httpLink);
-```
-
-#### Using Links.from
-
-`Link.from` joins multiple links into a single link at once.
-
-```dart
-final Link _link = Link.from([_authLink, _httpLink]);
-```
-
-#### Using Links.split
-
-`Link.split` routes the request based on some condition.
-**NB**: `WebSocketLink` and other "terminating links" must be used with `split` when there are multiple.
-
-```dart
-link = Link.split((request) => request.isSubscription, websocketLink, link);
 ```
 
 Once you have initialized a client, you can run queries and mutations.
@@ -236,27 +175,77 @@ if (isStarred) {
 // ...
 ```
 
-### AST documents
+## Links
 
-> We are deprecating `document` and recommend you update your application to use
-> `document` instead. `document` will be removed from the api in a future version.
+`graphql` and `graphql_flutter` now use the [`gql_link`] system, re-exporting:
+* [gql_http_link](https://pub.dev/packages/gql_http_link)
+* [gql_error_link](https://pub.dev/packages/gql_error_link)
+* [gql_dedupe_link](https://pub.dev/packages/gql_dedupe_link)
+* [gql_link](https://pub.dev/packages/gql_link)
 
-For example:
+As well as our own custom `WebSocketLink` and `AuthLink`
+
+### Composing Links
+The [`gql_link`] systm  has a well-specified routing system:
+![diagram](https://github.com/gql-dart/gql/blob/master/links/gql_link/assets/gql_link.svg)
+
+A quick rundown of the composition api:
 
 ```dart
-// ...
-
-final MutationOptions options = MutationOptions(
-  document: gql(addStar),
-  variables: <String, dynamic>{
-    'starrableId': repositoryID,
-  },
+Link.from([
+  // common links run before every request
+  AuthLink(getToken: commonAuthenticator),
+  DedupeLink(), // dedupe requests
+  ErrorLink(onException: reportClientException),
+]).split( // split terminating links, or they will break
+  (request) => request.isSubscription,
+  MyCustomSubscriptionAuthLink().concat(
+    WebsocketLink(mySubscriptionEndpoint),
+  ),
+  HttpLink(myAppEndpoint),
 );
-
-// ...
+// adding links after here would be pointless, as they would never be accessed
 ```
 
-With [`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen) you can parse your `*.graphql` files at build-time.
+When combining links, **it isimportant to note that**:
+
+- Terminating links like `HttpLink` and `WebsocketLink` must come at the end of a route, and will not call links following them.
+- Link order is very important. In `HttpLink(myEndpoint).concat(AuthLink(getToken: authenticate))`, the `AuthLink` will never be called.
+
+#### Using Concat
+
+```dart
+final Link _link = _authLink.concat(_httpLink);
+```
+
+#### Using Links.from
+
+`Link.from` joins multiple links into a single link at once.
+
+```dart
+final Link _link = Link.from([_authLink, _httpLink]);
+```
+
+#### Using Links.split
+
+`Link.split` routes the request based on some condition.
+**NB**: `WebSocketLink` and other "terminating links" must be used with `split` when there are multiple.
+
+```dart
+link = Link.split((request) => request.isSubscription, websocketLink, link);
+```
+
+## Parsing ASTs at build-time
+
+All `document` arguments are `DocumentNode`s from `gql/ast`.
+We supply a `gql` helper for parsing, them, but you can also
+parse documents at build-time use `ast_builder` from
+[`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen):
+
+```yaml
+dev_dependencies:
+  gql_code_gen: ^0.1.5
+```
 
 **`add_star.graphql`**:
 
@@ -285,27 +274,14 @@ final MutationOptions options = MutationOptions(
 // ...
 ```
 
-## Links
 
-### `ErrorLink`
+### `PersistedQueriesLink` (experimental) :warning: OUT OF SERVICE :warning:
 
-Perform custom logic when a GraphQL or network error happens, such as logging or
-signing out.
+**NOTE**: There is [a PR](https://github.com/zino-app/graphql-flutter/pull/699) for migrating the `v3` `PersistedQueriesLink`, and it works, but requires more consideration. It will be fixed before `v4` `stable` is published
 
-```dart
-final ErrorLink errorLink = ErrorLink(errorHandler: (ErrorResponse response) {
-  Operation operation = response.operation;
-  FetchResult result = response.fetchResult;
-  OperationException exception = response.exception;
-  print(exception.toString());
-});
-```
+To improve performance you can make use of a concept introduced by [apollo] called [Automatic persisted queries] (or short "APQ") to send smaller requests and even enabled CDN caching for your GraphQL API.
 
-### `PersistedQueriesLink` (experimental)
-
-To improve performance you can make use of a concept introduced by [Apollo](https://www.apollographql.com/) called [Automatic persisted queries](https://www.apollographql.com/docs/apollo-server/performance/apq/) (or short "APQ") to send smaller requests and even enabled CDN caching for your GraphQL API.
-
-**ATTENTION:** This also requires you to have a GraphQL server that supports APQ, like [Apollo's GraphQL Server](https://www.apollographql.com/docs/apollo-server/) and will only work for queries (but not for mutations or subscriptions).
+**ATTENTION:** This also requires you to have a GraphQL server that supports APQ, like [Apollo's GraphQL Server] and will only work for queries (but not for mutations or subscriptions).
 
 You can than use it simply by prepending a `PersistedQueriesLink` to your normal `HttpLink`:
 
@@ -339,3 +315,6 @@ final Link _link = _apqLink.concat(_httpLink);
 [discord-badge]: https://img.shields.io/discord/559455668810153989.svg?style=flat-square&logo=discord&logoColor=ffffff
 [discord-link]: https://discord.gg/tXTtBfC
 [`gql_link`]: https://github.com/gql-dart/gql/tree/master/links/gql_link
+[apollo]: https://www.apollographql.com/
+[Automatic persisted queries]: https://www.apollographql.com/docs/apollo-server/performance/apq/
+[Apollo's GraphQL Server]: https://www.apollographql.com/docs/apollo-server/
