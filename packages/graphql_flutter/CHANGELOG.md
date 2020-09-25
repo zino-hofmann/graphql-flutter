@@ -1,17 +1,17 @@
 # 4.0.0-alpha.9 (2020-09-25)
 
-:warning: breaking: the `cache.readFragment / cache.readFragment`` API has been reworked:
+:warning:  breaking: the `cache.readFragment / cache.readFragment` API has been reworked:
 ```diff
-final fragDoc = gql(...);
+  final fragDoc = gql(...);
 
-final idFields = { '__typename': 'MyType', 'id': 1 }
+  final idFields = { '__typename': 'MyType', 'id': 1 }
 
-final fragmentData = {
-  'myField': 'updatedValue',
-  'someNewField': [
-    {'newData': false}
-  ],
-};
+  final fragmentData = {
+    'myField': 'updatedValue',
+    'someNewField': [
+      {'newData': false}
+    ],
+  };
 
 + // or Fragment(document: fragDoc).asRequest(idFields: idFields)
 + final fragmentRequest = FragmentRequest(
@@ -21,13 +21,12 @@ final fragmentData = {
 +   idFields: idFields,
 + );
 
-cache.writeFragment(
+  cache.writeFragment(
 -   fragment: fragDoc,
 -   idFields: idFields,
-+ fragmentRequest,
-  data: fragmentData,
-);
-
++   fragmentRequest,
+    data: fragmentData,
+  );
 ```
 This was done because I (@micimize) wanted to make it more consistent with `cache.readQuery`/`cache.writeQuery` before `beta`.
 
