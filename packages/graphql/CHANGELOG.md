@@ -1,3 +1,40 @@
+# 4.0.0-alpha.9 (2020-09-25)
+
+:warning: breaking: the `cache.readFragment / cache.readFragment`` API has been reworked:
+```diff
+final fragDoc = gql(...);
+
+final idFields = { '__typename': 'MyType', 'id': 1 }
+
+final fragmentData = {
+  'myField': 'updatedValue',
+  'someNewField': [
+    {'newData': false}
+  ],
+};
+
++ // or Fragment(document: fragDoc).asRequest(idFields: idFields)
++ final fragmentRequest = FragmentRequest(
++   fragment: Fragment(
++     document: fragDoc,
++   ),
++   idFields: idFields,
++ );
+
+cache.writeFragment(
+-   fragment: fragDoc,
+-   idFields: idFields,
++ fragmentRequest,
+  data: fragmentData,
+);
+
+```
+This was done because I (@micimize) wanted to make it more consistent with `cache.readQuery`/`cache.writeQuery` before `beta`.
+
+* **client**: refactor(client): Fragment and FragmentRequest for more normalized api ([2f04058](https://github.com/zino-app/graphql-flutter/commit/2f04058b0dd2d739cd423ccea616c4574f9cf9eb))
+* **docs**:  update docs, add more sections ([00f4a97](https://github.com/zino-app/graphql-flutter/commit/00f4a971fa4b1aa14b568b16b25b31b98ef70a4b))
+
+
 # 4.0.0-alpha.8 (2020-09-24)
 
 This was mostly a prep release for the first v4 beta.

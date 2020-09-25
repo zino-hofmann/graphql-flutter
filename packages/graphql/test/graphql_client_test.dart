@@ -431,17 +431,18 @@ void main() {
       /// While fragments are never executed themselves, we provide a `gql_link`-like API for consistency.
       /// These can also be obtained via `Fragment(document: gql(...)).asRequest()`.
       final fragmentRequest = FragmentRequest(
-          fragment: Fragment(
-            document: gql(
-              r'''
+        fragment: Fragment(
+          document: gql(
+            r'''
                 fragment mySmallSubset on MyType {
                   myField,
                   someNewField
                 }
               ''',
-            ),
           ),
-          idFields: idFields);
+        ),
+        idFields: idFields,
+      );
 
       /// We've specified `idFields` and are only editing a subset of the data
       final fragmentData = {
