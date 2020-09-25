@@ -57,13 +57,13 @@ void main() {
 ''';
 
   MockLink link;
-  GraphQLClient graphQLClientClient;
+  GraphQLClient client;
 
   group('simple json', () {
     setUp(() {
       link = MockLink();
 
-      graphQLClientClient = GraphQLClient(
+      client = GraphQLClient(
         cache: getTestCache(),
         link: link,
       );
@@ -115,7 +115,7 @@ void main() {
           ),
         );
 
-        final QueryResult r = await graphQLClientClient.query(_options);
+        final QueryResult r = await client.query(_options);
 
         verify(
           link.request(
@@ -153,7 +153,7 @@ void main() {
           (_) => Stream.fromFuture(Future.error(e)),
         );
 
-        final QueryResult r = await graphQLClientClient.query(
+        final QueryResult r = await client.query(
           WatchQueryOptions(
             document: parseString(readRepositories),
           ),
@@ -176,7 +176,7 @@ void main() {
           (_) => Stream.fromFuture(Future.error(e)),
         );
 
-        final QueryResult r = await graphQLClientClient.query(
+        final QueryResult r = await client.query(
           WatchQueryOptions(
             document: parseString(readRepositories),
           ),
@@ -216,7 +216,7 @@ void main() {
           ),
         );
 
-        final ObservableQuery observable = await graphQLClientClient.watchQuery(
+        final ObservableQuery observable = await client.watchQuery(
           WatchQueryOptions(
             document: parseString(readSingle),
             eagerlyFetchResults: true,
@@ -267,9 +267,8 @@ void main() {
 
         final variables = {'id': '1', 'name': 'newNameFromMutation'};
 
-        final QueryResult response = await graphQLClientClient.mutate(
-            MutationOptions(
-                document: parseString(writeSingle), variables: variables));
+        final QueryResult response = await client.mutate(MutationOptions(
+            document: parseString(writeSingle), variables: variables));
 
         expect(response.data['updateSingle']['name'], variables['name']);
       });
@@ -297,7 +296,7 @@ void main() {
           ),
         );
 
-        final QueryResult response = await graphQLClientClient.mutate(_options);
+        final QueryResult response = await client.mutate(_options);
 
         verify(
           link.request(
@@ -345,7 +344,7 @@ void main() {
           (_) => Stream.fromIterable(responses),
         );
 
-        final stream = graphQLClientClient.subscribe(
+        final stream = client.subscribe(
           SubscriptionOptions(
             document: parseString(
               r'''

@@ -1,3 +1,17 @@
+# 4.0.0-alpha.8 (2020-09-24)
+
+This was mostly a prep release for the first v4 beta.
+
+* **client**: cache proxy methods on cache, resetStore with optional refetchQueries ([ba7134a](https://github.com/zino-app/graphql-flutter/commit/ba7134aad4f755c420ebf0f600898c090df52da7))
+* **test(client)**: more cache and store tests ([a9eed21](https://github.com/zino-app/graphql-flutter/commit/a9eed2133c273c1d938677e4694e26f643ca9d06))
+* **examples**: merge and update flutter_bloc changes ([ac4759a](https://github.com/zino-app/graphql-flutter/commit/ac4759a474b65b3ed2f5cc0b3779ec35e53492c3))
+* **docs**: correct multipart example ([f9d1adb](https://github.com/zino-app/graphql-flutter/commit/f9d1adb6545685cd4534955e27eb498ca9f9a6cb))
+* **chore**: re-merge changelog and templates ([9db0b44](https://github.com/zino-app/graphql-flutter/commit/9db0b44d546a7c7193d68dba4541b7acaa255dac))
+* **tests**: restore old websocket client tests (https://github.com/zino-app/graphql-flutter/commit/[3e4870c](3e4870ce4b67bd9a8716af54b26061eac801c44d))
+* **refactor**: pollInterval is now a Duration ([fe02bb8](https://github.com/zino-app/graphql-flutter/commit/fe02bb8daed67ae635b97a8d4fe34fa015bbcdd8))
+* **chore**: I think fixes coverage and lint ([d37e81c](https://github.com/zino-app/graphql-flutter/commit/d37e81c855e0013b965613a41f1531e8b33b4292))
+
+
 # 4.0.0-alpha.7 (2020-09-17)
 
 `GraphQLClient` now `implements GraphQLDataProxy`, exposing `readQuery`, `writeQuery`, `readFragment`, and `writeFragment`. The writing methods also trigger rebroadcasts, closing #728.
