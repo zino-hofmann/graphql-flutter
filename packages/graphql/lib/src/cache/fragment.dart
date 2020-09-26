@@ -1,7 +1,10 @@
-import "package:collection/collection.dart";
-import "package:gql/ast.dart";
-import 'package:graphql/client.dart';
+import 'dart:convert';
 import "package:meta/meta.dart";
+import "package:collection/collection.dart";
+
+import "package:gql/ast.dart";
+import 'package:gql/language.dart';
+import "package:gql_exec/gql_exec.dart";
 
 /// A fragment in a [document], optionally defined by [fragmentName]
 @immutable
@@ -43,8 +46,10 @@ class Fragment {
       );
 
   @override
-  String toString() =>
-      "Fragment(document: $document, fragmentName: $fragmentName)";
+  String toString() {
+    final documentRepr = json.encode(printNode(document));
+    return "Fragment(document: DocumentNode($documentRepr), fragmentName: $fragmentName)";
+  }
 
   /// helper for building a [FragmentRequest]
   @experimental

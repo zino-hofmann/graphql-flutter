@@ -76,6 +76,9 @@ class Policies {
   int get hashCode => const ListEquality<Object>(
         DeepCollectionEquality(),
       ).hash([fetch, error]);
+
+  @override
+  String toString() => 'Policies(fetch: $fetch, error: $error)';
 }
 
 /// The default [Policies] to set for each client action

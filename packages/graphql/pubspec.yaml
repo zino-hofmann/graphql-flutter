@@ -10,8 +10,8 @@ dependencies:
 
   gql: ^0.12.3
   gql_exec: ^0.2.4
-  gql_link: ^0.3.0
-  gql_http_link: ^0.3.1
+  gql_link: ^0.3.1
+  gql_http_link: ^0.3.2
   gql_transform_link: ^0.1.5
   gql_error_link: ^0.1.0
   gql_dedupe_link: ^1.0.10
