@@ -1,3 +1,8 @@
+# 4.0.0-alpha.10 (2020-09-26)
+
+* **hotfix(client)**: `gql_http_link==0.3.1` fix for bool json encoding support ([38b2fd2](https://github.com/zino-app/graphql-flutter/commit/38b2fd2abbb7e3439e35d139538816beb9e10c40 ))
+
+
 # 4.0.0-alpha.9 (2020-09-25)
 
 :warning:  breaking: the `cache.readFragment / cache.readFragment` API has been reworked:
