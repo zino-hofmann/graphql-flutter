@@ -3,10 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql/client.dart';
+import 'package:graphql_flutter_bloc/graphql_flutter_bloc.dart';
 
 import 'package:graphql_flutter_bloc_example/extended_bloc/repositories_bloc.dart';
-import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/event.dart';
-import 'package:graphql_flutter_bloc_example/extended_bloc/graphql/state.dart';
 
 class ExtendedBloc extends StatefulWidget {
   @override
@@ -24,8 +23,8 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
     bloc = BlocProvider.of<RepositoriesBloc>(context)..run();
   }
 
-  Future _handleRefreshStart(Bloc bloc) {
-    bloc.add(GraphqlRefetchEvent<Map<String, dynamic>>());
+  Future _handleRefreshStart(RepositoriesBloc bloc) {
+    bloc.refetch();
     return _refreshCompleter.future;
   }
 
@@ -40,6 +39,58 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
     _refreshCompleter = Completer();
   }
 
+  Widget _displayResults(Map<String, dynamic> data, QueryResult result) {
+    final itemCount = data['viewer']['repositories']['nodes'].length;
+
+    if (itemCount == 0) {
+      return ListView(children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Icon(Icons.inbox),
+            SizedBox(width: 8),
+            Text('No data'),
+          ],
+        )
+      ]);
+    } else {
+      return ListView.separated(
+        separatorBuilder: (_, __) => SizedBox(
+          height: 8.0,
+        ),
+        key: PageStorageKey('reports'),
+        itemCount: itemCount,
+        itemBuilder: (BuildContext context, int index) {
+          final pageInfo = data['viewer']['repositories']['pageInfo'];
+
+          if (bloc.shouldFetchMore(index, 1)) {
+            bloc.fetchMore(after: pageInfo['endCursor']);
+          }
+
+          final node = data['viewer']['repositories']['nodes'][index];
+
+          Widget tile = ListTile(
+            title: Text(node['name']),
+          );
+
+          if (bloc.isFetchingMore && index == itemCount - 1) {
+            tile = Column(
+              children: [
+                tile,
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: CircularProgressIndicator(),
+                ),
+              ],
+            );
+          }
+
+          return tile;
+        },
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,87 +99,27 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
       ),
       body: RefreshIndicator(
         onRefresh: () async => _handleRefreshStart(bloc),
-        child:
-            BlocBuilder<RepositoriesBloc, GraphqlState<Map<String, dynamic>>>(
-                bloc: bloc,
-                builder: (_, state) {
-                  Widget child = Container();
+        child: BlocBuilder<RepositoriesBloc, QueryState<Map<String, dynamic>>>(
+            cubit: bloc,
+            builder: (_, state) {
+              if (state is! QueryStateRefetch) {
+                _handleRefreshEnd();
+              }
 
-                  if (bloc.isLoading) {
-                    child = Center(child: CircularProgressIndicator());
-                  }
-
-                  if (bloc.hasError) {
-                    _handleRefreshEnd();
-                    child = ListView(children: [
-                      Text(
-                        bloc.getError,
-                        style: TextStyle(color: Theme.of(context).errorColor),
-                      )
-                    ]);
-                  }
-
-                  if (bloc.hasData) {
-                    _handleRefreshEnd();
-                    final itemCount =
-                        state.data['viewer']['repositories']['nodes'].length;
-
-                    if (itemCount == 0) {
-                      child = ListView(children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Icon(Icons.inbox),
-                            SizedBox(width: 8),
-                            Text('No data'),
-                          ],
-                        )
-                      ]);
-                    } else {
-                      child = ListView.separated(
-                        separatorBuilder: (_, __) => SizedBox(
-                          height: 8.0,
-                        ),
-                        key: PageStorageKey('reports'),
-                        itemCount: itemCount,
-                        itemBuilder: (BuildContext context, int index) {
-                          final pageInfo =
-                              state.data['viewer']['repositories']['pageInfo'];
-
-                          if (bloc.shouldFetchMore(index, 1)) {
-                            bloc.fetchMore(after: pageInfo['endCursor']);
-                          }
-
-                          final node = state.data['viewer']['repositories']
-                              ['nodes'][index];
-
-                          Widget tile = ListTile(
-                            title: Text(node['name']),
-                          );
-
-                          if (bloc.isFetchingMore && index == itemCount - 1) {
-                            tile = Column(
-                              children: [
-                                tile,
-                                Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ],
-                            );
-                          }
-
-                          return tile;
-                        },
-                      );
-                    }
-                  }
-
-                  return AnimatedSwitcher(
-                    duration: Duration(milliseconds: 300),
-                    child: child,
-                  );
-                }),
+              return state.when(
+                initial: () => Container(),
+                loading: (_) => Center(child: CircularProgressIndicator()),
+                error: (_, __) => ListView(children: [
+                  Text(
+                    bloc.getError,
+                    style: TextStyle(color: Theme.of(context).errorColor),
+                  )
+                ]),
+                loaded: _displayResults,
+                refetch: _displayResults,
+                fetchMore: _displayResults,
+              );
+            }),
       ),
     );
   }
