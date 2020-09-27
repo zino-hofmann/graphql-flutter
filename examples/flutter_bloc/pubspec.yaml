@@ -13,9 +13,10 @@ dependencies:
   graphql:
     path: ../../packages/graphql
   cupertino_icons: ^0.1.2
-  flutter_bloc: ^5.0.1
+  graphql_flutter_bloc: ^0.3.5-beta.1
+  flutter_bloc: ^6.0.5
   gql: 0.12.2
-  freezed_annotation: 0.11.0
+  freezed_annotation: 0.12.0
 
   equatable: ^0.2.0
 
@@ -24,7 +25,10 @@ dev_dependencies:
     sdk: flutter
   test: ^1.3.0
   mockito: ^3.0.0
-  freezed: ^0.11.4
+
+dependency_overrides:
+  graphql:
+    path: ../../packages/graphql
 
 flutter:
   uses-material-design: true
