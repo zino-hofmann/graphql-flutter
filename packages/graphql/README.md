@@ -425,7 +425,7 @@ as well as our own custom `WebSocketLink` and `AuthLink`.
 > **NB**: `WebSocketLink` and other "terminating links" must be used with `split` when there are multiple terminating links.
 
 The [`gql_link`] systm has a well-specified routing system:
-![diagram](https://github.com/gql-dart/gql/blob/master/links/gql_link/assets/gql_link.svg)
+![link diagram]
 
 a rundown of the composition api:
 
@@ -566,6 +566,7 @@ final Link _link = _apqLink.concat(_httpLink);
 [discord-link]: https://discord.gg/tXTtBfC
 [gql-dart project]: https://github.com/gql-dart
 [`gql_link`]: https://github.com/gql-dart/gql/tree/master/links/gql_link
+[link diagram]: https://raw.githubusercontent.com/gql-dart/gql/master/links/gql_link/assets/gql_link.svg
 [`gql`]: https://github.com/gql-dart/gql/tree/master/gql
 [`normalize`]: https://github.com/gql-dart/ferry/tree/master/normalize
 [apollo]: https://www.apollographql.com/
