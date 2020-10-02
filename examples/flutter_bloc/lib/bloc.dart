@@ -12,11 +12,18 @@ class BlocPage extends StatefulWidget {
 }
 
 class _BlocPageState extends State<BlocPage> {
+  MyGithubReposBloc bloc;
   @override
   void initState() {
     super.initState();
-    final bloc = BlocProvider.of<MyGithubReposBloc>(context);
+    bloc = BlocProvider.of<MyGithubReposBloc>(context);
     bloc.add(LoadMyRepos(numOfReposToLoad: 50));
+  }
+
+  @override
+  void dispose() {
+    bloc.close();
+    super.dispose();
   }
 
   @override
@@ -38,9 +45,7 @@ class _BlocPageState extends State<BlocPage> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               onChanged: (String n) {
-                final reposBloc = BlocProvider.of<MyGithubReposBloc>(context);
-                reposBloc
-                    .add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
+                bloc.add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
               },
             ),
             SizedBox(
@@ -64,7 +69,7 @@ class LoadRepositories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MyGithubReposBloc, MyGithubReposState>(
-      bloc: bloc,
+      cubit: bloc,
       builder: (BuildContext context, MyGithubReposState state) {
         if (state is ReposLoading) {
           return Expanded(

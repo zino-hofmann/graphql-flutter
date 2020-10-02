@@ -68,6 +68,10 @@ void main() {
       );
     });
 
+    tearDown(() {
+      repoBloc.close();
+    });
+
     test('initial state is loading', () {
       expect(repoBloc.state, ReposLoading());
     });
