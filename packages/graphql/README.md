@@ -41,8 +41,8 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
 
 **Useful API Docs:**
 
-- [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLCache-class.html)
-- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLDataProxy-class.html) (direct cache access)
+- [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLCache-class.html)
+- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html) (direct cache access)
 
 ## Installation
 
@@ -301,7 +301,7 @@ subscription.listen(reactToAddedReview)
 
 ### `client.watchQuery` and `ObservableQuery`
 
-[`client.watchQuery`](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLClient/watchQuery.html)
+[`client.watchQuery`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLClient/watchQuery.html)
 can be used to execute both queries and mutations, then reactively listen to changes to the underlying data in the cache. It is used in the `Query` and `Mutation` widgets of `graphql_flutter`:
 
 ```dart
@@ -341,21 +341,21 @@ observableQuery.stream.listen((QueryResult result) {
 observableQuery.close();
 ```
 
-`ObservableQuery` is a bit of a kitchen sink for reactive operation logic – consider looking at the [API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/ObservableQuery-class.html) if you'd like to develop a deeper understanding.
+`ObservableQuery` is a bit of a kitchen sink for reactive operation logic – consider looking at the [API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ObservableQuery-class.html) if you'd like to develop a deeper understanding.
 
 > **NB**: `watchQuery` and `ObservableQuery` currently don't have a nice APIs for `update` `onCompleted` and `onError` callbacks,
 > but you can have a look at how `graphql_flutter` registers them through
-> [`onData`](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/ObservableQuery/onData.html) in
+> [`onData`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ObservableQuery/onData.html) in
 > [`Mutation.runMutation`](https://pub.dev/documentation/graphql_flutter/4.0.0-alpha.7/graphql_flutter/MutationState/runMutation.html).
 
 ## Direct Cache Access API
 
-The [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLCache-class.html)
+The [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLCache-class.html)
 leverages [`normalize`] to give us a fairly apollo-ish [direct cache access] API, which is also available on `GraphQLClient`.
 This means we can do [local state management] in a similar fashion as well.
 
 A complete and well-commented rundown of can be found in the
-[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.7/graphql/GraphQLDataProxy-class.html)
+[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html)
 
 > **NB** You likely want to call the cache access API from your `client` for automatic broadcasting support.
 
