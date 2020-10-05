@@ -64,7 +64,7 @@ class LoadRepositories extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MyGithubReposBloc, MyGithubReposState>(
-      bloc: bloc,
+      cubit: bloc,
       builder: (BuildContext context, MyGithubReposState state) {
         if (state is ReposLoading) {
           return Expanded(
