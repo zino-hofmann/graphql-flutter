@@ -31,11 +31,13 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
 **Useful sections in the [`graphql` README](../graphql/README.md):**
 
 - [in-depth link guide](../graphql/README.md#links)
+- [Direct Cache Access](../graphql/README.md#direct-cache-access-api)
 - [Policies](../graphql/README.md#exceptions)
 - [Exceptions](../graphql/README.md#exceptions)
 - [AWS AppSync Support](../graphql/README.md#aws-appsync-support)
 - [GraphQL Upload](../graphql/README.md#graphql-upload)
-- [Parsing ASTs at build-time](../graphql/README.md##parsing-asts-at-build-time)
+- [Parsing ASTs at build-time](../graphql/README.md#parsing-asts-at-build-time)
+
 
 **Useful API Docs:**
 
@@ -48,7 +50,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql: ^4.0.0-beta
+  graphql_flutter: ^4.0.0-beta
 ```
 
 And then import it inside your dart code:
@@ -59,7 +61,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 ## Migration Guide
 
-Find the migration from version 2 to version 3 [here](./../../changelog-v2-v3.md).
+Find the migration from version 3 to version 4 [here](./../../changelog-v3-v4.md).
 
 ## Usage
 

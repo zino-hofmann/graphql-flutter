@@ -35,8 +35,7 @@ class QueryOptions extends BaseOptions {
           optimisticResult: optimisticResult,
         );
 
-  /// The time interval (in milliseconds) on which this query should be
-  /// re-fetched from the server.
+  /// The time interval on which this query should be re-fetched from the server.
   Duration pollInterval;
 
   @override

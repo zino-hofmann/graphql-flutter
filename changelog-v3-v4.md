@@ -1,6 +1,18 @@
 # Migrating from v3 – v4
 
-v4 aims to solve a number of sore spots, particularly with caching, largely by leveraging libraries from the https://github.com/gql-dart ecosystem. There has also been a concerted effort to add more API docstrings to the codebase.
+v4 aims to solve a number of sore spots, particularly with caching, largely by leveraging libraries from the [gql-dart](https://github.com/gql-dart) ecosystem.
+
+There has also been an effort to add more API docs and docs in general, particularly in the [`graphql` README](./packages/graphql).
+
+> **NB** Note that if you are depending on `PersistedQueriesLink`, its migration is not yet complete
+
+- [Migrating from v3 – v4](#migrating-from-v3--v4)
+  - [Cache overhaul](#cache-overhaul)
+  - [We now use the gql_link system](#we-now-use-the-gql_link-systemhttpsgithubcomgql-dartgqltreemasterlinksgql_link)
+  - [`subscription` API overhaul](#subscription-api-overhaul)
+  - [Minor changes](#minor-changes)
+    - [Enums are normalized and idiomatic](#enums-are-normalized-and-idiomatic)
+    - [`client.fetchMore` (experimental)](#clientfetchmore-experimental)
 
 ## Cache overhaul
 
@@ -8,10 +20,14 @@ v4 aims to solve a number of sore spots, particularly with caching, largely by l
   Giving us a much more `apollo`ish API.
   - [`typePolicies`]
   - [direct cache access] via `readQuery`, `writeQuery`, `readFragment`, and `writeFragment`
-    All of which can which can be used for [local state management]
+    ```dart
+    /// see more in graphql's readme
+    client.writeQuery(myQueryOptions.asRequest, queryData);
+    client.readQuery(myQueryOptions.asRequest);
+    ```
 - `LazyCacheMap` has been deleted
 - `GraphQLCache` marks itself for rebroadcasting (should fix some related issues)
-- **`Store`** is now a seperate concern:
+- **`Store`** now decouples persistence from the cache:
 
 ```dart
 /// Only necessary on flutter
@@ -33,7 +49,6 @@ GraphQLCache(
   [gql_exec](https://github.com/gql-dart/gql/tree/master/links/gql_exec) `Request`s
   before being sent down the link chain.
 - `documentNode` is deprecated in favor of `DocumentNode document` for consistency with `gql` libraries
-- We won't leave alpha until we have [full backwards compatability](https://github.com/gql-dart/gql/issues/57)
 
 ```diff
 final httpLink = HttpLink(
@@ -147,4 +162,4 @@ class MyQuery {
 
 [local state management]: https://www.apollographql.com/docs/tutorial/local-state/#update-local-data
 [`typepolicies`]: https://www.apollographql.com/docs/react/caching/cache-configuration/#the-typepolicy-type
-[direct cache access]: https://www.apollographql.com/docs/react/caching/cache-interaction/
+[direct cache access]: ./packages/graphql#direct-cache-access-api

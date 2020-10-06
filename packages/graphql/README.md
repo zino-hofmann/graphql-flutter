@@ -21,21 +21,20 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
   - [Migration Guide](#migration-guide)
   - [Basic Usage](#basic-usage)
     - [Persistence](#persistence)
+    - [Options](#options)
     - [Query](#query)
     - [Mutations](#mutations)
       - [GraphQL Upload](#graphql-upload)
     - [Subscriptions](#subscriptions)
     - [`client.watchQuery` and `ObservableQuery`](#clientwatchquery-and-observablequery)
   - [Direct Cache Access API](#direct-cache-access-api)
+    - [`Request`, `readQuery`, and `writeQuery`](#request-readquery-and-writequery)
+    - [`FragmentRequest`, `readFragment`, and `writeFragment`](#fragmentrequest-readfragment-and-writefragment)
   - [Policies](#policies)
-      - [`FetchPolicy` determines where the client may return a result from.](#fetchpolicy-determines-where-the-client-may-return-a-result-from)
-      - [`ErrorPolicy` determines the level of events for errors in the execution result.](#errorpolicy-determines-the-level-of-events-for-errors-in-the-execution-result)
   - [Exceptions](#exceptions)
   - [Links](#links)
     - [Composing Links](#composing-links)
     - [AWS AppSync Support](#aws-appsync-support)
-      - [Cognito Pools](#cognito-pools)
-      - [Other Authorization Types](#other-authorization-types)
   - [Parsing ASTs at build-time](#parsing-asts-at-build-time)
   - [`PersistedQueriesLink` (experimental) :warning: OUT OF SERVICE :warning:](#persistedquerieslink-experimental-warning-out-of-service-warning)
 
@@ -90,10 +89,10 @@ if (websocketEndpoint != null){
 }
 
 final GraphQLClient client = GraphQLClient(
-        /// **NOTE** The default store is the InMemoryStore, which does NOT persist to disk
-        cache: GraphQLCache(),
-        link: _link,
-    );
+  /// **NOTE** The default store is the InMemoryStore, which does NOT persist to disk
+  cache: GraphQLCache(),
+  link: _link,
+);
 
 // ...
 ```
@@ -120,6 +119,12 @@ GraphQL getClient() async {
 ```
 
 Once you have initialized a client, you can run queries and mutations.
+
+### Options
+
+All `graphql` methods accept a corresponding `*Options` object for configuring behavior. These options all include [policies](#policies) with which to override defaults, an `optimisticResult` for snappy client-side interactions, [`gql_exec` `Context`](https://github.com/gql-dart/gql/tree/master/links/gql_exec#context) with which to make requests, and of course a `document` to be requested.
+
+Internally they are converted to [`gql_exec` `Requests`](https://github.com/gql-dart/gql/tree/master/links/gql_exec#context) with `.asRequest` for execution via [links](#links), and thus can also be used with the [direct cache access api](#direct-cache-access-api).
 
 ### Query
 
@@ -153,10 +158,10 @@ In our case, we need to pass `nRepositories` variable and the document name is `
 const int nRepositories = 50;
 
 final QueryOptions options = QueryOptions(
-    document: gql(readRepositories),
-    variables: <String, dynamic>{
-        'nRepositories': nRepositories,
-    },
+  document: gql(readRepositories),
+  variables: <String, dynamic>{
+    'nRepositories': nRepositories,
+  },
 );
 
 ```
@@ -169,7 +174,7 @@ And finally you can send the query to the server and `await` the response:
 final QueryResult result = await client.query(options);
 
 if (result.hasException) {
-    print(result.exception.toString());
+  print(result.exception.toString());
 }
 
 final List<dynamic> repositories =
@@ -217,8 +222,8 @@ And finally you can send the mutation to the server and `await` the response:
 final QueryResult result = await client.mutate(options);
 
 if (result.hasException) {
-    print(result.exception.toString());
-    return;
+  print(result.exception.toString());
+  return;
 }
 
 final bool isStarred =
@@ -354,8 +359,84 @@ The [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphq
 leverages [`normalize`] to give us a fairly apollo-ish [direct cache access] API, which is also available on `GraphQLClient`.
 This means we can do [local state management] in a similar fashion as well.
 
-A complete and well-commented rundown of can be found in the
-[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html)
+The cache access methods are available on any cache proxy, which includes the `GraphQLCache` the `OptimisticProxy` passed to `update` in the `graphql_flutter` `Mutation` widget, and the `client` itself.  
+> **NB** counter-intuitively, you likely never want to use use direct cache access methods directly on the `cache`,
+> as they will not be rebroadcast automatically.  
+> **Prefer `client.writeQuery` and `client.writeFragment` to those on the `client.cache` for automatic rebroadcasting**
+
+In addition to this overview, a complete and well-commented rundown of can be found in the
+[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html).
+
+### `Request`, `readQuery`, and `writeQuery`
+
+The query-based direct cache access methods `readQuery` and `writeQuery` leverage [`gql_exec` `Requests`](https://github.com/gql-dart/gql/tree/master/links/gql_exec#request) used internally in the link system. These can be retrieved from `options.asRequest` available on all `*Options` objects, or constructed manually:
+
+```dart
+const int nRepositories = 50;
+
+final QueryOptions options = QueryOptions(
+  document: gql(readRepositories),
+  variables: {
+    'nRepositories': nRepositories,
+  },
+);
+
+var queryRequest = Request(
+  operation: Operation(
+    document: gql(readRepositories),
+  ),
+  variables: {
+    'nRepositories': nRepositories,
+  },
+);
+
+/// experimental convenience api
+queryRequest = Operation(document: gql(readRepositories)).asRequest(
+  variables: {
+    'nRepositories': nRepositories,
+  },
+);
+
+print(queryRequest == options.asRequest);
+
+final data = client.readQuery(queryRequest);
+client.writeQuery(queryRequest, data);
+```
+
+The cache access methods are available on any cache proxy, which includes the `GraphQLCache` the `OptimisticProxy` passed to `update` in the `graphql_flutter` `Mutation` widget, and the `client` itself.  
+> **NB** counter-intuitively, you likely never want to use use direct cache access methods on the cache 
+cache.readQuery(queryRequest);
+client.readQuery(queryRequest); // 
+
+### `FragmentRequest`, `readFragment`, and `writeFragment`
+`FragmentRequest` has almost the same api as `Request`, but is provided directly from `graphql` for consistency.
+It is used to access `readFragment` and `writeFragment`. The main differences are that they cannot be retreived from options, and that `FragmentRequests` require `idFields` to find their cooresponding entities:
+```dart
+
+final fragmentDoc = gql(
+  r'''
+    fragment mySmallSubset on MyType {
+      myField,
+      someNewField
+    }
+  ''',
+);
+
+var fragmentRequest = FragmentRequest(
+  fragment: Fragment(
+    document: fragmentDoc,
+  ),
+  idFields: {'__typename': 'MyType', 'id': 1},
+);
+
+/// same as experimental convenience api
+fragmentRequest = Fragment(document: fragmentDoc).asRequest(
+  idFields: {'__typename': 'MyType', 'id': 1},
+);
+
+final data = client.readFragment(fragmentRequest);
+client.writeFragment(fragmentRequest, data);
+```
 
 > **NB** You likely want to call the cache access API from your `client` for automatic broadcasting support.
 
@@ -364,8 +445,7 @@ A complete and well-commented rundown of can be found in the
 Policies are used to configure execution and error behavior for a given request.
 The client's default policies can also be set for each method via the `defaultPolicies` option.
 
-#### `FetchPolicy` determines where the client may return a result from.
-
+**[`FetchPolicy`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/FetchPolicy-class.html):** determines where the client may return a result from.  
 Possible options:
 
 - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
@@ -374,8 +454,7 @@ Possible options:
 - noCache: return result from network, fail if network call doesn't succeed, don't save to cache.
 - networkOnly: return result from network, fail if network call doesn't succeed, save to cache.
 
-#### `ErrorPolicy` determines the level of events for errors in the execution result.
-
+**[`ErrorPolicy`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ErrorPolicy-class.html):** determines the level of events for errors in the execution result.  
 Possible options:
 
 - none (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
@@ -404,10 +483,10 @@ Example usage:
 
 ```dart
 if (result.hasException) {
-    if (result.exception.linkException is NetworkException) {
-        // handle network issues, maybe
-    }
-    return Text(result.exception.toString())
+  if (result.exception.linkException is NetworkException) {
+    // handle network issues, maybe
+  }
+  return Text(result.exception.toString())
 }
 ```
 
@@ -419,6 +498,8 @@ if (result.hasException) {
 [gql_dedupe_link](https://pub.dev/packages/gql_dedupe_link),
 and the api from [gql_link](https://pub.dev/packages/gql_link),
 as well as our own custom `WebSocketLink` and `AuthLink`.
+
+This makes all link development coordinated across the ecosystem, so that we can leverage existing links like [gql_dio_link](https://pub.dev/packages/gql_dio_link), and all link-based clients benefit from new link development (such as [ferry](https://github.com/gql-dart/ferry)).
 
 ### Composing Links
 
@@ -463,7 +544,7 @@ When combining links, **it isimportant to note that**:
 
 ### AWS AppSync Support
 
-#### Cognito Pools
+**Cognito Pools**
 
 To use with an AppSync GraphQL API that is authorized with AWS Cognito User Pools, simply pass the JWT token for your Cognito user session in to the `AuthLink`:
 
@@ -479,7 +560,7 @@ final AuthLink authLink = AuthLink(
 
 See more: [Issue #209](https://github.com/zino-app/graphql-flutter/issues/209)
 
-#### Other Authorization Types
+**Other Authorization Types**
 
 API key, IAM, and Federated provider authorization could be accomplished through custom links, but it is not known to be supported. Anyone wanting to implement this can reference AWS' JS SDK `AuthLink` implementation.
 

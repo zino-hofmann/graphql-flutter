@@ -1,3 +1,10 @@
+# [4.0.0-beta.1](https://github.com/zino-app/graphql-flutter/4.0.0-beta.1) (2020-10-06)
+
+`v4` reworks a lot of the internals of the core `graphql/client.dart` (and thus `graphql_flutter`).
+
+Please see the [v4 changelog](../../changelog-v3-v4.md) for more details, and the updated READMEs for more extensive documentation.
+
+
 # 4.0.0-alpha.11 (2020-09-26)
 
 * **hotfix(client)**: `gql_http_link==0.3.2` for custom toJsons closing #734 ([98b8cf7](https://github.com/zino-app/graphql-flutter/commit/98b8cf771e9f982741d5041bd4a4f017ac46dc91))

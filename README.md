@@ -8,7 +8,9 @@
 
 # GraphQL Flutter
 
-## :mega: [`v4` is now in open alpha](https://github.com/zino-app/graphql-flutter/pull/648) :mega:
+## :mega: `v4` is now in `beta` :mega:
+
+See the [Migration Guide](./changelog-v3-v4.md) and updated READMEs for details
 
 ## About this project
 
