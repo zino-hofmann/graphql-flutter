@@ -1,17 +1,38 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show MethodChannel, MethodCall;
 import 'package:flutter_test/flutter_test.dart';
+
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_flutter/src/widgets/query.dart';
-import 'package:http/http.dart';
+import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
-class MockHttpClient extends Mock implements Client {}
+class MockHttpClient extends Mock implements http.Client {}
 
 final query = gql("""
   query Foo {
     foo
   }
 """);
+
+/// https://flutter.dev/docs/cookbook/persistence/reading-writing-files#testing
+Future<void> mockApplicationDocumentsDirectory() async {
+// Create a temporary directory.
+  final directory = await Directory.systemTemp.createTemp();
+
+  // Mock out the MethodChannel for the path_provider plugin.
+  const MethodChannel('plugins.flutter.io/path_provider')
+      .setMockMethodCallHandler((MethodCall methodCall) async {
+    // If you're getting the apps documents directory, return the path to the
+    // temp directory on the test environment instead.
+    if (methodCall.method == 'getApplicationDocumentsDirectory') {
+      return directory.path;
+    }
+    return null;
+  });
+}
 
 class Page extends StatefulWidget {
   final Map<String, dynamic> variables;
@@ -23,7 +44,7 @@ class Page extends StatefulWidget {
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
-  }): super(key: key);
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => PageState();
@@ -64,34 +85,38 @@ class PageState extends State<Page> {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: query,
+        document: query,
         variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
       ),
-      builder: (QueryResult result, {
-        Refetch refetch,
-        FetchMore fetchMore
-      }) => Container(),
+      builder: (QueryResult result, {Refetch refetch, FetchMore fetchMore}) =>
+          Container(),
     );
   }
 }
 
 void main() {
+  setUpAll(() async {
+    await mockApplicationDocumentsDirectory();
+  });
+
   group('Query', () {
     MockHttpClient mockHttpClient;
     HttpLink httpLink;
     ValueNotifier<GraphQLClient> client;
 
     setUp(() async {
+      await initHiveForFlutter();
+
       mockHttpClient = MockHttpClient();
       httpLink = HttpLink(
-        uri: 'https://unused/graphql',
+        'https://unused/graphql',
         httpClient: mockHttpClient,
       );
       client = ValueNotifier(
         GraphQLClient(
-          cache: InMemoryCache(storagePrefix: 'test'),
+          cache: GraphQLCache(store: await HiveStore.open()),
           link: httpLink,
         ),
       );
@@ -112,7 +137,19 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page))
         ..setVariables({'foo': 1})
@@ -135,7 +172,19 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page))
         ..setFetchPolicy(null)
@@ -157,12 +206,35 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
 
-      tester.state<PageState>(find.byWidget(page))
-        .setVariables({'foo': 2});
+      tester.state<PageState>(find.byWidget(page)).setVariables({'foo': 2});
       await tester.pump();
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
     });
 
     testWidgets('issues a new network request when fetch policy changes',
@@ -176,12 +248,37 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
 
-      tester.state<PageState>(find.byWidget(page))
-        .setFetchPolicy(FetchPolicy.cacheFirst);
+      tester
+          .state<PageState>(find.byWidget(page))
+          .setFetchPolicy(FetchPolicy.cacheFirst);
       await tester.pump();
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
     });
 
     testWidgets('issues a new network request when error policy changes',
@@ -195,15 +292,41 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
 
-      tester.state<PageState>(find.byWidget(page))
-        .setErrorPolicy(ErrorPolicy.none);
+      tester
+          .state<PageState>(find.byWidget(page))
+          .setErrorPolicy(ErrorPolicy.none);
       await tester.pump();
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
     });
 
-    testWidgets('does not issues new network request when policies are effectively unchanged',
+    testWidgets(
+        'does not issues new network request when policies are effectively unchanged',
         (WidgetTester tester) async {
       final page = Page(
         fetchPolicy: FetchPolicy.cacheAndNetwork,
@@ -215,7 +338,19 @@ void main() {
         child: page,
       ));
 
-      verify(mockHttpClient.send(any)).called(1);
+      verify(
+        mockHttpClient.send(
+          argThat(isA<http.Request>()
+              .having((request) => request.method, "method", "POST")
+              .having((request) => request.headers, "headers", isNotNull)
+              .having((request) => request.body, "body", isNotNull)
+              .having(
+                (request) => request.url,
+                "expected endpoint",
+                Uri.parse('https://unused/graphql'),
+              )),
+        ),
+      ).called(1);
 
       tester.state<PageState>(find.byWidget(page))
         ..setFetchPolicy(null)

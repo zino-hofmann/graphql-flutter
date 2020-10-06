@@ -12,7 +12,7 @@ class HeroForEpisode extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: gql(r'''
+        document: gql(r'''
           query HeroForEpisode($ep: Episode!) {
             hero(episode: $ep) {
               __typename
@@ -40,7 +40,7 @@ class HeroForEpisode extends StatelessWidget {
           return Text(result.exception.toString());
         }
 
-        if (result.loading) {
+        if (result.isLoading) {
           return const Center(
             child: CircularProgressIndicator(),
           );

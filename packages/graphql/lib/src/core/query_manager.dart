@@ -1,18 +1,19 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
+import 'package:gql_exec/gql_exec.dart';
+import 'package:gql_link/gql_link.dart' show Link;
+
 import 'package:graphql/src/cache/cache.dart';
-import 'package:graphql/src/cache/normalized_in_memory.dart'
-    show NormalizedInMemoryCache;
-import 'package:graphql/src/cache/optimistic.dart' show OptimisticCache;
 import 'package:graphql/src/core/observable_query.dart';
+import 'package:graphql/src/core/_base_options.dart';
+import 'package:graphql/src/core/mutation_options.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/exceptions/exceptions.dart';
-import 'package:graphql/src/link/fetch_result.dart';
-import 'package:graphql/src/link/link.dart';
-import 'package:graphql/src/link/operation.dart';
+import 'package:graphql/src/core/policies.dart';
+import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
-import 'package:meta/meta.dart';
 
 class QueryManager {
   QueryManager({
@@ -25,11 +26,16 @@ class QueryManager {
   }
 
   final Link link;
-  final Cache cache;
+  final GraphQLCache cache;
 
   QueryScheduler scheduler;
   int idCounter = 1;
+
+  /// [ObservableQuery] registry
   Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
+
+  /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
+  bool rebroadcastLocked = false;
 
   ObservableQuery watchQuery(WatchQueryOptions options) {
     final ObservableQuery observableQuery = ObservableQuery(
@@ -42,29 +48,78 @@ class QueryManager {
     return observableQuery;
   }
 
-  Future<QueryResult> query(QueryOptions options) {
-    return fetchQuery('0', options);
-  }
+  Stream<QueryResult> subscribe(SubscriptionOptions options) async* {
+    final request = options.asRequest;
 
-  Future<QueryResult> mutate(MutationOptions options) {
-    return fetchQuery('0', options).then((result) async {
-      // not sure why query id is '0', may be needs improvements
-      // once the mutation has been process successfully, execute callbacks
-      // before returning the results
-      final mutationCallbacks = MutationCallbacks(
-        cache: cache,
-        options: options,
-        queryId: '0',
-      );
+    // Add optimistic or cache-based result to the stream if any
+    if (options.optimisticResult != null) {
+      // TODO optimisticResults for streams just skip the cache for now
+      yield QueryResult.optimistic(data: options.optimisticResult);
+    } else if (options.fetchPolicy != FetchPolicy.noCache) {
+      final cacheResult = cache.readQuery(request, optimistic: true);
+      if (cacheResult != null) {
+        yield QueryResult(
+          source: QueryResultSource.cache,
+          data: cacheResult,
+        );
+      }
+    }
 
-      final callbacks = mutationCallbacks.callbacks;
+    yield* link.request(request).map((response) {
+      QueryResult queryResult;
+      try {
+        if (response.data != null &&
+            options.fetchPolicy != FetchPolicy.noCache) {
+          cache.writeQuery(request, data: response.data);
+        }
+        queryResult = mapFetchResultToQueryResult(
+          response,
+          options,
+          source: QueryResultSource.network,
+        );
+      } catch (failure) {
+        // we set the source to indicate where the source of failure
+        queryResult ??= QueryResult(source: QueryResultSource.network);
 
-      for (final callback in callbacks) {
-        await callback(result);
+        queryResult.exception = coalesceErrors(
+          exception: queryResult.exception,
+          linkException: translateFailure(failure),
+        );
       }
 
-      return result;
+      if (options.fetchPolicy != FetchPolicy.noCache) {
+        // normalize results if previously written
+        queryResult.data = cache.readQuery(request);
+      }
+
+      return queryResult;
     });
+  }
+
+  Future<QueryResult> query(QueryOptions options) => fetchQuery('0', options);
+
+  Future<QueryResult> mutate(MutationOptions options) async {
+    final result = await fetchQuery('0', options);
+    // not sure why query id is '0', may be needs improvements
+    // once the mutation has been process successfully, execute callbacks
+    // before returning the results
+    final mutationCallbacks = MutationCallbackHandler(
+      cache: cache,
+      options: options,
+      queryId: '0',
+    );
+
+    final callbacks = mutationCallbacks.callbacks;
+
+    for (final callback in callbacks) {
+      await callback(result);
+    }
+
+    /// [fetchQuery] attempts to broadcast from the observable,
+    /// but now we've called all our side effects.
+    maybeRebroadcastQueries();
+
+    return result;
   }
 
   Future<QueryResult> fetchQuery(
@@ -82,7 +137,11 @@ class QueryManager {
     String queryId,
     BaseOptions options,
   ) {
+    // create a new request to execute
+    final request = options.asRequest;
+
     final QueryResult eagerResult = _resolveQueryEagerly(
+      request,
       queryId,
       options,
     );
@@ -92,65 +151,57 @@ class QueryManager {
     return MultiSourceResult(
       eagerResult: eagerResult,
       networkResult:
-          (shouldStopAtCache(options.fetchPolicy) && !eagerResult.loading)
+          (shouldStopAtCache(options.fetchPolicy) && !eagerResult.isLoading)
               ? null
-              : _resolveQueryOnNetwork(queryId, options),
+              : _resolveQueryOnNetwork(request, queryId, options),
     );
   }
 
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
   Future<QueryResult> _resolveQueryOnNetwork(
+    Request request,
     String queryId,
     BaseOptions options,
   ) async {
-    // create a new operation to fetch
-    final Operation operation = Operation.fromOptions(options)
-      ..setContext(options.context);
-
-    FetchResult fetchResult;
+    Response response;
     QueryResult queryResult;
 
-    try {
-      // execute the operation through the provided link(s)
-      fetchResult = await execute(
-        link: link,
-        operation: operation,
-      ).first;
+    final writeToCache = options.fetchPolicy != FetchPolicy.noCache;
 
-      // save the data from fetchResult to the cache
-      if (fetchResult.data != null &&
-          options.fetchPolicy != FetchPolicy.noCache) {
-        cache.write(
-          operation.toKey(),
-          fetchResult.data,
-        );
+    try {
+      // execute the request through the provided link(s)
+      response = await link.request(request).first;
+
+      // save the data from response to the cache
+      if (response.data != null && writeToCache) {
+        await cache.writeQuery(request, data: response.data);
       }
 
       queryResult = mapFetchResultToQueryResult(
-        fetchResult,
+        response,
         options,
-        source: QueryResultSource.Network,
+        source: QueryResultSource.network,
       );
     } catch (failure) {
       // we set the source to indicate where the source of failure
-      queryResult ??= QueryResult(source: QueryResultSource.Network);
+      queryResult ??= QueryResult(source: QueryResultSource.network);
 
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
-        clientException: translateFailure(failure),
+        linkException: translateFailure(failure),
       );
     }
 
     // cleanup optimistic results
-    cleanupOptimisticResults(queryId);
-    if (options.fetchPolicy != FetchPolicy.noCache &&
-        cache is NormalizedInMemoryCache) {
+    cache.removeOptimisticPatch(queryId);
+
+    if (writeToCache) {
       // normalize results if previously written
-      queryResult.data = cache.read(operation.toKey());
+      queryResult.data = cache.readQuery(request);
     }
 
-    addQueryResult(queryId, queryResult);
+    addQueryResult(request, queryId, queryResult);
 
     return queryResult;
   }
@@ -158,18 +209,17 @@ class QueryManager {
   /// Add an eager cache response to the stream if possible,
   /// based on `fetchPolicy` and `optimisticResults`
   QueryResult _resolveQueryEagerly(
+    Request request,
     String queryId,
     BaseOptions options,
   ) {
-    final String cacheKey = options.toKey();
-
-    QueryResult queryResult = QueryResult(loading: true);
+    QueryResult queryResult = QueryResult.loading();
 
     try {
       if (options.optimisticResult != null) {
         queryResult = _getOptimisticQueryResult(
-          queryId,
-          cacheKey: cacheKey,
+          request,
+          queryId: queryId,
           optimisticResult: options.optimisticResult,
         );
       }
@@ -177,24 +227,24 @@ class QueryManager {
       // if we haven't already resolved results optimistically,
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
-          !queryResult.optimistic) {
-        final dynamic data = cache.read(cacheKey);
+          !queryResult.isOptimistic) {
+        final dynamic data = cache.readQuery(request, optimistic: false);
         // we only push an eager query with data
         if (data != null) {
           queryResult = QueryResult(
             data: data,
-            source: QueryResultSource.Cache,
+            source: QueryResultSource.cache,
           );
         }
 
         if (options.fetchPolicy == FetchPolicy.cacheOnly &&
-            queryResult.loading) {
+            queryResult.isLoading) {
           queryResult = QueryResult(
-            source: QueryResultSource.Cache,
+            source: QueryResultSource.cache,
             exception: OperationException(
-              clientException: CacheMissException(
-                'Could not find that operation in the cache. (FetchPolicy.cacheOnly)',
-                cacheKey,
+              linkException: CacheMissException(
+                'Could not resolve the given request against the cache. (FetchPolicy.cacheOnly)',
+                request,
               ),
             ),
           );
@@ -203,24 +253,36 @@ class QueryManager {
     } catch (failure) {
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
-        clientException: translateFailure(failure),
+        linkException: translateFailure(failure),
       );
     }
 
     // If not a regular eager cache resolution,
     // will either be loading, or optimistic.
     //
-    // if there's an optimistic result, we add it regardless of fetchPolicy
+    // if there's an optimistic result, we add it regardless of fetchPolicy.
     // This is undefined-ish behavior/edge case, but still better than just
     // ignoring a provided optimisticResult.
     // Would probably be better to add it ignoring the cache in such cases
-    addQueryResult(queryId, queryResult);
+    addQueryResult(request, queryId, queryResult);
+
     return queryResult;
   }
 
   Future<QueryResult> refetchQuery(String queryId) {
     final WatchQueryOptions options = queries[queryId].options;
     return fetchQuery(queryId, options);
+  }
+
+  @experimental
+  Future<List<QueryResult>> refetchSafeQueries() async {
+    rebroadcastLocked = true;
+    final results = await Future.wait(
+      queries.values.where((q) => q.isRefetchSafe).map((q) => q.refetch()),
+    );
+    rebroadcastLocked = false;
+    maybeRebroadcastQueries();
+    return results;
   }
 
   ObservableQuery getQuery(String queryId) {
@@ -231,19 +293,25 @@ class QueryManager {
     return null;
   }
 
-  /// Add a result to the query specified by `queryId`, if it exists
+  /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists.
+  ///
+  /// Will [maybeRebroadcastQueries] from [ObservableQuery.addResult] if the [cache] has flagged the need to.
+  ///
+  /// Queries are registered via [setQuery] and [watchQuery]
   void addQueryResult(
+    Request request,
     String queryId,
     QueryResult queryResult, {
     bool writeToCache = false,
   }) {
-    final ObservableQuery observableQuery = getQuery(queryId);
     if (writeToCache) {
-      cache.write(
-        observableQuery.options.toKey(),
-        queryResult.data,
+      cache.writeQuery(
+        request,
+        data: queryResult.data,
       );
     }
+
+    final ObservableQuery observableQuery = getQuery(queryId);
 
     if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.addResult(queryResult);
@@ -252,49 +320,68 @@ class QueryManager {
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
   QueryResult _getOptimisticQueryResult(
-    String queryId, {
-    @required String cacheKey,
+    Request request, {
+    @required String queryId,
     @required Object optimisticResult,
   }) {
-    assert(cache is OptimisticCache,
-        "can't optimisticly update non-optimistic cache");
-
-    (cache as OptimisticCache).addOptimisiticPatch(
-        queryId, (Cache cache) => cache..write(cacheKey, optimisticResult));
+    cache.recordOptimisticTransaction(
+      (proxy) => proxy..writeQuery(request, data: optimisticResult),
+      queryId,
+    );
 
     final QueryResult queryResult = QueryResult(
-      data: cache.read(cacheKey),
-      source: QueryResultSource.OptimisticResult,
+      data: cache.readQuery(
+        request,
+        optimistic: true,
+      ),
+      source: QueryResultSource.optimisticResult,
     );
+
     return queryResult;
   }
 
-  /// Remove the optimistic patch for `cacheKey`, if any
-  void cleanupOptimisticResults(String cacheKey) {
-    if (cache is OptimisticCache) {
-      (cache as OptimisticCache).removeOptimisticPatch(cacheKey);
-    }
-  }
-
-  /// Push changed data from cache to query streams
+  /// Rebroadcast cached queries with changed underlying data if [cache.broadcastRequested] or [force].
   ///
-  /// rebroadcast queries inherit `optimistic`
-  /// from the triggering state-change
-  void rebroadcastQueries() {
+  /// Push changed data from cache to query streams.
+  /// [exclude] is used to skip a query if it was recently executed
+  /// (normally the query that caused the rebroadcast)
+  ///
+  /// Returns whether a broadcast was executed, which depends on the state of the cache.
+  /// If there are multiple in-flight cache updates, we wait until they all complete
+  ///
+  /// **Note on internal implementation details**:
+  /// There is sometimes confusion on when this is called, but rebroadcasts are requested
+  /// from every [addQueryResult] where `result.isNotLoading` as an [OnData] callback from [ObservableQuery].
+  bool maybeRebroadcastQueries({ObservableQuery exclude, bool force = false}) {
+    if (rebroadcastLocked && !force) {
+      return false;
+    }
+
+    final shouldBroadast = cache.shouldBroadcast(claimExecution: true);
+
+    if (!shouldBroadast && !force) {
+      return false;
+    }
+
     for (ObservableQuery query in queries.values) {
-      if (query.isRebroadcastSafe) {
-        final dynamic cachedData = cache.read(query.options.toKey());
+      if (query != exclude && query.isRebroadcastSafe) {
+        final dynamic cachedData = cache.readQuery(
+          query.options.asRequest,
+          optimistic: true,
+        );
         if (cachedData != null) {
           query.addResult(
             mapFetchResultToQueryResult(
-              FetchResult(data: cachedData),
+              Response(data: cachedData),
               query.options,
-              source: QueryResultSource.Cache,
+              source: QueryResultSource.cache,
             ),
+            fromRebroadcast: true,
           );
         }
       }
     }
+    return true;
   }
 
   void setQuery(ObservableQuery observableQuery) {
@@ -317,7 +404,7 @@ class QueryManager {
   }
 
   QueryResult mapFetchResultToQueryResult(
-    FetchResult fetchResult,
+    Response response,
     BaseOptions options, {
     @required QueryResultSource source,
   }) {
@@ -326,26 +413,26 @@ class QueryManager {
 
     // check if there are errors and apply the error policy if so
     // in a nutshell: `ignore` swallows errors, `none` swallows data
-    if (fetchResult.errors != null && fetchResult.errors.isNotEmpty) {
+    if (response.errors != null && response.errors.isNotEmpty) {
       switch (options.errorPolicy) {
         case ErrorPolicy.all:
           // handle both errors and data
-          errors = _errorsFromResult(fetchResult);
-          data = fetchResult.data;
+          errors = response.errors;
+          data = response.data;
           break;
         case ErrorPolicy.ignore:
           // ignore errors
-          data = fetchResult.data;
+          data = response.data;
           break;
         case ErrorPolicy.none:
         default:
           // TODO not actually sure if apollo even casts graphql errors in `none` mode,
           // it's also kind of legacy
-          errors = _errorsFromResult(fetchResult);
+          errors = response.errors;
           break;
       }
     } else {
-      data = fetchResult.data;
+      data = response.data;
     }
 
     return QueryResult(
@@ -354,9 +441,4 @@ class QueryManager {
       exception: coalesceErrors(graphqlErrors: errors),
     );
   }
-
-  List<GraphQLError> _errorsFromResult(FetchResult fetchResult) =>
-      List<GraphQLError>.from(fetchResult.errors.map<GraphQLError>(
-        (dynamic rawError) => GraphQLError.fromJSON(rawError),
-      ));
 }

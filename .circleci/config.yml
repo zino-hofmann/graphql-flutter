@@ -82,7 +82,9 @@ jobs:
           command: |
             cd packages/graphql
             dartfmt **/*.dart -n --set-exit-if-changed
-            flutter analyze
+            pub get
+            dartanalyzer lib test
+            cd example && pub get && dartanalyzer .
       - run:
           name: Code formating and analyzing (graphql_flutter)
           command: |

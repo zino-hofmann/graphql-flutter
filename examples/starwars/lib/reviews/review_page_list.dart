@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:starwars_app/reviews/review_subscription.dart'
-    show DisplayReviews;
+import 'package:starwars_app/reviews/review.dart';
 
 class PagingReviews extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
@@ -13,7 +12,7 @@ class PagingReviews extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: gql(r'''
+        document: gql(r'''
           query Reviews($page: Int!) {
             reviews(page: $page) {
               page
@@ -37,7 +36,7 @@ class PagingReviews extends StatelessWidget {
           return Text(result.exception.toString());
         }
 
-        if (result.loading && result.data == null) {
+        if (result.isLoading && result.data == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -53,7 +52,7 @@ class PagingReviews extends StatelessWidget {
                     .cast<Map<String, dynamic>>(),
               ),
             ),
-            (result.loading)
+            (result.isLoading)
                 ? Center(
                     child: CircularProgressIndicator(),
                   )

@@ -16,11 +16,11 @@ class GithubRepository {
 
   Future<QueryResult> getRepositories(int numOfRepositories) async {
     final WatchQueryOptions _options = WatchQueryOptions(
-      documentNode: parseString(queries.readRepositories),
+      document: parseString(queries.readRepositories),
       variables: <String, dynamic>{
         'nRepositories': numOfRepositories,
       },
-      pollInterval: 4,
+      pollInterval: Duration(seconds: 4),
       fetchResults: true,
     );
 
@@ -32,7 +32,7 @@ class GithubRepository {
         repo.viewerHasStarred ? mutations.removeStar : mutations.addStar;
 
     final MutationOptions _options = MutationOptions(
-      documentNode: parseString(document),
+      document: parseString(document),
       variables: <String, String>{
         'starrableId': repo.id,
       },

@@ -1,27 +1,67 @@
 import 'dart:async';
-
-import 'package:graphql/src/exceptions/exceptions.dart';
+import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/fetch_more.dart';
 import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
+/// Side effect to register for execution when data is received
 typedef OnData = void Function(QueryResult result);
 
+/// Lifecycle states for [ObservableQuery.lifecycle]
 enum QueryLifecycle {
-  UNEXECUTED,
-  PENDING,
-  POLLING,
-  POLLING_STOPPED,
-  SIDE_EFFECTS_PENDING,
-  SIDE_EFFECTS_BLOCKING,
+  /// No results have been requested or fetched
+  unexecuted,
 
-  COMPLETED,
-  CLOSED
+  /// Results are being fetched, and will be side-effect free
+  pending,
+
+  /// Polling for results periodically
+  polling,
+
+  /// Was polling but [ObservableQuery.stopPolling()] was called
+  pollingStopped,
+
+  /// Results are being fetched, and will trigger
+  /// the callbacks registered with [ObservableQuery.onData]
+  sideEffectsPending,
+
+  /// Pending side effects are preventing [ObservableQuery.close],
+  /// and the [ObservableQuery] will be discarded after fetch completes
+  /// and side effects are resolved.
+  sideEffectsBlocking,
+
+  /// The operation was executed and is not [polling]
+  completed,
+
+  /// [ObservableQuery.close] was called and all activity
+  /// from this [ObservableQuery] has ceased.
+  closed
 }
 
+/// An Observable/Stream-based API for both queries and mutations.
+///
+/// Returned from [GraphQLClient.watchQuery] for use in reactive programming,
+/// for instance in `graphql_flutter` widgets.
+/// It is modelled closely after [Apollo's ObservableQuery][apollo_oq]
+///
+/// [ObservableQuery]'s core api/usage is to [fetchResults], then listen to the [stream].
+/// [fetchResults] will be called on instantiation if [options.eagerlyFetchResults] is set,
+/// which in turn defaults to [options.fetchResults].
+///
+/// Beyond that, [ObservableQuery] is a bit of a kitchen sink:
+/// * There are [refetch] and [fetchMore] methods for fetching more results
+/// * An [onData] method for registering callbacks (namely for mutations)
+/// * [lifecycle] for tracking  polling, side effect, an inflight execution state
+/// * [latestResult] – the most recent result from this operation
+///
+/// And a handful of internally leveraged methods.
+///
+/// [apollo_oq]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ObservableQuery/
 class ObservableQuery {
   ObservableQuery({
     @required this.queryManager,
@@ -39,63 +79,80 @@ class ObservableQuery {
   // set to true when eagerly fetched to prevent back-to-back queries
   bool _latestWasEagerlyFetched = false;
 
+  /// The identity of this query within the [QueryManager]
   final String queryId;
+
+  @protected
   final QueryManager queryManager;
 
+  @protected
   QueryScheduler get scheduler => queryManager.scheduler;
 
-  final Set<StreamSubscription<QueryResult>> _onDataSubscriptions =
-      <StreamSubscription<QueryResult>>{};
+  /// callbacks registered with [onData]
+  List<OnData> _onDataCallbacks = [];
+
+  /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
+  ///
+  /// Automatically appended as an [OnData]
+  void _maybeRebroadcast(QueryResult result) =>
+      queryManager.maybeRebroadcastQueries(exclude: this);
 
   /// The most recently seen result from this operation's stream
   QueryResult latestResult;
 
-  QueryLifecycle lifecycle = QueryLifecycle.UNEXECUTED;
+  QueryLifecycle lifecycle = QueryLifecycle.unexecuted;
 
   WatchQueryOptions options;
 
   StreamController<QueryResult> controller;
 
   Stream<QueryResult> get stream => controller.stream;
-  bool get isCurrentlyPolling => lifecycle == QueryLifecycle.POLLING;
+  bool get isCurrentlyPolling => lifecycle == QueryLifecycle.polling;
 
-  bool get _isRefetchSafe {
+  bool get isRefetchSafe {
+    if (!options.isQuery) {
+      return false;
+    }
     switch (lifecycle) {
-      case QueryLifecycle.COMPLETED:
-      case QueryLifecycle.POLLING:
-      case QueryLifecycle.POLLING_STOPPED:
+      case QueryLifecycle.completed:
+      case QueryLifecycle.polling:
+      case QueryLifecycle.pollingStopped:
         return true;
 
-      case QueryLifecycle.PENDING:
-      case QueryLifecycle.CLOSED:
-      case QueryLifecycle.UNEXECUTED:
-      case QueryLifecycle.SIDE_EFFECTS_PENDING:
-      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+      case QueryLifecycle.pending:
+      case QueryLifecycle.closed:
+      case QueryLifecycle.unexecuted:
+      case QueryLifecycle.sideEffectsPending:
+      case QueryLifecycle.sideEffectsBlocking:
         return false;
     }
     return false;
   }
 
   /// Attempts to refetch, throwing error if not refetch safe
-  Future<QueryResult> refetch() {
-    if (_isRefetchSafe) {
+  Future<QueryResult> refetch() async {
+    if (isRefetchSafe) {
       return queryManager.refetchQuery(queryId);
     }
-    return Future<QueryResult>.error(Exception('Query is not refetch safe'));
+    throw Exception('Query is not refetch safe');
   }
 
+  /// Whether it is safe to rebroadcast results due to cache
+  /// changes based on [lifecycle].
+  ///
+  /// Called internally by the [QueryManager]
   bool get isRebroadcastSafe {
     switch (lifecycle) {
-      case QueryLifecycle.PENDING:
-      case QueryLifecycle.COMPLETED:
-      case QueryLifecycle.POLLING:
-      case QueryLifecycle.POLLING_STOPPED:
+      case QueryLifecycle.pending:
+      case QueryLifecycle.completed:
+      case QueryLifecycle.polling:
+      case QueryLifecycle.pollingStopped:
         return true;
 
-      case QueryLifecycle.UNEXECUTED: // this might be ok
-      case QueryLifecycle.CLOSED:
-      case QueryLifecycle.SIDE_EFFECTS_PENDING:
-      case QueryLifecycle.SIDE_EFFECTS_BLOCKING:
+      case QueryLifecycle.unexecuted: // this might be ok
+      case QueryLifecycle.closed:
+      case QueryLifecycle.sideEffectsPending:
+      case QueryLifecycle.sideEffectsBlocking:
         return false;
     }
     return false;
@@ -118,6 +175,9 @@ class ObservableQuery {
     }
   }
 
+  /// Fetch results based on [options.fetchPolicy]
+  ///
+  /// Will [startPolling] if [options.pollInterval] is set
   MultiSourceResult fetchResults() {
     final MultiSourceResult allResults =
         queryManager.fetchQueryAsMultiSourceResult(queryId, options);
@@ -125,82 +185,44 @@ class ObservableQuery {
 
     // if onData callbacks have been registered,
     // they are waited on by default
-    lifecycle = _onDataSubscriptions.isNotEmpty
-        ? QueryLifecycle.SIDE_EFFECTS_PENDING
-        : QueryLifecycle.PENDING;
+    lifecycle = _onDataCallbacks.isNotEmpty
+        ? QueryLifecycle.sideEffectsPending
+        : QueryLifecycle.pending;
 
-    if (options.pollInterval != null && options.pollInterval > 0) {
+    if (options.pollInterval != null && options.pollInterval > Duration.zero) {
       startPolling(options.pollInterval);
     }
 
     return allResults;
   }
 
-  /// fetch more results and then merge them according to the updateQuery method.
-  /// the results will then be added to to stream for the widget to re-build
-  void fetchMore(FetchMoreOptions fetchMoreOptions) async {
-    // fetch more and udpate
+  /// fetch more results and then merge them with the [latestResult]
+  /// according to [FetchMoreOptions.updateQuery].
+  ///
+  /// The results will then be added to to stream for listeners to react to,
+  /// such as for triggering `grahphql_flutter` widget rebuilds
+  Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
     assert(fetchMoreOptions.updateQuery != null);
 
-    final combinedOptions = QueryOptions(
-      fetchPolicy: FetchPolicy.noCache,
-      errorPolicy: options.errorPolicy,
-      documentNode: fetchMoreOptions.documentNode ?? options.documentNode,
-      context: options.context,
-      variables: {
-        ...options.variables,
-        ...fetchMoreOptions.variables,
-      },
+    addResult(QueryResult.loading(data: latestResult.data));
+
+    return fetchMoreImplementation(
+      fetchMoreOptions,
+      originalOptions: options,
+      queryManager: queryManager,
+      previousResult: latestResult,
+      queryId: queryId,
     );
-
-    // stream old results with a loading indicator
-    addResult(QueryResult(
-      data: latestResult.data,
-      loading: true,
-    ));
-
-    QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
-
-    try {
-      // combine the query with the new query, using the function provided by the user
-      fetchMoreResult.data = fetchMoreOptions.updateQuery(
-        latestResult.data,
-        fetchMoreResult.data,
-      );
-      assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
-      // stream the new results and rebuild
-      queryManager.addQueryResult(
-        queryId,
-        fetchMoreResult,
-        writeToCache: true,
-      );
-    } catch (error) {
-      if (fetchMoreResult.hasException) {
-        // because the updateQuery failure might have been because of these errors,
-        // we just add them to the old errors
-        latestResult.exception = coalesceErrors(
-          exception: latestResult.exception,
-          graphqlErrors: fetchMoreResult.exception.graphqlErrors,
-          clientException: fetchMoreResult.exception.clientException,
-        );
-
-        queryManager.addQueryResult(
-          queryId,
-          latestResult,
-          writeToCache: true,
-        );
-        return;
-      } else {
-        // TODO merge results OperationException
-        rethrow;
-      }
-    }
   }
 
-  /// add a result to the stream,
-  /// copying `loading` and `optimistic`
-  /// from the `latestResult` if they aren't set.
-  void addResult(QueryResult result) {
+  /// Add a [result] to the [stream] unless it was created
+  /// before [lasestResult].
+  ///
+  /// Copies the [QueryResult.source] from the [latestResult]
+  /// if it is set to `null`.
+  ///
+  /// Called internally by the [QueryManager]
+  void addResult(QueryResult result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
         latestResult.timestamp.isAfter(result.timestamp)) {
@@ -211,50 +233,77 @@ class ObservableQuery {
       result.source ??= latestResult.source;
     }
 
-    if (lifecycle == QueryLifecycle.PENDING && result.optimistic != true) {
-      lifecycle = QueryLifecycle.COMPLETED;
+    if (lifecycle == QueryLifecycle.pending && result.isConcrete) {
+      lifecycle = QueryLifecycle.completed;
     }
 
     latestResult = result;
 
+    // TODO should callbacks be applied before or after streaming
     if (!controller.isClosed) {
       controller.add(result);
+    }
+
+    if (result.isNotLoading) {
+      _applyCallbacks(result, fromRebroadcast: fromRebroadcast);
     }
   }
 
   // most mutation behavior happens here
-  /// call any registered callbacks, then rebroadcast queries
-  /// incase the underlying data has changed
-  void onData(Iterable<OnData> callbacks) {
-    callbacks ??= const <OnData>[];
-    StreamSubscription<QueryResult> subscription;
+  /// Register [callbacks] to trigger when [stream] has new results
+  /// where [QueryResult.isNotLoading]
+  ///
+  /// Will deregister [callbacks] after calling them on the first
+  /// result that [QueryResult.isConcrete],
+  /// handling the resolution of [lifecycle] from
+  /// [QueryLifecycle.sideEffectsBlocking] to [QueryLifecycle.completed]
+  /// as appropriate
+  void onData(Iterable<OnData> callbacks) =>
+      _onDataCallbacks.addAll(callbacks ?? []);
 
-    subscription = stream.listen((QueryResult result) async {
-      if (!result.loading) {
-        for (final callback in callbacks) {
-          await callback(result);
+  /// Applies [onData] callbacks at the end of [addResult]
+  ///
+  /// [fromRebroadcast] is used to avoid the super-edge case of infinite rebroadcasts
+  /// (not sure if it's even possible)
+  void _applyCallbacks(
+    QueryResult result, {
+    bool fromRebroadcast = false,
+  }) async {
+    final callbacks = [
+      ..._onDataCallbacks,
+      if (!fromRebroadcast) _maybeRebroadcast
+    ];
+    for (final callback in callbacks) {
+      await callback(result);
+    }
+
+    if (this == null || lifecycle == QueryLifecycle.closed) {
+      // .close(force: true) was called
+      return;
+    }
+
+    if (result.isConcrete) {
+      // avoid removing new callbacks
+      _onDataCallbacks.removeWhere((cb) => callbacks.contains(cb));
+
+      // if there are new callbacks, there is maybe another inflight mutation
+      if (_onDataCallbacks.isEmpty) {
+        if (lifecycle == QueryLifecycle.sideEffectsBlocking) {
+          lifecycle = QueryLifecycle.completed;
+          close();
         }
-
-        queryManager.rebroadcastQueries();
-
-        if (!result.optimistic) {
-          await subscription.cancel();
-          _onDataSubscriptions.remove(subscription);
-
-          if (_onDataSubscriptions.isEmpty) {
-            if (lifecycle == QueryLifecycle.SIDE_EFFECTS_BLOCKING) {
-              lifecycle = QueryLifecycle.COMPLETED;
-              close();
-            }
-          }
+        // the mutation has been completed, but disposal has not been requested
+        if (lifecycle == QueryLifecycle.sideEffectsPending) {
+          lifecycle = QueryLifecycle.completed;
         }
       }
-    });
-
-    _onDataSubscriptions.add(subscription);
+    }
   }
 
-  void startPolling(int pollInterval) {
+  /// Poll the server periodically for results.
+  ///
+  /// Will be called by [fetchResults] automatically if [options.pollInterval] is set
+  void startPolling(Duration pollInterval) {
     if (options.fetchPolicy == FetchPolicy.cacheFirst ||
         options.fetchPolicy == FetchPolicy.cacheOnly) {
       throw Exception(
@@ -267,7 +316,7 @@ class ObservableQuery {
     }
 
     options.pollInterval = pollInterval;
-    lifecycle = QueryLifecycle.POLLING;
+    lifecycle = QueryLifecycle.polling;
     scheduler.startPollingQuery(options, queryId);
   }
 
@@ -275,28 +324,34 @@ class ObservableQuery {
     if (isCurrentlyPolling) {
       scheduler.stopPollingQuery(queryId);
       options.pollInterval = null;
-      lifecycle = QueryLifecycle.POLLING_STOPPED;
+      lifecycle = QueryLifecycle.pollingStopped;
     }
   }
 
-  set variables(Map<String, dynamic> variables) {
-    options.variables = variables;
-  }
+  set variables(Map<String, dynamic> variables) =>
+      options.variables = variables;
+
+  /// [onData] callbacks have het to be run
+  ///
+  /// inlcudes `lifecycle == QueryLifecycle.sideEffectsBlocking`
+  bool get sideEffectsArePending =>
+      (lifecycle == QueryLifecycle.sideEffectsPending ||
+          lifecycle == QueryLifecycle.sideEffectsBlocking);
 
   /// Closes the query or mutation, or else queues it for closing.
   ///
-  /// To preserve Mutation side effects, `close` checks the `lifecycle`,
-  /// queuing the stream for closing if  `lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING`.
+  /// To preserve Mutation side effects, [close] checks the [lifecycle],
+  /// queuing the stream for closing if  [sideEffectsArePending].
   /// You can override this check with `force: true`.
   ///
-  /// Returns a `FutureOr` of the resultant lifecycle
-  /// (`QueryLifecycle.SIDE_EFFECTS_BLOCKING | QueryLifecycle.CLOSED`)
+  /// Returns a [FutureOr] of the resultant lifecycle, either
+  /// [QueryLifecycle.sideEffectsBlocking] or [QueryLifecycle.closed]
   FutureOr<QueryLifecycle> close({
     bool force = false,
     bool fromManager = false,
   }) async {
-    if (lifecycle == QueryLifecycle.SIDE_EFFECTS_PENDING && !force) {
-      lifecycle = QueryLifecycle.SIDE_EFFECTS_BLOCKING;
+    if (lifecycle == QueryLifecycle.sideEffectsPending && !force) {
+      lifecycle = QueryLifecycle.sideEffectsBlocking;
       // stop closing because we're waiting on something
       return lifecycle;
     }
@@ -306,15 +361,11 @@ class ObservableQuery {
       queryManager.closeQuery(this, fromQuery: true);
     }
 
-    for (StreamSubscription<QueryResult> subscription in _onDataSubscriptions) {
-      await subscription.cancel();
-    }
-
     stopPolling();
 
     await controller.close();
 
-    lifecycle = QueryLifecycle.CLOSED;
-    return QueryLifecycle.CLOSED;
+    lifecycle = QueryLifecycle.closed;
+    return QueryLifecycle.closed;
   }
 }

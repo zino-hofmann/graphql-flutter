@@ -16,7 +16,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
+      'https://api.github.com/graphql',
     );
 
     final authLink = AuthLink(
@@ -27,20 +27,18 @@ class GraphQLWidgetScreen extends StatelessWidget {
     var link = authLink.concat(httpLink);
 
     if (ENABLE_WEBSOCKETS) {
-      final websocketLink = WebSocketLink(
-        url: 'ws://localhost:8080/ws/graphql',
-        config: SocketClientConfig(
-            autoReconnect: true, inactivityTimeout: Duration(seconds: 15)),
-      );
+      final websocketLink = WebSocketLink('ws://localhost:8080/ws/graphql');
 
-      link = link.concat(websocketLink);
+      link = Link.split(
+        (request) => request.isSubscription,
+        websocketLink,
+        link,
+      );
     }
 
     final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: OptimisticCache(
-          dataIdFromObject: typenameDataIdFromObject,
-        ),
+        cache: GraphQLCache(),
         link: link,
       ),
     );
@@ -96,8 +94,8 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                documentNode: gql(queries.readRepositories),
-                variables: <String, dynamic>{
+                document: gql(queries.readRepositories),
+                variables: {
                   'nRepositories': nRepositories,
                 },
                 //pollInterval: 10,
@@ -111,15 +109,17 @@ class _MyHomePageState extends State<MyHomePage> {
 
                   // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
                   final repositories = (result.data['viewer']['repositories']
-                          ['nodes'] as List<dynamic>)
-                      .cast<LazyCacheMap>();
+                      ['nodes'] as List<dynamic>);
 
                   return Expanded(
                     child: ListView.builder(
                       itemCount: repositories.length,
                       itemBuilder: (BuildContext context, int index) {
                         return StarrableRepository(
-                            repository: repositories[index]);
+                          repository: repositories[index],
+                          optimistic: result.source ==
+                              QueryResultSource.optimisticResult,
+                        );
                       },
                     ),
                   );
@@ -127,16 +127,14 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ENABLE_WEBSOCKETS
-                ? Subscription<Map<String, dynamic>>(
-                    'test', queries.testSubscription, builder: ({
-                    bool loading,
-                    Map<String, dynamic> payload,
-                    dynamic error,
-                  }) {
-                    return loading
+                ? Subscription(
+                    options: SubscriptionOptions(
+                      document: gql(queries.testSubscription),
+                    ),
+                    builder: (result) => result.isLoading
                         ? const Text('Loading...')
-                        : Text(payload.toString());
-                  })
+                        : Text(result.data.toString()),
+                  )
                 : const Text(''),
           ],
         ),
@@ -149,13 +147,14 @@ class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
     Key key,
     @required this.repository,
+    @required this.optimistic,
   }) : super(key: key);
 
   final Map<String, Object> repository;
+  final bool optimistic;
 
-  Map<String, Object> extractRepositoryData(Object data) {
-    final action =
-        (data as Map<String, Object>)['action'] as Map<String, Object>;
+  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
+    final action = data['action'] as Map<String, Object>;
     if (action == null) {
       return null;
     }
@@ -163,11 +162,15 @@ class StarrableRepository extends StatelessWidget {
   }
 
   bool get starred => repository['viewerHasStarred'] as bool;
-  bool get optimistic => (repository as LazyCacheMap).isOptimistic;
 
   Map<String, dynamic> get expectedResult => <String, dynamic>{
-        'action': <String, dynamic>{
-          'starrable': <String, dynamic>{'viewerHasStarred': !starred}
+        'action': {
+          '__typename': 'AddStarPayload',
+          'starrable': {
+            '__typename': 'Repository',
+            'id': repository['id'],
+            'viewerHasStarred': !starred,
+          }
         }
       };
 
@@ -175,14 +178,32 @@ class StarrableRepository extends StatelessWidget {
   Widget build(BuildContext context) {
     return Mutation(
       options: MutationOptions(
-        documentNode: gql(starred ? mutations.removeStar : mutations.addStar),
-        update: (Cache cache, QueryResult result) {
+        document: gql(starred ? mutations.removeStar : mutations.addStar),
+        update: (cache, result) {
           if (result.hasException) {
             print(result.exception);
           } else {
-            final updated = Map<String, Object>.from(repository)
-              ..addAll(extractRepositoryData(result.data));
-            cache.write(typenameDataIdFromObject(updated), updated);
+            final updated = {
+              ...repository,
+              ...extractRepositoryData(result.data),
+            };
+            cache.writeFragment(
+              Fragment(
+                  document: gql(
+                '''
+                  fragment fields on Repository {
+                    id
+                    name
+                    viewerHasStarred
+                  }
+                ''',
+              )).asRequest(idFields: {
+                '__typename': updated['__typename'],
+                'id': updated['id'],
+              }),
+              data: updated,
+              broadcast: false,
+            );
           }
         },
         onError: (OperationException error) {
@@ -234,15 +255,13 @@ class StarrableRepository extends StatelessWidget {
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
-          trailing: result.loading || optimistic
+          trailing: result.isLoading || optimistic
               ? const CircularProgressIndicator()
               : null,
           title: Text(repository['name'] as String),
           onTap: () {
             toggleStar(
-              <String, dynamic>{
-                'starrableId': repository['id'],
-              },
+              {'starrableId': repository['id']},
               optimisticResult: expectedResult,
             );
           },

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/events.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/states.dart';
@@ -105,13 +104,12 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
         return;
       }
 
-      var mutatedRepo =
-          extractRepositoryData(queryResults.data) as LazyCacheMap;
+      var mutatedRepo = extractRepositoryData(queryResults.data);
 
       final notloadingRepo = Repo(
         id: repo.id,
         name: repo.name,
-        viewerHasStarred: mutatedRepo.data['viewerHasStarred'],
+        viewerHasStarred: mutatedRepo['viewerHasStarred'],
         isLoading: false,
       );
 

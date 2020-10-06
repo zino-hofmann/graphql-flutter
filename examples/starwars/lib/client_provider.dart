@@ -12,30 +12,22 @@ String uuidFromObject(Object object) {
   return null;
 }
 
-final OptimisticCache cache = OptimisticCache(
-  dataIdFromObject: uuidFromObject,
-);
-
 ValueNotifier<GraphQLClient> clientFor({
   @required String uri,
   String subscriptionUri,
 }) {
-  Link link = HttpLink(uri: uri);
+  Link link = HttpLink(uri);
   if (subscriptionUri != null) {
     final WebSocketLink websocketLink = WebSocketLink(
-      url: subscriptionUri,
-      config: SocketClientConfig(
-        autoReconnect: true,
-        inactivityTimeout: Duration(seconds: 30),
-      ),
+      subscriptionUri,
     );
 
-    link = link.concat(websocketLink);
+    link = Link.split((request) => request.isSubscription, websocketLink, link);
   }
 
   return ValueNotifier<GraphQLClient>(
     GraphQLClient(
-      cache: cache,
+      cache: GraphQLCache(store: HiveStore()),
       link: link,
     ),
   );

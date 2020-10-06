@@ -3,84 +3,105 @@ import 'dart:io';
 
 import 'package:connectivity/connectivity.dart';
 import 'package:flutter/widgets.dart';
-import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
-import 'package:graphql/internal.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef OnSubscriptionCompleted = void Function();
+typedef OnSubscriptionResult = void Function(
+  QueryResult subscriptionResult,
+  GraphQLClient client,
+);
 
-typedef SubscriptionBuilder<T> = Widget Function({
-  bool loading,
-  T payload,
-  dynamic error,
-});
+typedef SubscriptionBuilder = Widget Function(QueryResult result);
 
-class Subscription<T> extends StatefulWidget {
-  const Subscription(
-    this.operationName,
-    this.query, {
-    this.variables = const <String, dynamic>{},
-    final Key key,
+/// Creats a subscription with [GraphQLClient.subscribe].
+///
+/// The [builder] is passed a [QueryResult] with only the **most recent**
+/// `data`. [ResultAccumulator] can be used to accumulate results.
+///
+/// [onSubscriptionResult] can be used to react to changes,
+/// and has access to the `client`.
+///
+/// {@tool snippet}
+///
+/// Excerpt from the starwars example using [ResultAccumulator]
+///
+/// ```dart
+/// class ReviewFeed extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Subscription(
+///       options: SubscriptionOptions(
+///         document: gql(
+///           r'''
+///             subscription reviewAdded {
+///               reviewAdded {
+///                 stars, commentary, episode
+///               }
+///             }
+///           ''',
+///         ),
+///       ),
+///       builder: (result) {
+///         if (result.hasException) {
+///           return Text(result.exception.toString());
+///         }
+///
+///         if (result.isLoading) {
+///           return Center(
+///             child: const CircularProgressIndicator(),
+///           );
+///         }
+///         return ResultAccumulator.appendUniqueEntries(
+///           latest: result.data,
+///           builder: (context, {results}) => DisplayReviews(
+///             reviews: results.reversed.toList(),
+///           ),
+///         );
+///       },
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+class Subscription extends StatefulWidget {
+  const Subscription({
+    @required this.options,
     @required this.builder,
-    this.initial,
-    this.onCompleted,
+    this.onSubscriptionResult,
+    Key key,
   }) : super(key: key);
 
-  final String operationName;
-  final String query;
-  final Map<String, dynamic> variables;
-  final SubscriptionBuilder<T> builder;
-  final OnSubscriptionCompleted onCompleted;
-  final T initial;
+  final SubscriptionOptions options;
+  final SubscriptionBuilder builder;
+  final OnSubscriptionResult onSubscriptionResult;
 
   @override
-  _SubscriptionState<T> createState() => _SubscriptionState<T>();
+  _SubscriptionState createState() => _SubscriptionState();
 }
 
-class _SubscriptionState<T> extends State<Subscription<T>> {
-  bool _loading = true;
-  T _data;
-  dynamic _error;
-  StreamSubscription<FetchResult> _subscription;
-  GraphQLClient _client;
+class _SubscriptionState extends State<Subscription> {
+  Stream<QueryResult> stream;
+  GraphQLClient client;
 
   ConnectivityResult _currentConnectivityResult;
   StreamSubscription<ConnectivityResult> _networkSubscription;
 
   void _initSubscription() {
-    assert(_client != null);
-    final Operation operation = Operation(
-      documentNode: parseString(widget.query),
-      variables: widget.variables,
-      operationName: widget.operationName,
-    );
+    stream = client.subscribe(widget.options);
 
-    final Stream<FetchResult> stream = _client.subscribe(operation);
-
-    if (_subscription == null) {
-      // Set the initial value for the first time.
-      if (widget.initial != null) {
-        setState(() {
-          _loading = true;
-          _data = widget.initial;
-          _error = null;
-        });
-      }
+    if (widget.onSubscriptionResult != null) {
+      stream = stream.map((result) {
+        widget.onSubscriptionResult(result, client);
+        return result;
+      });
     }
-
-    _subscription?.cancel();
-    _subscription = stream.listen(
-      _onData,
-      onError: _onError,
-      onDone: _onDone,
-    );
   }
 
   @override
   void initState() {
-    _networkSubscription = Connectivity().onConnectivityChanged.listen(
-        (ConnectivityResult result) async => await _onNetworkChange(result));
+    _networkSubscription =
+        Connectivity().onConnectivityChanged.listen(_onNetworkChange);
 
     super.initState();
   }
@@ -88,52 +109,27 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    assert(client != null);
-    if (client != _client) {
-      _client = client;
+    final GraphQLClient newClient = GraphQLProvider.of(context).value;
+    assert(newClient != null);
+    if (client != newClient) {
+      client = newClient;
       _initSubscription();
     }
   }
 
   @override
-  void didUpdateWidget(Subscription<T> oldWidget) {
+  void didUpdateWidget(Subscription oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.query != oldWidget.query ||
-        widget.operationName != oldWidget.operationName ||
-        areDifferentVariables(widget.variables, oldWidget.variables)) {
+    if (!widget.options.equal(oldWidget.options)) {
       _initSubscription();
     }
   }
 
   @override
   void dispose() {
-    _subscription?.cancel();
     _networkSubscription?.cancel();
     super.dispose();
-  }
-
-  void _onData(final FetchResult message) {
-    setState(() {
-      _loading = false;
-      _data = message.data as T;
-      _error = message.errors;
-    });
-  }
-
-  void _onError(final Object error) {
-    setState(() {
-      _loading = false;
-      _data = null;
-      _error = (error is SubscriptionError) ? error.payload : error;
-    });
-  }
-
-  void _onDone() {
-    if (widget.onCompleted != null) {
-      widget.onCompleted();
-    }
   }
 
   Future _onNetworkChange(ConnectivityResult result) async {
@@ -165,11 +161,18 @@ class _SubscriptionState<T> extends State<Subscription<T>> {
   }
 
   @override
-  Widget build(final BuildContext context) {
-    return widget.builder(
-      loading: _loading,
-      error: _error,
-      payload: _data,
+  Widget build(BuildContext context) {
+    return StreamBuilder<QueryResult>(
+      initialData: widget.options?.optimisticResult != null
+          ? QueryResult.optimistic(data: widget.options?.optimisticResult)
+          : QueryResult.loading(),
+      stream: stream,
+      builder: (
+        BuildContext buildContext,
+        AsyncSnapshot<QueryResult> snapshot,
+      ) {
+        return widget?.builder(snapshot.data);
+      },
     );
   }
 }

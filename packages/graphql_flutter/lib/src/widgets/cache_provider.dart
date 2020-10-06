@@ -33,7 +33,7 @@ class _CacheProviderState extends State<CacheProvider>
     client = GraphQLProvider.of(context).value;
     assert(client != null);
 
-    client.cache?.restore();
+    // client.cache?.restore();
 
     super.didChangeDependencies();
   }
@@ -45,6 +45,7 @@ class _CacheProviderState extends State<CacheProvider>
     WidgetsBinding.instance.removeObserver(this);
   }
 
+/*
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     assert(client != null);
@@ -69,6 +70,7 @@ class _CacheProviderState extends State<CacheProvider>
         break;
     }
   }
+*/
 
   @override
   Widget build(BuildContext context) => widget.child;

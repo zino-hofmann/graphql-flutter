@@ -10,7 +10,7 @@ class RepositoriesBloc extends QueryBloc<Map<String, dynamic>> {
           client: client,
           options: options ??
               WatchQueryOptions(
-                documentNode: parseString(r'''
+                document: parseString(r'''
                   query ReadRepositories($nRepositories: Int!, $after: String) {
                       viewer {
                         id

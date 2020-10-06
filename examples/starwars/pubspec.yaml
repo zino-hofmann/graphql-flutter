@@ -4,14 +4,12 @@ description: An example graphql_flutter application utilizing graphql_starwars_t
 dependencies:
   flutter:
     sdk: flutter
-  graphql_flutter: 
-    path: ../../packages/graphql_flutter
+  graphql_flutter:
   graphql:
-    path: ../../packages/graphql
-  universal_platform: ^0.1.3
+  universal_platform:
+    ^0.1.3
     # https://github.com/flutter/flutter/issues/36126#issuecomment-596215587
-  graphql_starwars_test_server: 
-    git: git@github.com:micimize/angel-starwars-test-server.git
+  graphql_starwars_test_server: ^0.1.0
 
 flutter:
   uses-material-design: true
@@ -21,6 +19,7 @@ dependency_overrides:
     path: ../../packages/graphql_flutter
   graphql:
     path: ../../packages/graphql
+
   graphql_server:
     git:
       url: git@github.com:micimize/angel.git

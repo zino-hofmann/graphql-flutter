@@ -1,4 +1,5 @@
 import 'package:meta/meta.dart';
+import 'package:flutter/material.dart';
 
 import '../episode/episode.dart';
 
@@ -43,3 +44,29 @@ class Review {
 }
 
 const String Function(Object jsonObject) displayReview = getPrettyJSONString;
+
+class DisplayReviews extends StatelessWidget {
+  const DisplayReviews({
+    Key key,
+    @required this.reviews,
+  }) : super(key: key);
+
+  final List<Map<String, dynamic>> reviews;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(8.0),
+      children: reviews
+          .map(displayReview)
+          .map<Widget>((String s) => Card(
+                child: Container(
+                  padding: const EdgeInsets.all(15.0),
+                  //height: 150,
+                  child: Text(s),
+                ),
+              ))
+          .toList(),
+    );
+  }
+}
