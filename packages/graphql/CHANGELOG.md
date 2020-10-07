@@ -1,3 +1,67 @@
+# [4.0.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.1.0...v4.0.0-beta.1) (2020-10-07)
+
+
+### Bug Fixes
+
+* **examples:** ignore missing token ([ffd3294](https://github.com/zino-app/graphql-flutter/commit/ffd329446b078bae25b99294faf4403deed67c24))
+* query test ([f54c6ae](https://github.com/zino-app/graphql-flutter/commit/f54c6aeba316a263dc42c3c53ea2a59a14a747aa))
+* **ci:** loosen path version ([645d462](https://github.com/zino-app/graphql-flutter/commit/645d462a73047910ba3c45a1b28483016c082131))
+* **client:** gql_http_link==0.3.2 for custom toJsons closing [#734](https://github.com/zino-app/graphql-flutter/issues/734) ([98b8cf7](https://github.com/zino-app/graphql-flutter/commit/98b8cf771e9f982741d5041bd4a4f017ac46dc91))
+* **client:** mutation not firing observer callbacks ([75393c2](https://github.com/zino-app/graphql-flutter/commit/75393c2763c8b232aea7a719fa54d53a5885f995))
+* **client:** only queries are refetch safe ([1e93376](https://github.com/zino-app/graphql-flutter/commit/1e9337633d3c0b6ea61bc3d83fd7d9b1f2f20a7a))
+* **docs:** typo in docstring, add todo to sanitizeVariables ([9c84cb1](https://github.com/zino-app/graphql-flutter/commit/9c84cb13b7796b6b15027a8a2c76b00a953332bc))
+* **examples:** cleanup bloc example ([82724f0](https://github.com/zino-app/graphql-flutter/commit/82724f08b58db163864426e22b64ae159e6ef1e3))
+* **examples:** flutter bloc pubspec ([61582b3](https://github.com/zino-app/graphql-flutter/commit/61582b3d7bc15f3b1630175e39672d89db537ccf))
+* **examples:** starwars example cache ([22db4f7](https://github.com/zino-app/graphql-flutter/commit/22db4f7ffac1ca7abd00a75a060117ec5b9e4375))
+* **examples:** starwars example works again ([7514b93](https://github.com/zino-app/graphql-flutter/commit/7514b93fa280cd398f73db95b1a86f358bf690d5))
+* **examples:** update ios files for graphql_flutter/example ([5b6e3d0](https://github.com/zino-app/graphql-flutter/commit/5b6e3d06a7dc56888dcbfc4c395ea51985c10f1c))
+* **graphql:** default-yet-overrideable variable ([6ba687e](https://github.com/zino-app/graphql-flutter/commit/6ba687ec90c336cc47394230f95abdce80aa1392))
+* **graphql:** don't close mutations after callbacks ([2ba6c74](https://github.com/zino-app/graphql-flutter/commit/2ba6c743a7317c3df05c3f1c5e8e3e3cd44d6827))
+* **graphql:** dumb ?? documentNode bug ([ba7b641](https://github.com/zino-app/graphql-flutter/commit/ba7b6410c61a7d2cf9e28e4be2f2886a60ec4e52))
+* **graphql:** fix rebroadcasting by refactoring onData callbacks into a simpler async function ([9a5fff1](https://github.com/zino-app/graphql-flutter/commit/9a5fff1192bd8af069dd8d2ce8723a2598c13341))
+* **graphql:** keep deprecated QueryResult api and mark it as such ([2b447a0](https://github.com/zino-app/graphql-flutter/commit/2b447a02b3d25ca6398ac02033aa1c7d156be73c))
+* **graphql:** sanitize multipart files for cache ([4ceb800](https://github.com/zino-app/graphql-flutter/commit/4ceb8006baf4539ab423e3b3a229f194cc2eac45))
+* **graphql:** simplified AuthLink ([0b3fbd9](https://github.com/zino-app/graphql-flutter/commit/0b3fbd9a4d3d0f9bded2bd9a9fdf26e3bfe983df))
+* **tests:** update tests ([bba4a7a](https://github.com/zino-app/graphql-flutter/commit/bba4a7aba99bd3e4c5c49442f2e1e6e3cc71cb67))
+
+
+### Features
+
+* cache now flags itself for broadcasting ([84cba43](https://github.com/zino-app/graphql-flutter/commit/84cba43f9a7255b0125464014ee3c40e9b71d2ad))
+* client.fetchMore utility for leveraging the fetch more logic results without using ObservableQuery ([814ccb3](https://github.com/zino-app/graphql-flutter/commit/814ccb33264a36e7898e5817d5be563366fcea2b))
+* documentNode -> document, dependency issues, reexport links from client (for now), retrieve subscription changes from [#533](https://github.com/zino-app/graphql-flutter/issues/533) ([4fb205c](https://github.com/zino-app/graphql-flutter/commit/4fb205cfd4beab2745c361da18444eda7d7ab9b6))
+* **graphql_flutter:** add ResultAccumulator, fix Subscription ([7e1edee](https://github.com/zino-app/graphql-flutter/commit/7e1edeecf753c4d48335088ddb8597b50b1daf08))
+* drop Link layer in favor of package:gql_link and package:gql_exec ([2e491a7](https://github.com/zino-app/graphql-flutter/commit/2e491a7c54ebb77a1552cde4cda7e638af866e82))
+* **client:** cache proxy methods on cache, resetStore with optional refetchQueries ([ba7134a](https://github.com/zino-app/graphql-flutter/commit/ba7134aad4f755c420ebf0f600898c090df52da7))
+* **client:** expose store, cleanup ([6fc5e7e](https://github.com/zino-app/graphql-flutter/commit/6fc5e7e0878231ca2e3da465a16a8ef38906031e))
+* **client:** refetchSafeQueries, clarify rebroadcast calls in docs ([e45b240](https://github.com/zino-app/graphql-flutter/commit/e45b240ae5992edb63e02ddd01ddc5dc9d955795))
+* **docs:** v4 changelog ([38cfd9b](https://github.com/zino-app/graphql-flutter/commit/38cfd9b869b92b27e4790a8b4097b74ce06ed647))
+* **examples:** reorg graphql example so pub displays code ([bc32bdd](https://github.com/zino-app/graphql-flutter/commit/bc32bddfc37c212538999a9ff2b427b639e454f3))
+* **examples:** starwars hivestore usage ([2f874ec](https://github.com/zino-app/graphql-flutter/commit/2f874ecde038e16332bb51243afb167ac0421e35))
+* **graphql:** add isMutation etc helpers to Options types ([04e7888](https://github.com/zino-app/graphql-flutter/commit/04e7888e5c1d4f8a61e786a7e541bfaf0116accd))
+* **graphql:** complete caching overhaul ([e9b5660](https://github.com/zino-app/graphql-flutter/commit/e9b56606c45f4616db75ec7cfc0918a6f0419a12))
+* **graphql:** HiveStore api improvements, fetchmore fixes ([2d1a7f2](https://github.com/zino-app/graphql-flutter/commit/2d1a7f2e367f57f6ff2f968814045fb5edf15085))
+* **graphql:** HiveStore.open ([6db4677](https://github.com/zino-app/graphql-flutter/commit/6db46779ab5da6c7719d2df6685eac332ebff5af))
+* **graphql:** multipart file support ([c2733ca](https://github.com/zino-app/graphql-flutter/commit/c2733ca3d33b1b50afc5b2ef7809fd1f4aa41500))
+* **graphql:** re-add documentNode asdeprecated ([20d0176](https://github.com/zino-app/graphql-flutter/commit/20d017612072db9563842a4ba2322c8b3101ab3a))
+* **graphql:** Robust ObservableQuery docs ([1e893b5](https://github.com/zino-app/graphql-flutter/commit/1e893b5debf60e410816496bb795e0cc51132b20))
+* **graphql:** update old websocket_link ([496d994](https://github.com/zino-app/graphql-flutter/commit/496d994e06148fbad1a394c7b3d68e43a8e8acaf))
+* **graphql:** use new cache correctly everywhere else ([f64a6c8](https://github.com/zino-app/graphql-flutter/commit/f64a6c82aab878f3f828d86dcd71cf8422e038b1))
+* HiveStore ([2c3c66c](https://github.com/zino-app/graphql-flutter/commit/2c3c66cbb514a90e16a87ea4c722555824e18a06))
+* more work on gql links ([0d7ef7a](https://github.com/zino-app/graphql-flutter/commit/0d7ef7a885d905592dee313a64e57505dc5d7973))
+* move to DocumentNode-only documents ([7499323](https://github.com/zino-app/graphql-flutter/commit/7499323673af6ea6c9889c828fc8ff80042f1a74))
+* starting on gql links ([d9452bc](https://github.com/zino-app/graphql-flutter/commit/d9452bc4529d261ca74b17a9be1baaaf231dcea2))
+* **graphql:** work on making subscriptions more of a first-class citizen ([6d0b045](https://github.com/zino-app/graphql-flutter/commit/6d0b04564148623ecfe75f376818250683522a4c))
+* **graphql_flutter:** initHiveForFlutter ([1118cc7](https://github.com/zino-app/graphql-flutter/commit/1118cc72a2a38fc80c1df0855ac4154e0e426b1c))
+* **graphql_flutter:** work on making subscriptions more of a first-class citizen ([a0e0d5c](https://github.com/zino-app/graphql-flutter/commit/a0e0d5c4f3439a98d9e249f8362d4115d2440efa))
+* **tests:** test subscriptions ([2a3e6a1](https://github.com/zino-app/graphql-flutter/commit/2a3e6a11edfe85d322c07514d238d89093e451a0))
+
+
+### BREAKING CHANGES
+
+* the deprecated string documents are no longer supported
+* Link layer is now implemented via package:gql_link and package:gql_exec
+
 # [4.0.0-beta.1](https://github.com/zino-app/graphql-flutter/4.0.0-beta.1) (2020-10-06)
 
 `v4` reworks a lot of the internals of the core `graphql/client.dart` (and thus `graphql_flutter`).
