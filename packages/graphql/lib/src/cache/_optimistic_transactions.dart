@@ -25,12 +25,19 @@ class OptimisticPatch {
 /// [GraphQLCache.recordOptimisticTransaction].
 ///
 /// Implements, and is exposed as, a [GraphQLDataProxy].
-/// It's `optimistic` paraemeters default to `true`,
+/// It's `optimistic` parameters default to `true`,
 /// but the user can override them to read directly from the `store`.
 class OptimisticProxy extends NormalizingDataProxy {
   OptimisticProxy(this.cache);
 
   GraphQLCache cache;
+
+  /// `typePolicies` to pass down to `normalize` (proxied from [cache])
+  get typePolicies => cache.typePolicies;
+
+  /// Optional `dataIdFromObject` function to pass through to [normalize]
+  /// (proxied from [cache])
+  get dataIdFromObject => cache.dataIdFromObject;
 
   @override
   SanitizeVariables get sanitizeVariables => cache.sanitizeVariables;

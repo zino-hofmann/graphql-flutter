@@ -112,10 +112,12 @@ abstract class GraphQLDataProxy {
   /// Writes a GraphQL query to the root query id,
   /// then [broadcast] changes to watchers unless `broadcast: false`
   ///
-  /// [normalize] the given [data] into the cache using graphql metadata from [request]
-  ///
+  /// [normalize] the given [data] into the cache using graphql metadata from [request].
   /// Conceptually, this can be thought of as providing a manual execution result
   /// in the form of [data]
+  ///
+  /// For complex `normalize` type policies that involve custom reads,
+  /// `optimistic` will be the default.
   void writeQuery(
     Request request, {
     Map<String, dynamic> data,
@@ -128,6 +130,9 @@ abstract class GraphQLDataProxy {
   /// If there is more than one fragment in the provided document
   /// then a `fragmentName` must be provided to `fragmentRequest.fragment`
   /// to select the correct fragment.
+  ///
+  /// For complex `normalize` type policies that involve custom reads,
+  /// `optimistic` will be the default.
   void writeFragment(
     FragmentRequest fragmentRequest, {
     Map<String, dynamic> data,
