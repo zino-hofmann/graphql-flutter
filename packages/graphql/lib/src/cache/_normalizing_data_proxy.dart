@@ -14,7 +14,10 @@ typedef DataIdResolver = String Function(Map<String, Object> object);
 /// [readNormalized] and [writeNormalized] must still be supplied by the implementing class
 abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// `typePolicies` to pass down to `normalize`
-  Map<String, TypePolicy> typePolicies;
+  Map<String, TypePolicy> get typePolicies;
+
+  /// Optional `dataIdFromObject` function to pass through to [normalize]
+  DataIdResolver get dataIdFromObject;
 
   /// Whether to add `__typename` automatically.
   ///
@@ -36,9 +39,6 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   @protected
   @visibleForTesting
   bool broadcastRequested = false;
-
-  /// Optional `dataIdFromObject` function to pass through to [normalize]
-  DataIdResolver dataIdFromObject;
 
   /// Read normaized data from the cache
   ///
@@ -64,14 +64,16 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     Request request, {
     bool optimistic = true,
   }) =>
-      denormalize(
-        reader: (dataId) => readNormalized(dataId, optimistic: optimistic),
-        query: request.operation.document,
+      denormalizeOperation(
+        // provided from cache
+        read: (dataId) => readNormalized(dataId, optimistic: optimistic),
+        typePolicies: typePolicies,
+        returnPartialData: returnPartialData,
+        addTypename: addTypename ?? false,
+        // provided from request
+        document: request.operation.document,
         operationName: request.operation.operationName,
         variables: sanitizeVariables(request.variables),
-        typePolicies: typePolicies,
-        addTypename: addTypename ?? false,
-        returnPartialData: returnPartialData,
       );
 
   Map<String, dynamic> readFragment(
@@ -80,13 +82,13 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   }) =>
       denormalizeFragment(
         // provided from cache
-        reader: (dataId) => readNormalized(dataId, optimistic: optimistic),
+        read: (dataId) => readNormalized(dataId, optimistic: optimistic),
         typePolicies: typePolicies,
         dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
         addTypename: addTypename ?? false,
         // provided from request
-        fragment: fragmentRequest.fragment.document,
+        document: fragmentRequest.fragment.document,
         idFields: fragmentRequest.idFields,
         fragmentName: fragmentRequest.fragment.fragmentName,
         variables: sanitizeVariables(fragmentRequest.variables),
@@ -97,14 +99,18 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     Map<String, dynamic> data,
     bool broadcast = true,
   }) {
-    normalize(
-      writer: (dataId, value) => writeNormalized(dataId, value),
-      query: request.operation.document,
-      operationName: request.operation.operationName,
-      variables: sanitizeVariables(request.variables),
-      data: data,
+    normalizeOperation(
+      // provided from cache
+      write: (dataId, value) => writeNormalized(dataId, value),
+      read: (dataId) => readNormalized(dataId),
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
+      // provided from request
+      document: request.operation.document,
+      operationName: request.operation.operationName,
+      variables: sanitizeVariables(request.variables),
+      // data
+      data: data,
     );
     if (broadcast ?? true) {
       broadcastRequested = true;
@@ -118,11 +124,12 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   }) {
     normalizeFragment(
       // provided from cache
-      writer: (dataId, value) => writeNormalized(dataId, value),
+      write: (dataId, value) => writeNormalized(dataId, value),
+      read: (dataId) => readNormalized(dataId),
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
       // provided from request
-      fragment: request.fragment.document,
+      document: request.fragment.document,
       idFields: request.idFields,
       fragmentName: request.fragment.fragmentName,
       variables: sanitizeVariables(request.variables),

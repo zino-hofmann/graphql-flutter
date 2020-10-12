@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
 import 'package:http/http.dart' show MultipartFile;
-import 'package:normalize/normalize.dart';
+import 'package:normalize/utils.dart';
 
 bool notNull(Object any) {
   return any != null;
@@ -59,9 +59,7 @@ Map<String, dynamic> deeplyMergeLeft(
 /// So you should probably include an [AddTypenameVistor] [transform]
 DocumentNode gql(String document) => transform(
       parseString(document),
-      [
-        AddTypenameVisitor(),
-      ],
+      [AddTypenameVisitor()],
     );
 
 /// Converts [MultipartFile]s to a string representation containing hashCode. Default argument to [variableSanitizer]

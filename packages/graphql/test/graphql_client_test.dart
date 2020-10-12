@@ -402,7 +402,6 @@ void main() {
           document: gql(
             r'''{
               someField {
-                __typename,
                 id,
                 myField
               }
@@ -412,6 +411,7 @@ void main() {
       );
 
       final queryData = {
+        '__typename': 'Query',
         'someField': {
           ...idFields,
           'myField': 'originalValue',
@@ -465,6 +465,7 @@ void main() {
       );
 
       final updatedQueryData = {
+        '__typename': 'Query',
         'someField': {
           ...idFields,
           'myField': 'updatedValue',
