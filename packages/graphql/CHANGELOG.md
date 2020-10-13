@@ -1,3 +1,10 @@
+# [4.0.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2020-10-13)
+
+
+### Features
+
+* **graphql:** upgrade normalize to 0.4.2 ([4655e7d](https://github.com/zino-app/graphql-flutter/commit/4655e7d1da01432b3906890439c1850e2f1a2838))
+
 # [4.0.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v3.1.0...v4.0.0-beta.1) (2020-10-07)
 
 `v4` reworks a lot of the internals of the core `graphql/client.dart` (and thus `graphql_flutter`).
