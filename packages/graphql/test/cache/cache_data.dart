@@ -218,28 +218,28 @@ final basicTestSubsetAValue = TestCase(
   },
 );
 
-final Map updatedSubsetOperationData = {
-  'a': {
-    '__typename': 'A',
-    'id': 1,
-    'list': basicTestSubsetAValue.data['a']['list'],
-    'b': {
-      '__typename': 'B',
-      'id': 5,
-      'c': {
-        '__typename': 'C',
-        'id': 6,
-        'cField': 'changed value',
+getUpdatedSubsetOperationData({withUpdatedC = false}) => {
+      'a': {
+        '__typename': 'A',
+        'id': 1,
+        'list': basicTestSubsetAValue.data['a']['list'],
+        'b': {
+          '__typename': 'B',
+          'id': 5,
+          'c': {
+            '__typename': 'C',
+            'id': 6,
+            'cField': '${withUpdatedC ? "changed " : ""}value',
+          },
+          'bField': {'field': true}
+        },
+        'd': {
+          'id': 10,
+          'dField': {'field': true}
+        },
+        'aField': {'field': false}
       },
-      'bField': {'field': true}
-    },
-    'd': {
-      'id': 10,
-      'dField': {'field': true}
-    },
-    'aField': {'field': false}
-  },
-};
+    };
 
 final cyclicalTest = TestCase(operation: r'''{
     a {

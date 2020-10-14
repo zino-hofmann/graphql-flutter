@@ -6,9 +6,21 @@ import 'package:graphql/src/cache/cache.dart';
 import '../helpers.dart';
 import './cache_data.dart';
 
+typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
+
 void main() {
+  if (debuggingUnexpectedTestFailures) {
+    print(
+      'DEBUGGING UNEXPECTED TEST FAILURES: $debuggingUnexpectedTestFailures.\n'
+      'RUNNING TESTS WITH returnPartialData SET TO TRUE.\n',
+    );
+  }
+
   group('Normalizes writes', () {
-    final GraphQLCache cache = getTestCache();
+    GraphQLCache cache;
+    setUp(() {
+      cache = getTestCache();
+    });
     test('.writeQuery .readQuery round trip', () {
       cache.writeQuery(basicTest.request, data: basicTest.data);
       expect(
@@ -16,7 +28,9 @@ void main() {
         equals(basicTest.data),
       );
     });
+
     test('updating nested normalized fragment changes top level operation', () {
+      cache.writeQuery(basicTest.request, data: basicTest.data);
       final idFields = {
         '__typename': updatedCValue['__typename'],
         'id': updatedCValue['id'],
@@ -44,13 +58,15 @@ void main() {
     });
 
     test('updating subset query only partially overrides superset query', () {
+      cache.writeQuery(basicTest.request, data: basicTest.data);
+
       cache.writeQuery(
         basicTestSubsetAValue.request,
         data: basicTestSubsetAValue.data,
       );
       expect(
         cache.readQuery(basicTest.request),
-        equals(updatedSubsetOperationData),
+        equals(getUpdatedSubsetOperationData()),
       );
     });
   });
@@ -81,7 +97,11 @@ void main() {
   group(
     '.recordOptimisticTransaction',
     () {
-      final GraphQLCache cache = getTestCache();
+      GraphQLCache cache;
+
+      setUp(() {
+        cache = getTestCache();
+      });
 
       test(
         'OptimisticCache.readQuery and .readFragment pass through',
@@ -142,9 +162,7 @@ void main() {
         },
       );
 
-      test(
-        'updating nested normalized fragment changes top level operation',
-        () {
+      recordCFragmentUpdate(GraphQLCache cache) =>
           cache.recordOptimisticTransaction(
             (proxy) => proxy
               ..writeFragment(
@@ -156,6 +174,12 @@ void main() {
               ),
             '2',
           );
+
+      test(
+        'updating nested normalized fragment changes top level operation',
+        () {
+          cache.writeQuery(basicTest.request, data: basicTest.data);
+          recordCFragmentUpdate(cache);
           expect(
             cache.readQuery(basicTest.request),
             equals(updatedCBasicTestData),
@@ -163,9 +187,7 @@ void main() {
         },
       );
 
-      test(
-        'updating subset query only partially overrides superset query',
-        () {
+      recordBasicSubsetData(GraphQLCache cache) =>
           cache.recordOptimisticTransaction(
             (proxy) => proxy
               ..writeQuery(
@@ -174,9 +196,15 @@ void main() {
               ),
             '3',
           );
+      test(
+        'updating subset query partially overrides superset query',
+        () {
+          cache.writeQuery(basicTest.request, data: basicTest.data);
+          recordCFragmentUpdate(cache);
+          recordBasicSubsetData(cache);
           expect(
             cache.readQuery(basicTest.request, optimistic: true),
-            equals(updatedSubsetOperationData),
+            equals(getUpdatedSubsetOperationData(withUpdatedC: true)),
           );
         },
       );
@@ -184,6 +212,9 @@ void main() {
       test(
         '.removeOptimisticPatch results in data from lower layers on readQuery',
         () {
+          cache.writeQuery(basicTest.request, data: basicTest.data);
+          recordCFragmentUpdate(cache);
+          recordBasicSubsetData(cache);
           cache.removeOptimisticPatch('2');
           cache.removeOptimisticPatch('3');
           expect(
@@ -196,7 +227,10 @@ void main() {
   );
 
   group('Handles MultipartFile variables', () {
-    final GraphQLCache cache = getTestCache();
+    GraphQLCache cache;
+    setUp(() {
+      cache = getTestCache();
+    });
     test('.writeQuery .readQuery round trip', () {
       cache.writeQuery(fileVarsTest.request, data: fileVarsTest.data);
       expect(
