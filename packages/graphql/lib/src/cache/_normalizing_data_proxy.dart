@@ -29,7 +29,10 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// [returnPartialData] is `true`
   bool addTypename = false;
 
-  /// Used for testing
+  /// Used for testing.
+  ///
+  /// Passed through to normalize. When [denormalizeOperation] isn't passed [returnPartialData],
+  /// It will simply return `null` if any part of the query can't be constructed.
   @protected
   bool get returnPartialData => false;
 

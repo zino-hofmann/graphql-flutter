@@ -12,49 +12,75 @@ class MockLink extends Mock implements Link {}
 
 void main() {
   const String readSingle = r'''
-  query ReadSingle($id: ID!) {
-    single(id: $id) {
-      id,
-      __typename,
-      name
+    query ReadSingle($id: ID!) {
+      single(id: $id) {
+        id,
+        __typename,
+        name
+      }
     }
-  }
-''';
+  ''';
 
   const String writeSingle = r'''
-  mutation WriteSingle($id: ID!, $name: String!) {
-    updateSingle(id: $id, name: $name) {
-      id,
-      __typename,
-      name
+    mutation WriteSingle($id: ID!, $name: String!) {
+      updateSingle(id: $id, name: $name) {
+        id,
+        __typename,
+        name
+      }
     }
-  }
-''';
+  ''';
 
   const String readRepositories = r'''
-  query ReadRepositories($nRepositories: Int!) {
-    viewer {
-      repositories(last: $nRepositories) {
-        nodes {
-          __typename
-          id
-          name
+    query ReadRepositories($nRepositories: Int!) {
+      viewer {
+        repositories(last: $nRepositories) {
+          nodes {
+            __typename
+            id
+            name
+            viewerHasStarred
+          }
+        }
+      }
+    }
+  ''';
+  readRepositoryData({withTypenames = true, withIds = true}) {
+    repo(map) => withTypenames ? {'__typename': 'Repository', ...map} : map;
+    return {
+      'viewer': {
+        'repositories': {
+          'nodes': [
+            {
+              if (withIds) 'id': 'MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==',
+              'name': 'pq',
+              'viewerHasStarred': false
+            },
+            {
+              if (withIds) 'id': 'MDEwOlJlcG9zaXRvcnkzMjkyNDQ0Mw==',
+              'name': 'go-evercookie',
+              'viewerHasStarred': false
+            },
+            {
+              if (withIds) 'id': 'MDEwOlJlcG9zaXRvcnkzNTA0NjgyNA==',
+              'name': 'watchbot',
+              'viewerHasStarred': false
+            },
+          ].map(repo).toList(),
+        },
+      },
+    };
+  }
+
+  const String addStar = r'''
+    mutation AddStar($starrableId: ID!) {
+      action: addStar(input: {starrableId: $starrableId}) {
+        starrable {
           viewerHasStarred
         }
       }
     }
-  }
-''';
-
-  const String addStar = r'''
-  mutation AddStar($starrableId: ID!) {
-    action: addStar(input: {starrableId: $starrableId}) {
-      starrable {
-        viewerHasStarred
-      }
-    }
-  }
-''';
+  ''';
 
   MockLink link;
   GraphQLClient client;
@@ -77,42 +103,14 @@ void main() {
             'nRepositories': 42,
           },
         );
+        final repoData = readRepositoryData(withTypenames: true);
 
         when(
           link.request(any),
         ).thenAnswer(
-          (_) => Stream.fromIterable(
-            [
-              Response(
-                data: <String, dynamic>{
-                  'viewer': {
-                    'repositories': {
-                      'nodes': [
-                        {
-                          '__typename': 'Repository',
-                          'id': 'MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==',
-                          'name': 'pq',
-                          'viewerHasStarred': false,
-                        },
-                        {
-                          '__typename': 'Repository',
-                          'id': 'MDEwOlJlcG9zaXRvcnkzMjkyNDQ0Mw==',
-                          'name': 'go-evercookie',
-                          'viewerHasStarred': false,
-                        },
-                        {
-                          '__typename': 'Repository',
-                          'id': 'MDEwOlJlcG9zaXRvcnkzNTA0NjgyNA==',
-                          'name': 'watchbot',
-                          'viewerHasStarred': false,
-                        },
-                      ],
-                    },
-                  },
-                },
-              ),
-            ],
-          ),
+          (_) => Stream.fromIterable([
+            Response(data: repoData),
+          ]),
         );
 
         final QueryResult r = await client.query(_options);
@@ -124,7 +122,7 @@ void main() {
                 document: parseString(readRepositories),
                 //operationName: 'ReadRepositories',
               ),
-              variables: <String, dynamic>{
+              variables: {
                 'nRepositories': 42,
               },
               context: Context(),
@@ -133,15 +131,69 @@ void main() {
         );
 
         expect(r.exception, isNull);
-        expect(r.data, isNotNull);
-        final List<Map<String, dynamic>> nodes =
-            (r.data['viewer']['repositories']['nodes'] as List<dynamic>)
-                .cast<Map<String, dynamic>>();
-        expect(nodes, hasLength(3));
-        expect(nodes[0]['id'], 'MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==');
-        expect(nodes[1]['name'], 'go-evercookie');
-        expect(nodes[2]['viewerHasStarred'], false);
-        return;
+        expect(r.data, equals(repoData));
+      });
+
+      test('successful response without normalization', () async {
+        final readUnidentifiedRepositories = parseString(r'''
+            query ReadRepositories($nRepositories: Int!) {
+              viewer {
+                repositories(last: $nRepositories) {
+                  nodes {
+                    name
+                    viewerHasStarred
+                  }
+                }
+              }
+            }
+          ''');
+        final repoData = readRepositoryData(
+          withTypenames: false,
+          withIds: false,
+        );
+
+        final WatchQueryOptions _options = WatchQueryOptions(
+          document: readUnidentifiedRepositories,
+          variables: {'nRepositories': 42},
+        );
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            Response(data: repoData),
+          ]),
+        );
+
+        final QueryResult r = await client.query(_options);
+
+        verify(link.request(_options.asRequest));
+        expect(r.data, equals(repoData));
+      });
+
+      test('malformed server response', () async {
+        final WatchQueryOptions _options = WatchQueryOptions(
+          document: parseString(readRepositories),
+          variables: {'nRepositories': 42},
+        );
+        final malformedRepoData = {
+          'viewer': {
+            // maybe the server doesn't validate response structures properly,
+            // or a user generates a response on the client, etc
+            'repos': readRepositoryData()['viewer']['repositories']
+          },
+        };
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            Response(data: malformedRepoData),
+          ]),
+        );
+
+        final QueryResult r = await client.query(_options);
+        print([r.data, r.source, r.exception]);
       });
 
       test('failed query because of an exception with null string', () async {
@@ -163,8 +215,6 @@ void main() {
           r.exception.linkException.originalException,
           e,
         );
-
-        return;
       });
 
       test('failed query because of an exception with empty string', () async {
@@ -186,8 +236,6 @@ void main() {
           r.exception.linkException.originalException,
           e,
         );
-
-        return;
       });
 //    test('failed query because of because of error response', {});
 //    test('failed query because of because of invalid response', () {

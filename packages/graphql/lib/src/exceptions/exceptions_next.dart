@@ -2,8 +2,8 @@
 /// these should be the only exceptions we need
 import 'package:meta/meta.dart';
 
-import 'package:gql_link/gql_link.dart' show LinkException;
-import 'package:gql_exec/gql_exec.dart' show GraphQLError, Request;
+import 'package:gql_link/gql_link.dart' show LinkException, ServerException;
+import 'package:gql_exec/gql_exec.dart' show GraphQLError, Request, Response;
 
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
 
@@ -16,9 +16,19 @@ class CacheMissException extends LinkException {
   final Request request;
 }
 
-//
-// end cache exceptions
-//
+/// Failure occurring when the structure of the parsed [Response] `data`
+/// does not match that of the [Request] `operation` `document`.
+///
+/// This is checked by doing a round-trip with `normalize`
+@immutable
+class MismatchedDataStructureException extends ServerException {
+  const MismatchedDataStructureException({
+    @required this.request,
+    @required Response parsedResponse,
+  }) : super(parsedResponse: parsedResponse, originalException: null);
+
+  final Request request;
+}
 
 /// Exception occurring when an unhandled, non-link exception
 /// is thrown during execution

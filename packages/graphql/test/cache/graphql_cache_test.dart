@@ -29,6 +29,15 @@ void main() {
       );
     });
 
+    test('.writeQuery should fail on missing fields', () {
+      cache.writeQuery(basicTest.request, data: {...basicTest.data, 'a': {}});
+      print(cache.store.toMap());
+      expect(
+        cache.readQuery(basicTest.request),
+        equals(null),
+      );
+    });
+
     test('updating nested normalized fragment changes top level operation', () {
       cache.writeQuery(basicTest.request, data: basicTest.data);
       final idFields = {

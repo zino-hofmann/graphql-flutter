@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:graphql/client.dart';
 
+const debuggingUnexpectedTestFailures = false;
+
 overridePrint(testFn(List<String> log)) => () {
       final log = <String>[];
       final spec = ZoneSpecification(print: (_, __, ___, String msg) {
@@ -11,7 +13,7 @@ overridePrint(testFn(List<String> log)) => () {
     };
 
 class TestCache extends GraphQLCache {
-  bool get returnPartialData => true;
+  bool get returnPartialData => debuggingUnexpectedTestFailures;
 }
 
 GraphQLCache getTestCache() => TestCache();
