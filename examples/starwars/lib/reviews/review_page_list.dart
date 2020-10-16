@@ -5,7 +5,7 @@ import 'package:starwars_app/reviews/review.dart';
 class PagingReviews extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
     icon: Icon(Icons.description),
-    title: Text('Paging'),
+    label: 'Paging',
   );
 
   @override
@@ -73,7 +73,7 @@ class PagingReviews extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Text('LOAD PAGE $nextPage'),
+                    child: Text('LOAD PAGE ${nextPage + 1}'),
                   ),
           ],
         );

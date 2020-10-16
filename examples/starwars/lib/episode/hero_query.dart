@@ -36,21 +36,29 @@ class HeroForEpisode extends StatelessWidget {
         Future<QueryResult> Function() refetch,
         FetchMore fetchMore,
       }) {
+        // NOTE: a loading message is always sent, but if you're developing locally,
+        // the network result might be returned so fast that
+        // flutter rebuilds again too quickly for you don't see the loading result on the stream
+        print([
+          result.source,
+          if (result.data != null) result.data['hero']['name']
+        ]);
         if (result.hasException) {
           return Text(result.exception.toString());
         }
 
-        if (result.isLoading) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        }
-
         return Column(
           children: <Widget>[
-            Text(getPrettyJSONString(result.data)),
+            if (result.isLoading)
+              const Center(
+                child: CircularProgressIndicator(),
+              ),
+            if (result.data != null)
+              Text(
+                getPrettyJSONString(result.data),
+              ),
             RaisedButton(
-              onPressed: refetch,
+              onPressed: result.isNotLoading ? refetch : null,
               child: const Text('REFETCH'),
             ),
           ],

@@ -269,9 +269,20 @@ class QueryManager {
     return queryResult;
   }
 
+  /// Refetch the [ObservableQuery] referenced by [queryId],
+  /// overriding any present non-network-only [FetchPolicy].
   Future<QueryResult> refetchQuery(String queryId) {
-    final WatchQueryOptions options = queries[queryId].options;
-    return fetchQuery(queryId, options);
+    final WatchQueryOptions options = queries[queryId].options.copy();
+    if (!canExecuteOnNetwork(options.fetchPolicy)) {
+      options.policies = options.policies.copyWith(
+        fetch: FetchPolicy.networkOnly,
+      );
+    }
+
+    // create a new request to execute
+    final request = options.asRequest;
+
+    return _resolveQueryOnNetwork(request, queryId, options);
   }
 
   @experimental

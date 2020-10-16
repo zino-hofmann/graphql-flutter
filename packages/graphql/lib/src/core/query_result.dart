@@ -7,14 +7,15 @@ import 'package:meta/meta.dart';
 /// The source of the result data contained
 ///
 /// * [loading]: No data has been specified from any source
+///   for the _most recent_ operation
 /// * [cache]: A result has been eagerly resolved from the cache
 /// * [optimisticResult]: An optimistic result has been specified
-///     May include eager results from the cache.
+///   May include eager results from the cache.
 /// * [network]: The query has been resolved on the network
 ///
 /// Both [optimisticResult] and [cache] sources are considered "Eager" results.
 enum QueryResultSource {
-  /// No data has been specified from any source
+  /// No data has been specified from any source for the _most recent_ operation
   loading,
 
   /// A result has been eagerly resolved from the cache
@@ -96,7 +97,12 @@ class QueryResult {
   OperationException exception;
 
   /// [data] has yet to be specified from any source
+  /// for the _most recent_ operation
   /// (including [QueryResultSource.optimisticResult])
+  ///
+  /// **NOTE:** query updating methods like `fetchMore` and `refetch` will send
+  /// an [isLoading], so it is best practice to check both `isLoading && data != null`
+  /// before assuming there is no data that should be displayed.
   bool get isLoading => source == QueryResultSource.loading;
 
   /// [data] been specified (including [QueryResultSource.optimisticResult])
