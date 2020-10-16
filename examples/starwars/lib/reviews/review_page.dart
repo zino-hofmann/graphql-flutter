@@ -5,7 +5,7 @@ import './review_subscription.dart';
 class ReviewsPage extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
     icon: Icon(Icons.star),
-    title: Text('Reviews'),
+    label: 'Reviews',
   );
 
   @override

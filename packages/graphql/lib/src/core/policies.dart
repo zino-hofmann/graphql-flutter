@@ -1,17 +1,35 @@
 import 'package:meta/meta.dart';
 import "package:collection/collection.dart";
 
-/// [FetchPolicy] determines where the client may return a result from. The options are:
-/// - cacheFirst (default): return result from cache. Only fetch from network if cached result is not available.
-/// - cacheAndNetwork: return result from cache first (if it exists), then return network result once it's available.
-/// - cacheOnly: return result from cache if available, fail otherwise.
-/// - noCache: return result from network, fail if network call doesn't succeed, don't save to cache.
-/// - networkOnly: return result from network, fail if network call doesn't succeed, save to cache.
+/// [FetchPolicy] determines where the client may return a result from.
+///
+/// * [cacheFirst] (default): return result from cache. Only fetch from network if cached result is not available.
+/// * [cacheAndNetwork]: return result from cache first (if it exists), then return network result once it's available.
+/// * [cacheOnly]: return result from cache if available, fail otherwise.
+/// * [noCache]: return result from network, fail if network call doesn't succeed, don't save to cache.
+/// * [networkOnly]: return result from network, fail if network call doesn't succeed, save to cache.
+///
+/// The default `fetchPolicy` for each method are:
+/// * `watchQuery`: [cacheAndNetwork]
+/// * `query`: [cacheFirst]
+/// * `mutation`: [networkOnly]
+///
+/// These can be overriden at client construction time by passing
+/// a [DefaultPolicies] instance to `defaultPolicies`.
 enum FetchPolicy {
+  /// Return result from cache. Only fetch from network if cached result is not available.
   cacheFirst,
+
+  /// Return result from cache first (if it exists), then return network result once it's available.
   cacheAndNetwork,
+
+  /// Return result from cache if available, fail otherwise.
   cacheOnly,
+
+  /// Return result from network, fail if network call doesn't succeed, don't save to cache.
   noCache,
+
+  /// Return result from network, fail if network call doesn't succeed, save to cache.
   networkOnly,
 }
 
@@ -26,15 +44,41 @@ bool shouldStopAtCache(FetchPolicy fetchPolicy) =>
     fetchPolicy == FetchPolicy.cacheFirst ||
     fetchPolicy == FetchPolicy.cacheOnly;
 
-/// [ErrorPolicy] determines the level of events for errors in the execution result. The options are:
-/// - none (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
-/// - ignore:  Ignore allows you to read any data that is returned alongside GraphQL Errors,
-///  but doesn't save the errors or report them to your UI.
-/// - all: Using the all policy is the best way to notify your users of potential issues while still showing as much data as possible from your server.
-///  It saves both data and errors into the Apollo Cache so your UI can use them.
+bool canExecuteOnNetwork(FetchPolicy policy) {
+  switch (policy) {
+    case FetchPolicy.noCache:
+    case FetchPolicy.networkOnly:
+      return true;
+    case FetchPolicy.cacheFirst:
+    case FetchPolicy.cacheAndNetwork:
+    case FetchPolicy.cacheOnly:
+      return false;
+  }
+}
+
+/// [ErrorPolicy] determines the level of events for errors in the execution result.
+///
+/// While the default for all client methods is [none],
+/// [all] is recommended for notifying your users of potential issues.
+///
+/// * [none] (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
+/// * [ignore]:  Ignore allows you to read any data that is returned alongside GraphQL Errors,
+///   but doesn't save the errors or report them to your UI.
+/// * [all]: saves both data and errors into the `cache` so your UI can use them.
+///   It is recommended for notifying your users of potential issues,
+///   while still showing as much data as possible from your server.
 enum ErrorPolicy {
+  /// Any GraphQL Errors are treated the same as network errors and any data is ignored from the response. (default)
   none,
+
+  /// Ignore allows you to read any data that is returned alongside GraphQL Errors,
+  /// but doesn't save the errors or report them to your UI.
   ignore,
+
+  /// saves both data and errors into the `cache` so your UI can use them.
+  ///
+  ///  It is recommended for notifying your users of potential issues,
+  ///  while still showing as much data as possible from your server.
   all,
 }
 
@@ -143,6 +187,7 @@ class DefaultPolicies {
     FetchPolicy.cacheFirst,
     ErrorPolicy.none,
   );
+
   static final _mutateDefaults = Policies.safe(
     FetchPolicy.networkOnly,
     ErrorPolicy.none,

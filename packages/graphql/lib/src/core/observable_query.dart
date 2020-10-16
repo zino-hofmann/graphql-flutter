@@ -129,9 +129,13 @@ class ObservableQuery {
     return false;
   }
 
-  /// Attempts to refetch, throwing error if not refetch safe
-  Future<QueryResult> refetch() async {
+  /// Attempts to refetch _on the network_, throwing error if not refetch safe
+  ///
+  /// **NOTE:** overrides any present non-network-only [FetchPolicy],
+  /// as refetching from the `cache` does not make sense.
+  Future<QueryResult> refetch() {
     if (isRefetchSafe) {
+      addResult(QueryResult.loading(data: latestResult.data));
       return queryManager.refetchQuery(queryId);
     }
     throw Exception('Query is not refetch safe');

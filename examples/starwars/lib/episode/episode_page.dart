@@ -6,7 +6,7 @@ import './hero_query.dart';
 class EpisodePage extends StatefulWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
     icon: Icon(Icons.movie_filter),
-    title: Text('Episodes'),
+    label: 'Episodes',
   );
 
   @override

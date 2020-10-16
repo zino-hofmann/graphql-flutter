@@ -20,6 +20,19 @@ String episodeToJson(Episode e) {
   }
 }
 
+String episodeToDisplay(Episode e) {
+  switch (e) {
+    case Episode.NEWHOPE:
+      return 'EP. IV: A NEW HOPE';
+    case Episode.EMPIRE:
+      return 'EP. V: THE EMPIRE STRIKES BACK';
+    case Episode.JEDI:
+      return 'EP. VI: RETURN OF THE JEDI';
+    default:
+      return null;
+  }
+}
+
 Episode episodeFromJson(String e) {
   switch (e) {
     case 'NEWHOPE':
