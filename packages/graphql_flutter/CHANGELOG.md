@@ -1,3 +1,10 @@
+# [4.0.0-beta.3](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2020-10-17)
+
+
+### Bug Fixes
+
+* **client:** refetch overrides fetchPolicy ([891bc2b](https://github.com/zino-app/graphql-flutter/commit/891bc2b1d3e501cd7e494c81134dd8665115c40d))
+
 # [4.0.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.1...v4.0.0-beta.2) (2020-10-13)
 
 
