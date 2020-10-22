@@ -293,9 +293,11 @@ Map<String, dynamic> _buildBody(
   return body;
 }
 
+var headerGl;
+
 Future<FetchResult> _parseResponse(StreamedResponse response) async {
   final int statusCode = response.statusCode;
-
+  headerGl = response.headers;
   final Encoding encoding = _determineEncodingFromResponse(response);
   // @todo limit bodyBytes
   final Uint8List responseByte = await response.stream.toBytes();
