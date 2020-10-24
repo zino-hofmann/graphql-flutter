@@ -30,11 +30,21 @@ void main() {
     });
 
     test('.writeQuery should fail on missing fields', () {
-      cache.writeQuery(basicTest.request, data: {...basicTest.data, 'a': {}});
-      print(cache.store.toMap());
       expect(
-        cache.readQuery(basicTest.request),
-        equals(null),
+        () => cache.writeQuery(basicTest.request, data: <String, dynamic>{
+          ...basicTest.data,
+          'a': <String, dynamic>{
+            ...basicTest.data['a'],
+            'b': <String, dynamic>{
+              'id': 5,
+            }
+          },
+        }),
+        throwsA(isA<PartialDataException>().having(
+          (e) => e.path,
+          'An accurate path to the first missing subfield',
+          ['a', 'b', '__typename'],
+        )),
       );
     });
 

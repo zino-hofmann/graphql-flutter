@@ -46,7 +46,6 @@ void main() {
     }
   ''';
   readRepositoryData({withTypenames = true, withIds = true}) {
-    repo(map) => withTypenames ? {'__typename': 'Repository', ...map} : map;
     return {
       'viewer': {
         'repositories': {
@@ -66,7 +65,10 @@ void main() {
               'name': 'watchbot',
               'viewerHasStarred': false
             },
-          ].map(repo).toList(),
+          ]
+              .map((map) =>
+                  withTypenames ? {'__typename': 'Repository', ...map} : map)
+              .toList(),
         },
       },
     };
@@ -122,7 +124,7 @@ void main() {
                 document: parseString(readRepositories),
                 //operationName: 'ReadRepositories',
               ),
-              variables: {
+              variables: <String, dynamic>{
                 'nRepositories': 42,
               },
               context: Context(),
@@ -193,7 +195,15 @@ void main() {
         );
 
         final QueryResult r = await client.query(_options);
-        print([r.data, r.source, r.exception]);
+
+        expect(r.data, equals(malformedRepoData), reason: 'Malformed data should be passed along with errors');
+
+        throwsA(isA<PartialDataException>().having(
+          (e) => e.path,
+          'An accurate path to the first missing subfield',
+          ['a', 'b', '__typename'],
+        )),
+
       });
 
       test('failed query because of an exception with null string', () async {

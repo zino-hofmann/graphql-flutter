@@ -7,6 +7,8 @@ import 'package:normalize/normalize.dart';
 import './data_proxy.dart';
 import '../utilities/helpers.dart';
 
+export 'package:normalize/normalize.dart' show PartialDataException;
+
 typedef DataIdResolver = String Function(Map<String, Object> object);
 
 /// Implements the core (de)normalization api leveraged by the cache and proxy,
@@ -35,6 +37,13 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// It will simply return `null` if any part of the query can't be constructed.
   @protected
   bool get returnPartialData => false;
+
+  /// Used for testing.
+  ///
+  /// Passed through to normalize. When [normalizeOperation] isn't passed [acceptPartialData],
+  /// It will simply return `null` if any part of the query can't be constructed.
+  @protected
+  bool get acceptPartialData => false;
 
   /// Flag used to request a (re)broadcast from the [QueryManager].
   ///
@@ -108,6 +117,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       read: (dataId) => readNormalized(dataId),
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
+      acceptPartialData: acceptPartialData,
       // provided from request
       document: request.operation.document,
       operationName: request.operation.operationName,
@@ -131,6 +141,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       read: (dataId) => readNormalized(dataId),
       typePolicies: typePolicies,
       dataIdFromObject: dataIdFromObject,
+      acceptPartialData: acceptPartialData,
       // provided from request
       document: request.fragment.document,
       idFields: request.idFields,

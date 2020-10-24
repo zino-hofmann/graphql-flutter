@@ -1,3 +1,5 @@
+import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
+
 /// Once `gql_link` has robust http and socket exception handling,
 /// these should be the only exceptions we need
 import 'package:meta/meta.dart';
@@ -22,10 +24,11 @@ class CacheMissException extends LinkException {
 /// This is checked by doing a round-trip with `normalize`
 @immutable
 class MismatchedDataStructureException extends ServerException {
-  const MismatchedDataStructureException({
+  const MismatchedDataStructureException(
+    PartialDataException original, {
     @required this.request,
     @required Response parsedResponse,
-  }) : super(parsedResponse: parsedResponse, originalException: null);
+  }) : super(parsedResponse: parsedResponse, originalException: original);
 
   final Request request;
 }
