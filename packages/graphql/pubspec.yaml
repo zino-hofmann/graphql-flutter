@@ -15,7 +15,10 @@ dependencies:
   gql_dedupe_link: ^1.0.10
   hive: ^1.3.0
   normalize: # ^0.4.2
-    path: /Users/mjr/Documents/code/libraries/dart/ferry/normalize
+    git: 
+      url: git@github.com:micimize/ferry.git
+      ref: partial_paths
+      path: normalize
   http: ^0.12.1
   collection: ^1.14.12
   websocket: ^0.0.5
