@@ -1,4 +1,6 @@
 import 'package:gql_exec/gql_exec.dart' show Request;
+import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
+import 'package:graphql/src/exceptions/exceptions_next.dart';
 
 import './fragment.dart';
 
@@ -118,6 +120,10 @@ abstract class GraphQLDataProxy {
   ///
   /// For complex `normalize` type policies that involve custom reads,
   /// `optimistic` will be the default.
+  ///
+  /// Will throw a [PartialDataException] if the [data] structure
+  /// doesn't match that of the [request] `operation.document`,
+  /// or a [CacheMisconfigurationException] if the write fails for some other reason.
   void writeQuery(
     Request request, {
     Map<String, dynamic> data,
@@ -133,6 +139,10 @@ abstract class GraphQLDataProxy {
   ///
   /// For complex `normalize` type policies that involve custom reads,
   /// `optimistic` will be the default.
+  ///
+  /// Will throw a [PartialDataException] if the [data] structure
+  /// doesn't match that of the [fragmentRequest] `fragment.document`,
+  /// or a [CacheMisconfigurationException] if the write fails for some other reason.
   void writeFragment(
     FragmentRequest fragmentRequest, {
     Map<String, dynamic> data,

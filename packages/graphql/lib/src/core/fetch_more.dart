@@ -27,6 +27,7 @@ Future<QueryResult> fetchMoreImplementation(
   assert(fetchMoreOptions.updateQuery != null);
 
   final document = (fetchMoreOptions.document ?? originalOptions.document);
+  final request = originalOptions.asRequest;
 
   assert(
     document != null,
@@ -48,17 +49,25 @@ Future<QueryResult> fetchMoreImplementation(
 
   try {
     // combine the query with the new query, using the function provided by the user
-    fetchMoreResult.data = fetchMoreOptions.updateQuery(
+    final data = fetchMoreOptions.updateQuery(
       previousResult.data,
       fetchMoreResult.data,
     );
-    assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+    assert(data != null, 'updateQuery result cannot be null');
+    fetchMoreResult.data = data;
+
+    if (originalOptions.fetchPolicy != FetchPolicy.noCache) {
+      queryManager.cache.writeQuery(
+        request,
+        data: data,
+      );
+    }
+
     // will add to a stream with `queryId` and rebroadcast if appropriate
     queryManager.addQueryResult(
-      originalOptions.asRequest,
+      request,
       queryId,
       fetchMoreResult,
-      writeToCache: originalOptions.fetchPolicy != FetchPolicy.noCache,
     );
   } catch (error) {
     if (fetchMoreResult.hasException) {

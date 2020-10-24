@@ -1,6 +1,4 @@
 import 'dart:async' show FutureOr;
-
-import 'package:graphql/client.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:meta/meta.dart';
 
@@ -130,6 +128,14 @@ class QueryResult {
 
   /// Whether the response includes an [exception]
   bool get hasException => (exception != null);
+
+  @override
+  String toString() => 'QueryResult('
+      'source: $source, '
+      'data: $data, '
+      'exception: $exception, '
+      'timestamp: $timestamp'
+      ')';
 }
 
 class MultiSourceResult {

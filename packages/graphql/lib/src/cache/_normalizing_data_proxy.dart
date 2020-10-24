@@ -1,4 +1,5 @@
 import 'package:graphql/src/cache/fragment.dart';
+import 'package:graphql/src/exceptions/exceptions_next.dart';
 import "package:meta/meta.dart";
 
 import 'package:gql_exec/gql_exec.dart' show Request;
@@ -6,8 +7,6 @@ import 'package:normalize/normalize.dart';
 
 import './data_proxy.dart';
 import '../utilities/helpers.dart';
-
-export 'package:normalize/normalize.dart' show PartialDataException;
 
 typedef DataIdResolver = String Function(Map<String, Object> object);
 
@@ -111,22 +110,33 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     Map<String, dynamic> data,
     bool broadcast = true,
   }) {
-    normalizeOperation(
-      // provided from cache
-      write: (dataId, value) => writeNormalized(dataId, value),
-      read: (dataId) => readNormalized(dataId),
-      typePolicies: typePolicies,
-      dataIdFromObject: dataIdFromObject,
-      acceptPartialData: acceptPartialData,
-      // provided from request
-      document: request.operation.document,
-      operationName: request.operation.operationName,
-      variables: sanitizeVariables(request.variables),
-      // data
-      data: data,
-    );
-    if (broadcast ?? true) {
-      broadcastRequested = true;
+    try {
+      normalizeOperation(
+        // provided from cache
+        write: (dataId, value) => writeNormalized(dataId, value),
+        read: (dataId) => readNormalized(dataId),
+        typePolicies: typePolicies,
+        dataIdFromObject: dataIdFromObject,
+        acceptPartialData: acceptPartialData,
+        // provided from request
+        document: request.operation.document,
+        operationName: request.operation.operationName,
+        variables: sanitizeVariables(request.variables),
+        // data
+        data: data,
+      );
+      if (broadcast ?? true) {
+        broadcastRequested = true;
+      }
+    } on PartialDataException catch (e) {
+      if (request.validatesStructureOf(data)) {
+        throw CacheMisconfigurationException(
+          e,
+          request: request,
+          data: data,
+        );
+      }
+      rethrow;
     }
   }
 
@@ -135,23 +145,34 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     @required Map<String, dynamic> data,
     bool broadcast = true,
   }) {
-    normalizeFragment(
-      // provided from cache
-      write: (dataId, value) => writeNormalized(dataId, value),
-      read: (dataId) => readNormalized(dataId),
-      typePolicies: typePolicies,
-      dataIdFromObject: dataIdFromObject,
-      acceptPartialData: acceptPartialData,
-      // provided from request
-      document: request.fragment.document,
-      idFields: request.idFields,
-      fragmentName: request.fragment.fragmentName,
-      variables: sanitizeVariables(request.variables),
-      // data
-      data: data,
-    );
-    if (broadcast ?? true) {
-      broadcastRequested = true;
+    try {
+      normalizeFragment(
+        // provided from cache
+        write: (dataId, value) => writeNormalized(dataId, value),
+        read: (dataId) => readNormalized(dataId),
+        typePolicies: typePolicies,
+        dataIdFromObject: dataIdFromObject,
+        acceptPartialData: acceptPartialData,
+        // provided from request
+        document: request.fragment.document,
+        idFields: request.idFields,
+        fragmentName: request.fragment.fragmentName,
+        variables: sanitizeVariables(request.variables),
+        // data
+        data: data,
+      );
+      if (broadcast ?? true) {
+        broadcastRequested = true;
+      }
+    } on PartialDataException catch (e) {
+      if (request.validatesStructureOf(data)) {
+        throw CacheMisconfigurationException(
+          e,
+          fragmentRequest: request,
+          data: data,
+        );
+      }
+      rethrow;
     }
   }
 }

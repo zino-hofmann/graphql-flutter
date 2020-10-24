@@ -14,6 +14,7 @@ import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
+import 'package:normalize/normalize.dart';
 
 class QueryManager {
   QueryManager({
@@ -67,15 +68,19 @@ class QueryManager {
 
     yield* link.request(request).map((response) {
       QueryResult queryResult;
+      bool rereadFromCache = false;
       try {
-        if (response.data != null &&
-            options.fetchPolicy != FetchPolicy.noCache) {
-          cache.writeQuery(request, data: response.data);
-        }
         queryResult = mapFetchResultToQueryResult(
           response,
           options,
           source: QueryResultSource.network,
+        );
+
+        rereadFromCache = _attemptCacheWrite(
+          options.fetchPolicy,
+          request,
+          response,
+          queryResult,
         );
       } catch (failure) {
         // we set the source to indicate where the source of failure
@@ -87,7 +92,7 @@ class QueryManager {
         );
       }
 
-      if (options.fetchPolicy != FetchPolicy.noCache) {
+      if (rereadFromCache) {
         // normalize results if previously written
         queryResult.data = cache.readQuery(request);
       }
@@ -157,6 +162,38 @@ class QueryManager {
     );
   }
 
+  /// Merges exceptions into `queryResult` and
+  /// returns `true` if a reread should be attempted
+  bool _attemptCacheWrite(
+    FetchPolicy fetchPolicy,
+    Request request,
+    Response response,
+    QueryResult queryResult,
+  ) {
+    if (fetchPolicy == FetchPolicy.noCache || response.data == null) {
+      return false;
+    }
+    try {
+      cache.writeQuery(request, data: response.data);
+      return true;
+    } on CacheMisconfigurationException catch (failure) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        linkException: failure,
+      );
+    } on PartialDataException catch (failure) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        linkException: UnexpectedResponseStructureException(
+          failure,
+          request: request,
+          parsedResponse: response,
+        ),
+      );
+    }
+    return false;
+  }
+
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
   Future<QueryResult> _resolveQueryOnNetwork(
@@ -167,21 +204,23 @@ class QueryManager {
     Response response;
     QueryResult queryResult;
 
-    final writeToCache = options.fetchPolicy != FetchPolicy.noCache;
+    bool rereadFromCache = false;
 
     try {
       // execute the request through the provided link(s)
       response = await link.request(request).first;
 
-      // save the data from response to the cache
-      if (response.data != null && writeToCache) {
-        await cache.writeQuery(request, data: response.data);
-      }
-
       queryResult = mapFetchResultToQueryResult(
         response,
         options,
         source: QueryResultSource.network,
+      );
+
+      rereadFromCache = _attemptCacheWrite(
+        options.fetchPolicy,
+        request,
+        response,
+        queryResult,
       );
     } catch (failure) {
       // we set the source to indicate where the source of failure
@@ -196,7 +235,7 @@ class QueryManager {
     // cleanup optimistic results
     cache.removeOptimisticPatch(queryId);
 
-    if (writeToCache) {
+    if (rereadFromCache) {
       // normalize results if previously written
       queryResult.data = cache.readQuery(request);
     }
@@ -312,16 +351,8 @@ class QueryManager {
   void addQueryResult(
     Request request,
     String queryId,
-    QueryResult queryResult, {
-    bool writeToCache = false,
-  }) {
-    if (writeToCache) {
-      cache.writeQuery(
-        request,
-        data: queryResult.data,
-      );
-    }
-
+    QueryResult queryResult,
+  ) {
     final ObservableQuery observableQuery = getQuery(queryId);
 
     if (observableQuery != null && !observableQuery.controller.isClosed) {
@@ -335,18 +366,37 @@ class QueryManager {
     @required String queryId,
     @required Object optimisticResult,
   }) {
-    cache.recordOptimisticTransaction(
-      (proxy) => proxy..writeQuery(request, data: optimisticResult),
-      queryId,
-    );
-
-    final QueryResult queryResult = QueryResult(
-      data: cache.readQuery(
-        request,
-        optimistic: true,
-      ),
+    QueryResult queryResult = QueryResult(
       source: QueryResultSource.optimisticResult,
     );
+
+    try {
+      cache.recordOptimisticTransaction(
+        (proxy) => proxy..writeQuery(request, data: optimisticResult),
+        queryId,
+      );
+    } on CacheMisconfigurationException catch (failure) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        linkException: failure,
+      );
+    } on PartialDataException catch (failure) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        linkException: MismatchedDataStructureException(
+          failure,
+          request: request,
+          data: optimisticResult,
+        ),
+      );
+    }
+
+    if (!queryResult.hasException) {
+      queryResult.data = cache.readQuery(
+        request,
+        optimistic: true,
+      );
+    }
 
     return queryResult;
   }

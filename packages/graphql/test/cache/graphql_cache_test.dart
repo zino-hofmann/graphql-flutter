@@ -1,4 +1,5 @@
 import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
+import 'package:normalize/normalize.dart' show PartialDataException;
 import 'package:test/test.dart';
 
 import 'package:graphql/src/cache/cache.dart';

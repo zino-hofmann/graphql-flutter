@@ -196,14 +196,14 @@ void main() {
 
         final QueryResult r = await client.query(_options);
 
-        expect(r.data, equals(malformedRepoData), reason: 'Malformed data should be passed along with errors');
+        expect(r.data, equals(malformedRepoData),
+            reason: 'Malformed data should be passed along with errors');
 
         throwsA(isA<PartialDataException>().having(
           (e) => e.path,
           'An accurate path to the first missing subfield',
           ['a', 'b', '__typename'],
-        )),
-
+        ));
       });
 
       test('failed query because of an exception with null string', () async {
@@ -274,7 +274,7 @@ void main() {
           ),
         );
 
-        final ObservableQuery observable = await client.watchQuery(
+        final ObservableQuery observable = client.watchQuery(
           WatchQueryOptions(
             document: parseString(readSingle),
             eagerlyFetchResults: true,

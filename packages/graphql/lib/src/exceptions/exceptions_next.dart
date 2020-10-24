@@ -1,4 +1,4 @@
-import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
+import 'package:graphql/client.dart';
 
 /// Once `gql_link` has robust http and socket exception handling,
 /// these should be the only exceptions we need
@@ -8,6 +8,7 @@ import 'package:gql_link/gql_link.dart' show LinkException, ServerException;
 import 'package:gql_exec/gql_exec.dart' show GraphQLError, Request, Response;
 
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
+export 'package:normalize/normalize.dart' show PartialDataException;
 
 /// A failure to find a response from  the cache when cacheOnly=true
 @immutable
@@ -18,19 +19,68 @@ class CacheMissException extends LinkException {
   final Request request;
 }
 
-/// Failure occurring when the structure of the parsed [Response] `data`
-/// does not match that of the [Request] `operation` `document`.
+/// A failure due to a data structure mismatch between the data and the expected
+/// structure based on the [request] `operation` `document`.
 ///
-/// This is checked by doing a round-trip with `normalize`
-@immutable
-class MismatchedDataStructureException extends ServerException {
+/// If [validateStructure] passes, then the mismatch must be due to a cache misconfiguration,
+/// [CacheMisconfigurationException].
+class MismatchedDataStructureException extends LinkException {
   const MismatchedDataStructureException(
-    PartialDataException original, {
-    @required this.request,
-    @required Response parsedResponse,
-  }) : super(parsedResponse: parsedResponse, originalException: original);
+    this.originalException, {
+    this.request,
+    @required this.data,
+  }) : super(originalException);
+
+  final Map<String, dynamic> data;
+  final Request request;
+  final PartialDataException originalException;
+}
+
+/// Failure occurring when the
+/// does not match that of the [request] `operation` `document`.
+///
+/// This is checked by leveraging `normalize`
+@immutable
+class CacheMisconfigurationException extends LinkException
+    implements MismatchedDataStructureException {
+  const CacheMisconfigurationException(
+    this.originalException, {
+    this.request,
+    this.fragmentRequest,
+    @required this.data,
+  }) : super(originalException);
 
   final Request request;
+  final FragmentRequest fragmentRequest;
+  final Map<String, dynamic> data;
+
+  @override
+  final PartialDataException originalException;
+}
+
+/// Failure occurring when the structure of the [parsedResponse] `data`
+/// does not match that of the [request] `operation` `document`.
+///
+/// This is checked by leveraging `normalize`
+@immutable
+class UnexpectedResponseStructureException extends ServerException
+    implements MismatchedDataStructureException {
+  const UnexpectedResponseStructureException(
+    this.originalException, {
+    @required this.request,
+    @required Response parsedResponse,
+  }) : super(
+            parsedResponse: parsedResponse,
+            originalException: originalException);
+
+  @override
+  final Request request;
+
+  @override
+  get data => parsedResponse.data;
+
+  @override
+  final PartialDataException originalException;
 }
 
 /// Exception occurring when an unhandled, non-link exception
