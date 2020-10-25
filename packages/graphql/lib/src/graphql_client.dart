@@ -186,6 +186,11 @@ class GraphQLClient implements GraphQLDataProxy {
 
   /// Fetch more results and then merge them with the given [previousResult]
   /// according to [FetchMoreOptions.updateQuery].
+  ///
+  /// **NOTE**: with the addition of strict data structure checking in v4,
+  /// it is easy to make mistakes in writing [updateQuery].
+  ///
+  /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   @experimental
   Future<QueryResult> fetchMore(
     FetchMoreOptions fetchMoreOptions, {

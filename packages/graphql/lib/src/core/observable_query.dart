@@ -205,6 +205,11 @@ class ObservableQuery {
   ///
   /// The results will then be added to to stream for listeners to react to,
   /// such as for triggering `grahphql_flutter` widget rebuilds
+  ///
+  /// **NOTE**: with the addition of strict data structure checking in v4,
+  /// it is easy to make mistakes in writing [updateQuery].
+  ///
+  /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
     assert(fetchMoreOptions.updateQuery != null);
 

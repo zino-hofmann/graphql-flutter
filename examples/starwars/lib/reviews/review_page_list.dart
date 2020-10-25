@@ -12,6 +12,8 @@ class PagingReviews extends StatelessWidget {
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
+        // if we have cached results, don't clobber them
+        fetchPolicy: FetchPolicy.cacheFirst,
         document: gql(r'''
           query Reviews($page: Int!) {
             reviews(page: $page) {
@@ -59,7 +61,7 @@ class PagingReviews extends StatelessWidget {
                 : RaisedButton(
                     onPressed: () {
                       fetchMore(
-                        FetchMoreOptions(
+                        FetchMoreOptions.partial(
                           variables: {'page': nextPage},
                           updateQuery: (existing, newReviews) => ({
                             'reviews': {

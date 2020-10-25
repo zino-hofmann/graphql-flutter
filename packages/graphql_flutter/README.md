@@ -196,6 +196,10 @@ In order to use the `FetchMore()` function, you will need to first define `Fetch
 final Map pageInfo = result.data['search']['pageInfo'];
 final String fetchMoreCursor = pageInfo['endCursor'];
 
+/// **NOTE**: with the addition of strict data structure checking in v4,
+/// it is easy to make mistakes in writing [updateQuery].
+///
+/// To mitigate this, [FetchMoreOptions.partial] has been provided.
 FetchMoreOptions opts = FetchMoreOptions(
   variables: {'cursor': fetchMoreCursor},
   updateQuery: (previousResultData, fetchMoreResultData) {

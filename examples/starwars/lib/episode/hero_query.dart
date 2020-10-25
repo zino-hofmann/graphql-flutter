@@ -39,10 +39,10 @@ class HeroForEpisode extends StatelessWidget {
         // NOTE: a loading message is always sent, but if you're developing locally,
         // the network result might be returned so fast that
         // flutter rebuilds again too quickly for you don't see the loading result on the stream
-        print([
-          result.source,
-          if (result.data != null) result.data['hero']['name']
-        ]);
+        // print([
+        //   result.source,
+        //   if (result.data != null) result.data['hero']['name']
+        // ]);
         if (result.hasException) {
           return Text(result.exception.toString());
         }

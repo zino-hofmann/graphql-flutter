@@ -8,6 +8,8 @@ import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
 
+import 'package:graphql/src/core/_query_write_handling.dart';
+
 /// Fetch more results and then merge them with [previousResult]
 /// according to [FetchMoreOptions.updateQuery]
 ///
@@ -53,13 +55,24 @@ Future<QueryResult> fetchMoreImplementation(
       previousResult.data,
       fetchMoreResult.data,
     );
-    assert(data != null, 'updateQuery result cannot be null');
+
+    assert(
+      data != null,
+      'updateQuery result cannot be null:\n'
+      '  previousResultData: ${previousResult.data},\n'
+      ' fetchMoreResultData: ${fetchMoreResult.data}',
+    );
     fetchMoreResult.data = data;
 
     if (originalOptions.fetchPolicy != FetchPolicy.noCache) {
-      queryManager.cache.writeQuery(
+      queryManager.attemptCacheWriteFromClient(
         request,
-        data: data,
+        data,
+        fetchMoreResult,
+        writeQuery: (req, data) => queryManager.cache.writeQuery(
+          req,
+          data: data,
+        ),
       );
     }
 
