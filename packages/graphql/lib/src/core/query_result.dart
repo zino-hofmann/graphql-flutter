@@ -63,7 +63,8 @@ class QueryResult {
     this.data,
     this.exception,
     @required this.source,
-  }) : timestamp = DateTime.now();
+  })  : timestamp = DateTime.now(),
+        assert(source != null);
 
   factory QueryResult.loading({
     Map<String, dynamic> data,

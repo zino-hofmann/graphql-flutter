@@ -90,6 +90,7 @@ class WatchQueryOptions extends QueryOptions {
     Object optimisticResult,
     Duration pollInterval,
     this.fetchResults = false,
+    this.carryForwardDataOnException = true,
     bool eagerlyFetchResults,
     Context context,
   })  : assert(
@@ -115,6 +116,10 @@ class WatchQueryOptions extends QueryOptions {
   /// Defaults to [fetchResults].
   bool eagerlyFetchResults;
 
+  /// carry forward previous data in the result of errors and no data.
+  /// defaults to `true`.
+  bool carryForwardDataOnException;
+
   @override
   List<Object> get properties =>
       [...super.properties, fetchResults, eagerlyFetchResults];
@@ -129,6 +134,7 @@ class WatchQueryOptions extends QueryOptions {
         pollInterval: pollInterval,
         fetchResults: fetchResults,
         eagerlyFetchResults: eagerlyFetchResults,
+        carryForwardDataOnException: carryForwardDataOnException,
         context: context,
       );
 }

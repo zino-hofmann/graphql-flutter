@@ -238,8 +238,8 @@ class ObservableQuery {
       return;
     }
 
-    if (latestResult != null) {
-      result.source ??= latestResult.source;
+    if (options.carryForwardDataOnException && result.hasException) {
+      result.data ??= latestResult.data;
     }
 
     if (lifecycle == QueryLifecycle.pending && result.isConcrete) {
