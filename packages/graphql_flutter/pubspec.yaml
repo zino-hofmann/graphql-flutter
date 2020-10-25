@@ -11,7 +11,7 @@ dependencies:
   meta: ^1.1.6
   path_provider: ^1.6.10
   path: ^1.6.4
-  connectivity: ^0.4.4
+  connectivity: ^2.0.0
   hive: ^1.3.0
 dev_dependencies:
   pedantic: ^1.8.0+1
