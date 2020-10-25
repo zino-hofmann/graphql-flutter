@@ -14,7 +14,8 @@ import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
-import 'package:normalize/normalize.dart';
+
+import 'package:graphql/src/core/_query_write_handling.dart';
 
 class QueryManager {
   QueryManager({
@@ -76,7 +77,7 @@ class QueryManager {
           source: QueryResultSource.network,
         );
 
-        rereadFromCache = _attemptCacheWrite(
+        rereadFromCache = attemptCacheWriteFromResponse(
           options.fetchPolicy,
           request,
           response,
@@ -162,38 +163,6 @@ class QueryManager {
     );
   }
 
-  /// Merges exceptions into `queryResult` and
-  /// returns `true` if a reread should be attempted
-  bool _attemptCacheWrite(
-    FetchPolicy fetchPolicy,
-    Request request,
-    Response response,
-    QueryResult queryResult,
-  ) {
-    if (fetchPolicy == FetchPolicy.noCache || response.data == null) {
-      return false;
-    }
-    try {
-      cache.writeQuery(request, data: response.data);
-      return true;
-    } on CacheMisconfigurationException catch (failure) {
-      queryResult.exception = coalesceErrors(
-        exception: queryResult.exception,
-        linkException: failure,
-      );
-    } on PartialDataException catch (failure) {
-      queryResult.exception = coalesceErrors(
-        exception: queryResult.exception,
-        linkException: UnexpectedResponseStructureException(
-          failure,
-          request: request,
-          parsedResponse: response,
-        ),
-      );
-    }
-    return false;
-  }
-
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
   Future<QueryResult> _resolveQueryOnNetwork(
@@ -216,7 +185,7 @@ class QueryManager {
         source: QueryResultSource.network,
       );
 
-      rereadFromCache = _attemptCacheWrite(
+      rereadFromCache = attemptCacheWriteFromResponse(
         options.fetchPolicy,
         request,
         response,
@@ -370,26 +339,15 @@ class QueryManager {
       source: QueryResultSource.optimisticResult,
     );
 
-    try {
-      cache.recordOptimisticTransaction(
-        (proxy) => proxy..writeQuery(request, data: optimisticResult),
+    attemptCacheWriteFromClient(
+      request,
+      optimisticResult,
+      queryResult,
+      writeQuery: (req, data) => cache.recordOptimisticTransaction(
+        (proxy) => proxy..writeQuery(req, data: data),
         queryId,
-      );
-    } on CacheMisconfigurationException catch (failure) {
-      queryResult.exception = coalesceErrors(
-        exception: queryResult.exception,
-        linkException: failure,
-      );
-    } on PartialDataException catch (failure) {
-      queryResult.exception = coalesceErrors(
-        exception: queryResult.exception,
-        linkException: MismatchedDataStructureException(
-          failure,
-          request: request,
-          data: optimisticResult,
-        ),
-      );
-    }
+      ),
+    );
 
     if (!queryResult.hasException) {
       queryResult.data = cache.readQuery(
