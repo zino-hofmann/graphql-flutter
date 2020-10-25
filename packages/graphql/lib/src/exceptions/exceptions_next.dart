@@ -17,6 +17,9 @@ class CacheMissException extends LinkException {
 
   final String message;
   final Request request;
+
+  @override
+  String toString() => 'CacheMissException($message, $request)';
 }
 
 /// A failure due to a data structure mismatch between the data and the expected
@@ -34,6 +37,13 @@ class MismatchedDataStructureException extends LinkException {
   final Map<String, dynamic> data;
   final Request request;
   final PartialDataException originalException;
+
+  @override
+  String toString() => 'MismatchedDataStructureException('
+      '$originalException, '
+      'request: ${request}, '
+      'data: ${data}, '
+      ')';
 }
 
 /// Failure occurring when the
@@ -56,6 +66,16 @@ class CacheMisconfigurationException extends LinkException
 
   @override
   final PartialDataException originalException;
+
+  @override
+  String toString() => [
+        'CacheMisconfigurationException(',
+        '$originalException, ',
+        if (request != null) 'request: ${request}',
+        if (fragmentRequest != null) 'fragmentRequest : ${fragmentRequest}',
+        'data: ${data}, ',
+        ')',
+      ].join('');
 }
 
 /// Failure occurring when the structure of the [parsedResponse] `data`
@@ -81,6 +101,13 @@ class UnexpectedResponseStructureException extends ServerException
 
   @override
   final PartialDataException originalException;
+
+  @override
+  String toString() => 'UnexpectedResponseStructureException('
+      '$originalException, '
+      'request: ${request}, '
+      'parsedResponse: ${parsedResponse}, '
+      ')';
 }
 
 /// Exception occurring when an unhandled, non-link exception
@@ -92,6 +119,9 @@ class UnknownException extends LinkException {
   const UnknownException(
     dynamic originalException,
   ) : super(originalException);
+
+  @override
+  String toString() => "UnknownException($originalException)";
 }
 
 /// Container for both [graphqlErrors] returned from the server
@@ -111,11 +141,11 @@ class OperationException implements Exception {
 
   void addError(GraphQLError error) => graphqlErrors.add(error);
 
-  String toString() => [
-        if (linkException != null) 'LinkException: ${linkException}',
-        if (graphqlErrors.isNotEmpty) 'GraphQL Errors:',
-        ...graphqlErrors.map((e) => e.toString()),
-      ].join('\n');
+  @override
+  String toString() => 'OperationException('
+      'linkException: ${linkException}, '
+      'graphqlErrors: ${graphqlErrors}'
+      ')';
 }
 
 /// `(graphqlErrors?, exception?) => exception?`
