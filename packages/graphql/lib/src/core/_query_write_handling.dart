@@ -49,14 +49,18 @@ extension InternalQueryWriteHandling on QueryManager {
   /// Part of [InternalQueryWriteHandling], and not exposed outside the
   /// library.
   ///
+  /// If we have no data, we skip caching, thus taking [ErrorPolicy.none]
+  /// into account
+  ///
   /// networked wrapper for [_writeQueryOrSetExceptionOnQueryResult]
+  /// NOTE: mapFetchResultToQueryResult must be called beforehand
   bool attemptCacheWriteFromResponse(
     FetchPolicy fetchPolicy,
     Request request,
     Response response,
     QueryResult queryResult,
   ) =>
-      (fetchPolicy == FetchPolicy.noCache || response.data == null)
+      (fetchPolicy == FetchPolicy.noCache || queryResult.data == null)
           ? false
           : _writeQueryOrSetExceptionOnQueryResult(
               request,
