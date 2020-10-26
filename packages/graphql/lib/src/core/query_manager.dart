@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:collection/collection.dart';
 
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_link/gql_link.dart' show Link;
@@ -17,10 +18,14 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 
 import 'package:graphql/src/core/_query_write_handling.dart';
 
+bool Function(dynamic a, dynamic b) _deepEquals =
+    const DeepCollectionEquality().equals;
+
 class QueryManager {
   QueryManager({
     @required this.link,
     @required this.cache,
+    this.alwaysRebroadcast = false,
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
@@ -29,6 +34,9 @@ class QueryManager {
 
   final Link link;
   final GraphQLCache cache;
+
+  /// Whether to skip deep equality checks in [maybeRebroadcastQueries]
+  final bool alwaysRebroadcast;
 
   QueryScheduler scheduler;
   int idCounter = 1;
@@ -384,11 +392,11 @@ class QueryManager {
 
     for (ObservableQuery query in queries.values) {
       if (query != exclude && query.isRebroadcastSafe) {
-        final dynamic cachedData = cache.readQuery(
+        final cachedData = cache.readQuery(
           query.options.asRequest,
           optimistic: true,
         );
-        if (cachedData != null) {
+        if (_cachedDataHasChangedFor(query, cachedData)) {
           query.addResult(
             mapFetchResultToQueryResult(
               Response(data: cachedData),
@@ -402,6 +410,13 @@ class QueryManager {
     }
     return true;
   }
+
+  bool _cachedDataHasChangedFor(
+    ObservableQuery query,
+    Map<String, dynamic> cachedData,
+  ) =>
+      cachedData != null &&
+      (alwaysRebroadcast || !_deepEquals(query.latestResult.data, cachedData));
 
   void setQuery(ObservableQuery observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
