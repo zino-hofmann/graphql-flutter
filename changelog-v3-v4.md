@@ -151,10 +151,10 @@ class MyQuery {
   Future<QueryResult> fetchMore() async {
     final result = await client.fetchMore(
       _fetchMoreOptions,
-      options: options,
+      originalOptions: options,
       previousResult: latestResult,
     );
-    _latestResult = result;
+    latestResult = result;
     return result;
   }
 }
