@@ -64,6 +64,7 @@ void main() {
 
       await store.box.deleteFromDisk();
     });
+
     test('box rereferencing', () async {
       final store = await HiveStore.open(path: path);
       store.putAll(data);

@@ -30,6 +30,22 @@ void main() {
       );
     });
 
+    test('typeless .writeQuery .readQuery round trip', () {
+      cache.writeQuery(typelessTest.request, data: typelessTest.data);
+      expect(
+        cache.readQuery(typelessTest.request),
+        equals(typelessTest.data),
+      );
+    });
+
+    test('typeless custom dataIdFromObject', () {
+      cache.writeQuery(typelessTest.request, data: typelessTest.data);
+      expect(
+        cache.readQuery(typelessTest.request),
+        equals(typelessTest.data),
+      );
+    });
+
     test('.writeQuery should fail on missing fields', () {
       expect(
         () => cache.writeQuery(basicTest.request, data: <String, dynamic>{
@@ -256,6 +272,38 @@ void main() {
       expect(
         cache.readQuery(fileVarsTest.request),
         equals(fileVarsTest.data),
+      );
+    });
+  });
+
+  group('custom dataIdFromObject', () {
+    /// Uses a `/` instead of the default `:`
+    String customDataIdFromObject(Object object) {
+      if (object is Map<String, Object> &&
+          object.containsKey('__typename') &&
+          object.containsKey('id'))
+        return "${object['__typename']}/${object['id']}";
+      return null;
+    }
+
+    GraphQLCache cache;
+    setUp(() {
+      cache = GraphQLCache(dataIdFromObject: customDataIdFromObject);
+    });
+
+    test('.writeQuery .readQuery round trip', () {
+      cache.writeQuery(basicTest.request, data: basicTest.data);
+      expect(
+        cache.readQuery(basicTest.request),
+        equals(basicTest.data),
+      );
+    });
+
+    test('typeless .writeQuery .readQuery round trip', () {
+      cache.writeQuery(typelessTest.request, data: typelessTest.data);
+      expect(
+        cache.readQuery(typelessTest.request),
+        equals(typelessTest.data),
       );
     });
   });
