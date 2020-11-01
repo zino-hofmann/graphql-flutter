@@ -10,16 +10,27 @@ import 'package:gql_exec/gql_exec.dart' show GraphQLError, Request, Response;
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
 export 'package:normalize/normalize.dart' show PartialDataException;
 
-/// A failure to find a response from  the cache when cacheOnly=true
+/// A failure to find a response from the cache.
+///
+/// Can occur when `cacheOnly=true`, or when the [request] was just written
+/// to the cache with [expectedData]
 @immutable
 class CacheMissException extends LinkException {
-  CacheMissException(this.message, this.request) : super(null);
+  CacheMissException(this.message, this.request, {this.expectedData})
+      : super(null);
 
   final String message;
   final Request request;
 
+  /// The data just written to the cache under [request], if any.
+  final Map<String, dynamic> expectedData;
+
   @override
-  String toString() => 'CacheMissException($message, $request)';
+  String toString() => [
+        'CacheMissException($message',
+        '$request',
+        if (expectedData != null) 'expectedData: $expectedData)'
+      ].join(', ');
 }
 
 /// A failure due to a data structure mismatch between the data and the expected
@@ -46,7 +57,7 @@ class MismatchedDataStructureException extends LinkException {
       ')';
 }
 
-/// Failure occurring when the
+/// Failure occurring when the structure of [data]
 /// does not match that of the [request] `operation` `document`.
 ///
 /// This is checked by leveraging `normalize`

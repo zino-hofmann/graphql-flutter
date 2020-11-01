@@ -103,7 +103,7 @@ class QueryManager {
 
       if (rereadFromCache) {
         // normalize results if previously written
-        queryResult.data = cache.readQuery(request);
+        attempCacheRereadIntoResult(request, queryResult);
       }
 
       return queryResult;
@@ -214,7 +214,7 @@ class QueryManager {
 
     if (rereadFromCache) {
       // normalize results if previously written
-      queryResult.data = cache.readQuery(request);
+      attempCacheRereadIntoResult(request, queryResult);
     }
 
     addQueryResult(request, queryId, queryResult);

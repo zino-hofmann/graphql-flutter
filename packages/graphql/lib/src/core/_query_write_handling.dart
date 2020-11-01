@@ -95,4 +95,23 @@ extension InternalQueryWriteHandling on QueryManager {
           data: data,
         ),
       );
+
+  /// Reread the request into the result from the cache,
+  /// adding a [CacheMissException] if it fails to do so
+  void attempCacheRereadIntoResult(Request request, QueryResult queryResult) {
+    // normalize results if previously written
+    final rereadData = cache.readQuery(request);
+    if (rereadData == null) {
+      queryResult.exception = coalesceErrors(
+        exception: queryResult.exception,
+        linkException: CacheMissException(
+          'Round trip cache re-read failed: cache.readQuery(request) returned null',
+          request,
+          expectedData: queryResult.data,
+        ),
+      );
+    } else {
+      queryResult.data = rereadData;
+    }
+  }
 }
