@@ -15,8 +15,8 @@ class _BlocPageState extends State<BlocPage> {
   @override
   void initState() {
     super.initState();
-    final bloc = BlocProvider.of<MyGithubReposBloc>(context);
-    bloc.add(LoadMyRepos(numOfReposToLoad: 50));
+    BlocProvider.of<MyGithubReposBloc>(context)
+        .add(LoadMyRepos(numOfReposToLoad: 50));
   }
 
   @override
@@ -38,8 +38,7 @@ class _BlocPageState extends State<BlocPage> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               onChanged: (String n) {
-                final reposBloc = BlocProvider.of<MyGithubReposBloc>(context);
-                reposBloc
+                BlocProvider.of<MyGithubReposBloc>(context)
                     .add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
               },
             ),
