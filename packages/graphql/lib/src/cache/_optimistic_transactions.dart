@@ -7,7 +7,8 @@ import 'package:meta/meta.dart';
 import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
 import 'package:graphql/src/cache/data_proxy.dart';
 
-import 'package:graphql/src/cache/cache.dart' show GraphQLCache;
+import 'package:graphql/src/cache/cache.dart'
+    show GraphQLCache, PartialDataCachePolicy;
 
 /// API for users to provide cache updates through
 typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
@@ -31,6 +32,14 @@ class OptimisticProxy extends NormalizingDataProxy {
   OptimisticProxy(this.cache);
 
   GraphQLCache cache;
+
+  /// Whether it is permissible to write partial data, as determined by [partialDataPolicy].
+  ///
+  /// Passed through to normalize. When [normalizeOperation] isn't passed [acceptPartialData],
+  /// It will set missing fields to `null` if any part of a structurally valid query result is missing.
+  @override
+  bool get acceptPartialData =>
+      cache.partialDataPolicy != PartialDataCachePolicy.reject;
 
   /// `typePolicies` to pass down to `normalize` (proxied from [cache])
   get typePolicies => cache.typePolicies;

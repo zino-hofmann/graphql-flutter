@@ -14,6 +14,8 @@ overridePrint(testFn(List<String> log)) => () {
 
 class TestCache extends GraphQLCache {
   bool get returnPartialData => debuggingUnexpectedTestFailures;
+
+  get partialDataPolicy => PartialDataCachePolicy.reject;
 }
 
 GraphQLCache getTestCache() => TestCache();

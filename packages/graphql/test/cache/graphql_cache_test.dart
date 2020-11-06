@@ -288,7 +288,10 @@ void main() {
 
     GraphQLCache cache;
     setUp(() {
-      cache = GraphQLCache(dataIdFromObject: customDataIdFromObject);
+      cache = GraphQLCache(
+        dataIdFromObject: customDataIdFromObject,
+        partialDataPolicy: PartialDataCachePolicy.reject,
+      );
     });
 
     test('.writeQuery .readQuery round trip', () {

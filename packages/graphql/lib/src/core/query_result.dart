@@ -58,13 +58,17 @@ final _eagerSources = {
   QueryResultSource.optimisticResult
 };
 
+/// A single operation result
 class QueryResult {
   QueryResult({
     this.data,
     this.exception,
     @required this.source,
-  })  : timestamp = DateTime.now(),
-        assert(source != null);
+  }) : timestamp = DateTime.now();
+
+  /// An empty result. Can be used as a placeholder when an operation
+  /// has not been executed yet.
+  factory QueryResult.empty() => QueryResult(source: null);
 
   factory QueryResult.loading({
     Map<String, dynamic> data,
@@ -86,7 +90,7 @@ class QueryResult {
 
   /// The source of the result data.
   ///
-  /// null when unexecuted.
+  /// `null` when unexecuted.
   /// Will be set when encountering an error during any execution attempt
   QueryResultSource source;
 

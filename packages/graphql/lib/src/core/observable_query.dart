@@ -135,7 +135,7 @@ class ObservableQuery {
   /// as refetching from the `cache` does not make sense.
   Future<QueryResult> refetch() {
     if (isRefetchSafe) {
-      addResult(QueryResult.loading(data: latestResult.data));
+      addResult(QueryResult.loading(data: latestResult?.data));
       return queryManager.refetchQuery(queryId);
     }
     throw Exception('Query is not refetch safe');
@@ -213,7 +213,7 @@ class ObservableQuery {
   Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
     assert(fetchMoreOptions.updateQuery != null);
 
-    addResult(QueryResult.loading(data: latestResult.data));
+    addResult(QueryResult.loading(data: latestResult?.data));
 
     return fetchMoreImplementation(
       fetchMoreOptions,
@@ -239,7 +239,7 @@ class ObservableQuery {
     }
 
     if (options.carryForwardDataOnException && result.hasException) {
-      result.data ??= latestResult.data;
+      result.data ??= latestResult?.data;
     }
 
     if (lifecycle == QueryLifecycle.pending && result.isConcrete) {

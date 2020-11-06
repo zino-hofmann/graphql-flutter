@@ -34,15 +34,19 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   ///
   /// Passed through to normalize. When [denormalizeOperation] isn't passed [returnPartialData],
   /// It will simply return `null` if any part of the query can't be constructed.
+  ///
+  /// **NOTE**: This is not exposed as a configuration for a reason.
+  /// If enabled, it would be easy to eagerly return an unexpected partial result from the cache,
+  /// resulting in mangled and hard-to-reason-about app state.
   @protected
   bool get returnPartialData => false;
 
-  /// Used for testing.
+  /// Whether it is permissible to write partial data to the this proxy.
+  /// Determined by [PartialDataCachePolicy]
   ///
   /// Passed through to normalize. When [normalizeOperation] isn't passed [acceptPartialData],
-  /// It will simply return `null` if any part of the query can't be constructed.
-  @protected
-  bool get acceptPartialData => false;
+  /// It will set missing fields to `null` if any part of a structurally valid query result is missing.
+  bool get acceptPartialData;
 
   /// Flag used to request a (re)broadcast from the [QueryManager].
   ///
