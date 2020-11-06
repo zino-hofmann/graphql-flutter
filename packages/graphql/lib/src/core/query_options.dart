@@ -1,5 +1,6 @@
 // ignore_for_file: deprecated_member_use_from_same_package
 import 'package:graphql/src/core/_base_options.dart';
+import 'package:graphql/src/utilities/helpers.dart';
 import 'package:meta/meta.dart';
 
 import 'package:gql/ast.dart';
@@ -89,6 +90,7 @@ class WatchQueryOptions extends QueryOptions {
     Object optimisticResult,
     Duration pollInterval,
     this.fetchResults = false,
+    this.carryForwardDataOnException = true,
     bool eagerlyFetchResults,
     Context context,
   })  : assert(
@@ -114,6 +116,10 @@ class WatchQueryOptions extends QueryOptions {
   /// Defaults to [fetchResults].
   bool eagerlyFetchResults;
 
+  /// carry forward previous data in the result of errors and no data.
+  /// defaults to `true`.
+  bool carryForwardDataOnException;
+
   @override
   List<Object> get properties =>
       [...super.properties, fetchResults, eagerlyFetchResults];
@@ -128,11 +134,17 @@ class WatchQueryOptions extends QueryOptions {
         pollInterval: pollInterval,
         fetchResults: fetchResults,
         eagerlyFetchResults: eagerlyFetchResults,
+        carryForwardDataOnException: carryForwardDataOnException,
         context: context,
       );
 }
 
 /// options for fetchMore operations
+///
+/// **NOTE**: with the addition of strict data structure checking in v4,
+/// it is easy to make mistakes in writing [updateQuery].
+///
+/// To mitigate this, [FetchMoreOptions.partial] has been provided.
 class FetchMoreOptions {
   FetchMoreOptions({
     DocumentNode document,
@@ -143,6 +155,22 @@ class FetchMoreOptions {
   })  : assert(updateQuery != null),
         this.document = document ?? documentNode;
 
+  /// Automatically merge the results of [updateQuery] into `previousResultData`.
+  ///
+  /// This is useful if you only want to, say, extract some list data
+  /// from the newly fetched result, and don't want to worry about
+  /// structural inconsistencies while merging.
+  static FetchMoreOptions partial({
+    DocumentNode document,
+    Map<String, dynamic> variables = const {},
+    @required UpdateQuery updateQuery,
+  }) =>
+      FetchMoreOptions(
+        document: document,
+        variables: variables,
+        updateQuery: partialUpdater(updateQuery),
+      );
+
   DocumentNode document;
 
   Map<String, dynamic> variables;
@@ -150,12 +178,18 @@ class FetchMoreOptions {
   /// Strategy for merging the fetchMore result data
   /// with the result data already in the cache
   UpdateQuery updateQuery;
+
+  /// Wrap an [UpdateQuery] in a [deeplyMergeLeft] of the `previousResultData`.
+  static UpdateQuery partialUpdater(UpdateQuery update) =>
+      (previous, fetched) => deeplyMergeLeft(
+            [previous, update(previous, fetched)],
+          );
 }
 
 /// merge fetchMore result data with earlier result data
-typedef dynamic UpdateQuery(
-  dynamic previousResultData,
-  dynamic fetchMoreResultData,
+typedef Map<String, dynamic> UpdateQuery(
+  Map<String, dynamic> previousResultData,
+  Map<String, dynamic> fetchMoreResultData,
 );
 
 extension WithType on Request {

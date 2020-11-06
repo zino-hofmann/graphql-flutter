@@ -164,6 +164,7 @@ class StarrableRepository extends StatelessWidget {
   bool get starred => repository['viewerHasStarred'] as bool;
 
   Map<String, dynamic> get expectedResult => <String, dynamic>{
+        //'__typename': 'Query',
         'action': {
           '__typename': 'AddStarPayload',
           'starrable': {
@@ -189,15 +190,16 @@ class StarrableRepository extends StatelessWidget {
             };
             cache.writeFragment(
               Fragment(
-                  document: gql(
-                '''
+                document: gql(
+                  '''
                   fragment fields on Repository {
                     id
                     name
                     viewerHasStarred
                   }
-                ''',
-              )).asRequest(idFields: {
+                  ''',
+                ),
+              ).asRequest(idFields: {
                 '__typename': updated['__typename'],
                 'id': updated['id'],
               }),

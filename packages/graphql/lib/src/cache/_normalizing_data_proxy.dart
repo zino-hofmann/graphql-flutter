@@ -1,4 +1,5 @@
 import 'package:graphql/src/cache/fragment.dart';
+import 'package:graphql/src/exceptions/exceptions_next.dart';
 import "package:meta/meta.dart";
 
 import 'package:gql_exec/gql_exec.dart' show Request;
@@ -29,9 +30,23 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// [returnPartialData] is `true`
   bool addTypename = false;
 
-  /// Used for testing
+  /// Used for testing.
+  ///
+  /// Passed through to normalize. When [denormalizeOperation] isn't passed [returnPartialData],
+  /// It will simply return `null` if any part of the query can't be constructed.
+  ///
+  /// **NOTE**: This is not exposed as a configuration for a reason.
+  /// If enabled, it would be easy to eagerly return an unexpected partial result from the cache,
+  /// resulting in mangled and hard-to-reason-about app state.
   @protected
   bool get returnPartialData => false;
+
+  /// Whether it is permissible to write partial data to the this proxy.
+  /// Determined by [PartialDataCachePolicy]
+  ///
+  /// Passed through to normalize. When [normalizeOperation] isn't passed [acceptPartialData],
+  /// It will set missing fields to `null` if any part of a structurally valid query result is missing.
+  bool get acceptPartialData;
 
   /// Flag used to request a (re)broadcast from the [QueryManager].
   ///
@@ -68,8 +83,11 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         // provided from cache
         read: (dataId) => readNormalized(dataId, optimistic: optimistic),
         typePolicies: typePolicies,
+        //dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
         addTypename: addTypename ?? false,
+        // if there is partial data, we cannot read and return null
+        handleException: true,
         // provided from request
         document: request.operation.document,
         operationName: request.operation.operationName,
@@ -87,6 +105,8 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
         addTypename: addTypename ?? false,
+        // if there is partial data, we cannot read and return null
+        handleException: true,
         // provided from request
         document: fragmentRequest.fragment.document,
         idFields: fragmentRequest.idFields,
@@ -99,21 +119,34 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     Map<String, dynamic> data,
     bool broadcast = true,
   }) {
-    normalizeOperation(
-      // provided from cache
-      write: (dataId, value) => writeNormalized(dataId, value),
-      read: (dataId) => readNormalized(dataId),
-      typePolicies: typePolicies,
-      dataIdFromObject: dataIdFromObject,
-      // provided from request
-      document: request.operation.document,
-      operationName: request.operation.operationName,
-      variables: sanitizeVariables(request.variables),
-      // data
-      data: data,
-    );
-    if (broadcast ?? true) {
-      broadcastRequested = true;
+    try {
+      normalizeOperation(
+        // provided from cache
+        write: (dataId, value) => writeNormalized(dataId, value),
+        read: (dataId) => readNormalized(dataId),
+        typePolicies: typePolicies,
+        dataIdFromObject: dataIdFromObject,
+        acceptPartialData: acceptPartialData,
+        addTypename: addTypename ?? false,
+        // provided from request
+        document: request.operation.document,
+        operationName: request.operation.operationName,
+        variables: sanitizeVariables(request.variables),
+        // data
+        data: data,
+      );
+      if (broadcast ?? true) {
+        broadcastRequested = true;
+      }
+    } on PartialDataException catch (e) {
+      if (request.validatesStructureOf(data)) {
+        throw CacheMisconfigurationException(
+          e,
+          request: request,
+          data: data,
+        );
+      }
+      rethrow;
     }
   }
 
@@ -122,22 +155,35 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     @required Map<String, dynamic> data,
     bool broadcast = true,
   }) {
-    normalizeFragment(
-      // provided from cache
-      write: (dataId, value) => writeNormalized(dataId, value),
-      read: (dataId) => readNormalized(dataId),
-      typePolicies: typePolicies,
-      dataIdFromObject: dataIdFromObject,
-      // provided from request
-      document: request.fragment.document,
-      idFields: request.idFields,
-      fragmentName: request.fragment.fragmentName,
-      variables: sanitizeVariables(request.variables),
-      // data
-      data: data,
-    );
-    if (broadcast ?? true) {
-      broadcastRequested = true;
+    try {
+      normalizeFragment(
+        // provided from cache
+        write: (dataId, value) => writeNormalized(dataId, value),
+        read: (dataId) => readNormalized(dataId),
+        typePolicies: typePolicies,
+        dataIdFromObject: dataIdFromObject,
+        acceptPartialData: acceptPartialData,
+        addTypename: addTypename ?? false,
+        // provided from request
+        document: request.fragment.document,
+        idFields: request.idFields,
+        fragmentName: request.fragment.fragmentName,
+        variables: sanitizeVariables(request.variables),
+        // data
+        data: data,
+      );
+      if (broadcast ?? true) {
+        broadcastRequested = true;
+      }
+    } on PartialDataException catch (e) {
+      if (request.validatesStructureOf(data)) {
+        throw CacheMisconfigurationException(
+          e,
+          fragmentRequest: request,
+          data: data,
+        );
+      }
+      rethrow;
     }
   }
 }

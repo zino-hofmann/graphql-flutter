@@ -218,28 +218,28 @@ final basicTestSubsetAValue = TestCase(
   },
 );
 
-final Map updatedSubsetOperationData = {
-  'a': {
-    '__typename': 'A',
-    'id': 1,
-    'list': basicTestSubsetAValue.data['a']['list'],
-    'b': {
-      '__typename': 'B',
-      'id': 5,
-      'c': {
-        '__typename': 'C',
-        'id': 6,
-        'cField': 'changed value',
+getUpdatedSubsetOperationData({withUpdatedC = false}) => {
+      'a': {
+        '__typename': 'A',
+        'id': 1,
+        'list': basicTestSubsetAValue.data['a']['list'],
+        'b': {
+          '__typename': 'B',
+          'id': 5,
+          'c': {
+            '__typename': 'C',
+            'id': 6,
+            'cField': '${withUpdatedC ? "changed " : ""}value',
+          },
+          'bField': {'field': true}
+        },
+        'd': {
+          'id': 10,
+          'dField': {'field': true}
+        },
+        'aField': {'field': false}
       },
-      'bField': {'field': true}
-    },
-    'd': {
-      'id': 10,
-      'dField': {'field': true}
-    },
-    'aField': {'field': false}
-  },
-};
+    };
 
 final cyclicalTest = TestCase(operation: r'''{
     a {
@@ -299,3 +299,52 @@ Map<String, dynamic> get cyclicalObjOperationData {
   a['b'] = b;
   return {'a': a};
 }
+
+final typelessTest = TestCase(
+  operation: r'''{
+    a {
+      # union
+      list {
+        __typename
+        value 
+        ... on Item { id }
+      }
+      b {
+        id
+        c {
+          id,
+          cField
+        }
+        bField { field }
+      },
+      d {
+        id,
+        dField {field}
+      }
+      aField { field }
+    }
+  }''',
+  data: {
+    'a': {
+      'list': [
+        {'__typename': 'Num', 'value': 1},
+        {'__typename': 'Num', 'value': 2},
+        {'__typename': 'Num', 'value': 3},
+        {'__typename': 'Item', 'id': 4, 'value': 4}
+      ],
+      'b': {
+        'id': 5,
+        'c': {
+          'id': 6,
+          'cField': 'value',
+        },
+        'bField': {'field': true}
+      },
+      'd': {
+        'id': 9,
+        'dField': {'field': true}
+      },
+      'aField': {'field': false}
+    },
+  },
+);

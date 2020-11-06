@@ -4,14 +4,15 @@ description: A GraphQL client for Flutter, bringing all the features from a mode
 version: 4.0.0-beta.3
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
 dependencies:
-  graphql: ^4.0.0-beta.3
+  graphql: #^4.0.0-beta.3
+    path: ../graphql
   gql_exec: ^0.2.2
   flutter:
     sdk: flutter
   meta: ^1.1.6
   path_provider: ^1.6.10
   path: ^1.6.4
-  connectivity: ^0.4.4
+  connectivity: ^2.0.0
   hive: ^1.3.0
 dev_dependencies:
   pedantic: ^1.8.0+1

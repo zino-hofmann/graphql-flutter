@@ -135,7 +135,7 @@ class ObservableQuery {
   /// as refetching from the `cache` does not make sense.
   Future<QueryResult> refetch() {
     if (isRefetchSafe) {
-      addResult(QueryResult.loading(data: latestResult.data));
+      addResult(QueryResult.loading(data: latestResult?.data));
       return queryManager.refetchQuery(queryId);
     }
     throw Exception('Query is not refetch safe');
@@ -205,10 +205,15 @@ class ObservableQuery {
   ///
   /// The results will then be added to to stream for listeners to react to,
   /// such as for triggering `grahphql_flutter` widget rebuilds
+  ///
+  /// **NOTE**: with the addition of strict data structure checking in v4,
+  /// it is easy to make mistakes in writing [updateQuery].
+  ///
+  /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
     assert(fetchMoreOptions.updateQuery != null);
 
-    addResult(QueryResult.loading(data: latestResult.data));
+    addResult(QueryResult.loading(data: latestResult?.data));
 
     return fetchMoreImplementation(
       fetchMoreOptions,
@@ -233,8 +238,8 @@ class ObservableQuery {
       return;
     }
 
-    if (latestResult != null) {
-      result.source ??= latestResult.source;
+    if (options.carryForwardDataOnException && result.hasException) {
+      result.data ??= latestResult?.data;
     }
 
     if (lifecycle == QueryLifecycle.pending && result.isConcrete) {

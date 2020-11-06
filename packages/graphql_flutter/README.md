@@ -32,6 +32,7 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
 
 - [in-depth link guide](../graphql/README.md#links)
 - [Direct Cache Access](../graphql/README.md#direct-cache-access-api)
+- [Cache Write Strictness](../graphql/README.md#write-strictness-and-partialdatapolicy)
 - [Policies](../graphql/README.md#exceptions)
 - [Exceptions](../graphql/README.md#exceptions)
 - [AWS AppSync Support](../graphql/README.md#aws-appsync-support)
@@ -196,6 +197,10 @@ In order to use the `FetchMore()` function, you will need to first define `Fetch
 final Map pageInfo = result.data['search']['pageInfo'];
 final String fetchMoreCursor = pageInfo['endCursor'];
 
+/// **NOTE**: with the addition of strict data structure checking in v4,
+/// it is easy to make mistakes in writing [updateQuery].
+///
+/// To mitigate this, [FetchMoreOptions.partial] has been provided.
 FetchMoreOptions opts = FetchMoreOptions(
   variables: {'cursor': fetchMoreCursor},
   updateQuery: (previousResultData, fetchMoreResultData) {

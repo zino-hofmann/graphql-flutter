@@ -12,6 +12,10 @@ import 'package:graphql/src/core/fetch_more.dart';
 /// The link is a [Link] over which GraphQL documents will be resolved into a [Response].
 /// The cache is the [GraphQLCache] to use for caching results and optimistic updates.
 ///
+/// The client automatically rebroadcasts watched queries when their underlying data
+/// changes in the cache. To skip the data comparison check, `alwaysRebroadcast: true` can be passed.
+/// **NOTE**: This flag was added ot accomodate the old default behavior.
+/// It is marked `@experimental` because it may be deprecated in the future.
 ///
 /// [ac]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ApolloClient/
 /// [link]: https://github.com/gql-dart/gql/tree/master/links/gql_link
@@ -21,11 +25,13 @@ class GraphQLClient implements GraphQLDataProxy {
     @required this.link,
     @required this.cache,
     this.defaultPolicies,
+    @experimental bool alwaysRebroadcast = false,
   }) {
     defaultPolicies ??= DefaultPolicies();
     queryManager = QueryManager(
       link: link,
       cache: cache,
+      alwaysRebroadcast: alwaysRebroadcast ?? false,
     );
   }
 
@@ -186,6 +192,11 @@ class GraphQLClient implements GraphQLDataProxy {
 
   /// Fetch more results and then merge them with the given [previousResult]
   /// according to [FetchMoreOptions.updateQuery].
+  ///
+  /// **NOTE**: with the addition of strict data structure checking in v4,
+  /// it is easy to make mistakes in writing [updateQuery].
+  ///
+  /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   @experimental
   Future<QueryResult> fetchMore(
     FetchMoreOptions fetchMoreOptions, {

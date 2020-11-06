@@ -1,6 +1,4 @@
 import 'dart:async' show FutureOr;
-
-import 'package:graphql/client.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:meta/meta.dart';
 
@@ -60,12 +58,17 @@ final _eagerSources = {
   QueryResultSource.optimisticResult
 };
 
+/// A single operation result
 class QueryResult {
   QueryResult({
     this.data,
     this.exception,
     @required this.source,
   }) : timestamp = DateTime.now();
+
+  /// An empty result. Can be used as a placeholder when an operation
+  /// has not been executed yet.
+  factory QueryResult.empty() => QueryResult(source: null);
 
   factory QueryResult.loading({
     Map<String, dynamic> data,
@@ -87,7 +90,7 @@ class QueryResult {
 
   /// The source of the result data.
   ///
-  /// null when unexecuted.
+  /// `null` when unexecuted.
   /// Will be set when encountering an error during any execution attempt
   QueryResultSource source;
 
@@ -130,6 +133,14 @@ class QueryResult {
 
   /// Whether the response includes an [exception]
   bool get hasException => (exception != null);
+
+  @override
+  String toString() => 'QueryResult('
+      'source: $source, '
+      'data: $data, '
+      'exception: $exception, '
+      'timestamp: $timestamp'
+      ')';
 }
 
 class MultiSourceResult {

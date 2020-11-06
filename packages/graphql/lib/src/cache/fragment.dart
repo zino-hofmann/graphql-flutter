@@ -5,6 +5,7 @@ import "package:collection/collection.dart";
 import "package:gql/ast.dart";
 import 'package:gql/language.dart';
 import "package:gql_exec/gql_exec.dart";
+import 'package:normalize/utils.dart';
 
 /// A fragment in a [document], optionally defined by [fragmentName]
 @immutable
@@ -115,4 +116,34 @@ extension OperationRequestHelper on Operation {
     Map<String, dynamic> variables = const <String, dynamic>{},
   }) =>
       Request(operation: this, variables: variables);
+}
+
+extension FragmentDataValid on FragmentRequest {
+  /// Returns `true` if the structure of [data] is valid according to [request]'s structure.
+  ///
+  /// Thin wrapper around [validateFragmentDataStructure]
+  bool validatesStructureOf(Map<String, dynamic> data) =>
+      validateFragmentDataStructure(
+        document: fragment.document,
+        fragmentName: fragment.fragmentName,
+        variables: variables,
+        handleException: true,
+        data: data,
+      );
+}
+
+extension OperationDataValid on Request {
+  /// Returns `true` if the structure of [data] is valid according to [request]'s structure.
+
+  /// Returns `true` if the structure of [data] is valid according to [request]'s structure.
+  ///
+  /// Thin wrapper around [validateOperationDataStructure]
+  bool validatesStructureOf(Map<String, dynamic> data) =>
+      validateOperationDataStructure(
+        document: operation.document,
+        operationName: operation.operationName,
+        variables: variables,
+        handleException: true,
+        data: data,
+      );
 }

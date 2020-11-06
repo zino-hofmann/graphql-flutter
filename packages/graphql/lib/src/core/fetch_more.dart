@@ -8,6 +8,8 @@ import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/core/policies.dart';
 
+import 'package:graphql/src/core/_query_write_handling.dart';
+
 /// Fetch more results and then merge them with [previousResult]
 /// according to [FetchMoreOptions.updateQuery]
 ///
@@ -27,6 +29,7 @@ Future<QueryResult> fetchMoreImplementation(
   assert(fetchMoreOptions.updateQuery != null);
 
   final document = (fetchMoreOptions.document ?? originalOptions.document);
+  final request = originalOptions.asRequest;
 
   assert(
     document != null,
@@ -48,17 +51,36 @@ Future<QueryResult> fetchMoreImplementation(
 
   try {
     // combine the query with the new query, using the function provided by the user
-    fetchMoreResult.data = fetchMoreOptions.updateQuery(
+    final data = fetchMoreOptions.updateQuery(
       previousResult.data,
       fetchMoreResult.data,
     );
-    assert(fetchMoreResult.data != null, 'updateQuery result cannot be null');
+
+    assert(
+      data != null,
+      'updateQuery result cannot be null:\n'
+      '  previousResultData: ${previousResult.data},\n'
+      ' fetchMoreResultData: ${fetchMoreResult.data}',
+    );
+    fetchMoreResult.data = data;
+
+    if (originalOptions.fetchPolicy != FetchPolicy.noCache) {
+      queryManager.attemptCacheWriteFromClient(
+        request,
+        data,
+        fetchMoreResult,
+        writeQuery: (req, data) => queryManager.cache.writeQuery(
+          req,
+          data: data,
+        ),
+      );
+    }
+
     // will add to a stream with `queryId` and rebroadcast if appropriate
     queryManager.addQueryResult(
-      originalOptions.asRequest,
+      request,
       queryId,
       fetchMoreResult,
-      writeToCache: originalOptions.fetchPolicy != FetchPolicy.noCache,
     );
   } catch (error) {
     if (fetchMoreResult.hasException) {

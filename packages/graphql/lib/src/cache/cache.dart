@@ -31,11 +31,7 @@ class GraphQLCache extends NormalizingDataProxy {
     Store store,
     this.dataIdFromObject,
     this.typePolicies = const {},
-
-    /// Input variable sanitizer for referencing custom scalar types in cache keys.
-    ///
-    /// Defaults to [sanitizeFilesForCache]. Can be set to `null` to disable sanitization.
-    /// If present, a sanitizer will be built with [variableSanitizer]
+    this.partialDataPolicy = PartialDataCachePolicy.acceptForOptimisticData,
     Object Function(Object) sanitizeVariables = sanitizeFilesForCache,
   })  : sanitizeVariables = variableSanitizer(sanitizeVariables),
         store = store ?? InMemoryStore();
@@ -46,12 +42,30 @@ class GraphQLCache extends NormalizingDataProxy {
   /// rebroadcast operations.
   final Store store;
 
+  /// Determines how partial data should be handled when written to the cache
+  ///
+  /// [acceptForOptimisticData] is the default and recommended, as it provides
+  /// the best balance between safety and usability.
+  final PartialDataCachePolicy partialDataPolicy;
+
+  /// Whether it is permissible to write partial data, as determined by [partialDataPolicy].
+  ///
+  /// Passed through to normalize. When [normalizeOperation] isn't passed [acceptPartialData],
+  /// It will simply return `null` if any part of the query can't be constructed.
+  @override
+  bool get acceptPartialData =>
+      partialDataPolicy == PartialDataCachePolicy.accept;
+
   /// `typePolicies` to pass down to [normalize]
   final Map<String, TypePolicy> typePolicies;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   final DataIdResolver dataIdFromObject;
 
+  /// Input variable sanitizer for referencing custom scalar types in cache keys.
+  ///
+  /// Defaults to [sanitizeFilesForCache]. Can be set to `null` to disable sanitization.
+  /// If present, a sanitizer will be built with [variableSanitizer]
   @override
   final SanitizeVariables sanitizeVariables;
 
@@ -116,7 +130,7 @@ class GraphQLCache extends NormalizingDataProxy {
   /// Write normalized data into the cache,
   /// deeply merging maps with existing values
   ///
-  /// Called from [writeQuery] and [writeFragment].
+  /// Called from [witeQuery] and [writeFragment].
   void writeNormalized(String dataId, dynamic value) {
     if (value is Map<String, Object>) {
       final existing = store.get(dataId);
@@ -189,4 +203,20 @@ class GraphQLCache extends NormalizingDataProxy {
     );
     broadcastRequested = true;
   }
+}
+
+/// Determines how partial data should be handled when written to the cache
+///
+/// [acceptForOptimisticData] is the default and recommended, as it provides
+/// the best balance between safety and usability.
+enum PartialDataCachePolicy {
+  /// Accept partial data in all cases (default).
+  accept,
+
+  /// Accept partial data, but only for transient optimistic writes made with
+  /// [GraphQLCache.recordOptimisticTransaction]
+  acceptForOptimisticData,
+
+  /// Reject partial data in all cases.
+  reject,
 }

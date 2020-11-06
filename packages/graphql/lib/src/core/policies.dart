@@ -56,7 +56,7 @@ bool canExecuteOnNetwork(FetchPolicy policy) {
   }
 }
 
-/// [ErrorPolicy] determines the level of events for errors in the execution result.
+/// [ErrorPolicy] determines the level of events for GraphQL Errors in the execution result. The options are:
 ///
 /// While the default for all client methods is [none],
 /// [all] is recommended for notifying your users of potential issues.
@@ -67,6 +67,10 @@ bool canExecuteOnNetwork(FetchPolicy policy) {
 /// * [all]: saves both data and errors into the `cache` so your UI can use them.
 ///   It is recommended for notifying your users of potential issues,
 ///   while still showing as much data as possible from your server.
+///
+/// **NOTE**: [ErrorPolicy] only effects **GraphQL Errors**.
+/// Client side and network exceptions are added to a [QueryResult] as they occur,
+/// and can co-exist alongside data.
 enum ErrorPolicy {
   /// Any GraphQL Errors are treated the same as network errors and any data is ignored from the response. (default)
   none,

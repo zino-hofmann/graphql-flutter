@@ -151,6 +151,8 @@ class _MyHomePageState extends State<MyHomePage> {
                             CircularProgressIndicator(),
                           ],
                         ),
+                      Text('note: this example has no mutations',
+                          style: Theme.of(context).textTheme.caption),
                       RaisedButton(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

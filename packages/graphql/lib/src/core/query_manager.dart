@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:collection/collection.dart';
 
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_link/gql_link.dart' show Link;
@@ -15,10 +16,16 @@ import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
+import 'package:graphql/src/core/_query_write_handling.dart';
+
+bool Function(dynamic a, dynamic b) _deepEquals =
+    const DeepCollectionEquality().equals;
+
 class QueryManager {
   QueryManager({
     @required this.link,
     @required this.cache,
+    this.alwaysRebroadcast = false,
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
@@ -27,6 +34,9 @@ class QueryManager {
 
   final Link link;
   final GraphQLCache cache;
+
+  /// Whether to skip deep equality checks in [maybeRebroadcastQueries]
+  final bool alwaysRebroadcast;
 
   QueryScheduler scheduler;
   int idCounter = 1;
@@ -67,15 +77,19 @@ class QueryManager {
 
     yield* link.request(request).map((response) {
       QueryResult queryResult;
+      bool rereadFromCache = false;
       try {
-        if (response.data != null &&
-            options.fetchPolicy != FetchPolicy.noCache) {
-          cache.writeQuery(request, data: response.data);
-        }
         queryResult = mapFetchResultToQueryResult(
           response,
           options,
           source: QueryResultSource.network,
+        );
+
+        rereadFromCache = attemptCacheWriteFromResponse(
+          options.fetchPolicy,
+          request,
+          response,
+          queryResult,
         );
       } catch (failure) {
         // we set the source to indicate where the source of failure
@@ -87,9 +101,9 @@ class QueryManager {
         );
       }
 
-      if (options.fetchPolicy != FetchPolicy.noCache) {
+      if (rereadFromCache) {
         // normalize results if previously written
-        queryResult.data = cache.readQuery(request);
+        attempCacheRereadIntoResult(request, queryResult);
       }
 
       return queryResult;
@@ -167,21 +181,23 @@ class QueryManager {
     Response response;
     QueryResult queryResult;
 
-    final writeToCache = options.fetchPolicy != FetchPolicy.noCache;
+    bool rereadFromCache = false;
 
     try {
       // execute the request through the provided link(s)
       response = await link.request(request).first;
 
-      // save the data from response to the cache
-      if (response.data != null && writeToCache) {
-        await cache.writeQuery(request, data: response.data);
-      }
-
       queryResult = mapFetchResultToQueryResult(
         response,
         options,
         source: QueryResultSource.network,
+      );
+
+      rereadFromCache = attemptCacheWriteFromResponse(
+        options.fetchPolicy,
+        request,
+        response,
+        queryResult,
       );
     } catch (failure) {
       // we set the source to indicate where the source of failure
@@ -196,9 +212,9 @@ class QueryManager {
     // cleanup optimistic results
     cache.removeOptimisticPatch(queryId);
 
-    if (writeToCache) {
+    if (rereadFromCache) {
       // normalize results if previously written
-      queryResult.data = cache.readQuery(request);
+      attempCacheRereadIntoResult(request, queryResult);
     }
 
     addQueryResult(request, queryId, queryResult);
@@ -312,16 +328,8 @@ class QueryManager {
   void addQueryResult(
     Request request,
     String queryId,
-    QueryResult queryResult, {
-    bool writeToCache = false,
-  }) {
-    if (writeToCache) {
-      cache.writeQuery(
-        request,
-        data: queryResult.data,
-      );
-    }
-
+    QueryResult queryResult,
+  ) {
     final ObservableQuery observableQuery = getQuery(queryId);
 
     if (observableQuery != null && !observableQuery.controller.isClosed) {
@@ -335,18 +343,26 @@ class QueryManager {
     @required String queryId,
     @required Object optimisticResult,
   }) {
-    cache.recordOptimisticTransaction(
-      (proxy) => proxy..writeQuery(request, data: optimisticResult),
-      queryId,
-    );
-
-    final QueryResult queryResult = QueryResult(
-      data: cache.readQuery(
-        request,
-        optimistic: true,
-      ),
+    QueryResult queryResult = QueryResult(
       source: QueryResultSource.optimisticResult,
     );
+
+    attemptCacheWriteFromClient(
+      request,
+      optimisticResult,
+      queryResult,
+      writeQuery: (req, data) => cache.recordOptimisticTransaction(
+        (proxy) => proxy..writeQuery(req, data: data),
+        queryId,
+      ),
+    );
+
+    if (!queryResult.hasException) {
+      queryResult.data = cache.readQuery(
+        request,
+        optimistic: true,
+      );
+    }
 
     return queryResult;
   }
@@ -376,11 +392,11 @@ class QueryManager {
 
     for (ObservableQuery query in queries.values) {
       if (query != exclude && query.isRebroadcastSafe) {
-        final dynamic cachedData = cache.readQuery(
+        final cachedData = cache.readQuery(
           query.options.asRequest,
           optimistic: true,
         );
-        if (cachedData != null) {
+        if (_cachedDataHasChangedFor(query, cachedData)) {
           query.addResult(
             mapFetchResultToQueryResult(
               Response(data: cachedData),
@@ -394,6 +410,13 @@ class QueryManager {
     }
     return true;
   }
+
+  bool _cachedDataHasChangedFor(
+    ObservableQuery query,
+    Map<String, dynamic> cachedData,
+  ) =>
+      cachedData != null &&
+      (alwaysRebroadcast || !_deepEquals(query.latestResult.data, cachedData));
 
   void setQuery(ObservableQuery observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
