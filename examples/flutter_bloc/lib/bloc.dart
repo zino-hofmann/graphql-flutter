@@ -12,17 +12,14 @@ class BlocPage extends StatefulWidget {
 }
 
 class _BlocPageState extends State<BlocPage> {
-  MyGithubReposBloc bloc;
   @override
   void initState() {
     super.initState();
-    bloc = BlocProvider.of<MyGithubReposBloc>(context);
-    bloc.add(LoadMyRepos(numOfReposToLoad: 50));
+    BlocProvider.of<MyGithubReposBloc>(context).add(LoadMyRepos(numOfReposToLoad: 50));
   }
 
   @override
   void dispose() {
-    bloc.close();
     super.dispose();
   }
 
@@ -45,7 +42,7 @@ class _BlocPageState extends State<BlocPage> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               onChanged: (String n) {
-                bloc.add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
+                BlocProvider.of<MyGithubReposBloc>(context).add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
               },
             ),
             SizedBox(
