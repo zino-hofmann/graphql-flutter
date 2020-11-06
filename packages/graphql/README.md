@@ -30,6 +30,9 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
   - [Direct Cache Access API](#direct-cache-access-api)
     - [`Request`, `readQuery`, and `writeQuery`](#request-readquery-and-writequery)
     - [`FragmentRequest`, `readFragment`, and `writeFragment`](#fragmentrequest-readfragment-and-writefragment)
+  - [Other Cache Considerations](#other-cache-considerations)
+    - [Write strictness and `partialDataPolicy`](#write-strictness-and-partialdatapolicy)
+    - [Possible cache write exceptions](#possible-cache-write-exceptions)
   - [Policies](#policies)
   - [Exceptions](#exceptions)
   - [Links](#links)
@@ -439,6 +442,26 @@ client.writeFragment(fragmentRequest, data);
 ```
 
 > **NB** You likely want to call the cache access API from your `client` for automatic broadcasting support.
+
+## Other Cache Considerations
+
+### Write strictness and `partialDataPolicy`
+
+As of [#754](https://github.com/zino-app/graphql-flutter/pull/754) we can now enforce strict structural constraints on data written to the cache. This means that if the client receives structurally invalid data from the network or on `client.writeQuery`, it will throw an exception.
+
+By default, optimistic data is excluded from these constraints for ease of use via `PartialDataCachePolicy.acceptForOptimisticData`, as it is easy to miss `__typename`, etc.
+This behavior is configurable via `GraphQLCache.partialDataPolicy`, which can be set to `accept` for no constraints or `reject` for full constraints.
+
+### Possible cache write exceptions
+
+At link execution time, one of the following exceptions can be thrown:
+
+* `CacheMisconfigurationException` if the structure seems like it should write properly, and is perhaps failing due to a `typePolicy`
+* `UnexpectedResponseStructureException` if the server response looks malformed.
+* `MismatchedDataStructureException` in the event of a malformed optimistic result (and `PartialDataCachePolicy.reject`).
+* `CacheMissException` if write succeeds but `readQuery` then returns `null` (though **data will not be overwritten**)
+
+</details>
 
 ## Policies
 

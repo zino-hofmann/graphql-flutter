@@ -32,6 +32,7 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
 
 - [in-depth link guide](../graphql/README.md#links)
 - [Direct Cache Access](../graphql/README.md#direct-cache-access-api)
+- [Cache Write Strictness](../graphql/README.md#write-strictness-and-partialdatapolicy)
 - [Policies](../graphql/README.md#exceptions)
 - [Exceptions](../graphql/README.md#exceptions)
 - [AWS AppSync Support](../graphql/README.md#aws-appsync-support)
