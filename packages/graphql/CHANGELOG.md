@@ -1,3 +1,20 @@
+# [4.0.0-beta.4](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2020-11-07)
+
+
+### Bug Fixes
+
+* **client:** add CacheMissException for when write/read results in null ([a0a967f](https://github.com/zino-app/graphql-flutter/commit/a0a967f0d348a7ce368843b74567f04192b6bfb7))
+* **client:** fetchMore partial handling ([10ec576](https://github.com/zino-app/graphql-flutter/commit/10ec57690c1d6a98be19de2076c4e167aa2cf4b0))
+* **client:** skip cache writes on null data, thus fixing [#405](https://github.com/zino-app/graphql-flutter/issues/405) ([7472bb9](https://github.com/zino-app/graphql-flutter/commit/7472bb9102b22b0652f6df53d6bcea66592f8aa0))
+
+
+### Features
+
+* **client:** cache writes are now strict, and throw PartialDataException (from normalize), ([616b5ed](https://github.com/zino-app/graphql-flutter/commit/616b5edb503ce68d0212c5da8a9df69a9df30782))
+* **client:** carry forward data on exception ([ccf3b9c](https://github.com/zino-app/graphql-flutter/commit/ccf3b9ca8b961574407e68b69f082d8b1d20a352))
+* **client:** only rebroadcast on deep equals ([ee64e99](https://github.com/zino-app/graphql-flutter/commit/ee64e99612025918d136a436796724a26c6adcfd))
+* **client:** partialDataPolicy for configuring rejections ([0a7cd28](https://github.com/zino-app/graphql-flutter/commit/0a7cd280ef6c56726bcefbdfea6ac2d5e2bc16db))
+
 # [4.0.0-beta.3](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.2...v4.0.0-beta.3) (2020-10-17)
 
 
