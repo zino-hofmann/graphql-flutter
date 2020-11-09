@@ -3,7 +3,7 @@ name: v4 issue
 about: An issue encountered with a v4 library
 title: ''
 labels: v4
-assignees: micimize
+assignees: ''
 
 ---
 
