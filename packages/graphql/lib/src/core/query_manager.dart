@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
 import 'package:gql_exec/gql_exec.dart';
-import 'package:gql_link/gql_link.dart' show Link;
+import 'package:gql_link/gql_link.dart' show Link, LinkException;
 
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
@@ -75,39 +75,45 @@ class QueryManager {
       }
     }
 
-    yield* link.request(request).map((response) {
-      QueryResult queryResult;
-      bool rereadFromCache = false;
-      try {
-        queryResult = mapFetchResultToQueryResult(
-          response,
-          options,
-          source: QueryResultSource.network,
-        );
+    try {
+      yield* link.request(request).map((response) {
+        QueryResult queryResult;
+        bool rereadFromCache = false;
+        try {
+          queryResult = mapFetchResultToQueryResult(
+            response,
+            options,
+            source: QueryResultSource.network,
+          );
 
-        rereadFromCache = attemptCacheWriteFromResponse(
-          options.fetchPolicy,
-          request,
-          response,
-          queryResult,
-        );
-      } catch (failure) {
-        // we set the source to indicate where the source of failure
-        queryResult ??= QueryResult(source: QueryResultSource.network);
+          rereadFromCache = attemptCacheWriteFromResponse(
+            options.fetchPolicy,
+            request,
+            response,
+            queryResult,
+          );
+        } catch (failure) {
+          // we set the source to indicate where the source of failure
+          queryResult ??= QueryResult(source: QueryResultSource.network);
 
-        queryResult.exception = coalesceErrors(
-          exception: queryResult.exception,
-          linkException: translateFailure(failure),
-        );
-      }
+          queryResult.exception = coalesceErrors(
+            exception: queryResult.exception,
+            linkException: translateFailure(failure),
+          );
+        }
 
-      if (rereadFromCache) {
-        // normalize results if previously written
-        attempCacheRereadIntoResult(request, queryResult);
-      }
+        if (rereadFromCache) {
+          // normalize results if previously written
+          attempCacheRereadIntoResult(request, queryResult);
+        }
 
-      return queryResult;
-    });
+        return queryResult;
+      }).transform(StreamTransformer.fromHandlers(
+        handleError: (err, trace, sink) => sink.add(_wrapFailure(err)),
+      ));
+    } catch (ex) {
+      yield* Stream.fromIterable([_wrapFailure(ex)]);
+    }
   }
 
   Future<QueryResult> query(QueryOptions options) => fetchQuery('0', options);
@@ -476,3 +482,9 @@ class QueryManager {
     );
   }
 }
+
+QueryResult _wrapFailure(dynamic ex) => QueryResult(
+      // we set the source to indicate where the source of failure
+      source: QueryResultSource.network,
+      exception: coalesceErrors(linkException: translateFailure(ex)),
+    );

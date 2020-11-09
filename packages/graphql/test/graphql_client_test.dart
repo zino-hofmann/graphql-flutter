@@ -435,6 +435,82 @@ void main() {
           ),
         );
       });
+
+      test('wraps stream exceptions', () async {
+        final ex = ServerException(
+          parsedResponse: null,
+          originalException: Error(),
+        );
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.error(ex),
+        );
+
+        final stream = client.subscribe(
+          SubscriptionOptions(
+            document: parseString(
+              r'''
+                subscription {
+                  item {
+                    id
+                    name
+                  }
+                }
+              ''',
+            ),
+          ),
+        );
+
+        expect(
+          stream,
+          emitsInOrder(
+            [
+              isA<QueryResult>().having(
+                (result) => result.exception.linkException,
+                'wrapped exception',
+                ex,
+              ),
+            ],
+          ),
+        );
+      });
+      test('wraps all exceptions from outside of stream', () async {
+        final err = Error();
+
+        when(
+          link.request(any),
+        ).thenThrow(err);
+
+        final stream = client.subscribe(
+          SubscriptionOptions(
+            document: parseString(
+              r'''
+                subscription {
+                  item {
+                    id
+                    name
+                  }
+                }
+              ''',
+            ),
+          ),
+        );
+
+        expect(
+          stream,
+          emitsInOrder(
+            [
+              isA<QueryResult>().having(
+                (result) => result.exception.linkException.originalException,
+                'wrapped exception',
+                err,
+              ),
+            ],
+          ),
+        );
+      });
     });
   });
 
