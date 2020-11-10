@@ -1,3 +1,10 @@
+# [4.0.0-beta.5](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2020-11-10)
+
+
+### Bug Fixes
+
+* **client:** wrap all subscription errors in QueryResults ([aae61ca](https://github.com/zino-app/graphql-flutter/commit/aae61cab543000916442420069b8e4019fa6ed0e))
+
 # [4.0.0-beta.4](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.3...v4.0.0-beta.4) (2020-11-07)
 
 
