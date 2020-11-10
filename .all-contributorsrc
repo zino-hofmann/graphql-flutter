@@ -153,7 +153,14 @@
         "doc",
         "example",
         "ideas",
-        "test"
+        "test",
+        "content",
+        "infra",
+        "maintenance",
+        "projectManagement",
+        "question",
+        "review",
+        "tutorial"
       ]
     },
     {
@@ -330,5 +337,7 @@
       ]
     }
   ],
-  "commitConvention": "none"
+  "commitConvention": "none",
+  "skipCi": true,
+  "contributorsPerLine": 7
 }
