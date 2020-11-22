@@ -4,7 +4,7 @@ import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
 import 'package:gql_exec/gql_exec.dart';
-import 'package:gql_link/gql_link.dart' show Link, LinkException;
+import 'package:gql_link/gql_link.dart' show Link;
 
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
