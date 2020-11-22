@@ -375,6 +375,58 @@ void main() {
             response.data['action']['starrable']['viewerHasStarred'] as bool;
         expect(viewerHasStarred, true);
       });
+
+      test('successful mutation through watchQuery', () async {
+        final _options = MutationOptions(
+          document: parseString(addStar),
+          variables: {},
+        );
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'action': {
+                    'starrable': {
+                      'viewerHasStarred': true,
+                    },
+                  },
+                },
+              ),
+            ],
+          ),
+        );
+
+        final observableQuery = await client.watchQuery(WatchQueryOptions(
+          document: _options.document,
+          variables: _options.variables,
+          fetchResults: false,
+        ));
+
+        final result = await observableQuery.fetchResults().networkResult;
+
+        verify(
+          link.request(
+            Request(
+              operation: Operation(
+                document: parseString(addStar),
+                //operationName: 'AddStar',
+              ),
+              variables: <String, dynamic>{},
+              context: Context(),
+            ),
+          ),
+        );
+
+        expect(result.hasException, isFalse);
+        expect(result.data, isNotNull);
+        final bool viewerHasStarred =
+            result.data['action']['starrable']['viewerHasStarred'] as bool;
+        expect(viewerHasStarred, true);
+      });
     });
 
     group('subscription', () {
