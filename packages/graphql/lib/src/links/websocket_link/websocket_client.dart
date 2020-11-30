@@ -261,15 +261,12 @@ class SocketClient {
   Future<void> dispose() async {
     print('Disposing socket client..');
     _reconnectTimer?.cancel();
-    final closing = [
+    await Future.wait([
       socket?.close(),
       _messageSubscription?.cancel(),
       _connectionStateController?.close(),
-    ];
-    if (_keepAliveSubscription != null) {
-      closing.add(_keepAliveSubscription?.cancel());
-    }
-    await Future.wait(closing);
+      _keepAliveSubscription?.cancel()
+    ].where((future) => future != null).toList());
   }
 
   static GraphQLSocketMessage _parseSocketMessage(dynamic message) {
