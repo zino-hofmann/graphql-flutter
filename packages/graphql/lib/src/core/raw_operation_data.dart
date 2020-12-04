@@ -85,6 +85,12 @@ class RawOperationData {
       if (isIoFile(object)) {
         return object.path;
       }
+      
+      // Better support for DateTime objects.
+      if (object is DateTime) {
+        return object.toIso8601String();
+      }
+      
       // default toEncodable behavior
       return object.toJson();
     });
