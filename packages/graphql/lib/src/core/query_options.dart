@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
@@ -105,7 +106,7 @@ class BaseOptions extends RawOperationData {
 }
 
 /// Query options.
-class QueryOptions extends BaseOptions {
+class QueryOptions extends BaseOptions with EquatableMixin {
   QueryOptions({
     @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
         String document,
@@ -129,6 +130,18 @@ class QueryOptions extends BaseOptions {
   /// The time interval (in milliseconds) on which this query should be
   /// re-fetched from the server.
   int pollInterval;
+
+  @override
+  List<Object> get props => [
+        documentNode?.definitions,
+        documentNode?.span?.sourceUrl,
+        variables,
+        fetchPolicy,
+        errorPolicy,
+        optimisticResult,
+        pollInterval,
+        context,
+      ];
 }
 
 typedef OnMutationCompleted = void Function(dynamic data);
@@ -136,7 +149,7 @@ typedef OnMutationUpdate = void Function(Cache cache, QueryResult result);
 typedef OnError = void Function(OperationException error);
 
 /// Mutation options
-class MutationOptions extends BaseOptions {
+class MutationOptions extends BaseOptions with EquatableMixin {
   MutationOptions({
     @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
         String document,
@@ -160,6 +173,20 @@ class MutationOptions extends BaseOptions {
   OnMutationCompleted onCompleted;
   OnMutationUpdate update;
   OnError onError;
+
+  @override
+  List<Object> get props => [
+        documentNode?.definitions,
+        documentNode?.span?.sourceUrl,
+        variables,
+        fetchPolicy,
+        errorPolicy,
+        optimisticResult,
+        context,
+        onCompleted,
+        update,
+        onError,
+      ];
 }
 
 class MutationCallbacks {
@@ -250,7 +277,7 @@ class MutationCallbacks {
 }
 
 // ObservableQuery options
-class WatchQueryOptions extends QueryOptions {
+class WatchQueryOptions extends QueryOptions with EquatableMixin {
   WatchQueryOptions({
     @Deprecated('The "document" option has been deprecated, use "documentNode" instead')
         String document,
@@ -280,6 +307,19 @@ class WatchQueryOptions extends QueryOptions {
   /// Whether or not to fetch result.
   bool fetchResults;
   bool eagerlyFetchResults;
+
+  @override
+  List<Object> get props => [
+        documentNode?.definitions,
+        documentNode?.span?.sourceUrl,
+        variables,
+        fetchPolicy,
+        errorPolicy,
+        optimisticResult,
+        context,
+        fetchResults,
+        eagerlyFetchResults,
+      ];
 
   /// Checks if the [WatchQueryOptions] in this class are equal to some given options.
   bool areEqualTo(WatchQueryOptions otherOptions) {
