@@ -1,6 +1,8 @@
 import 'dart:async' show FutureOr;
 
+import 'package:equatable/equatable.dart';
 import 'package:graphql/src/exceptions/exceptions.dart';
+import 'package:meta/meta.dart';
 
 /// The source of the result data contained
 ///
@@ -23,7 +25,8 @@ final eagerSources = {
   QueryResultSource.OptimisticResult
 };
 
-class QueryResult {
+// ignore: must_be_immutable
+class QueryResult extends Equatable {
   QueryResult({
     this.data,
     this.exception,
@@ -60,6 +63,20 @@ class QueryResult {
 
   /// Whether the response includes an exception
   bool get hasException => (exception != null);
+
+  @override
+  List<Object> get props => [
+        data,
+        hasException,
+        optimistic,
+        exception?.clientException,
+        exception?.graphqlErrors,
+        exception?.addError,
+        timestamp,
+        loading,
+        optimistic,
+        source?.index
+      ];
 }
 
 class MultiSourceResult {
