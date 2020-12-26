@@ -263,10 +263,10 @@ class SocketClient {
     _reconnectTimer?.cancel();
     await Future.wait([
       socket?.close(),
-      _keepAliveSubscription?.cancel(),
       _messageSubscription?.cancel(),
       _connectionStateController?.close(),
-    ]);
+      _keepAliveSubscription?.cancel()
+    ].where((future) => future != null).toList());
   }
 
   static GraphQLSocketMessage _parseSocketMessage(dynamic message) {
