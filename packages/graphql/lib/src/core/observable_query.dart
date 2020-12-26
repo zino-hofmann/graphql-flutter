@@ -187,11 +187,16 @@ class ObservableQuery {
         queryManager.fetchQueryAsMultiSourceResult(queryId, options);
     latestResult ??= allResults.eagerResult;
 
-    // if onData callbacks have been registered,
-    // they are waited on by default
-    lifecycle = _onDataCallbacks.isNotEmpty
-        ? QueryLifecycle.sideEffectsPending
-        : QueryLifecycle.pending;
+    if (allResults.networkResult == null) {
+      // This path is only possible for cacheFirst and cacheOnly fetch policies.
+      lifecycle = QueryLifecycle.completed;
+    } else {
+      // if onData callbacks have been registered,
+      // they are waited on by default
+      lifecycle = _onDataCallbacks.isNotEmpty
+          ? QueryLifecycle.sideEffectsPending
+          : QueryLifecycle.pending;
+    }
 
     if (options.pollInterval != null && options.pollInterval > Duration.zero) {
       startPolling(options.pollInterval);
