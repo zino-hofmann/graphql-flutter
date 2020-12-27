@@ -1,3 +1,10 @@
+# [4.0.0-beta.6](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.5...v4.0.0-beta.6) (2020-12-27)
+
+
+### Bug Fixes
+
+* fix ObservableQuery.lifecycle for cache only results ([f44b479](https://github.com/zino-app/graphql-flutter/commit/f44b479adc32a676d71dfc6ea95be78f60dbd3b6))
+
 # [4.0.0-beta.5](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.4...v4.0.0-beta.5) (2020-11-10)
 
 
