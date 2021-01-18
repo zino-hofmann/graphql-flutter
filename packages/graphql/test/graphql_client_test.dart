@@ -114,7 +114,15 @@ void main() {
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
-            Response(data: repoData),
+            Response(
+              data: repoData,
+              context: Context().withEntry(
+                HttpLinkResponseContext(
+                  statusCode: 200,
+                  headers: {'foo': 'bar'},
+                ),
+              ),
+            ),
           ]),
         );
 
@@ -137,6 +145,15 @@ void main() {
 
         expect(r.exception, isNull);
         expect(r.data, equals(repoData));
+
+        expect(
+          r.context.entry<HttpLinkResponseContext>().statusCode,
+          equals(200),
+        );
+        expect(
+          r.context.entry<HttpLinkResponseContext>().headers['foo'],
+          equals('bar'),
+        );
       });
 
       test('successful response without normalization', () async {
@@ -448,6 +465,7 @@ void main() {
         final mutation = gql(order.mutation);
         var _options = MutationOptions(
           document: mutation,
+          //fetchPolicy: FetchPolicy.cacheAndNetwork,
           variables: {
             'placeId': (order.expectedResult['place'] as Map)['id'],
             'lines': [order.closedOrderLineCreate],
@@ -476,18 +494,21 @@ void main() {
           variables: _options.variables,
           fetchResults: false,
         ));
-        var result = await observableQuery.fetchResults().networkResult;
+        var multiResult = await observableQuery.fetchResults();
+        var result = await multiResult.networkResult;
         expect(result.data['createOrder'], equals(order.closedOrder));
 
         count += 1;
 
         observableQuery.options.variables = {
           'placeId': (order.expectedResult['place'] as Map)['id'],
-          'lines': [order.openOrderLineCreate],
+          'lines': [order.closedOrderLineCreate],
           'name': null
         };
 
-        result = await observableQuery.fetchResults().networkResult;
+        multiResult = await observableQuery.fetchResults();
+        print(multiResult.eagerResult);
+        result = await multiResult.networkResult;
 
         //print(jsonEncode(client.cache.store.toMap()));
 

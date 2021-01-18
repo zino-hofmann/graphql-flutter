@@ -477,6 +477,7 @@ class QueryManager {
 
     return QueryResult(
       data: data,
+      context: response.context,
       source: source,
       exception: coalesceErrors(graphqlErrors: errors),
     );

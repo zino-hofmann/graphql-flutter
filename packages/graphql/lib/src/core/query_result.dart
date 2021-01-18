@@ -1,4 +1,5 @@
 import 'dart:async' show FutureOr;
+import 'package:graphql/client.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:meta/meta.dart';
 
@@ -63,6 +64,7 @@ class QueryResult {
   QueryResult({
     this.data,
     this.exception,
+    this.context = const Context(),
     @required this.source,
   }) : timestamp = DateTime.now();
 
@@ -96,6 +98,9 @@ class QueryResult {
 
   /// Response data
   Map<String, dynamic> data;
+
+  /// Response context. Defaults to an empty `Context()`
+  Context context;
 
   OperationException exception;
 
@@ -138,6 +143,7 @@ class QueryResult {
   String toString() => 'QueryResult('
       'source: $source, '
       'data: $data, '
+      'context: $context, '
       'exception: $exception, '
       'timestamp: $timestamp'
       ')';
