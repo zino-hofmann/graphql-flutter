@@ -305,9 +305,9 @@ final typelessTest = TestCase(
     a {
       # union
       list {
-        __typename
+        #__typename
         value 
-        ... on Item { id }
+        #... on Item { id }
       }
       b {
         id
@@ -327,10 +327,23 @@ final typelessTest = TestCase(
   data: {
     'a': {
       'list': [
-        {'__typename': 'Num', 'value': 1},
-        {'__typename': 'Num', 'value': 2},
-        {'__typename': 'Num', 'value': 3},
-        {'__typename': 'Item', 'id': 4, 'value': 4}
+        {
+          //'__typename': 'Num',
+          'value': 1,
+        },
+        {
+          //'__typename': 'Num',
+          'value': 2,
+        },
+        {
+          //'__typename': 'Num',
+          'value': 3,
+        },
+        {
+          //'__typename': 'Item',
+          //'id': 4,
+          'value': 4,
+        }
       ],
       'b': {
         'id': 5,

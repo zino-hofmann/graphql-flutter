@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_link/gql_link.dart';
 import 'package:test/test.dart';
@@ -7,11 +5,8 @@ import 'package:mockito/mockito.dart';
 
 import 'package:graphql/client.dart';
 import 'package:gql/language.dart';
-import './mutation_sequence_issue_data.dart' as order;
 
 import './helpers.dart';
-
-class MockLink extends Mock implements Link {}
 
 void main() {
   const String readSingle = r'''
@@ -446,74 +441,6 @@ void main() {
         final bool viewerHasStarred =
             result.data['action']['starrable']['viewerHasStarred'] as bool;
         expect(viewerHasStarred, true);
-      });
-
-      /// https://github.com/zino-app/graphql-flutter/issues/747#issuecomment-731649547
-      test('watchQuery mutations are isolated', () async {
-        //client.writeFragment(
-        //  FragmentRequest(
-        //    fragment: Fragment(document: gql(order.fragment)),
-        //    idFields: {'__typename': 'Order', 'id': order.closedOrder['id']},
-        //    variables: {'placeId': (order.closedOrder['place'] as Map)['id']},
-        //  ),
-        //  data: order.closedOrder,
-        //);
-        //print(client.cache.store.toMap());
-
-        int count = 0;
-
-        final mutation = gql(order.mutation);
-        var _options = MutationOptions(
-          document: mutation,
-          //fetchPolicy: FetchPolicy.cacheAndNetwork,
-          variables: {
-            'placeId': (order.expectedResult['place'] as Map)['id'],
-            'lines': [order.closedOrderLineCreate],
-            'name': null
-          },
-        );
-
-        when(
-          link.request(any),
-        ).thenAnswer(
-          (_) => Stream.fromIterable(
-            [
-              Response(
-                data: {
-                  'createOrder':
-                      count < 1 ? order.closedOrder : order.expectedResult,
-                  '__typename': 'Mutation'
-                },
-              ),
-            ],
-          ),
-        );
-
-        var observableQuery = await client.watchQuery(WatchQueryOptions(
-          document: _options.document,
-          variables: _options.variables,
-          fetchResults: false,
-        ));
-        var multiResult = await observableQuery.fetchResults();
-        var result = await multiResult.networkResult;
-        expect(result.data['createOrder'], equals(order.closedOrder));
-
-        count += 1;
-
-        observableQuery.options.variables = {
-          'placeId': (order.expectedResult['place'] as Map)['id'],
-          'lines': [order.closedOrderLineCreate],
-          'name': null
-        };
-
-        multiResult = await observableQuery.fetchResults();
-        print(multiResult.eagerResult);
-        result = await multiResult.networkResult;
-
-        //print(jsonEncode(client.cache.store.toMap()));
-
-        expect(result.hasException, isFalse);
-        expect(result.data['createOrder'], equals(order.expectedResult));
       });
     });
 
