@@ -3,7 +3,7 @@ import "package:collection/collection.dart";
 
 /// [FetchPolicy] determines where the client may return a result from.
 ///
-/// * [cacheFirst] (default): return result from cache. Only fetch from network if cached result is not available.
+/// * [cacheFirst]: return result from cache. Only fetch from network if cached result is not available.
 /// * [cacheAndNetwork]: return result from cache first (if it exists), then return network result once it's available.
 /// * [cacheOnly]: return result from cache if available, fail otherwise.
 /// * [noCache]: return result from network, fail if network call doesn't succeed, don't save to cache.
@@ -11,8 +11,10 @@ import "package:collection/collection.dart";
 ///
 /// The default `fetchPolicy` for each method are:
 /// * `watchQuery`: [cacheAndNetwork]
+/// * `watchMutation`: [cacheAndNetwork]
 /// * `query`: [cacheFirst]
 /// * `mutation`: [networkOnly]
+/// * `subscribe`: [networkOnly]
 ///
 /// These can be overriden at client construction time by passing
 /// a [DefaultPolicies] instance to `defaultPolicies`.
@@ -44,7 +46,7 @@ bool shouldStopAtCache(FetchPolicy fetchPolicy) =>
     fetchPolicy == FetchPolicy.cacheFirst ||
     fetchPolicy == FetchPolicy.cacheOnly;
 
-bool canExecuteOnNetwork(FetchPolicy policy) {
+bool willAlwaysExecuteOnNetwork(FetchPolicy policy) {
   switch (policy) {
     case FetchPolicy.noCache:
     case FetchPolicy.networkOnly:
@@ -64,7 +66,7 @@ bool canExecuteOnNetwork(FetchPolicy policy) {
 /// * [none] (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
 /// * [ignore]:  Ignore allows you to read any data that is returned alongside GraphQL Errors,
 ///   but doesn't save the errors or report them to your UI.
-/// * [all]: saves both data and errors into the `cache` so your UI can use them.
+/// * [all]: Saves both data and errors into the `cache` so your UI can use them.
 ///   It is recommended for notifying your users of potential issues,
 ///   while still showing as much data as possible from your server.
 ///
@@ -79,16 +81,44 @@ enum ErrorPolicy {
   /// but doesn't save the errors or report them to your UI.
   ignore,
 
-  /// saves both data and errors into the `cache` so your UI can use them.
+  /// Saves both data and errors into the `cache` so your UI can use them.
   ///
   ///  It is recommended for notifying your users of potential issues,
   ///  while still showing as much data as possible from your server.
   all,
 }
 
-/// Container for supplying a [fetch] and [error] policy.
+/// [CacheDataPolicy] determines whether and how cache data will be merged into
+/// the final [QueryResult] `data` before it is returned.
 ///
-/// If either are `null`, the appropriate policy will be selected from [DefaultPolicies]
+/// * [mergeOptimistic]: Merge relevant optimistic data from the cache before returning.
+/// * [ignoreOptimistic]: Ignore relevant optimistic data in the cache.
+/// * [ignoreAll]: Ignore all cache data, including relevant data returned from other operations.
+///
+/// The default `cacheDataPolicy` for each method are:
+/// * `watchQuery`: [mergeOptimistic]
+/// * `watchMutation`: [ignoreAll]
+/// * `query`: [mergeOptimistic]
+/// * `mutation`: [ignoreAll]
+/// * `subscribe`: [mergeOptimistic]
+///
+/// The [CacheDataPolicy] only controls cache reading, while cache writing is controlled via [FetchPolicy].
+enum CacheDataPolicy {
+  /// Merge relevant optimistic data from the cache before returning.
+  mergeOptimistic,
+
+  /// Ignore optimistic data, but still allow for non-optimistic cache re-reads and rebroadcasts
+  /// **if applicable**.
+  ignoreOptimisitic,
+
+  /// Ignore all cache data besides the result, and never rebroadcast the result,
+  /// even if the underlying cache data changes.
+  ignoreAll,
+}
+
+/// Container for supplying [fetch], [error], and [cacheData] policies.
+///
+/// If any are `null`, the appropriate policy will be selected from [DefaultPolicies]
 @immutable
 class Policies {
   /// Specifies the [FetchPolicy] to be used.
@@ -97,39 +127,56 @@ class Policies {
   /// Specifies the [ErrorPolicy] to be used.
   final ErrorPolicy error;
 
+  /// Specifies the [CacheDataPolicy] to be used.
+  final CacheDataPolicy cacheData;
+
+  bool get mergeOptimisticData => cacheData == CacheDataPolicy.mergeOptimistic;
+
   Policies({
     this.fetch,
     this.error,
+    this.cacheData,
   });
 
   Policies.safe(
     this.fetch,
     this.error,
+    this.cacheData,
   )   : assert(fetch != null, 'fetch policy must be specified'),
-        assert(error != null, 'error policy must be specified');
+        assert(error != null, 'error policy must be specified'),
+        assert(cacheData != null, 'cacheData policy must be specified');
 
   Policies withOverrides([Policies overrides]) => Policies.safe(
         overrides?.fetch ?? fetch,
         overrides?.error ?? error,
+        overrides?.cacheData ?? cacheData,
       );
 
   Policies copyWith({FetchPolicy fetch, ErrorPolicy error}) =>
-      Policies(fetch: fetch, error: error);
+      Policies(fetch: fetch, error: error, cacheData: cacheData);
 
   operator ==(Object other) =>
       identical(this, other) ||
-      (other is Policies && fetch == other.fetch && error == other.error);
+      (other is Policies &&
+          fetch == other.fetch &&
+          error == other.error &&
+          cacheData == other.cacheData);
 
   @override
   int get hashCode => const ListEquality<Object>(
         DeepCollectionEquality(),
-      ).hash([fetch, error]);
+      ).hash([fetch, error, cacheData]);
+
+  /// Returns `false` if either [fetch] or [cacheData] policies have disabled rebroadcast.
+  bool get allowsRebroadcasting =>
+      !(fetch == FetchPolicy.noCache || cacheData == CacheDataPolicy.ignoreAll);
 
   @override
-  String toString() => 'Policies(fetch: $fetch, error: $error)';
+  String toString() =>
+      'Policies(fetch: $fetch, error: $error, cacheData: $cacheData)';
 }
 
-/// The default [Policies] to set for each client action
+/// The default [Policies] to set for each client action.
 @immutable
 class DefaultPolicies {
   /// The default [Policies] for watchQuery.
@@ -138,9 +185,21 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.cacheAndNetwork,
   ///   ErrorPolicy.none,
+  ///   OptimisticData.mergeOptimistic,
   /// )
   /// ```
   final Policies watchQuery;
+
+  /// The default [Policies] for watchMutation.
+  /// Defaults to
+  /// ```
+  /// Policies(
+  ///   FetchPolicy.networkOnly,
+  ///   ErrorPolicy.none,
+  ///   OptimisticData.ignoreAll,
+  /// )
+  /// ```
+  final Policies watchMutation;
 
   /// The default [Policies] for query.
   /// Defaults to
@@ -148,6 +207,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.cacheFirst,
   ///   ErrorPolicy.none,
+  ///   OptimisticData.mergeOptimistic,
   /// )
   /// ```
   final Policies query;
@@ -158,6 +218,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.networkOnly,
   ///   ErrorPolicy.none,
+  ///   OptimisticData.ignore,
   /// )
   /// ```
   final Policies mutate;
@@ -166,46 +227,67 @@ class DefaultPolicies {
   /// Defaults to
   /// ```
   /// Policies(
-  ///   FetchPolicy.cacheAndNetwork,
+  ///   FetchPolicy.networkOnly,
   ///   ErrorPolicy.none,
+  ///   OptimisticData.mergeOptimistic,
   /// )
   /// ```
+  ///
+  /// The subscription spec is very flexible, so we default to `FetchPolicy.networkOnly`
+  /// to avoid breaking some use-cases by default.
+  ///
+  /// `FetchPolicy.cacheOnly` is invalid for subscriptions. This is because `FetchPolicy` changes do
+  /// little to change subscription behavior, only determining
+  /// whether an eager result is first read from the cache.
   final Policies subscribe;
 
   DefaultPolicies({
     Policies watchQuery,
+    Policies watchMutation,
     Policies query,
     Policies mutate,
     Policies subscribe,
   })  : watchQuery = _watchQueryDefaults.withOverrides(watchQuery),
+        watchMutation = _mutateDefaults.withOverrides(watchMutation),
         query = _queryDefaults.withOverrides(query),
         mutate = _mutateDefaults.withOverrides(mutate),
-        subscribe = _watchQueryDefaults.withOverrides(subscribe);
+        subscribe = _subscribeDefaults.withOverrides(subscribe);
 
   static final _watchQueryDefaults = Policies.safe(
     FetchPolicy.cacheAndNetwork,
     ErrorPolicy.none,
+    CacheDataPolicy.mergeOptimistic,
   );
 
   static final _queryDefaults = Policies.safe(
     FetchPolicy.cacheFirst,
     ErrorPolicy.none,
+    CacheDataPolicy.mergeOptimistic,
   );
 
   static final _mutateDefaults = Policies.safe(
     FetchPolicy.networkOnly,
     ErrorPolicy.none,
+    CacheDataPolicy.ignoreAll,
+  );
+
+  static final _subscribeDefaults = Policies.safe(
+    FetchPolicy.networkOnly,
+    ErrorPolicy.none,
+    CacheDataPolicy.mergeOptimistic,
   );
 
   DefaultPolicies copyWith({
     Policies watchQuery,
     Policies query,
+    Policies watchMutation,
     Policies mutate,
     Policies subscribe,
   }) =>
       DefaultPolicies(
         watchQuery: watchQuery,
         query: query,
+        watchMutation: watchMutation,
         mutate: mutate,
         subscribe: subscribe,
       );
@@ -213,6 +295,7 @@ class DefaultPolicies {
   List<Object> _getChildren() => [
         watchQuery,
         query,
+        watchMutation,
         mutate,
         subscribe,
       ];

@@ -17,8 +17,13 @@ abstract class BaseOptions extends MutableDataClass {
     Context context,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
+    CacheDataPolicy cacheDataPolicy,
     this.optimisticResult,
-  })  : policies = Policies(fetch: fetchPolicy, error: errorPolicy),
+  })  : policies = Policies(
+          fetch: fetchPolicy,
+          error: errorPolicy,
+          cacheData: cacheDataPolicy,
+        ),
         context = context ?? Context();
 
   /// Document containing at least one [OperationDefinitionNode]
@@ -42,6 +47,8 @@ abstract class BaseOptions extends MutableDataClass {
   FetchPolicy get fetchPolicy => policies.fetch;
 
   ErrorPolicy get errorPolicy => policies.error;
+
+  CacheDataPolicy get cacheDataPolicy => policies.cacheData;
 
   /// Context to be passed to link execution chain.
   Context context;

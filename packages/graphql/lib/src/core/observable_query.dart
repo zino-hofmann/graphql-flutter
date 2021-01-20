@@ -142,10 +142,13 @@ class ObservableQuery {
   }
 
   /// Whether it is safe to rebroadcast results due to cache
-  /// changes based on [lifecycle].
+  /// changes based on policies and [lifecycle].
   ///
   /// Called internally by the [QueryManager]
   bool get isRebroadcastSafe {
+    if (!options.policies.allowsRebroadcasting) {
+      return false;
+    }
     switch (lifecycle) {
       case QueryLifecycle.pending:
       case QueryLifecycle.completed:
