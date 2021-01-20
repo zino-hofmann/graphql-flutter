@@ -17,12 +17,12 @@ abstract class BaseOptions extends MutableDataClass {
     Context context,
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
-    CacheDataPolicy cacheDataPolicy,
+    CacheRereadPolicy cacheRereadPolicy,
     this.optimisticResult,
   })  : policies = Policies(
           fetch: fetchPolicy,
           error: errorPolicy,
-          cacheData: cacheDataPolicy,
+          cacheReread: cacheRereadPolicy,
         ),
         context = context ?? Context();
 
@@ -48,7 +48,7 @@ abstract class BaseOptions extends MutableDataClass {
 
   ErrorPolicy get errorPolicy => policies.error;
 
-  CacheDataPolicy get cacheDataPolicy => policies.cacheData;
+  CacheRereadPolicy get cacheRereadPolicy => policies.cacheReread;
 
   /// Context to be passed to link execution chain.
   Context context;

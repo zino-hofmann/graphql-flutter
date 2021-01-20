@@ -1,3 +1,4 @@
+import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 import "package:collection/collection.dart";
 
@@ -88,26 +89,28 @@ enum ErrorPolicy {
   all,
 }
 
-/// [CacheDataPolicy] determines whether and how cache data will be merged into
+/// [CacheRereadPolicy] determines whether and how cache data will be merged into
 /// the final [QueryResult] `data` before it is returned.
 ///
-/// * [mergeOptimistic]: Merge relevant optimistic data from the cache before returning.
-/// * [ignoreOptimistic]: Ignore relevant optimistic data in the cache.
-/// * [ignoreAll]: Ignore all cache data, including relevant data returned from other operations.
+/// It _does not_ effect `optimisticResults` added to [QueryOptions], etc.
 ///
-/// The default `cacheDataPolicy` for each method are:
+/// * [mergeOptimistic]: Merge relevant optimistic data from the cache before returning.
+/// * [ignoreOptimistic]: Ignore optimistic data, but still allow for non-optimistic cache rebroadcasts
+///   **if applicable**.
+/// * [ignoreAll]: Ignore all cache data besides the result, and never rebroadcast the result,
+///   even if the underlying cache data changes.
+///
+/// The default `cacheRereadPolicy` for each method are:
 /// * `watchQuery`: [mergeOptimistic]
 /// * `watchMutation`: [ignoreAll]
 /// * `query`: [mergeOptimistic]
 /// * `mutation`: [ignoreAll]
 /// * `subscribe`: [mergeOptimistic]
-///
-/// The [CacheDataPolicy] only controls cache reading, while cache writing is controlled via [FetchPolicy].
-enum CacheDataPolicy {
+enum CacheRereadPolicy {
   /// Merge relevant optimistic data from the cache before returning.
   mergeOptimistic,
 
-  /// Ignore optimistic data, but still allow for non-optimistic cache re-reads and rebroadcasts
+  /// Ignore optimistic data, but still allow for non-optimistic cache rebroadcasts
   /// **if applicable**.
   ignoreOptimisitic,
 
@@ -116,7 +119,7 @@ enum CacheDataPolicy {
   ignoreAll,
 }
 
-/// Container for supplying [fetch], [error], and [cacheData] policies.
+/// Container for supplying [fetch], [error], and [cacheReread] policies.
 ///
 /// If any are `null`, the appropriate policy will be selected from [DefaultPolicies]
 @immutable
@@ -127,53 +130,54 @@ class Policies {
   /// Specifies the [ErrorPolicy] to be used.
   final ErrorPolicy error;
 
-  /// Specifies the [CacheDataPolicy] to be used.
-  final CacheDataPolicy cacheData;
+  /// Specifies the [CacheRereadPolicy] to be used.
+  final CacheRereadPolicy cacheReread;
 
-  bool get mergeOptimisticData => cacheData == CacheDataPolicy.mergeOptimistic;
+  bool get mergeOptimisticData =>
+      cacheReread == CacheRereadPolicy.mergeOptimistic;
 
   Policies({
     this.fetch,
     this.error,
-    this.cacheData,
+    this.cacheReread,
   });
 
   Policies.safe(
     this.fetch,
     this.error,
-    this.cacheData,
+    this.cacheReread,
   )   : assert(fetch != null, 'fetch policy must be specified'),
         assert(error != null, 'error policy must be specified'),
-        assert(cacheData != null, 'cacheData policy must be specified');
+        assert(cacheReread != null, 'cacheReread policy must be specified');
 
   Policies withOverrides([Policies overrides]) => Policies.safe(
         overrides?.fetch ?? fetch,
         overrides?.error ?? error,
-        overrides?.cacheData ?? cacheData,
+        overrides?.cacheReread ?? cacheReread,
       );
 
   Policies copyWith({FetchPolicy fetch, ErrorPolicy error}) =>
-      Policies(fetch: fetch, error: error, cacheData: cacheData);
+      Policies(fetch: fetch, error: error, cacheReread: cacheReread);
 
   operator ==(Object other) =>
       identical(this, other) ||
       (other is Policies &&
           fetch == other.fetch &&
           error == other.error &&
-          cacheData == other.cacheData);
+          cacheReread == other.cacheReread);
 
   @override
   int get hashCode => const ListEquality<Object>(
         DeepCollectionEquality(),
-      ).hash([fetch, error, cacheData]);
+      ).hash([fetch, error, cacheReread]);
 
-  /// Returns `false` if either [fetch] or [cacheData] policies have disabled rebroadcast.
-  bool get allowsRebroadcasting =>
-      !(fetch == FetchPolicy.noCache || cacheData == CacheDataPolicy.ignoreAll);
+  /// Returns `false` if either [fetch] or [cacheReread] policies have disabled rebroadcast.
+  bool get allowsRebroadcasting => !(fetch == FetchPolicy.noCache ||
+      cacheReread == CacheRereadPolicy.ignoreAll);
 
   @override
   String toString() =>
-      'Policies(fetch: $fetch, error: $error, cacheData: $cacheData)';
+      'Policies(fetch: $fetch, error: $error, cacheReread: $cacheReread)';
 }
 
 /// The default [Policies] to set for each client action.
@@ -185,7 +189,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.cacheAndNetwork,
   ///   ErrorPolicy.none,
-  ///   OptimisticData.mergeOptimistic,
+  ///   CacheRereadPolicy.mergeOptimistic,
   /// )
   /// ```
   final Policies watchQuery;
@@ -196,7 +200,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.networkOnly,
   ///   ErrorPolicy.none,
-  ///   OptimisticData.ignoreAll,
+  ///   CacheRereadPolicy.ignoreAll,
   /// )
   /// ```
   final Policies watchMutation;
@@ -207,7 +211,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.cacheFirst,
   ///   ErrorPolicy.none,
-  ///   OptimisticData.mergeOptimistic,
+  ///   CacheRereadPolicy.mergeOptimistic,
   /// )
   /// ```
   final Policies query;
@@ -218,7 +222,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.networkOnly,
   ///   ErrorPolicy.none,
-  ///   OptimisticData.ignore,
+  ///   CacheRereadPolicy.ignore,
   /// )
   /// ```
   final Policies mutate;
@@ -229,7 +233,7 @@ class DefaultPolicies {
   /// Policies(
   ///   FetchPolicy.networkOnly,
   ///   ErrorPolicy.none,
-  ///   OptimisticData.mergeOptimistic,
+  ///   CacheRereadPolicy.mergeOptimistic,
   /// )
   /// ```
   ///
@@ -256,25 +260,25 @@ class DefaultPolicies {
   static final _watchQueryDefaults = Policies.safe(
     FetchPolicy.cacheAndNetwork,
     ErrorPolicy.none,
-    CacheDataPolicy.mergeOptimistic,
+    CacheRereadPolicy.mergeOptimistic,
   );
 
   static final _queryDefaults = Policies.safe(
     FetchPolicy.cacheFirst,
     ErrorPolicy.none,
-    CacheDataPolicy.mergeOptimistic,
+    CacheRereadPolicy.mergeOptimistic,
   );
 
   static final _mutateDefaults = Policies.safe(
     FetchPolicy.networkOnly,
     ErrorPolicy.none,
-    CacheDataPolicy.ignoreAll,
+    CacheRereadPolicy.ignoreAll,
   );
 
   static final _subscribeDefaults = Policies.safe(
     FetchPolicy.networkOnly,
     ErrorPolicy.none,
-    CacheDataPolicy.mergeOptimistic,
+    CacheRereadPolicy.mergeOptimistic,
   );
 
   DefaultPolicies copyWith({

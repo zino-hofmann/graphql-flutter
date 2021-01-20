@@ -42,7 +42,7 @@ class MutationState extends State<Mutation> {
       variables: widget.options.variables,
       fetchPolicy: widget.options.fetchPolicy,
       errorPolicy: widget.options.errorPolicy,
-      cacheDataPolicy: widget.options.cacheDataPolicy,
+      cacheRereadPolicy: widget.options.cacheRereadPolicy,
       fetchResults: false,
       context: widget.options.context,
     );

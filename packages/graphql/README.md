@@ -486,6 +486,14 @@ Possible options:
 - all: Using the all policy is the best way to notify your users of potential issues while still showing as much data as possible from your server.
   It saves both data and errors into the Apollo Cache so your UI can use them.
 
+**CacheRereadPolicy** determines whether and how cache data will be merged into the final `QueryResult.data` before it is returned.
+Possible options:
+* mergeOptimistic: Merge relevant optimistic data from the cache before returning.
+* ignoreOptimistic: Ignore optimistic data, but still allow for non-optimistic cache rebroadcasts
+  **if applicable**.
+* ignoreAll: Ignore all cache data besides the result, and never rebroadcast the result,
+  even if the underlying cache data changes.
+
 ## Exceptions
 
 If there were problems encountered during a query or mutation, the `QueryResult` will have an `OperationException` in the `exception` field:
