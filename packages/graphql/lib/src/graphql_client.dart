@@ -95,6 +95,17 @@ class GraphQLClient implements GraphQLDataProxy {
     return queryManager.watchQuery(options);
   }
 
+  /// [watchMutation] is the same as [watchQuery], but with a different [defaultPolicies] that are more appropriate for mutations.
+  ///
+  /// This is a stop-gap solution to the problems created by the reliance of `graphql_flutter` on [ObservableQuery] for mutations.
+  ///
+  /// For more details, see https://github.com/zino-app/graphql-flutter/issues/774
+  ObservableQuery watchMutation(WatchQueryOptions options) {
+    options.policies =
+        defaultPolicies.watchMutation.withOverrides(options.policies);
+    return queryManager.watchQuery(options);
+  }
+
   /// This resolves a single query according to the [QueryOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
   ///

@@ -42,6 +42,7 @@ class MutationState extends State<Mutation> {
       variables: widget.options.variables,
       fetchPolicy: widget.options.fetchPolicy,
       errorPolicy: widget.options.errorPolicy,
+      cacheRereadPolicy: widget.options.cacheRereadPolicy,
       fetchResults: false,
       context: widget.options.context,
     );
@@ -63,7 +64,7 @@ class MutationState extends State<Mutation> {
   // TODO is it possible to extract shared logic into mixin
   void _initQuery() {
     observableQuery?.close();
-    observableQuery = client.watchQuery(_providedOptions.copy());
+    observableQuery = client.watchMutation(_providedOptions.copy());
   }
 
   @override
@@ -116,7 +117,7 @@ class MutationState extends State<Mutation> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
-      initialData: observableQuery?.latestResult ?? QueryResult.empty(),
+      initialData: observableQuery?.latestResult ?? QueryResult.unexecuted,
       stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,

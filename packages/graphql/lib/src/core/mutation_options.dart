@@ -27,6 +27,7 @@ class MutationOptions extends BaseOptions {
     Map<String, dynamic> variables = const {},
     FetchPolicy fetchPolicy,
     ErrorPolicy errorPolicy,
+    CacheRereadPolicy cacheRereadPolicy,
     Context context,
     Object optimisticResult,
     this.onCompleted,
@@ -39,6 +40,7 @@ class MutationOptions extends BaseOptions {
         super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
+          cacheRereadPolicy: cacheRereadPolicy,
           document: document ?? documentNode,
           operationName: operationName,
           variables: variables,

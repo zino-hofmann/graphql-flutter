@@ -1,6 +1,9 @@
 import 'dart:async';
 
 import 'package:graphql/client.dart';
+import 'package:mockito/mockito.dart';
+
+class MockLink extends Mock implements Link {}
 
 const debuggingUnexpectedTestFailures = false;
 

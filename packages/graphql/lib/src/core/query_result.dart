@@ -1,4 +1,5 @@
 import 'dart:async' show FutureOr;
+import 'package:graphql/client.dart';
 import 'package:graphql/src/exceptions.dart';
 import 'package:meta/meta.dart';
 
@@ -63,12 +64,14 @@ class QueryResult {
   QueryResult({
     this.data,
     this.exception,
+    this.context = const Context(),
     @required this.source,
   }) : timestamp = DateTime.now();
 
-  /// An empty result. Can be used as a placeholder when an operation
-  /// has not been executed yet.
-  factory QueryResult.empty() => QueryResult(source: null);
+  /// Unexecuted singleton, used as a placeholder for mutations,
+  /// etc.
+  static final unexecuted = QueryResult(source: null)
+    ..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
   factory QueryResult.loading({
     Map<String, dynamic> data,
@@ -96,6 +99,9 @@ class QueryResult {
 
   /// Response data
   Map<String, dynamic> data;
+
+  /// Response context. Defaults to an empty `Context()`
+  Context context;
 
   OperationException exception;
 
@@ -138,6 +144,7 @@ class QueryResult {
   String toString() => 'QueryResult('
       'source: $source, '
       'data: $data, '
+      'context: $context, '
       'exception: $exception, '
       'timestamp: $timestamp'
       ')';

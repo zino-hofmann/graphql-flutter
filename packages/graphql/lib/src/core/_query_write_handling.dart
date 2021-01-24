@@ -18,7 +18,7 @@ typedef _IntPartialDataHandler = MismatchedDataStructureException Function(
 
 extension InternalQueryWriteHandling on QueryManager {
   /// Merges exceptions into `queryResult` and
-  /// returns `true` if a reread should be attempted
+  /// returns `true` on success.
   ///
   /// This is named `*OrSetExceptionOnQueryResult` because it is very imperative,
   /// and edits the [queryResult] inplace.
@@ -49,30 +49,33 @@ extension InternalQueryWriteHandling on QueryManager {
   /// Part of [InternalQueryWriteHandling], and not exposed outside the
   /// library.
   ///
+  /// Returns `true` if a reread should be attempted to incorporate potential optimistic data.
+  ///
   /// If we have no data, we skip caching, thus taking [ErrorPolicy.none]
-  /// into account
+  /// into account.
   ///
   /// networked wrapper for [_writeQueryOrSetExceptionOnQueryResult]
   /// NOTE: mapFetchResultToQueryResult must be called beforehand
   bool attemptCacheWriteFromResponse(
-    FetchPolicy fetchPolicy,
+    Policies policies,
     Request request,
     Response response,
     QueryResult queryResult,
   ) =>
-      (fetchPolicy == FetchPolicy.noCache || queryResult.data == null)
+      (policies.fetch == FetchPolicy.noCache || queryResult.data == null)
           ? false
           : _writeQueryOrSetExceptionOnQueryResult(
-              request,
-              response.data,
-              queryResult,
-              writeQuery: (req, data) => cache.writeQuery(req, data: data),
-              onPartial: (failure) => UnexpectedResponseStructureException(
-                failure,
-                request: request,
-                parsedResponse: response,
-              ),
-            );
+                request,
+                response.data,
+                queryResult,
+                writeQuery: (req, data) => cache.writeQuery(req, data: data),
+                onPartial: (failure) => UnexpectedResponseStructureException(
+                  failure,
+                  request: request,
+                  parsedResponse: response,
+                ),
+              ) &&
+              policies.mergeOptimisticData;
 
   /// Part of [InternalQueryWriteHandling], and not exposed outside the
   /// library.

@@ -1,10 +1,11 @@
 import 'dart:async';
 
+import 'package:graphql/src/cache/_optimistic_transactions.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
 import 'package:gql_exec/gql_exec.dart';
-import 'package:gql_link/gql_link.dart' show Link, LinkException;
+import 'package:gql_link/gql_link.dart' show Link;
 
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
@@ -59,6 +60,10 @@ class QueryManager {
   }
 
   Stream<QueryResult> subscribe(SubscriptionOptions options) async* {
+    assert(
+      options.fetchPolicy != FetchPolicy.cacheOnly,
+      "Cannot subscribe with FetchPolicy.cacheOnly: $options",
+    );
     final request = options.asRequest;
 
     // Add optimistic or cache-based result to the stream if any
@@ -66,7 +71,10 @@ class QueryManager {
       // TODO optimisticResults for streams just skip the cache for now
       yield QueryResult.optimistic(data: options.optimisticResult);
     } else if (options.fetchPolicy != FetchPolicy.noCache) {
-      final cacheResult = cache.readQuery(request, optimistic: true);
+      final cacheResult = cache.readQuery(
+        request,
+        optimistic: options.policies.mergeOptimisticData,
+      );
       if (cacheResult != null) {
         yield QueryResult(
           source: QueryResultSource.cache,
@@ -87,7 +95,7 @@ class QueryManager {
           );
 
           rereadFromCache = attemptCacheWriteFromResponse(
-            options.fetchPolicy,
+            options.policies,
             request,
             response,
             queryResult,
@@ -200,7 +208,7 @@ class QueryManager {
       );
 
       rereadFromCache = attemptCacheWriteFromResponse(
-        options.fetchPolicy,
+        options.policies,
         request,
         response,
         queryResult,
@@ -295,7 +303,7 @@ class QueryManager {
   /// overriding any present non-network-only [FetchPolicy].
   Future<QueryResult> refetchQuery(String queryId) {
     final WatchQueryOptions options = queries[queryId].options.copy();
-    if (!canExecuteOnNetwork(options.fetchPolicy)) {
+    if (!willAlwaysExecuteOnNetwork(options.fetchPolicy)) {
       options.policies = options.policies.copyWith(
         fetch: FetchPolicy.networkOnly,
       );
@@ -400,7 +408,7 @@ class QueryManager {
       if (query != exclude && query.isRebroadcastSafe) {
         final cachedData = cache.readQuery(
           query.options.asRequest,
-          optimistic: true,
+          optimistic: query.options.policies.mergeOptimisticData,
         );
         if (_cachedDataHasChangedFor(query, cachedData)) {
           query.addResult(
@@ -477,6 +485,7 @@ class QueryManager {
 
     return QueryResult(
       data: data,
+      context: response.context,
       source: source,
       exception: coalesceErrors(graphqlErrors: errors),
     );

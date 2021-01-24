@@ -8,8 +8,6 @@ import 'package:gql/language.dart';
 
 import './helpers.dart';
 
-class MockLink extends Mock implements Link {}
-
 void main() {
   const String readSingle = r'''
     query ReadSingle($id: ID!) {
@@ -111,7 +109,15 @@ void main() {
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
-            Response(data: repoData),
+            Response(
+              data: repoData,
+              context: Context().withEntry(
+                HttpLinkResponseContext(
+                  statusCode: 200,
+                  headers: {'foo': 'bar'},
+                ),
+              ),
+            ),
           ]),
         );
 
@@ -134,6 +140,15 @@ void main() {
 
         expect(r.exception, isNull);
         expect(r.data, equals(repoData));
+
+        expect(
+          r.context.entry<HttpLinkResponseContext>().statusCode,
+          equals(200),
+        );
+        expect(
+          r.context.entry<HttpLinkResponseContext>().headers['foo'],
+          equals('bar'),
+        );
       });
 
       test('successful response without normalization', () async {
@@ -373,6 +388,58 @@ void main() {
         expect(response.data, isNotNull);
         final bool viewerHasStarred =
             response.data['action']['starrable']['viewerHasStarred'] as bool;
+        expect(viewerHasStarred, true);
+      });
+
+      test('successful mutation through watchQuery', () async {
+        final _options = MutationOptions(
+          document: parseString(addStar),
+          variables: {},
+        );
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'action': {
+                    'starrable': {
+                      'viewerHasStarred': true,
+                    },
+                  },
+                },
+              ),
+            ],
+          ),
+        );
+
+        final observableQuery = await client.watchQuery(WatchQueryOptions(
+          document: _options.document,
+          variables: _options.variables,
+          fetchResults: false,
+        ));
+
+        final result = await observableQuery.fetchResults().networkResult;
+
+        verify(
+          link.request(
+            Request(
+              operation: Operation(
+                document: parseString(addStar),
+                //operationName: 'AddStar',
+              ),
+              variables: <String, dynamic>{},
+              context: Context(),
+            ),
+          ),
+        );
+
+        expect(result.hasException, isFalse);
+        expect(result.data, isNotNull);
+        final bool viewerHasStarred =
+            result.data['action']['starrable']['viewerHasStarred'] as bool;
         expect(viewerHasStarred, true);
       });
     });
