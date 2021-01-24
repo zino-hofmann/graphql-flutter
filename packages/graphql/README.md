@@ -361,8 +361,6 @@ While eventually [we would like to decouple mutation and query logic](https://gi
 
 See [Rebroadcasting](#rebroadcasting) for more details.
 
-#795 added `client`
-
 > **NB**: `watchQuery`, `watchMutation`, and `ObservableQuery` currently don't have a nice APIs for `update` `onCompleted` and `onError` callbacks,
 > but you can have a look at how `graphql_flutter` registers them through
 > [`onData`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ObservableQuery/onData.html) in
