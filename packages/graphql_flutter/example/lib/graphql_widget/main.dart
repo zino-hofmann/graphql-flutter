@@ -104,7 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
                 (QueryResult result, {refetch, fetchMore}) {
                   if (result.data == null && !result.hasException) {
                     return const Text(
-                        'Both data and errors are null, this is a known bug after refactoring, you might forget to set Github token');
+                      'Loading has completed, but both data and errors are null. '
+                      'This should never be the case – please open an issue',
+                    );
                   }
 
                   // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
@@ -153,6 +155,7 @@ class StarrableRepository extends StatelessWidget {
   final Map<String, Object> repository;
   final bool optimistic;
 
+  /// Extract the repository data for updating the fragment
   Map<String, Object> extractRepositoryData(Map<String, Object> data) {
     final action = data['action'] as Map<String, Object>;
     if (action == null) {
@@ -161,114 +164,152 @@ class StarrableRepository extends StatelessWidget {
     return action['starrable'] as Map<String, Object>;
   }
 
+  /// Get whether the repository is currently starred, according to the current Query
   bool get starred => repository['viewerHasStarred'] as bool;
 
-  Map<String, dynamic> get expectedResult => <String, dynamic>{
-        //'__typename': 'Query',
+  /// Build an optimisticResult based on whether [viewerIsStarrring]
+  Map<String, dynamic> expectedResult(bool viewerIsStarrring) =>
+      <String, dynamic>{
         'action': {
-          '__typename': 'AddStarPayload',
           'starrable': {
             '__typename': 'Repository',
             'id': repository['id'],
-            'viewerHasStarred': !starred,
+            'viewerHasStarred': viewerIsStarrring,
           }
         }
       };
 
-  @override
-  Widget build(BuildContext context) {
-    return Mutation(
-      options: MutationOptions(
-        document: gql(starred ? mutations.removeStar : mutations.addStar),
-        update: (cache, result) {
-          if (result.hasException) {
-            print(result.exception);
-          } else {
-            final updated = {
-              ...repository,
-              ...extractRepositoryData(result.data),
-            };
-            cache.writeFragment(
-              Fragment(
-                document: gql(
-                  '''
+  OnMutationUpdate get update => (cache, result) {
+        if (result.hasException) {
+          print(result.exception);
+        } else {
+          final updated = {
+            ...repository,
+            ...extractRepositoryData(result.data),
+          };
+          cache.writeFragment(
+            Fragment(
+              document: gql(
+                '''
                   fragment fields on Repository {
                     id
                     name
                     viewerHasStarred
                   }
                   ''',
-                ),
-              ).asRequest(idFields: {
-                '__typename': updated['__typename'],
-                'id': updated['id'],
-              }),
-              data: updated,
-              broadcast: false,
-            );
-          }
-        },
-        onError: (OperationException error) {
-          showDialog<AlertDialog>(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(error.toString()),
-                actions: <Widget>[
-                  SimpleDialogOption(
-                    child: const Text('DISMISS'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
-              );
-            },
+              ),
+            ).asRequest(idFields: {
+              '__typename': updated['__typename'],
+              'id': updated['id'],
+            }),
+            data: updated,
           );
-        },
-        onCompleted: (dynamic resultData) {
-          showDialog<AlertDialog>(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(
-                  extractRepositoryData(resultData)['viewerHasStarred'] as bool
-                      ? 'Thanks for your star!'
-                      : 'Sorry you changed your mind!',
-                ),
-                actions: <Widget>[
-                  SimpleDialogOption(
-                    child: const Text('DISMISS'),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  )
-                ],
-              );
-            },
-          );
-        },
+        }
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    /// While we could toggle between the addStar and removeStar mutations conditionally,
+    /// this would discard and rebuild each associated [ObservableQuery]. The side effects would still execute,
+    /// but we would not have a way to inspect the mutation results, such as with [_debugLatestResults].
+    return Mutation(
+      options: MutationOptions(
+        document: gql(mutations.addStar),
+        update: update,
+        onError: (OperationException error) =>
+            _simpleAlert(context, error.toString()),
+        onCompleted: (dynamic resultData) =>
+            _simpleAlert(context, 'Thanks for your star!'),
+        // 'Sorry you changed your mind!',
       ),
-      builder: (RunMutation toggleStar, QueryResult result) {
-        return ListTile(
-          leading: starred
-              ? const Icon(
-                  Icons.star,
-                  color: Colors.amber,
-                )
-              : const Icon(Icons.star_border),
-          trailing: result.isLoading || optimistic
-              ? const CircularProgressIndicator()
-              : null,
-          title: Text(repository['name'] as String),
-          onTap: () {
-            toggleStar(
-              {'starrableId': repository['id']},
-              optimisticResult: expectedResult,
+      builder: (RunMutation _addStar, QueryResult addResult) {
+        final addStar = () => _addStar({'starrableId': repository['id']},
+            optimisticResult: expectedResult(true));
+        return Mutation(
+          options: MutationOptions(
+            document: gql(mutations.removeStar),
+            update: update,
+            onError: (OperationException error) =>
+                _simpleAlert(context, error.toString()),
+            onCompleted: (dynamic resultData) =>
+                _simpleAlert(context, 'Sorry you changed your mind!'),
+          ),
+          builder: (RunMutation _removeStar, QueryResult removeResult) {
+            final removeStar = () => _removeStar(
+                {'starrableId': repository['id']},
+                optimisticResult: expectedResult(false));
+
+            final anyLoading =
+                addResult.isLoading || removeResult.isLoading || optimistic;
+
+            return ListTile(
+              leading: starred
+                  ? Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    )
+                  : Icon(Icons.star_border),
+              trailing: anyLoading ? CircularProgressIndicator() : null,
+              title: Text(repository['name'] as String),
+
+              /// uncomment this line to see the actual mutation results
+              subtitle: _debugLatestResults(addResult, removeResult),
+              onTap: anyLoading
+                  ? null
+                  : starred
+                      ? removeStar
+                      : addStar,
             );
           },
         );
       },
     );
   }
+
+  // TODO extract these details into better docs on [Policies]
+  /// Used for inspecting the mutation results.
+  ///
+  /// Can be used to observe the behavior in https://github.com/zino-app/graphql-flutter/issues/774,
+  /// patched in https://github.com/zino-app/graphql-flutter/pull/795 with the addition of [CacheRereadPolicy].
+  ///
+  /// To behavior, add the following to the `Mutations` above:
+  /// ```dart
+  /// fetchPolicy: FetchPolicy.networkOnly,
+  /// cacheRereadPolicy: CacheRereadPolicy.mergeOptimistic,
+  /// ```
+  /// This will cause the mutation results to be rebroadcast from the cache,
+  /// merging in the new `Repository.viewerHasStarred` state.
+  /// This can be desirable when a mutation result is used merely as a follow-up query.
+  Widget _debugLatestResults(QueryResult add, QueryResult remove) {
+    //return null;
+    var latestResults = '';
+    if (add.data != null) {
+      latestResults += 'addResultRepo: ${extractRepositoryData(add.data)}; ';
+    }
+    if (remove.data != null) {
+      latestResults +=
+          'removeResultRepo: ${extractRepositoryData(remove.data)}; ';
+    }
+    if (latestResults.isEmpty) {
+      return null;
+    }
+    return Text(latestResults);
+  }
 }
+
+void _simpleAlert(BuildContext context, String text) => showDialog<AlertDialog>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(text),
+          actions: <Widget>[
+            SimpleDialogOption(
+              child: const Text('DISMISS'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            )
+          ],
+        );
+      },
+    );

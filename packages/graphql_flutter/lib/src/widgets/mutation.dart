@@ -117,7 +117,7 @@ class MutationState extends State<Mutation> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
-      initialData: observableQuery?.latestResult ?? QueryResult.empty(),
+      initialData: observableQuery?.latestResult ?? QueryResult.unexecuted,
       stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,
