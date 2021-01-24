@@ -357,7 +357,7 @@ observableQuery.close();
 
 The default `CacheRereadPolicy` of `client.watchQuery` merges optimistic data from the cache into the result on every related cache change. This is great for queries, but [an undesirable default for mutations](https://github.com/zino-app/graphql-flutter/issues/774), as their results should not change due to subsequent mutations.
 
-While eventually [we would like to decouple mutation and query logic](https://github.com/zino-app/graphql-flutter/issues/774#issuecomment-735436053), for now we have `client.watchMutation` (used in the `Mutation` widget of `graphql_flutter`) which has the default policy `CacheRereadPolicy.ignoreAll`. **Otherwise, its behavior is exactly the same.** It still takes `WatchQueryOptions` and returns `ObservableQuery`, and both methods can take either mutation or query documents. The `watchMutation` method should be thought of as a stop-gap.
+While eventually [we would like to decouple mutation and query logic](https://github.com/zino-app/graphql-flutter/issues/798), for now we have `client.watchMutation` (used in the `Mutation` widget of `graphql_flutter`) which has the default policy `CacheRereadPolicy.ignoreAll`. **Otherwise, its behavior is exactly the same.** It still takes `WatchQueryOptions` and returns `ObservableQuery`, and both methods can take either mutation or query documents. The `watchMutation` method should be thought of as a stop-gap.
 
 See [Rebroadcasting](#rebroadcasting) for more details.
 
