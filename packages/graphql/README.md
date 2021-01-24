@@ -503,7 +503,7 @@ GraphQLClient(
 )
 ```
 
-**[`FetchPolicy`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/FetchPolicy-class.html):** determines where the client may return a result from.  
+**[`FetchPolicy`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/FetchPolicy-class.html):** determines where the client may return a result from, and whether that result will be saved to the cache.  
 Possible options:
 
 - cacheFirst: return result from cache. Only fetch from network if cached result is not available.
