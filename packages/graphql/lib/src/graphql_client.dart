@@ -100,7 +100,6 @@ class GraphQLClient implements GraphQLDataProxy {
   /// This is a stop-gap solution to the problems created by the reliance of `graphql_flutter` on [ObservableQuery] for mutations.
   ///
   /// For more details, see https://github.com/zino-app/graphql-flutter/issues/774
-  @experimental
   ObservableQuery watchMutation(WatchQueryOptions options) {
     options.policies =
         defaultPolicies.watchMutation.withOverrides(options.policies);

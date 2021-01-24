@@ -68,9 +68,10 @@ class QueryResult {
     @required this.source,
   }) : timestamp = DateTime.now();
 
-  /// An empty result. Can be used as a placeholder when an operation
-  /// has not been executed yet.
-  factory QueryResult.empty() => QueryResult(source: null);
+  /// Unexecuted singleton, used as a placeholder for mutations,
+  /// etc.
+  static final unexecuted = QueryResult(source: null)
+    ..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
   factory QueryResult.loading({
     Map<String, dynamic> data,
