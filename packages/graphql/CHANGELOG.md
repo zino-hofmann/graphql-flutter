@@ -1,3 +1,18 @@
+# [4.0.0-beta.7](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.6...v4.0.0-beta.7) (2021-01-25)
+
+
+### Features
+
+* **client:** add context to QueryResult ([fbc5a2d](https://github.com/zino-app/graphql-flutter/commit/fbc5a2d1fbd2257e4d94aabbc9369f888d3f992b))
+* **client:** CacheRereadPolicy, watchMutation workaround ([32e02da](https://github.com/zino-app/graphql-flutter/commit/32e02dac00b581bc594fa5e42bcdcca326369cce))
+* **client:** QueryResult.unexecuted ([13e3257](https://github.com/zino-app/graphql-flutter/commit/13e32572dd7401e24207c7bbf889d05847f1d86b))
+
+
+### BREAKING CHANGES
+
+* **client:** By fixing the defaults for mutations, the old behavior
+is now lost
+
 # [4.0.0-beta.6](https://github.com/zino-app/graphql-flutter/compare/v4.0.0-beta.5...v4.0.0-beta.6) (2020-12-27)
 
 
