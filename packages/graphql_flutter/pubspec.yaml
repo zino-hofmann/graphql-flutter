@@ -10,7 +10,7 @@ dependencies:
   meta: ^1.1.6
   path: ^1.6.2
   path_provider: ^1.1.0
-  rxdart: ^0.24.0
+  rxdart: ^0.25.0
   connectivity: ^0.4.4
   gql: ^0.12.0
 dev_dependencies:
