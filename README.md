@@ -8,9 +8,11 @@
 
 # GraphQL Flutter
 
-## :mega: [`v4` is now in beta](https://github.com/zino-app/graphql-flutter/blob/beta/changelog-v3-v4.md) :mega:
-
-See the [Migration Guide](./changelog-v3-v4.md) and updated READMEs for details
+### 📌 &nbsp; Bulletin
+* See the [`v3 -> v4` Migration Guide](./changelog-v3-v4.md) if you're still on `v3`.
+* [Maintenance status: Low](https://github.com/zino-app/graphql-flutter/issues/763).
+  * Follow [#762](https://github.com/zino-app/graphql-flutter/issues/762) for updates on the planned architecture walk through videos.
+* [Join the discord.][discord-link]
 
 ## About this project
 
@@ -46,23 +48,15 @@ External guides, tutorials, and other resources from the GraphQL Flutter communi
 - [Ultimate toolchain to work with GraphQL in Flutter](https://medium.com/@v.ditsyak/ultimate-toolchain-to-work-with-graphql-in-flutter-13aef79c6484):  
   An intro to using `graphql_flutter` with [`artemis`](https://pub.dev/packages/artemis) for code generation and [`graphql-faker`](https://github.com/APIs-guru/graphql-faker) for API prototyping
 
-## Roadmap
-
-This is currently our roadmap, please feel free to request additions/changes.
-
-| Feature                     | Progress |
-| :-------------------------- | :------: |
-| Queries                     |    ✅    |
-| Mutations                   |    ✅    |
-| Subscriptions               |    ✅    |
-| Query polling               |    ✅    |
-| In memory cache             |    ✅    |
-| Offline cache sync          |    ✅    |
-| GraphQL Upload              |    ✅    |
-| Optimistic results          |    ✅    |
-| Modularity                  |    ✅    |
-| Automatic Persisted Queries |    ✅    |
-| Client state management     |    ✅    |
+## Features
+✅ &nbsp; Queries, Mutations, and Subscriptions  
+✅ &nbsp; [Query polling and rebroadcasting](./packages/graphql/README.md#clientwatchquery-and-observablequery)  
+✅ &nbsp; [In memory and persistent caching](./packages/graphql/README.md#persistence)  
+✅ &nbsp; [GraphQL Upload](./packages/graphql/README.md#graphql-upload)  
+✅ &nbsp; [Optimistic results](./packages/graphql_flutter/README.md#optimism)  
+✅ &nbsp; [Modularity](./packages/graphql/README.md#links)  
+✅ &nbsp; [Client-state management](./packages/graphql/README.md#direct-cache-access-api)  
+⚠️  &nbsp; [Automatic Persisted Queries](./packages/graphql/README.md#persistedquerieslink-experimental-warning-out-of-service-warning) (out of service)  
 
 ## Contributing
 
