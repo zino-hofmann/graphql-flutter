@@ -42,8 +42,8 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
 
 **Useful API Docs:**
 
-- [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLCache-class.html)
-- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html) (direct cache access)
+- [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLCache-class.html)
+- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/latest/graphql/GraphQLDataProxy-class.html) (direct cache access)
 
 ## Installation
 
@@ -296,7 +296,7 @@ Mutation(
 `GraphQLCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(GraphQLDataProxy cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache state.
 
 A complete and well-commented rundown of how exactly one interfaces with the `proxy` provided to `update` can be fount in the
-[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html)
+[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/latest/graphql/GraphQLDataProxy-class.html)
 
 ```dart
 ...
@@ -440,7 +440,7 @@ class _MyHomePageState extends State<MyHomePage> {
 ### GraphQL Consumer
 
 If you want to use the `client` directly, say for some its
-[direct cache update](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html) methods,
+[direct cache update](../graphql/README.md#direct-cache-access-api) methods,
 You can use `GraphQLConsumer` to grab it from any `context` descended from a `GraphQLProvider`:
 
 ```dart
