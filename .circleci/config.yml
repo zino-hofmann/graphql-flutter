@@ -134,7 +134,7 @@ jobs:
           name: Sync master into beta
           command: |
             git checkout master
-            git pull
+            git pull origin master
             git checkout beta
             git merge master --no-commit
             git commit --allow-empty -m "ci(Semantic release): Sync master into beta [skip ci]"
@@ -223,7 +223,7 @@ workflows:
   weekly:
     triggers:
       - schedule:
-          cron: "0 21 * * 1"
+          cron: "15 * * * *"
           filters:
             branches:
               only:
