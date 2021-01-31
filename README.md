@@ -10,7 +10,8 @@
 
 ### 📌 &nbsp; Bulletin
 * See the [`v3 -> v4` Migration Guide](./changelog-v3-v4.md) if you're still on `v3`.
-* [Maintenance status: Low](https://github.com/zino-app/graphql-flutter/issues/763). Follow [#762](https://github.com/zino-app/graphql-flutter/issues/762) for updates on the planned architecture walk through videos.
+* [Maintenance status: Low](https://github.com/zino-app/graphql-flutter/issues/763).
+  * Follow [#762](https://github.com/zino-app/graphql-flutter/issues/762) for updates on the planned architecture walk through videos.
 * [Join the discord.][discord-link]
 
 ## About this project
