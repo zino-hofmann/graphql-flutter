@@ -8,8 +8,6 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^0.1.2
-  rxdart: ^0.24.0
-  connectivity: ^0.4.4
   graphql_flutter:
     path: ..
 
@@ -21,3 +19,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+dependency_overrides:
+  graphql:
+    path: ../../graphql

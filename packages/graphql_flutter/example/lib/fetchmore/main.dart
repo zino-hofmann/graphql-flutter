@@ -11,20 +11,18 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
-    );
+    final httpLink = HttpLink('https://api.github.com/graphql');
 
     final authLink = AuthLink(
       // ignore: undefined_identifier
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+      getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     );
 
     final link = authLink.concat(httpLink);
 
     final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
-        cache: InMemoryCache(),
+        cache: GraphQLCache(),
         link: link,
       ),
     );
@@ -82,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Query(
               options: QueryOptions(
-                documentNode: gql(queries.searchRepositories),
+                document: gql(queries.searchRepositories),
                 variables: <String, dynamic>{
                   'nRepositories': nRepositories,
                   'query': _searchQuery,
@@ -96,7 +94,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   return Text(result.exception.toString());
                 }
 
-                if (result.loading && result.data == null) {
+                if (result.isLoading && result.data == null) {
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
@@ -146,13 +144,15 @@ class _MyHomePageState extends State<MyHomePage> {
                               : const Icon(Icons.star_border),
                           title: Text(repository['name'] as String),
                         ),
-                      if (result.loading)
+                      if (result.isLoading)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             CircularProgressIndicator(),
                           ],
                         ),
+                      Text('note: this example has no mutations',
+                          style: Theme.of(context).textTheme.caption),
                       RaisedButton(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

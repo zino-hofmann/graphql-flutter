@@ -4,6 +4,7 @@ import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/observable_query.dart';
 
+/// Handles scheduling polling results for each [ObservableQuery] with a `pollInterval`
 class QueryScheduler {
   QueryScheduler({
     this.queryManager,
@@ -40,8 +41,7 @@ class QueryScheduler {
           return false;
         }
 
-        final Duration pollInterval =
-            Duration(seconds: registeredQueries[queryId].pollInterval);
+        final Duration pollInterval = registeredQueries[queryId].pollInterval;
 
         return registeredQueries.containsKey(queryId) &&
             pollInterval == interval;
@@ -64,13 +64,13 @@ class QueryScheduler {
     WatchQueryOptions options,
     String queryId,
   ) {
-    assert(options.pollInterval != null && options.pollInterval > 0);
+    assert(
+      options.pollInterval != null && options.pollInterval > Duration.zero,
+    );
 
     registeredQueries[queryId] = options;
 
-    final Duration interval = Duration(
-      seconds: options.pollInterval,
-    );
+    final interval = options.pollInterval;
 
     if (intervalQueries.containsKey(interval)) {
       intervalQueries[interval].add(queryId);

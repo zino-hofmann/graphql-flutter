@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:starwars_app/reviews/review_subscription.dart'
-    show DisplayReviews;
+import 'package:starwars_app/reviews/review.dart';
 
 class PagingReviews extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
     icon: Icon(Icons.description),
-    title: Text('Paging'),
+    label: 'Paging',
   );
 
   @override
   Widget build(BuildContext context) {
     return Query(
       options: QueryOptions(
-        documentNode: gql(r'''
+        // if we have cached results, don't clobber them
+        fetchPolicy: FetchPolicy.cacheFirst,
+        document: gql(r'''
           query Reviews($page: Int!) {
             reviews(page: $page) {
               page
@@ -37,7 +38,7 @@ class PagingReviews extends StatelessWidget {
           return Text(result.exception.toString());
         }
 
-        if (result.loading && result.data == null) {
+        if (result.isLoading && result.data == null) {
           return const Center(
             child: CircularProgressIndicator(),
           );
@@ -53,14 +54,14 @@ class PagingReviews extends StatelessWidget {
                     .cast<Map<String, dynamic>>(),
               ),
             ),
-            (result.loading)
+            (result.isLoading)
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
                 : RaisedButton(
                     onPressed: () {
                       fetchMore(
-                        FetchMoreOptions(
+                        FetchMoreOptions.partial(
                           variables: {'page': nextPage},
                           updateQuery: (existing, newReviews) => ({
                             'reviews': {
@@ -74,7 +75,7 @@ class PagingReviews extends StatelessWidget {
                         ),
                       );
                     },
-                    child: Text('LOAD PAGE $nextPage'),
+                    child: Text('LOAD PAGE ${nextPage + 1}'),
                   ),
           ],
         );

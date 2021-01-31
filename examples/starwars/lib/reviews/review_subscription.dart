@@ -6,87 +6,35 @@ import './review.dart';
 class ReviewFeed extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Subscription<Map<String, dynamic>>(
-      'reviewAdded',
-      r'''
-        subscription reviewAdded {
-          reviewAdded {
-            stars, commentary, episode
-          }
-        }
-      ''',
-      builder: ({dynamic loading, dynamic payload, dynamic error}) {
-        if (error != null) {
-          return Text(error.toString());
+    return Subscription(
+      options: SubscriptionOptions(
+        document: gql(
+          r'''
+            subscription reviewAdded {
+              reviewAdded {
+                stars, commentary, episode
+              }
+            }
+          ''',
+        ),
+      ),
+      builder: (result) {
+        if (result.hasException) {
+          return Text(result.exception.toString());
         }
 
-        if (loading == true) {
+        if (result.isLoading) {
           return Center(
             child: const CircularProgressIndicator(),
           );
         }
-        return ReviewList(newReview: payload as Map<String, dynamic>);
+        return ResultAccumulator.appendUniqueEntries(
+          latest: result.data,
+          builder: (context, {results}) => DisplayReviews(
+            reviews: results.reversed.toList(),
+          ),
+        );
       },
-    );
-  }
-}
-
-class ReviewList extends StatefulWidget {
-  const ReviewList({@required this.newReview});
-
-  final Map<String, dynamic> newReview;
-
-  @override
-  _ReviewListState createState() => _ReviewListState();
-}
-
-class _ReviewListState extends State<ReviewList> {
-  List<Map<String, dynamic>> reviews;
-
-  @override
-  void initState() {
-    reviews = widget.newReview != null ? [widget.newReview] : [];
-    super.initState();
-  }
-
-  @override
-  void didUpdateWidget(ReviewList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (!reviews.contains(widget.newReview)) {
-      setState(() {
-        reviews.insert(0, widget.newReview);
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return DisplayReviews(reviews: reviews);
-  }
-}
-
-class DisplayReviews extends StatelessWidget {
-  const DisplayReviews({
-    Key key,
-    @required this.reviews,
-  }) : super(key: key);
-
-  final List<Map<String, dynamic>> reviews;
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(8.0),
-      children: reviews
-          .map(displayReview)
-          .map<Widget>((String s) => Card(
-                child: Container(
-                  padding: const EdgeInsets.all(15.0),
-                  height: 150,
-                  child: Text(s),
-                ),
-              ))
-          .toList(),
     );
   }
 }

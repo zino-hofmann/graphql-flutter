@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql/client.dart';
 
 import 'package:graphql_flutter_bloc_example/bloc.dart';
+import 'package:graphql_flutter_bloc_example/hive_init.dart';
 import 'package:graphql_flutter_bloc_example/repository.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/my_repos_bloc.dart';
 import 'package:graphql_flutter_bloc_example/extended_bloc/repositories_bloc.dart';
@@ -13,11 +14,12 @@ import 'package:graphql_flutter_bloc_example/extended_bloc.dart';
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
 import 'local.dart';
 
-void main() => runApp(MyApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initHiveForFlutter();
 
-final OptimisticCache cache = OptimisticCache(
-  dataIdFromObject: typenameDataIdFromObject,
-);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -49,7 +51,7 @@ class MyApp extends StatelessWidget {
 
   GraphQLClient _client() {
     final HttpLink _httpLink = HttpLink(
-      uri: 'https://api.github.com/graphql',
+      'https://api.github.com/graphql',
     );
 
     final AuthLink _authLink = AuthLink(
@@ -59,7 +61,9 @@ class MyApp extends StatelessWidget {
     final Link _link = _authLink.concat(_httpLink);
 
     return GraphQLClient(
-      cache: cache,
+      cache: GraphQLCache(
+        store: HiveStore(),
+      ),
       link: _link,
     );
   }

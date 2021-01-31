@@ -1,12 +1,11 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:graphql/client.dart';
-import 'package:graphql/internal.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 // method to call from widget to fetchmore queries
-typedef FetchMore = dynamic Function(FetchMoreOptions options);
+typedef FetchMore = Future<QueryResult> Function(FetchMoreOptions options);
 
 typedef Refetch = Future<QueryResult> Function();
 
@@ -35,22 +34,8 @@ class Query extends StatefulWidget {
 class QueryState extends State<Query> {
   ObservableQuery observableQuery;
   GraphQLClient _client;
-  WatchQueryOptions get _options {
-    final QueryOptions options = widget.options;
 
-    return WatchQueryOptions(
-      // ignore: deprecated_member_use
-      document: options.document,
-      documentNode: options.documentNode,
-      variables: options.variables,
-      fetchPolicy: options.fetchPolicy,
-      errorPolicy: options.errorPolicy,
-      pollInterval: options.pollInterval,
-      fetchResults: true,
-      context: options.context,
-      optimisticResult: options.optimisticResult,
-    );
-  }
+  WatchQueryOptions get _options => widget.options.asWatchQueryOptions();
 
   void _initQuery() {
     observableQuery?.close();
@@ -76,9 +61,9 @@ class QueryState extends State<Query> {
 
     final optionsWithOverrides = _options;
     optionsWithOverrides.policies = client.defaultPolicies.watchQuery
-      .withOverrides(optionsWithOverrides.policies);
+        .withOverrides(optionsWithOverrides.policies);
 
-    if (!observableQuery.options.areEqualTo(optionsWithOverrides)) {
+    if (!observableQuery.options.equal(optionsWithOverrides)) {
       _initQuery();
     }
   }
@@ -92,8 +77,7 @@ class QueryState extends State<Query> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
-      key: Key(observableQuery?.options?.toKey()),
-      initialData: observableQuery?.latestResult ?? QueryResult(loading: true),
+      initialData: observableQuery?.latestResult ?? QueryResult.loading(),
       stream: observableQuery.stream,
       builder: (
         BuildContext buildContext,

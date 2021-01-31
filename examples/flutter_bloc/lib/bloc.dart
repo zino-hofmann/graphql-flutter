@@ -15,8 +15,12 @@ class _BlocPageState extends State<BlocPage> {
   @override
   void initState() {
     super.initState();
-    BlocProvider.of<MyGithubReposBloc>(context)
-        .add(LoadMyRepos(numOfReposToLoad: 50));
+    BlocProvider.of<MyGithubReposBloc>(context).add(LoadMyRepos(numOfReposToLoad: 50));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -38,8 +42,7 @@ class _BlocPageState extends State<BlocPage> {
               keyboardType: TextInputType.number,
               textAlign: TextAlign.center,
               onChanged: (String n) {
-                BlocProvider.of<MyGithubReposBloc>(context)
-                    .add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
+                BlocProvider.of<MyGithubReposBloc>(context).add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
               },
             ),
             SizedBox(
