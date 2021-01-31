@@ -45,8 +45,8 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
 
 **Useful API Docs:**
 
-- [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLCache-class.html)
-- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html) (direct cache access)
+- [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLCache-class.html)
+- [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/latest/graphql/GraphQLDataProxy-class.html) (direct cache access)
 
 ## Installation
 
@@ -311,7 +311,7 @@ subscription.listen(reactToAddedReview)
 
 ### `client.watchQuery` and `ObservableQuery`
 
-[`client.watchQuery`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLClient/watchQuery.html)
+[`client.watchQuery`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLClient/watchQuery.html)
 can be used to execute both queries and mutations, then reactively listen to changes to the underlying data in the cache. 
 
 ```dart
@@ -351,7 +351,7 @@ observableQuery.stream.listen((QueryResult result) {
 observableQuery.close();
 ```
 
-`ObservableQuery` is a bit of a kitchen sink for reactive operation logic – consider looking at the [API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ObservableQuery-class.html) if you'd like to develop a deeper understanding.
+`ObservableQuery` is a bit of a kitchen sink for reactive operation logic – consider looking at the [API docs](https://pub.dev/documentation/graphql/latest/graphql/ObservableQuery-class.html) if you'd like to develop a deeper understanding.
 
 ### `client.watchMutation`
 
@@ -363,12 +363,12 @@ See [Rebroadcasting](#rebroadcasting) for more details.
 
 > **NB**: `watchQuery`, `watchMutation`, and `ObservableQuery` currently don't have a nice APIs for `update` `onCompleted` and `onError` callbacks,
 > but you can have a look at how `graphql_flutter` registers them through
-> [`onData`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ObservableQuery/onData.html) in
-> [`Mutation.runMutation`](https://pub.dev/documentation/graphql_flutter/4.0.0-alpha.7/graphql_flutter/MutationState/runMutation.html).
+> [`onData`](https://pub.dev/documentation/graphql/latest/graphql/ObservableQuery/onData.html) in
+> [`Mutation.runMutation`](https://pub.dev/documentation/graphql_flutter/latest/graphql_flutter/MutationState/runMutation.html).
 
 ## Direct Cache Access API
 
-The [`GraphQLCache`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLCache-class.html)
+The [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLCache-class.html)
 leverages [`normalize`] to give us a fairly apollo-ish [direct cache access] API, which is also available on `GraphQLClient`.
 This means we can do [local state management] in a similar fashion as well.
 
@@ -378,7 +378,7 @@ The cache access methods are available on any cache proxy, which includes the `G
 > **Prefer `client.writeQuery` and `client.writeFragment` to those on the `client.cache` for automatic rebroadcasting**
 
 In addition to this overview, a complete and well-commented rundown of can be found in the
-[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/GraphQLDataProxy-class.html).
+[`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/latest/graphql/GraphQLDataProxy-class.html).
 
 ### `Request`, `readQuery`, and `writeQuery`
 
@@ -503,7 +503,7 @@ GraphQLClient(
 )
 ```
 
-**[`FetchPolicy`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/FetchPolicy-class.html):** determines where the client may return a result from, and whether that result will be saved to the cache.  
+**[`FetchPolicy`](https://pub.dev/documentation/graphql/latest/graphql/FetchPolicy-class.html):** determines where the client may return a result from, and whether that result will be saved to the cache.  
 Possible options:
 
 - cacheFirst: return result from cache. Only fetch from network if cached result is not available.
@@ -512,7 +512,7 @@ Possible options:
 - noCache: return result from network, fail if network call doesn't succeed, don't save to cache.
 - networkOnly: return result from network, fail if network call doesn't succeed, save to cache.
 
-**[`ErrorPolicy`](https://pub.dev/documentation/graphql/4.0.0-alpha.11/graphql/ErrorPolicy-class.html):** determines the level of events for errors in the execution result.  
+**[`ErrorPolicy`](https://pub.dev/documentation/graphql/latest/graphql/ErrorPolicy-class.html):** determines the level of events for errors in the execution result.  
 Possible options:
 
 - none (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
