@@ -223,7 +223,7 @@ workflows:
   weekly:
     triggers:
       - schedule:
-          cron: "6 * * * *"
+          cron: "0 21 * * 1"
           filters:
             branches:
               only:
