@@ -83,7 +83,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         // provided from cache
         read: (dataId) => readNormalized(dataId, optimistic: optimistic),
         typePolicies: typePolicies,
-        //dataIdFromObject: dataIdFromObject,
+        dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
         addTypename: addTypename ?? false,
         // if there is partial data, we cannot read and return null
