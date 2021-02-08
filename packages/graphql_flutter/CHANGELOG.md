@@ -1,3 +1,10 @@
+## [4.0.2-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.1...v4.0.2-beta.1) (2021-02-08)
+
+
+### Bug Fixes
+
+* **client:** hotfix dataIdFromObject passthrough in cache.readQuery ([e3e04f8](https://github.com/zino-app/graphql-flutter/commit/e3e04f8c25427f4850ac407b44a7eea7a6264bdf))
+
 ## [4.0.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.0...v4.0.1) (2021-02-07)
 
 
