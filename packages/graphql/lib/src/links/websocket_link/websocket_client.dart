@@ -7,14 +7,31 @@ import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_options.dart' show WithType;
 import 'package:gql_exec/gql_exec.dart';
-import 'package:websocket/websocket.dart' show WebSocket, WebSocketStatus;
+
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as ws_status;
 
 import 'package:rxdart/rxdart.dart';
-import 'package:uuid_enhanced/uuid.dart';
+import 'package:uuid/uuid.dart';
+import 'package:uuid/uuid_util.dart';
 
 import './websocket_messages.dart';
 
+// create uuid generator
+final _uuid = Uuid(options: {'grng': UuidUtil.cryptoRNG});
+
 typedef GetInitPayload = FutureOr<dynamic> Function();
+
+/// A definition for functions that returns a connected [WebSocketChannel]
+typedef WebSocketConnect = WebSocketChannel Function(
+  Uri uri,
+  Iterable<String> protocols,
+);
+
+final _kDefaultWebSocketConnect = (uri, protocols) => WebSocketChannel.connect(
+      uri,
+      protocols: protocols,
+    );
 
 class SubscriptionListener {
   Function callback;
@@ -67,7 +84,7 @@ class SocketClientConfig {
   /// Callback for handling connections and reconnections.
   ///
   /// Useful for registering custom listeners or extracting the socket for other non-graphql features.
-  final void Function(WebSocket socket) onConnectOrReconnect;
+  final void Function(WebSocketChannel socketChannel) onConnectOrReconnect;
 
   /// Payload to be sent with the connection_init request.
   ///
@@ -112,10 +129,10 @@ class SocketClient {
     this.protocols = const <String>[
       'graphql-ws',
     ],
+    WebSocketConnect connect,
     this.config = const SocketClientConfig(),
-    this.connect = WebSocket.connect,
     @visibleForTesting this.randomBytesForUuid,
-  }) {
+  }) : this._connectFunc = connect ?? _kDefaultWebSocketConnect {
     _connect();
   }
 
@@ -123,6 +140,7 @@ class SocketClient {
   final String url;
   final Iterable<String> protocols;
   final SocketClientConfig config;
+  final WebSocketConnect _connectFunc;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
@@ -130,14 +148,12 @@ class SocketClient {
   final HashMap<String, SubscriptionListener> _subscriptionInitializers =
       HashMap();
 
-  final Future<WebSocket> Function(String url, {Iterable<String> protocols})
-      connect;
-
   bool _connectionWasLost = false;
 
   Timer _reconnectTimer;
+
   @visibleForTesting
-  WebSocket socket;
+  WebSocketChannel socketChannel;
 
   Stream<GraphQLSocketMessage> _messageStream;
 
@@ -146,6 +162,7 @@ class SocketClient {
 
   Map<String, dynamic> Function(Request) get serialize =>
       config.serializer.serializeRequest;
+
   Response Function(Map<String, dynamic>) get parse =>
       config.parser.parseResponse;
 
@@ -163,22 +180,29 @@ class SocketClient {
     print('Connecting to websocket: $url...');
 
     try {
-      socket = await connect(url, protocols: protocols);
+      // Even though _connectFunc is sync, we call async in order to make the
+      // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
+      socketChannel = await _connectFunc(
+        Uri.parse(url),
+        protocols,
+      );
       _connectionStateController.add(SocketConnectionState.connected);
       print('Connected to websocket.');
       _write(initOperation);
 
-      _messageStream =
-          socket.stream.map<GraphQLSocketMessage>(_parseSocketMessage);
+      _messageStream = socketChannel.stream.map<GraphQLSocketMessage>(
+        _parseSocketMessage,
+      );
 
       if (config.inactivityTimeout != null) {
         _keepAliveSubscription = _messagesOfType<ConnectionKeepAlive>().timeout(
           config.inactivityTimeout,
           onTimeout: (EventSink<ConnectionKeepAlive> event) {
             print(
-                "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..");
+              "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
+            );
             event.close();
-            socket.close(WebSocketStatus.goingAway);
+            socketChannel.sink.close(ws_status.goingAway);
             _connectionStateController.add(SocketConnectionState.notConnected);
           },
         ).listen(null);
@@ -206,7 +230,7 @@ class SocketClient {
       }
 
       if (config.onConnectOrReconnect != null) {
-        config.onConnectOrReconnect(socket);
+        config.onConnectOrReconnect(socketChannel);
       }
     } catch (e) {
       onConnectionLost(e);
@@ -260,8 +284,9 @@ class SocketClient {
   Future<void> dispose() async {
     print('Disposing socket client..');
     _reconnectTimer?.cancel();
+
     await Future.wait([
-      socket?.close(),
+      socketChannel.sink.close(ws_status.goingAway),
       _messageSubscription?.cancel(),
       _connectionStateController?.close(),
       _keepAliveSubscription?.cancel()
@@ -297,7 +322,7 @@ class SocketClient {
 
   void _write(final GraphQLSocketMessage message) {
     if (_connectionStateController.value == SocketConnectionState.connected) {
-      socket.add(
+      socketChannel.sink.add(
         json.encode(
           message,
           toEncodable: (dynamic m) => m.toJson(),
@@ -318,7 +343,11 @@ class SocketClient {
     final Request payload,
     final bool waitForConnection,
   ) {
-    final String id = Uuid.randomUuid(random: randomBytesForUuid).toString();
+    final String id = _uuid.v4(
+      options: {
+        'random': randomBytesForUuid,
+      },
+    ).toString();
     final StreamController<Response> response = StreamController<Response>();
     StreamSubscription<SocketConnectionState> sub;
     final bool addTimeout =
@@ -415,7 +444,7 @@ class SocketClient {
 
       sub?.cancel();
       if (_connectionStateController.value == SocketConnectionState.connected &&
-          socket != null) {
+          socketChannel != null) {
         _write(StopOperation(id));
       }
     };
