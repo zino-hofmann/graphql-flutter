@@ -159,12 +159,12 @@ class SocketClient {
       return;
     }
 
-    _connectionStateController.value = SocketConnectionState.connecting;
+    _connectionStateController.add(SocketConnectionState.connecting);
     print('Connecting to websocket: $url...');
 
     try {
       socket = await connect(url, protocols: protocols);
-      _connectionStateController.value = SocketConnectionState.connected;
+      _connectionStateController.add(SocketConnectionState.connected);
       print('Connected to websocket.');
       _write(initOperation);
 
@@ -179,8 +179,7 @@ class SocketClient {
                 "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..");
             event.close();
             socket.close(WebSocketStatus.goingAway);
-            _connectionStateController.value =
-                SocketConnectionState.notConnected;
+            _connectionStateController.add(SocketConnectionState.notConnected);
           },
         ).listen(null);
       }
@@ -232,7 +231,7 @@ class SocketClient {
 
     if (_connectionStateController.value !=
         SocketConnectionState.notConnected) {
-      _connectionStateController.value = SocketConnectionState.notConnected;
+      _connectionStateController.add(SocketConnectionState.notConnected);
     }
 
     if (config.autoReconnect && !_connectionStateController.isClosed) {

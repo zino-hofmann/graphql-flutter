@@ -1,3 +1,8 @@
+## [4.0.2-beta.2](https://github.com/zino-app/graphql-flutter/compare/v4.0.1...v4.0.2-beta.2) (2021-02-08)
+
+### Dependencies versions update
+
+
 ## [4.0.2-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.1...v4.0.2-beta.1) (2021-02-08)
 
 
