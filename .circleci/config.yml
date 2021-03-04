@@ -1,7 +1,7 @@
 version: 2.1
 aliases:
   - &flutter_environment
-    - image: cirrusci/flutter:latest-web
+    - image: cirrusci/flutter:stable
   - &node_environment
     - image: circleci/node:10
   - &restore_cache
