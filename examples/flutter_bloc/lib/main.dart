@@ -12,6 +12,7 @@ import 'package:graphql_flutter_bloc_example/extended_bloc.dart';
 // to run the example, create a file ../local.dart with the content:
 // const String YOUR_PERSONAL_ACCESS_TOKEN =
 //    '<YOUR_PERSONAL_ACCESS_TOKEN>';
+// ignore: uri_does_not_exist
 import 'local.dart';
 
 Future<void> main() async {
