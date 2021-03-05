@@ -7,10 +7,10 @@ import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_options.dart' show WithType;
 import 'package:gql_exec/gql_exec.dart';
+import 'package:uuid/uuid.dart';
 import 'package:websocket/websocket.dart' show WebSocket, WebSocketStatus;
 
 import 'package:rxdart/rxdart.dart';
-import 'package:uuid_enhanced/uuid.dart';
 
 import './websocket_messages.dart';
 
@@ -318,7 +318,10 @@ class SocketClient {
     final Request payload,
     final bool waitForConnection,
   ) {
-    final String id = Uuid.randomUuid(random: randomBytesForUuid).toString();
+    // convert Uint8List to List<int> for the new uuid package
+    final List<int> randomBytesIntList = randomBytesForUuid.toList();
+
+    final String id = Uuid().v4(options: {'random': randomBytesIntList});
     final StreamController<Response> response = StreamController<Response>();
     StreamSubscription<SocketConnectionState> sub;
     final bool addTimeout =

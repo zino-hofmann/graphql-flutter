@@ -19,7 +19,8 @@ dependencies:
   collection: ^1.14.12
   websocket: ^0.0.5
   rxdart: ^0.26.0
-  uuid_enhanced: ^3.0.2
+  # uuid_enhanced: ^3.0.2
+  uuid: ^3.0.1
 dev_dependencies:
   pedantic: ^1.8.0+1
   mockito: ^4.0.0
