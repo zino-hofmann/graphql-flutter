@@ -21,7 +21,7 @@ aliases:
       binary="yq_linux_amd64"
       source="https://github.com/mikefarah/yq/releases/download"
 
-      wget "${source}/${version}/${binary}" -O ~/yq
+      wget "${source}/v${version}/${binary}" -O ~/yq
       sudo chmod +x ~/yq
 
       sudo apt remove -y wget
