@@ -1,5 +1,4 @@
 import 'package:gql_exec/gql_exec.dart' show Request;
-import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
 import 'package:graphql/src/exceptions/exceptions_next.dart';
 
 import './fragment.dart';

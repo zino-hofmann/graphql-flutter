@@ -304,10 +304,10 @@ void _simpleAlert(BuildContext context, String text) => showDialog<AlertDialog>(
           title: Text(text),
           actions: <Widget>[
             SimpleDialogOption(
-              child: const Text('DISMISS'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
+              child: const Text('DISMISS'),
             )
           ],
         );

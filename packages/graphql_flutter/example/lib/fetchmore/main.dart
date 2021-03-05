@@ -153,16 +153,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       Text('note: this example has no mutations',
                           style: Theme.of(context).textTheme.caption),
-                      RaisedButton(
+                      ElevatedButton(
+                        onPressed: () {
+                          fetchMore(opts);
+                        },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text('Load More'),
                           ],
                         ),
-                        onPressed: () {
-                          fetchMore(opts);
-                        },
                       )
                     ],
                   ),
