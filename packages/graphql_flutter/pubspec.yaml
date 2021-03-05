@@ -4,8 +4,13 @@ description: A GraphQL client for Flutter, bringing all the features from a mode
 version: 4.0.2-beta.1
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
 
+# We develop with the path version of graphql,
+# so this disables linting complaints.
+publish_to: none
+
 dependencies:
-  graphql: ^4.0.2-beta.1
+  graphql:
+    path: ../graphql
   gql_exec: ^0.3.0-nullsafety.1
   flutter:
     sdk: flutter
@@ -24,6 +29,4 @@ dev_dependencies:
 
 environment:
   sdk: '>=2.10.0 <3.0.0'
-
-
 
