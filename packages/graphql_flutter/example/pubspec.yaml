@@ -1,6 +1,8 @@
 name: app
 description: A new Flutter project.
 
+publish_to: none
+
 module:
   androidX: true // Add this line.
 

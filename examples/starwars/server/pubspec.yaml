@@ -1,5 +1,7 @@
 name: starwars_server
 
+publish_to: none
+
 environment:
   sdk: ">=2.10.0 <3.0.0"
 

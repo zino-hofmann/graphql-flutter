@@ -1,6 +1,8 @@
 name: starwars_app
 description: An example graphql_flutter application utilizing graphql_starwars_test_server
 
+publish_to: none
+
 environment:
   sdk: ">=2.10.0 <3.0.0"
 
