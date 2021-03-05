@@ -13,7 +13,9 @@ aliases:
   - &install_yaml_processor
     name: Install yq yaml processor
     command: |
-      sudo apt update && \
+      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
+      sudo add-apt-repository ppa:rmescandon/yq
+      sudo apt update
       sudo apt install yq=4.6.1 -y
   - &setup_github_bot
     name: Setup Github bot
