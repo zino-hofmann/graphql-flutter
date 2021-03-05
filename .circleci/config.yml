@@ -13,10 +13,18 @@ aliases:
   - &install_yaml_processor
     name: Install yq yaml processor
     command: |
-      sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64
-      sudo add-apt-repository ppa:rmescandon/yq
-      sudo apt update
-      sudo apt install yq=4.6.1 -y
+
+      sudo apt update && \
+      sudo apt install -y wget
+
+      version="4.6.1"
+      binary="yq_linux_amd64"
+      source="https://github.com/mikefarah/yq/releases/download"
+
+      wget "${source}/${version}/${binary}" -O ~/yq
+      sudo chmod +x ~/yq
+
+      sudo apt remove -y wget
   - &setup_github_bot
     name: Setup Github bot
     command: |
@@ -141,7 +149,7 @@ jobs:
 
             export VERSION=${CIRCLE_TAG#"v"}
 
-            yq -P -i eval '.version=env(VERSION)' pubspec.yaml
+            ~/yq -P -i eval '.version=env(VERSION)' pubspec.yaml
       - run:
           name: Patch pubspec with version (graphql_flutter)
           command: |
@@ -150,7 +158,7 @@ jobs:
             export VERSION=${CIRCLE_TAG#"v"}
             export GRAPHQL_DEP="^${VERSION}"
 
-            yq -P -i  eval '.version=env(VERSION) | .dependencies.graphql=env(GRAPHQL_DEP) | del(.publish_to)' pubspec.yaml
+            ~/yq -P -i  eval '.version=env(VERSION) | .dependencies.graphql=env(GRAPHQL_DEP) | del(.publish_to)' pubspec.yaml
       - run:
           name: Bump version numbers
           command: |
