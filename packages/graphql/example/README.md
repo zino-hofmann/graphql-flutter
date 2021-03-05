@@ -8,12 +8,7 @@ To run this application:
 
 1. First clone this repository and navigate to this directory
 2. Install all dart dependencies
-3. create a file `bin/local.dart` with the content:
-   ```dart
-   const String YOUR_PERSONAL_ACCESS_TOKEN =
-      '<YOUR_PERSONAL_ACCESS_TOKEN>';
-   ```
-
+3. replace `<YOUR_PERSONAL_ACCESS_TOKEN>` in `bin/local.dart` with your GitHub token
 ## Usage:
 
 ```sh

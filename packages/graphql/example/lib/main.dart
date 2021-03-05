@@ -15,7 +15,7 @@
 import 'dart:io' show stdout, stderr, exit;
 import 'package:graphql/client.dart';
 
-// ignore: uri_does_not_exist
+// to run the example, replace <YOUR_PERSONAL_ACCESS_TOKEN> with your GitHub token in ./local.dart
 import './local.dart';
 
 /// Get an authenticated [GraphQLClient] for the github api
