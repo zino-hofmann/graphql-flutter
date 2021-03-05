@@ -57,6 +57,7 @@ bool willAlwaysExecuteOnNetwork(FetchPolicy policy) {
     case FetchPolicy.cacheOnly:
       return false;
   }
+  return false;
 }
 
 /// [ErrorPolicy] determines the level of events for GraphQL Errors in the execution result. The options are:

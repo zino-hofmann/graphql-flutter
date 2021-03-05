@@ -3,7 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 
-// ignore: uri_does_not_exist
+// to run the example, replace <YOUR_PERSONAL_ACCESS_TOKEN> with your GitHub token in ../local.dart
 import '../local.dart';
 
 class FetchMoreWidgetScreen extends StatelessWidget {
@@ -153,16 +153,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       Text('note: this example has no mutations',
                           style: Theme.of(context).textTheme.caption),
-                      RaisedButton(
+                      ElevatedButton(
+                        onPressed: () {
+                          fetchMore(opts);
+                        },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text('Load More'),
                           ],
                         ),
-                        onPressed: () {
-                          fetchMore(opts);
-                        },
                       )
                     ],
                   ),

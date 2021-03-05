@@ -1,6 +1,8 @@
 name: app
 description: A new Flutter project.
 
+publish_to: none
+
 module:
   androidX: true // Add this line.
 
@@ -23,3 +25,6 @@ flutter:
 dependency_overrides:
   graphql:
     path: ../../graphql
+
+environment:
+  sdk: '>=2.10.0 <3.0.0'

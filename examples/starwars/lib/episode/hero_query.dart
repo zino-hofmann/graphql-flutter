@@ -57,7 +57,7 @@ class HeroForEpisode extends StatelessWidget {
               Text(
                 getPrettyJSONString(result.data),
               ),
-            RaisedButton(
+            ElevatedButton(
               onPressed: result.isNotLoading ? refetch : null,
               child: const Text('REFETCH'),
             ),

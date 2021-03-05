@@ -1,10 +1,10 @@
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:rxdart/subjects.dart';
+import 'package:rxdart/rxdart.dart';
 
 import '../graphql_operation/mutations/mutations.dart' as mutations;
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 
-// ignore: uri_does_not_exist
+// to run the example, replace <YOUR_PERSONAL_ACCESS_TOKEN> with your GitHub token in ../local.dart
 import '../local.dart';
 
 class Repo {

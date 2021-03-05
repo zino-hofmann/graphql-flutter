@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:graphql/src/cache/_optimistic_transactions.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
