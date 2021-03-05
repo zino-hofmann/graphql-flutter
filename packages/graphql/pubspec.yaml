@@ -6,7 +6,7 @@ homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graph
 dependencies:
   meta: ^1.3.0
   path: ^1.8.0
-  gql: ^0.13.0-nullsafety.1
+  gql: ^0.13.0-nullsafety.2
   gql_exec: ^0.3.0-nullsafety.1
   gql_link: ^0.4.0-nullsafety.1
   gql_http_link: ^0.4.0-nullsafety.1
