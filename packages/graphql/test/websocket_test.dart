@@ -167,7 +167,7 @@ void main() {
           .first;
 
       // ignore: unawaited_futures
-      socketClient.socketChannel.stream
+      socketClient.socketStream
           .where((message) => message == expectedMessage)
           .first
           .then((_) {
@@ -205,14 +205,27 @@ void main() {
       final subscriptionDataStream =
           socketClient.subscribe(payload, waitForConnection);
 
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
       socketClient.onConnectionLost();
 
-      await socketClient.connectionState
-          .where((state) => state == SocketConnectionState.connected)
-          .first;
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.notConnected,
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
 
       // ignore: unawaited_futures
-      socketClient.socketChannel.stream
+      socketClient.socketStream
           .where((message) => message == expectedMessage)
           .first
           .then((_) {
@@ -265,7 +278,7 @@ void main() {
           .where((state) => state == SocketConnectionState.connected)
           .first;
 
-      await expectLater(socketClient.socketChannel.stream.map((s) {
+      await expectLater(socketClient.socketStream.map((s) {
         return jsonDecode(s)['payload'];
       }), emits(initPayload));
     });
@@ -297,7 +310,7 @@ void main() {
           .where((state) => state == SocketConnectionState.connected)
           .first;
 
-      await expectLater(socketClient.socketChannel.stream.map((s) {
+      await expectLater(socketClient.socketStream.map((s) {
         return jsonDecode(s)['payload'];
       }), emits(initPayload));
     });

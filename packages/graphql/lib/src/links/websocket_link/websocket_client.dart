@@ -168,6 +168,9 @@ class SocketClient {
   WebSocketChannel socketChannel;
 
   @visibleForTesting
+  Stream<dynamic> socketStream;
+
+  @visibleForTesting
   void Function(GraphQLSocketMessage) onMessage;
 
   @visibleForTesting
@@ -184,19 +187,19 @@ class SocketClient {
   Response Function(Map<String, dynamic>) get parse =>
       config.parser.parseResponse;
 
-  void disconnectOnKeepAliveTimeout(Stream<GraphQLSocketMessage> messages) =>
-      _keepAliveSubscription =
-          messages.whereType<ConnectionKeepAlive>().timeout(
-        config.inactivityTimeout,
-        onTimeout: (EventSink<ConnectionKeepAlive> event) {
-          print(
-            "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
-          );
-          event.close();
-          socketChannel.sink.close(ws_status.goingAway);
-          _connectionStateController.add(SocketConnectionState.notConnected);
-        },
-      ).listen(null);
+  void _disconnectOnKeepAliveTimeout(Stream<GraphQLSocketMessage> messages) {
+    _keepAliveSubscription = messages.whereType<ConnectionKeepAlive>().timeout(
+      config.inactivityTimeout,
+      onTimeout: (EventSink<ConnectionKeepAlive> event) {
+        print(
+          "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
+        );
+        event.close();
+        socketChannel.sink.close(ws_status.goingAway);
+        _connectionStateController.add(SocketConnectionState.notConnected);
+      },
+    ).listen(null);
+  }
 
   /// Connects to the server.
   ///
@@ -219,10 +222,13 @@ class SocketClient {
       print('Connected to websocket.');
       _write(initOperation);
 
-      _messages = socketChannel.graphQLMessageStream;
+      socketStream = socketChannel.stream.asBroadcastStream();
+      _messages = socketStream.map<GraphQLSocketMessage>(
+        GraphQLSocketMessage.parse,
+      );
 
       if (config.inactivityTimeout != null) {
-        disconnectOnKeepAliveTimeout(_messages);
+        _disconnectOnKeepAliveTimeout(_messages);
       }
 
       _messageSubscription = _messages.listen(
@@ -449,14 +455,7 @@ class SocketClient {
       _connectionStateController.stream;
 }
 
-extension GraphQLWebsocket on WebSocketChannel {
-  /// Multi-subscription stream of messages from the other endpoint.
-  /// GraphQLSocketMessage
-  ///
-  Stream<GraphQLSocketMessage> get graphQLMessageStream => stream
-      .asBroadcastStream()
-      .map<GraphQLSocketMessage>(GraphQLSocketMessage.parse);
-}
+extension GraphQLWebsocket on WebSocketChannel {}
 
 void _defaultOnStreamError(Object error, StackTrace st) {
   print('[SocketClient] message stream ecnountered error: $error\n'
