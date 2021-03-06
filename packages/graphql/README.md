@@ -307,6 +307,30 @@ subscription = client.subscribe(
   ),
 );
 subscription.listen(reactToAddedReview)
+
+#### Customizing WebSocket Connections
+
+`WebSocketLink` now has an experimental `connect` parameter that can be
+used to supply custom headers to an IO client, register custom listeners,
+and extract the socket for other non-graphql features.
+
+**Warning:** if you want to listen to the listen to the stream,
+wrap your channel with our `GraphQLWebSocketChannel` using the `.forGraphQL()` helper:
+```dart
+connect: (url, protocols) {
+   var channel = WebSocketChannel.connect(url, protocols: protocols)
+   // without this line, our client won't be able to listen to stream events,
+   // because you are already listening.
+   channel = channel.forGraphQL();
+   channel.stream.listen(myListener)
+   return channel;
+}
+```
+
+To supply custom headers to an IO client:
+```dart
+connect: (url, protocols) =>
+  IOWebSocketChannel.connect(url, protocols: protocols, headers: myCustomHeaders)
 ```
 
 ### `client.watchQuery` and `ObservableQuery`

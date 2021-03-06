@@ -95,7 +95,7 @@ class SocketClientConfig {
   /// }
   /// ```
   ///
-  /// To supply custom headers to an IO client one can supply the following:
+  /// To supply custom headers to an IO client:
   /// ```dart
   /// connect: (url, protocols) =>
   ///   IOWebSocketChannel.connect(url, protocols: protocols, headers: myCustomHeaders)
