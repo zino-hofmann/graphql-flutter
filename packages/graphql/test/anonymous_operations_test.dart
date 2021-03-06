@@ -31,7 +31,7 @@ void main() {
   }
 ''';
 
-  MockLink? link;
+  late MockLink link;
   late GraphQLClient graphQLClientClient;
 
   group('simple json', () {
@@ -52,7 +52,7 @@ void main() {
         );
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [
@@ -91,7 +91,7 @@ void main() {
         final QueryResult r = await graphQLClientClient.query(_options);
 
         verify(
-          link!.request(
+          link.request(
             Request(
               operation: Operation(
                 document: parseString(readRepositories),
@@ -130,7 +130,7 @@ void main() {
         );
 
         when(
-          link!.request(any!),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [
@@ -150,7 +150,7 @@ void main() {
         final QueryResult response = await graphQLClientClient.mutate(_options);
 
         verify(
-          link!.request(
+          link.request(
             Request(
               operation: Operation(
                 document: parseString(addStar),

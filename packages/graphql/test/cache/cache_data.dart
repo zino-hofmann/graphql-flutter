@@ -2,7 +2,6 @@ import 'package:gql_exec/gql_exec.dart';
 import 'package:gql/language.dart';
 import 'package:graphql/client.dart' show Fragment;
 import 'package:graphql/src/utilities/helpers.dart';
-import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 

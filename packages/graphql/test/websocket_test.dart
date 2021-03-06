@@ -89,7 +89,6 @@ class EchoSocket implements WebSocketChannel {
 SocketClient getTestClient([StreamController? controller]) => SocketClient(
       'ws://echo.websocket.org',
       connect: (_, __) => EchoSocket.connect(controller ?? BehaviorSubject()),
-      protocols: null,
       config: SocketClientConfig(
         delayBetweenReconnectionAttempts: Duration(milliseconds: 1),
       ),

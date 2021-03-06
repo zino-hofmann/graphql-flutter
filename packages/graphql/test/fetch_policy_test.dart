@@ -51,7 +51,7 @@ void main() {
     };
   }
 
-  MockLink? link;
+  late MockLink link;
   late GraphQLClient client;
 
   group('FetchPolicy', () {
@@ -81,7 +81,7 @@ void main() {
         final repoData = readRepositoryData(withTypenames: true);
 
         when(
-          link!.request(any!),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             Response(data: repoData),
@@ -91,7 +91,7 @@ void main() {
         final QueryResult r = await client.query(_options);
 
         verify(
-          link!.request(
+          link.request(
             Request(
               operation: Operation(
                 document: parseString(readRepositories),
