@@ -85,7 +85,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         typePolicies: typePolicies,
         dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
-        addTypename: addTypename ?? false,
+        addTypename: addTypename,
         // if there is partial data, we cannot read and return null
         handleException: true,
         // provided from request
@@ -104,7 +104,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         typePolicies: typePolicies,
         dataIdFromObject: dataIdFromObject,
         returnPartialData: returnPartialData,
-        addTypename: addTypename ?? false,
+        addTypename: addTypename,
         // if there is partial data, we cannot read and return null
         handleException: true,
         // provided from request
@@ -127,7 +127,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         typePolicies: typePolicies,
         dataIdFromObject: dataIdFromObject,
         acceptPartialData: acceptPartialData,
-        addTypename: addTypename ?? false,
+        addTypename: addTypename,
         // provided from request
         document: request.operation.document,
         operationName: request.operation.operationName,
@@ -163,7 +163,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         typePolicies: typePolicies,
         dataIdFromObject: dataIdFromObject,
         acceptPartialData: acceptPartialData,
-        addTypename: addTypename ?? false,
+        addTypename: addTypename,
         // provided from request
         document: request.fragment.document,
         idFields: request.idFields,

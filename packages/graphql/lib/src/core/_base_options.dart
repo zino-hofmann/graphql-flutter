@@ -1,5 +1,4 @@
 import 'package:graphql/src/core/_data_class.dart';
-import 'package:meta/meta.dart';
 
 import 'package:gql/ast.dart';
 import 'package:gql_exec/gql_exec.dart';
@@ -27,7 +26,7 @@ abstract class BaseOptions extends MutableDataClass {
         context = context ?? Context();
 
   /// Document containing at least one [OperationDefinitionNode]
-  DocumentNode? document;
+  DocumentNode document;
 
   /// Name of the executable definition
   ///
@@ -57,7 +56,7 @@ abstract class BaseOptions extends MutableDataClass {
   /// Resolve these options into a request
   Request get asRequest => Request(
         operation: Operation(
-          document: document!,
+          document: document,
           operationName: operationName,
         ),
         variables: variables,
@@ -76,7 +75,7 @@ abstract class BaseOptions extends MutableDataClass {
 
   OperationType get type {
     final definitions =
-        document!.definitions.whereType<OperationDefinitionNode>().toList();
+        document.definitions.whereType<OperationDefinitionNode>().toList();
     if (operationName != null) {
       definitions.removeWhere(
         (node) => node.name!.value != operationName,

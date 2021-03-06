@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import 'package:http/http.dart' as http show ClientException;
 
 import 'package:gql_link/gql_link.dart' show LinkException;
@@ -7,11 +6,11 @@ import 'package:gql_link/gql_link.dart' show LinkException;
 class NetworkException extends LinkException {
   NetworkException({
     dynamic originalException,
-    required this.message,
+    this.message,
     required this.uri,
   }) : super(originalException);
 
-  final String message;
+  final String? message;
   final Uri? uri;
 
   String toString() =>

@@ -46,7 +46,6 @@ class SocketClientConfig {
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.connect = defaultConnect,
-    this.onConnectOrReconnect,
     dynamic initialPayload,
     @deprecated dynamic initPayload,
   })
@@ -67,29 +66,24 @@ class SocketClientConfig {
   /// If [autoReconnect] is set to true, we try to reconnect to the server after the specified [delayBetweenReconnectionAttempts].
   ///
   /// If null, the keep alive messages will be ignored.
-  final Duration inactivityTimeout;
+  final Duration? inactivityTimeout;
 
   /// The duration that needs to pass before trying to reconnect to the server after a connection loss.
   /// This only takes effect when [autoReconnect] is set to true.
   ///
   /// If null, the reconnection will occur immediately, although not recommended.
-  final Duration delayBetweenReconnectionAttempts;
+  final Duration? delayBetweenReconnectionAttempts;
 
   /// The duration after which a query or mutation should time out.
   /// If null, no timeout is applied, although not recommended.
-  final Duration queryAndMutationTimeout;
-
-  /// Deprecated: Callback for handling connections and reconnections.
-  /// Now that we have [connect], one can just
-  ///
-  /// Useful for registering custom listeners or extracting the socket for other non-graphql features.
-  @Deprecated('Use `connect` instead. Will be removed in 5.0.0')
-  final void Function(WebSocketChannel? socketChannel)? onConnectOrReconnect;
+  final Duration? queryAndMutationTimeout;
 
   /// Connect or reconnect to the websocket.
   ///
   /// Useful supplying custom headers to an IO client, registering custom listeners,
   /// and extracting the socket for other non-graphql features.
+  ///
+  /// Warning: if you listen tothe
   ///
   /// To supply custom headers to an IO client one can supply the following:
   /// ```dart
@@ -98,7 +92,10 @@ class SocketClientConfig {
   /// ```
   final WebSocketConnect connect;
 
-  static WebSocketChannel defaultConnect(Uri uri, Iterable<String> protocols) =>
+  static WebSocketChannel defaultConnect(
+    Uri uri,
+    Iterable<String>? protocols,
+  ) =>
       WebSocketChannel.connect(uri, protocols: protocols);
 
   /// Payload to be sent with the connection_init request.
@@ -189,10 +186,10 @@ class SocketClient {
 
   void _disconnectOnKeepAliveTimeout(Stream<GraphQLSocketMessage> messages) {
     _keepAliveSubscription = messages.whereType<ConnectionKeepAlive>().timeout(
-      config.inactivityTimeout,
+      config.inactivityTimeout!,
       onTimeout: (EventSink<ConnectionKeepAlive> event) {
         print(
-          "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
+          "Haven't received keep alive message for ${config.inactivityTimeout!.inSeconds} seconds. Disconnecting..",
         );
         event.close();
         socketChannel!.sink.close(ws_status.goingAway);
@@ -245,23 +242,13 @@ class SocketClient {
 
         _connectionWasLost = false;
       }
-
-      // ignore: deprecated_member_use_from_same_package
-      if (config.onConnectOrReconnect != null) {
-        print(
-          'onConnectOrReconnect is deprecated and will be removed in the next major release. '
-          'Instead, supply a custom connect function and work with the socketChannel there.',
-        );
-        // ignore: deprecated_member_use_from_same_package
-        config.onConnectOrReconnect!(socketChannel);
-      }
     } catch (e) {
       onConnectionLost(e);
     }
   }
 
   void onConnectionLost([e]) {
-    socketChannel?.sink?.close(ws_status.goingAway);
+    socketChannel?.sink.close(ws_status.goingAway);
     if (e != null) {
       print('There was an error causing connection lost: $e');
     }
@@ -285,11 +272,11 @@ class SocketClient {
     if (config.autoReconnect && !_connectionStateController.isClosed) {
       if (config.delayBetweenReconnectionAttempts != null) {
         print(
-          'Scheduling to connect in ${config.delayBetweenReconnectionAttempts.inSeconds} seconds...',
+          'Scheduling to connect in ${config.delayBetweenReconnectionAttempts!.inSeconds} seconds...',
         );
 
         _reconnectTimer = Timer(
-          config.delayBetweenReconnectionAttempts,
+          config.delayBetweenReconnectionAttempts!,
           () {
             _connect();
           },
@@ -311,10 +298,10 @@ class SocketClient {
     _reconnectTimer?.cancel();
 
     await Future.wait([
-      socketChannel?.sink?.close(ws_status.goingAway),
+      socketChannel?.sink.close(ws_status.goingAway),
       _messageSubscription?.cancel(),
-      _connectionStateController?.close(),
-    ].where((future) => future != null).toList() as Iterable<Future<_>>);
+      _connectionStateController.close(),
+    ].where((future) => future != null).cast<Future<dynamic>>().toList());
   }
 
   void _write(final GraphQLSocketMessage message) {
@@ -352,16 +339,17 @@ class SocketClient {
 
     final onListen = () {
       final Stream<SocketConnectionState> waitForConnectedStateWithoutTimeout =
-          _connectionStateController
-              .startWith(
-                  waitForConnection ? null : SocketConnectionState.connected)
+          (waitForConnection
+                  ? _connectionStateController
+                  : _connectionStateController
+                      .startWith(SocketConnectionState.connected))
               .where((SocketConnectionState state) =>
                   state == SocketConnectionState.connected)
               .take(1);
 
       final Stream<SocketConnectionState> waitForConnectedState = addTimeout
           ? waitForConnectedStateWithoutTimeout.timeout(
-              config.queryAndMutationTimeout,
+              config.queryAndMutationTimeout!,
               onTimeout: (EventSink<SocketConnectionState> event) {
                 print('Connection timed out.');
                 response.addError(TimeoutException('Connection timed out.'));
@@ -395,7 +383,7 @@ class SocketClient {
                 .where((message) => message is SubscriptionComplete)
                 .take(1)
                 .timeout(
-                config.queryAndMutationTimeout,
+                config.queryAndMutationTimeout!,
                 onTimeout: (EventSink<GraphQLSocketMessage> event) {
                   print('Request timed out.');
                   response.addError(TimeoutException('Request timed out.'));
@@ -455,8 +443,6 @@ class SocketClient {
   Stream<SocketConnectionState> get connectionState =>
       _connectionStateController.stream;
 }
-
-extension GraphQLWebsocket on WebSocketChannel {}
 
 void _defaultOnStreamError(Object error, StackTrace st) {
   print('[SocketClient] message stream ecnountered error: $error\n'

@@ -1,4 +1,5 @@
 // ignore_for_file: deprecated_member_use_from_same_package
+import 'dart:async';
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/observable_query.dart';
@@ -11,18 +12,16 @@ import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/core/policies.dart';
 
-typedef OnMutationCompleted = void Function(dynamic data);
-typedef OnMutationUpdate = void Function(
+typedef OnMutationCompleted = FutureOr<void> Function(dynamic data);
+typedef OnMutationUpdate = FutureOr<void> Function(
   GraphQLDataProxy cache,
   QueryResult? result,
 );
-typedef OnError = void Function(OperationException? error);
+typedef OnError = FutureOr<void> Function(OperationException? error);
 
 class MutationOptions extends BaseOptions {
   MutationOptions({
-    DocumentNode? document,
-    @Deprecated('Use `document` instead. Will be removed in 5.0.0')
-        DocumentNode? documentNode,
+    required DocumentNode document,
     String? operationName,
     Map<String, dynamic> variables = const {},
     FetchPolicy? fetchPolicy,
@@ -33,15 +32,11 @@ class MutationOptions extends BaseOptions {
     this.onCompleted,
     this.update,
     this.onError,
-  })  : assert(
-          (document ?? documentNode) != null,
-          'document must not be null',
-        ),
-        super(
+  }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
           cacheRereadPolicy: cacheRereadPolicy,
-          document: document ?? documentNode,
+          document: document,
           operationName: operationName,
           variables: variables,
           context: context,
@@ -67,14 +62,12 @@ class MutationCallbackHandler {
     required this.options,
     required this.cache,
     required this.queryId,
-  })  : assert(cache != null),
-        assert(options != null),
-        assert(queryId != null);
+  });
 
   // callbacks will be called against each result in the stream,
   // which should then rebroadcast queries with the appropriate optimism
-  Iterable<OnData?> get callbacks =>
-      <OnData?>[onCompleted, update, onError].where(notNull);
+  Iterable<OnData> get callbacks =>
+      <OnData?>[onCompleted, update, onError].where(notNull).cast<OnData>();
 
   // Todo: probably move this to its own class
   OnData? get onCompleted {
@@ -132,7 +125,7 @@ class MutationCallbackHandler {
       final OnData optimisticUpdate = _optimisticUpdate;
 
       // wrap update logic to handle optimism
-      void updateOnData(QueryResult? result) {
+      FutureOr<void> updateOnData(QueryResult? result) {
         if (result!.isOptimistic) {
           return optimisticUpdate(result);
         } else {

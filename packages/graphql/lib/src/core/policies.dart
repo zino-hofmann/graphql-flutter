@@ -147,9 +147,7 @@ class Policies {
     FetchPolicy this.fetch,
     ErrorPolicy this.error,
     CacheRereadPolicy this.cacheReread,
-  )   : assert(fetch != null, 'fetch policy must be specified'),
-        assert(error != null, 'error policy must be specified'),
-        assert(cacheReread != null, 'cacheReread policy must be specified');
+  );
 
   Policies withOverrides([Policies? overrides]) => Policies.safe(
         overrides?.fetch ?? fetch!,

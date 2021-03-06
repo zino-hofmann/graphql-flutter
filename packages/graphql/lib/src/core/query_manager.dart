@@ -68,7 +68,8 @@ class QueryManager {
     // Add optimistic or cache-based result to the stream if any
     if (options.optimisticResult != null) {
       // TODO optimisticResults for streams just skip the cache for now
-      yield QueryResult.optimistic(data: options.optimisticResult as Map<String, dynamic>?);
+      yield QueryResult.optimistic(
+          data: options.optimisticResult as Map<String, dynamic>?);
     } else if (options.fetchPolicy != FetchPolicy.noCache) {
       final cacheResult = cache.readQuery(
         request,
@@ -136,10 +137,10 @@ class QueryManager {
       queryId: '0',
     );
 
-    final Iterable<void Function(QueryResult)?> callbacks = mutationCallbacks.callbacks;
+    final callbacks = mutationCallbacks.callbacks;
 
     for (final callback in callbacks) {
-      await callback!(result);
+      await callback(result);
     }
 
     /// [fetchQuery] attempts to broadcast from the observable,
@@ -155,7 +156,7 @@ class QueryManager {
   ) async {
     final MultiSourceResult allResults =
         fetchQueryAsMultiSourceResult(queryId, options);
-    return (await (allResults.networkResult as FutureOr<QueryResult>?)) ?? allResults.eagerResult;
+    return allResults.networkResult ?? allResults.eagerResult;
   }
 
   /// Wrap both the `eagerResult` and `networkResult` future in a `MultiSourceResult`
@@ -186,7 +187,7 @@ class QueryManager {
 
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
-  Future<QueryResult?> _resolveQueryOnNetwork(
+  Future<QueryResult> _resolveQueryOnNetwork(
     Request request,
     String queryId,
     BaseOptions options,

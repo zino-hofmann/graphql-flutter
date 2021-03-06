@@ -1,5 +1,4 @@
 import 'package:graphql/client.dart';
-import 'package:meta/meta.dart';
 
 import 'package:gql_exec/gql_exec.dart';
 

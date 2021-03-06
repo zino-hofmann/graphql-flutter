@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:graphql/client.dart';
-import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_manager.dart';
 import 'package:graphql/src/core/query_options.dart';
@@ -26,16 +25,9 @@ Future<QueryResult> fetchMoreImplementation(
   String? queryId,
 }) async {
   // fetch more and udpate
-  assert(fetchMoreOptions.updateQuery != null);
 
-  final document = (fetchMoreOptions.document ?? originalOptions.document!);
+  final document = (fetchMoreOptions.document ?? originalOptions.document);
   final request = originalOptions.asRequest;
-
-  assert(
-    document != null,
-    'Either fetchMoreOptions.document '
-    'or the previous QueryOptions must be supplied!',
-  );
 
   final combinedOptions = QueryOptions(
     fetchPolicy: FetchPolicy.noCache,
@@ -56,12 +48,6 @@ Future<QueryResult> fetchMoreImplementation(
       fetchMoreResult.data,
     )!;
 
-    assert(
-      data != null,
-      'updateQuery result cannot be null:\n'
-      '  previousResultData: ${previousResult.data},\n'
-      ' fetchMoreResultData: ${fetchMoreResult.data}',
-    );
     fetchMoreResult.data = data;
 
     if (originalOptions.fetchPolicy != FetchPolicy.noCache) {

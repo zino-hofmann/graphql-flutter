@@ -21,7 +21,7 @@ class Fragment {
   const Fragment({
     required this.document,
     this.fragmentName,
-  }) : assert(document != null);
+  });
 
   List<Object?> _getChildren() => [
         document,
@@ -77,8 +77,7 @@ class FragmentRequest {
     required this.fragment,
     required this.idFields,
     this.variables = const <String, dynamic>{},
-  })  : assert(fragment != null),
-        assert(idFields != null);
+  });
 
   List<Object> _getChildren() => [
         fragment,

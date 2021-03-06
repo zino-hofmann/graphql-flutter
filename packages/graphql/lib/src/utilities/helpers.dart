@@ -79,7 +79,7 @@ typedef SanitizeVariables = Map<String, dynamic>? Function(
 /// [sanitizeVariables] is passed to [jsonEncode] as `toEncodable`. The default is  [defaultSanitizeVariables],
 /// which convets [MultipartFile]s to a string representation containing hashCode)
 SanitizeVariables variableSanitizer(
-  Object? Function(Object?) sanitizeVariables,
+  Object? Function(Object?)? sanitizeVariables,
 ) =>
     // TODO use more efficient traversal method
     sanitizeVariables == null

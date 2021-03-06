@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:graphql/client.dart';
-import 'package:meta/meta.dart';
 
 import "package:gql_exec/gql_exec.dart";
 import "package:gql_http_link/gql_http_link.dart";
@@ -54,16 +53,14 @@ class _AsyncReqTransformLink extends Link {
 
   _AsyncReqTransformLink({
     required this.requestTransformer,
-  }) : assert(requestTransformer != null);
+  });
 
   @override
   Stream<Response> request(
     Request request, [
     NextLink? forward,
   ]) async* {
-    final req = requestTransformer != null
-        ? await requestTransformer(request)
-        : request;
+    final req = await requestTransformer(request);
 
     yield* forward!(req);
   }

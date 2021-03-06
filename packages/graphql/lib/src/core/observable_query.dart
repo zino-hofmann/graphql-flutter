@@ -217,8 +217,6 @@ class ObservableQuery {
   ///
   /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
-    assert(fetchMoreOptions.updateQuery != null);
-
     addResult(QueryResult.loading(data: latestResult?.data));
 
     return fetchMoreImplementation(

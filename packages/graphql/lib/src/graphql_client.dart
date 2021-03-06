@@ -25,13 +25,13 @@ class GraphQLClient implements GraphQLDataProxy {
     required this.link,
     required this.cache,
     this.defaultPolicies,
-    @experimental bool alwaysRebroadcast = false,
+    bool alwaysRebroadcast = false,
   }) {
     defaultPolicies ??= DefaultPolicies();
     queryManager = QueryManager(
       link: link,
       cache: cache,
-      alwaysRebroadcast: alwaysRebroadcast ?? false,
+      alwaysRebroadcast: alwaysRebroadcast,
     );
   }
 
