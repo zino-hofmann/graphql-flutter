@@ -261,6 +261,7 @@ class SocketClient {
   }
 
   void onConnectionLost([e]) {
+    socketChannel?.sink?.close(ws_status.goingAway);
     if (e != null) {
       print('There was an error causing connection lost: $e');
     }
@@ -284,7 +285,8 @@ class SocketClient {
     if (config.autoReconnect && !_connectionStateController.isClosed) {
       if (config.delayBetweenReconnectionAttempts != null) {
         print(
-            'Scheduling to connect in ${config.delayBetweenReconnectionAttempts.inSeconds} seconds...');
+          'Scheduling to connect in ${config.delayBetweenReconnectionAttempts.inSeconds} seconds...',
+        );
 
         _reconnectTimer = Timer(
           config.delayBetweenReconnectionAttempts,
@@ -309,10 +311,9 @@ class SocketClient {
     _reconnectTimer?.cancel();
 
     await Future.wait([
-      socketChannel.sink.close(ws_status.goingAway),
+      socketChannel?.sink?.close(ws_status.goingAway),
       _messageSubscription?.cancel(),
       _connectionStateController?.close(),
-      _keepAliveSubscription?.cancel()
     ].where((future) => future != null).toList());
   }
 

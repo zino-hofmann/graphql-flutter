@@ -32,9 +32,7 @@ class EchoSink extends DelegatingStreamSink implements WebSocketSink {
 class EchoSocket implements WebSocketChannel {
   final StreamController controller;
 
-  EchoSocket.connect(BehaviorSubject controller)
-      : controller = controller,
-        sink = EchoSink(controller.sink);
+  EchoSocket.connect(this.controller) : sink = EchoSink(controller.sink);
 
   @override
   Stream get stream => controller.stream;
@@ -88,6 +86,18 @@ class EchoSocket implements WebSocketChannel {
       throw UnimplementedError();
 }
 
+SocketClient getTestClient([StreamController controller]) => SocketClient(
+      'ws://echo.websocket.org',
+      connect: (_, __) => EchoSocket.connect(controller ?? BehaviorSubject()),
+      protocols: null,
+      config: SocketClientConfig(
+        delayBetweenReconnectionAttempts: Duration(milliseconds: 1),
+      ),
+      randomBytesForUuid: Uint8List.fromList(
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+      ),
+    );
+
 void main() {
   group('InitOperation', () {
     test('null payload', () {
@@ -124,26 +134,18 @@ void main() {
 
   group('SocketClient without payload', () {
     SocketClient socketClient;
+    StreamController controller;
     final expectedMessage = r'{'
         r'"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10",'
         r'"payload":{"operationName":null,"variables":{},"query":"subscription {\n  \n}"}'
         r'}';
     setUp(overridePrint((log) {
-      socketClient = SocketClient(
-        'ws://echo.websocket.org',
-        connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
-        protocols: null,
-        config: SocketClientConfig(
-          delayBetweenReconnectionAttempts: Duration(milliseconds: 1),
-        ),
-        randomBytesForUuid: Uint8List.fromList(
-          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
-        ),
-      );
+      controller = StreamController(sync: true);
+      socketClient = getTestClient(controller);
     }));
-    tearDown(overridePrint((log) async {
-      await socketClient.dispose();
-    }));
+    tearDown(overridePrint(
+      (log) => socketClient.dispose(),
+    ));
     test('connection', () async {
       await expectLater(
         socketClient.connectionState.asBroadcastStream(),
@@ -269,9 +271,12 @@ void main() {
       );
     }));
 
-    tearDown(overridePrint((log) async {
-      await socketClient.dispose();
-    }));
+    tearDown(overridePrint(
+      (log) => expectLater(
+        socketClient.dispose().timeout(Duration(seconds: 1)),
+        completion(null),
+      ),
+    ));
 
     test('connection', () async {
       await socketClient.connectionState
