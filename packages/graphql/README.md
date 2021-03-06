@@ -317,6 +317,7 @@ can be used to execute both queries and mutations, then reactively listen to cha
 ```dart
 final observableQuery = client.watchQuery(
   WatchQueryOptions(
+    fetchResults: true,
     document: gql(
       r'''
       query HeroForEpisode($ep: Episode!) {
