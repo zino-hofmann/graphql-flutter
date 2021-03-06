@@ -1,9 +1,19 @@
 import 'dart:async';
 
 import 'package:graphql/client.dart';
+
 import 'package:mockito/mockito.dart';
 
-class MockLink extends Mock implements Link {}
+class MockLink extends Mock implements Link {
+  @override
+  Stream<Response> request(Request? request, [NextLink? forward]) =>
+      super.noSuchMethod(
+        Invocation.method(#request, [request, forward]),
+        returnValue: Stream.fromIterable(
+          <Response>[],
+        ),
+      ) as Stream<Response>;
+}
 
 const debuggingUnexpectedTestFailures = false;
 

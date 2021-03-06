@@ -24,7 +24,7 @@ class EchoSink extends DelegatingStreamSink implements WebSocketSink {
         super(sink);
 
   @override
-  Future close([int closeCode, String closeReason]) {
+  Future close([int? closeCode, String? closeReason]) {
     return super.close();
   }
 }
@@ -86,7 +86,7 @@ class EchoSocket implements WebSocketChannel {
       throw UnimplementedError();
 }
 
-SocketClient getTestClient([StreamController controller]) => SocketClient(
+SocketClient getTestClient([StreamController? controller]) => SocketClient(
       'ws://echo.websocket.org',
       connect: (_, __) => EchoSocket.connect(controller ?? BehaviorSubject()),
       protocols: null,
@@ -133,7 +133,7 @@ void main() {
   });
 
   group('SocketClient without payload', () {
-    SocketClient socketClient;
+    late SocketClient socketClient;
     StreamController controller;
     final expectedMessage = r'{'
         r'"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10",'
@@ -169,11 +169,11 @@ void main() {
           .first;
 
       // ignore: unawaited_futures
-      socketClient.socketStream
+      socketClient.socketChannel!.stream
           .where((message) => message == expectedMessage)
           .first
           .then((_) {
-        socketClient.socketChannel.sink.add(jsonEncode({
+        socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
           'payload': {
@@ -227,11 +227,11 @@ void main() {
       );
 
       // ignore: unawaited_futures
-      socketClient.socketStream
+      socketClient.socketChannel!.stream
           .where((message) => message == expectedMessage)
           .first
           .then((_) {
-        socketClient.socketChannel.sink.add(jsonEncode({
+        socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
           'payload': {
@@ -260,7 +260,7 @@ void main() {
   }, tags: "integration");
 
   group('SocketClient with const payload', () {
-    SocketClient socketClient;
+    late SocketClient socketClient;
     const initPayload = {'token': 'mytoken'};
 
     setUp(overridePrint((log) {
@@ -283,14 +283,16 @@ void main() {
           .where((state) => state == SocketConnectionState.connected)
           .first;
 
-      await expectLater(socketClient.socketStream.map((s) {
-        return jsonDecode(s)['payload'];
-      }), emits(initPayload));
+      await expectLater(
+          socketClient.socketChannel!.stream.map((s) {
+            return jsonDecode(s)['payload'];
+          }),
+          emits(initPayload));
     });
   });
 
   group('SocketClient with future payload', () {
-    SocketClient socketClient;
+    late SocketClient socketClient;
     const initPayload = {'token': 'mytoken'};
 
     setUp(overridePrint((log) {
@@ -315,9 +317,12 @@ void main() {
           .where((state) => state == SocketConnectionState.connected)
           .first;
 
-      await expectLater(socketClient.socketStream.map((s) {
-        return jsonDecode(s)['payload'];
-      }), emits(initPayload));
+      await expectLater(
+        socketClient.socketChannel!.stream.map((s) {
+          return jsonDecode(s)['payload'];
+        }),
+        emits(initPayload),
+      );
     });
   });
 }

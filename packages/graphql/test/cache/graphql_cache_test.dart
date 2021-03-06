@@ -18,7 +18,7 @@ void main() {
   }
 
   group('Normalizes writes', () {
-    GraphQLCache cache;
+    late GraphQLCache cache;
     setUp(() {
       cache = getTestCache();
     });
@@ -111,7 +111,7 @@ void main() {
     final GraphQLCache cache = getTestCache();
     test('lazily reads cyclical references', () {
       cache.writeQuery(cyclicalTest.request, data: cyclicalTest.data);
-      for (final normalized in cyclicalTest.normalizedEntities) {
+      for (final normalized in cyclicalTest.normalizedEntities!) {
         final dataId = "${normalized['__typename']}:${normalized['id']}";
         expect(cache.readNormalized(dataId), equals(normalized));
       }
@@ -123,7 +123,7 @@ void main() {
     test('correctly reads cyclical references', () {
       cyclicalTest.data = cyclicalObjOperationData;
       cache.writeQuery(cyclicalTest.request, data: cyclicalTest.data);
-      for (final normalized in cyclicalTest.normalizedEntities) {
+      for (final normalized in cyclicalTest.normalizedEntities!) {
         final dataId = "${normalized['__typename']}:${normalized['id']}";
         expect(cache.readNormalized(dataId), equals(normalized));
       }
@@ -133,7 +133,7 @@ void main() {
   group(
     '.recordOptimisticTransaction',
     () {
-      GraphQLCache cache;
+      late GraphQLCache cache;
 
       setUp(() {
         cache = getTestCache();
@@ -263,7 +263,7 @@ void main() {
   );
 
   group('Handles MultipartFile variables', () {
-    GraphQLCache cache;
+    late GraphQLCache cache;
     setUp(() {
       cache = getTestCache();
     });
@@ -278,7 +278,7 @@ void main() {
 
   group('custom dataIdFromObject', () {
     /// Uses a `/` instead of the default `:`
-    String customDataIdFromObject(Object object) {
+    String? customDataIdFromObject(Object object) {
       if (object is Map<String, Object> &&
           object.containsKey('__typename') &&
           object.containsKey('id'))
@@ -286,7 +286,7 @@ void main() {
       return null;
     }
 
-    GraphQLCache cache;
+    late GraphQLCache cache;
     setUp(() {
       cache = GraphQLCache(
         dataIdFromObject: customDataIdFromObject,

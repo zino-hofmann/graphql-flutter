@@ -1,14 +1,11 @@
 import 'package:gql/language.dart';
 import 'package:gql_exec/gql_exec.dart';
-import 'package:gql_link/gql_link.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
 import 'package:graphql/client.dart';
 
 import './helpers.dart';
-
-class MockLink extends Mock implements Link {}
 
 void main() {
   const String readRepositories = r'''{
@@ -34,8 +31,8 @@ void main() {
   }
 ''';
 
-  MockLink link;
-  GraphQLClient graphQLClientClient;
+  MockLink? link;
+  late GraphQLClient graphQLClientClient;
 
   group('simple json', () {
     setUp(() {
@@ -55,7 +52,7 @@ void main() {
         );
 
         when(
-          link.request(any),
+          link!.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [
@@ -94,7 +91,7 @@ void main() {
         final QueryResult r = await graphQLClientClient.query(_options);
 
         verify(
-          link.request(
+          link!.request(
             Request(
               operation: Operation(
                 document: parseString(readRepositories),
@@ -109,7 +106,7 @@ void main() {
         expect(r.exception, isNull);
         expect(r.data, isNotNull);
         final List<Map<String, dynamic>> nodes =
-            (r.data['viewer']['repositories']['nodes'] as List<dynamic>)
+            (r.data!['viewer']['repositories']['nodes'] as List<dynamic>)
                 .cast<Map<String, dynamic>>();
         expect(nodes, hasLength(3));
         expect(nodes[0]['id'], 'MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==');
@@ -133,7 +130,7 @@ void main() {
         );
 
         when(
-          link.request(any),
+          link!.request(any!),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [
@@ -153,7 +150,7 @@ void main() {
         final QueryResult response = await graphQLClientClient.mutate(_options);
 
         verify(
-          link.request(
+          link!.request(
             Request(
               operation: Operation(
                 document: parseString(addStar),
@@ -166,8 +163,8 @@ void main() {
 
         expect(response.exception, isNull);
         expect(response.data, isNotNull);
-        final bool viewerHasStarred =
-            response.data['action']['starrable']['viewerHasStarred'] as bool;
+        final bool? viewerHasStarred =
+            response.data!['action']['starrable']['viewerHasStarred'] as bool?;
         expect(viewerHasStarred, true);
       });
     });

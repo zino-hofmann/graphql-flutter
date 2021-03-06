@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
+
 import 'package:graphql/src/links/gql_links.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_options.dart' show WithType;
 import 'package:gql_exec/gql_exec.dart';
 
+import 'package:stream_channel/stream_channel.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as ws_status;
 
@@ -45,12 +47,9 @@ class SocketClientConfig {
     this.queryAndMutationTimeout = const Duration(seconds: 10),
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
-    this.connect = defaultConnect,
-    dynamic initialPayload,
-    @deprecated dynamic initPayload,
-  })
-  // ignore: deprecated_member_use_from_same_package
-  : initialPayload = initialPayload ?? initPayload;
+    this.initialPayload,
+    @experimental this.connect = defaultConnect,
+  });
 
   /// Serializer used to serialize request
   final RequestSerializer serializer;
@@ -83,7 +82,18 @@ class SocketClientConfig {
   /// Useful supplying custom headers to an IO client, registering custom listeners,
   /// and extracting the socket for other non-graphql features.
   ///
-  /// Warning: if you listen tothe
+  /// Warning: if you want to listen to the listen to the stream,
+  /// wrap your channel with our [GraphQLWebSocketChannel] using the `.forGraphQL()` helper:
+  /// ```dart
+  /// connect: (url, protocols) {
+  ///    var channel = WebSocketChannel.connect(url, protocols: protocols)
+  ///    // without this line, our client won't be able to listen to stream events,
+  ///    // because you are already listening.
+  ///    channel = channel.forGraphQL();
+  ///    channel.stream.listen(myListener)
+  ///    return channel;
+  /// }
+  /// ```
   ///
   /// To supply custom headers to an IO client one can supply the following:
   /// ```dart
@@ -96,7 +106,7 @@ class SocketClientConfig {
     Uri uri,
     Iterable<String>? protocols,
   ) =>
-      WebSocketChannel.connect(uri, protocols: protocols);
+      WebSocketChannel.connect(uri, protocols: protocols).forGraphQL();
 
   /// Payload to be sent with the connection_init request.
   ///
@@ -162,10 +172,7 @@ class SocketClient {
   Timer? _reconnectTimer;
 
   @visibleForTesting
-  WebSocketChannel? socketChannel;
-
-  @visibleForTesting
-  late Stream<dynamic> socketStream;
+  GraphQLWebSocketChannel? socketChannel;
 
   @visibleForTesting
   void Function(GraphQLSocketMessage)? onMessage;
@@ -173,7 +180,7 @@ class SocketClient {
   @visibleForTesting
   void Function(Object error, StackTrace stackTrace) onStreamError;
 
-  late Stream<GraphQLSocketMessage> _messages;
+  Stream<GraphQLSocketMessage> get _messages => socketChannel!.messages;
 
   StreamSubscription<ConnectionKeepAlive>? _keepAliveSubscription;
   StreamSubscription<GraphQLSocketMessage>? _messageSubscription;
@@ -214,15 +221,11 @@ class SocketClient {
     try {
       // Even though config.connect is sync, we call async in order to make the
       // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
-      socketChannel = await config.connect(Uri.parse(url), protocols);
+      socketChannel =
+          await config.connect(Uri.parse(url), protocols).forGraphQL();
       _connectionStateController.add(SocketConnectionState.connected);
       print('Connected to websocket.');
       _write(initOperation);
-
-      socketStream = socketChannel!.stream.asBroadcastStream();
-      _messages = socketStream.map<GraphQLSocketMessage>(
-        GraphQLSocketMessage.parse,
-      );
 
       if (config.inactivityTimeout != null) {
         _disconnectOnKeepAliveTimeout(_messages);
@@ -447,4 +450,35 @@ class SocketClient {
 void _defaultOnStreamError(Object error, StackTrace st) {
   print('[SocketClient] message stream ecnountered error: $error\n'
       'stacktrace:\n${st.toString()}');
+}
+
+class GraphQLWebSocketChannel extends StreamChannelMixin
+    implements WebSocketChannel {
+  GraphQLWebSocketChannel(this._webSocket)
+      : stream = _webSocket.stream.asBroadcastStream();
+
+  WebSocketChannel _webSocket;
+
+  Stream stream;
+  Stream<GraphQLSocketMessage>? _messages;
+
+  /// Stream of messages from the endpoint parsed as GraphQLSocketMessages
+  Stream<GraphQLSocketMessage> get messages => _messages ??=
+      stream.map<GraphQLSocketMessage>(GraphQLSocketMessage.parse);
+
+  String? get protocol => _webSocket.protocol;
+
+  int? get closeCode => _webSocket.closeCode;
+
+  String? get closeReason => _webSocket.closeReason;
+
+  @override
+  WebSocketSink get sink => _webSocket.sink;
+}
+
+extension GraphQLGetter on WebSocketChannel {
+  /// Returns a wrapper that has safety and convenience features for graphql
+  GraphQLWebSocketChannel forGraphQL() => this is GraphQLWebSocketChannel
+      ? this as GraphQLWebSocketChannel
+      : GraphQLWebSocketChannel(this);
 }

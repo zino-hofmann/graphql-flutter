@@ -10,8 +10,8 @@ const String rawOperationKey = 'rawOperationKey';
 
 class TestCase {
   TestCase({
-    @required this.data,
-    @required String operation,
+    required this.data,
+    required String operation,
     Map<String, dynamic> variables = const <String, dynamic>{},
     this.normalizedEntities,
   }) : request = Request(
@@ -26,7 +26,7 @@ class TestCase {
   Map<String, dynamic> data;
 
   /// entities to inspect the store for, if any
-  List<Map<String, dynamic>> normalizedEntities;
+  List<Map<String, dynamic>>? normalizedEntities;
 }
 
 final basicTest = TestCase(
@@ -169,7 +169,7 @@ final updatedCValue = <String, dynamic>{
   'cField': 'changed value',
 };
 
-final Map updatedCBasicTestData = deeplyMergeLeft([
+final Map? updatedCBasicTestData = deeplyMergeLeft([
   basicTest.data,
   {
     'a': {
