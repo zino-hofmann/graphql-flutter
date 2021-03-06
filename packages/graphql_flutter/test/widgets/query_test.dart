@@ -99,6 +99,7 @@ class PageState extends State<Page> {
 void main() {
   setUpAll(() async {
     await mockApplicationDocumentsDirectory();
+    await initHiveForFlutter();
   });
 
   group('Query', () {
@@ -107,8 +108,6 @@ void main() {
     ValueNotifier<GraphQLClient> client;
 
     setUp(() async {
-      await initHiveForFlutter();
-
       mockHttpClient = MockHttpClient();
       httpLink = HttpLink(
         'https://unused/graphql',

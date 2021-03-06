@@ -1,5 +1,9 @@
 import 'dart:async';
+
+import 'package:async/async.dart';
 import 'package:rxdart/subjects.dart';
+import 'package:stream_channel/src/stream_channel_transformer.dart';
+import 'package:stream_channel/stream_channel.dart';
 import 'package:test/test.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -8,44 +12,80 @@ import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql/src/links/websocket_link/websocket_client.dart';
 import 'package:graphql/src/links/websocket_link/websocket_messages.dart';
-import 'package:websocket/websocket.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import './helpers.dart';
 
-class EchoSocket implements WebSocket {
-  EchoSocket() : controller = BehaviorSubject();
+class EchoSink extends DelegatingStreamSink implements WebSocketSink {
+  final StreamSink sink;
 
-  static Future<WebSocket> connect(
-    String url, {
-    Iterable<String> protocols,
-  }) async =>
-      EchoSocket();
+  EchoSink(StreamSink sink)
+      : this.sink = sink,
+        super(sink);
 
-  StreamController controller;
-
-  int closeCode;
-  String closeReason;
-
-  void add(/*String|List<int>*/ data) => controller.add(data);
-
-  Future addStream(Stream stream) => controller.addStream(stream);
-
-  Future close([int code, String reason]) {
-    closeCode ??= closeCode;
-    closeReason ??= closeReason;
-    return controller.close();
+  @override
+  Future close([int closeCode, String closeReason]) {
+    return super.close();
   }
+}
 
-  String get extensions => null;
+class EchoSocket implements WebSocketChannel {
+  final StreamController controller;
 
-  String get protocol => null;
+  EchoSocket.connect(BehaviorSubject controller)
+      : controller = controller,
+        sink = EchoSink(controller.sink);
 
-  int get readyState => throw UnsupportedError('unmocked');
-  void addUtf8Text(List<int> bytes) => throw UnsupportedError('unmocked');
-
-  Future get done => controller.done;
-
+  @override
   Stream get stream => controller.stream;
+
+  @override
+  final WebSocketSink sink;
+
+  @override
+  StreamChannel<S> cast<S>() => throw UnimplementedError();
+
+  @override
+  StreamChannel changeSink(
+    StreamSink Function(StreamSink p1) change,
+  ) =>
+      throw UnimplementedError();
+
+  @override
+  StreamChannel changeStream(
+    Stream Function(Stream p1) change,
+  ) =>
+      throw UnimplementedError();
+
+  @override
+  int get closeCode => throw UnimplementedError();
+
+  @override
+  String get closeReason => throw UnimplementedError();
+
+  @override
+  void pipe(StreamChannel other) {}
+
+  @override
+  String get protocol => throw UnimplementedError();
+
+  @override
+  StreamChannel<S> transform<S>(
+    StreamChannelTransformer<S, dynamic> transformer,
+  ) =>
+      throw UnimplementedError();
+
+  @override
+  StreamChannel transformSink(
+    StreamSinkTransformer transformer,
+  ) =>
+      throw UnimplementedError();
+
+  @override
+  StreamChannel transformStream(
+    StreamTransformer transformer,
+  ) =>
+      throw UnimplementedError();
 }
 
 void main() {
@@ -91,13 +131,14 @@ void main() {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         'ws://echo.websocket.org',
-        connect: EchoSocket.connect,
+        connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
         protocols: null,
         config: SocketClientConfig(
           delayBetweenReconnectionAttempts: Duration(milliseconds: 1),
         ),
         randomBytesForUuid: Uint8List.fromList(
-            [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]),
+          [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
+        ),
       );
     }));
     tearDown(overridePrint((log) async {
@@ -126,11 +167,11 @@ void main() {
           .first;
 
       // ignore: unawaited_futures
-      socketClient.socket.stream
+      socketClient.socketChannel.stream
           .where((message) => message == expectedMessage)
           .first
           .then((_) {
-        socketClient.socket.add(jsonEncode({
+        socketClient.socketChannel.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
           'payload': {
@@ -171,11 +212,11 @@ void main() {
           .first;
 
       // ignore: unawaited_futures
-      socketClient.socket.stream
+      socketClient.socketChannel.stream
           .where((message) => message == expectedMessage)
           .first
           .then((_) {
-        socketClient.socket.add(jsonEncode({
+        socketClient.socketChannel.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
           'payload': {
@@ -210,7 +251,7 @@ void main() {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         'ws://echo.websocket.org',
-        connect: EchoSocket.connect,
+        connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
         config: SocketClientConfig(initialPayload: () => initPayload),
       );
     }));
@@ -224,7 +265,7 @@ void main() {
           .where((state) => state == SocketConnectionState.connected)
           .first;
 
-      await expectLater(socketClient.socket.stream.map((s) {
+      await expectLater(socketClient.socketChannel.stream.map((s) {
         return jsonDecode(s)['payload'];
       }), emits(initPayload));
     });
@@ -237,7 +278,7 @@ void main() {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         'ws://echo.websocket.org',
-        connect: EchoSocket.connect,
+        connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
         config: SocketClientConfig(
           initialPayload: () async {
             await Future.delayed(Duration(seconds: 3));
@@ -256,7 +297,7 @@ void main() {
           .where((state) => state == SocketConnectionState.connected)
           .first;
 
-      await expectLater(socketClient.socket.stream.map((s) {
+      await expectLater(socketClient.socketChannel.stream.map((s) {
         return jsonDecode(s)['payload'];
       }), emits(initPayload));
     });
