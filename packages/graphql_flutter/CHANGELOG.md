@@ -1,3 +1,16 @@
+# [4.1.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.2-beta.1...v4.1.0-beta.1) (2021-03-06)
+
+
+### Bug Fixes
+
+* **ci:** graphql coverage ([d47852a](https://github.com/zino-app/graphql-flutter/commit/d47852a2c4159570881017063c5fd13ed07e007b))
+* **client:** always only pull broadcast stream once ([1b6a9e6](https://github.com/zino-app/graphql-flutter/commit/1b6a9e66d460f29f929772547f9a502af4921b39))
+
+
+### Features
+
+* **client:** SocketClient with web_socket_channel ([6631f42](https://github.com/zino-app/graphql-flutter/commit/6631f42bf1fcf0e66fb51c5aa770097b2ea51e07))
+
 ## [4.0.2-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.1...v4.0.2-beta.1) (2021-02-08)
 
 
