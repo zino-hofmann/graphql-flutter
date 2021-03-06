@@ -65,7 +65,7 @@ class QueryResult {
     this.data,
     this.exception,
     this.context = const Context(),
-    @required this.source,
+    required this.source,
   }) : timestamp = DateTime.now();
 
   /// Unexecuted singleton, used as a placeholder for mutations,
@@ -74,7 +74,7 @@ class QueryResult {
     ..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
   factory QueryResult.loading({
-    Map<String, dynamic> data,
+    Map<String, dynamic>? data,
   }) =>
       QueryResult(
         data: data,
@@ -82,7 +82,7 @@ class QueryResult {
       );
 
   factory QueryResult.optimistic({
-    Map<String, dynamic> data,
+    Map<String, dynamic>? data,
   }) =>
       QueryResult(
         data: data,
@@ -95,15 +95,15 @@ class QueryResult {
   ///
   /// `null` when unexecuted.
   /// Will be set when encountering an error during any execution attempt
-  QueryResultSource source;
+  QueryResultSource? source;
 
   /// Response data
-  Map<String, dynamic> data;
+  Map<String, dynamic>? data;
 
   /// Response context. Defaults to an empty `Context()`
   Context context;
 
-  OperationException exception;
+  OperationException? exception;
 
   /// [data] has yet to be specified from any source
   /// for the _most recent_ operation
@@ -152,15 +152,14 @@ class QueryResult {
 
 class MultiSourceResult {
   MultiSourceResult({
-    this.eagerResult,
+    QueryResult? eagerResult,
     this.networkResult,
-  }) : assert(
-          eagerResult.source != QueryResultSource.network,
+  })  : eagerResult = eagerResult ?? QueryResult.loading(),
+        assert(
+          eagerResult!.source != QueryResultSource.network,
           'An eager result cannot be gotten from the network',
-        ) {
-    eagerResult ??= QueryResult.loading();
-  }
+        );
 
   QueryResult eagerResult;
-  FutureOr<QueryResult> networkResult;
+  FutureOr<QueryResult>? networkResult;
 }

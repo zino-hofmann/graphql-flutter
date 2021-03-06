@@ -22,7 +22,7 @@ typedef GetInitPayload = FutureOr<dynamic> Function();
 /// A definition for functions that returns a connected [WebSocketChannel]
 typedef WebSocketConnect = WebSocketChannel Function(
   Uri uri,
-  Iterable<String> protocols,
+  Iterable<String>? protocols,
 );
 
 // create uuid generator
@@ -84,7 +84,7 @@ class SocketClientConfig {
   ///
   /// Useful for registering custom listeners or extracting the socket for other non-graphql features.
   @Deprecated('Use `connect` instead. Will be removed in 5.0.0')
-  final void Function(WebSocketChannel socketChannel) onConnectOrReconnect;
+  final void Function(WebSocketChannel? socketChannel)? onConnectOrReconnect;
 
   /// Connect or reconnect to the websocket.
   ///
@@ -140,7 +140,7 @@ class SocketClient {
   SocketClient(
     this.url, {
     this.protocols = const ['graphql-ws'],
-    WebSocketConnect connect,
+    WebSocketConnect? connect,
     this.config = const SocketClientConfig(),
     @visibleForTesting this.randomBytesForUuid,
     @visibleForTesting this.onMessage,
@@ -149,9 +149,9 @@ class SocketClient {
     _connect();
   }
 
-  Uint8List randomBytesForUuid;
+  Uint8List? randomBytesForUuid;
   final String url;
-  final Iterable<String> protocols;
+  final Iterable<String>? protocols;
   final SocketClientConfig config;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
@@ -162,24 +162,24 @@ class SocketClient {
 
   bool _connectionWasLost = false;
 
-  Timer _reconnectTimer;
+  Timer? _reconnectTimer;
 
   @visibleForTesting
-  WebSocketChannel socketChannel;
+  WebSocketChannel? socketChannel;
 
   @visibleForTesting
-  Stream<dynamic> socketStream;
+  late Stream<dynamic> socketStream;
 
   @visibleForTesting
-  void Function(GraphQLSocketMessage) onMessage;
+  void Function(GraphQLSocketMessage)? onMessage;
 
   @visibleForTesting
   void Function(Object error, StackTrace stackTrace) onStreamError;
 
-  Stream<GraphQLSocketMessage> _messages;
+  late Stream<GraphQLSocketMessage> _messages;
 
-  StreamSubscription<ConnectionKeepAlive> _keepAliveSubscription;
-  StreamSubscription<GraphQLSocketMessage> _messageSubscription;
+  StreamSubscription<ConnectionKeepAlive>? _keepAliveSubscription;
+  StreamSubscription<GraphQLSocketMessage>? _messageSubscription;
 
   Map<String, dynamic> Function(Request) get serialize =>
       config.serializer.serializeRequest;
@@ -195,7 +195,7 @@ class SocketClient {
           "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
         );
         event.close();
-        socketChannel.sink.close(ws_status.goingAway);
+        socketChannel!.sink.close(ws_status.goingAway);
         _connectionStateController.add(SocketConnectionState.notConnected);
       },
     ).listen(null);
@@ -222,7 +222,7 @@ class SocketClient {
       print('Connected to websocket.');
       _write(initOperation);
 
-      socketStream = socketChannel.stream.asBroadcastStream();
+      socketStream = socketChannel!.stream.asBroadcastStream();
       _messages = socketStream.map<GraphQLSocketMessage>(
         GraphQLSocketMessage.parse,
       );
@@ -253,7 +253,7 @@ class SocketClient {
           'Instead, supply a custom connect function and work with the socketChannel there.',
         );
         // ignore: deprecated_member_use_from_same_package
-        config.onConnectOrReconnect(socketChannel);
+        config.onConnectOrReconnect!(socketChannel);
       }
     } catch (e) {
       onConnectionLost(e);
@@ -314,12 +314,12 @@ class SocketClient {
       socketChannel?.sink?.close(ws_status.goingAway),
       _messageSubscription?.cancel(),
       _connectionStateController?.close(),
-    ].where((future) => future != null).toList());
+    ].where((future) => future != null).toList() as Iterable<Future<_>>);
   }
 
   void _write(final GraphQLSocketMessage message) {
     if (_connectionStateController.value == SocketConnectionState.connected) {
-      socketChannel.sink.add(
+      socketChannel!.sink.add(
         json.encode(
           message,
           toEncodable: (dynamic m) => m.toJson(),
@@ -346,7 +346,7 @@ class SocketClient {
       },
     ).toString();
     final StreamController<Response> response = StreamController<Response>();
-    StreamSubscription<SocketConnectionState> sub;
+    StreamSubscription<SocketConnectionState>? sub;
     final bool addTimeout =
         !payload.isSubscription && config.queryAndMutationTimeout != null;
 
@@ -421,14 +421,14 @@ class SocketClient {
             .cast<SubscriptionError>()
             .listen((message) => response.addError(message));
 
-        if (!_subscriptionInitializers[id].hasBeenTriggered) {
+        if (!_subscriptionInitializers[id]!.hasBeenTriggered) {
           _write(
             StartOperation(
               id,
               serialize(payload),
             ),
           );
-          _subscriptionInitializers[id].hasBeenTriggered = true;
+          _subscriptionInitializers[id]!.hasBeenTriggered = true;
         }
       });
     };

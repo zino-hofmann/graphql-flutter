@@ -115,11 +115,11 @@ class TerminateOperation extends GraphQLSocketMessage {
 class QueryPayload extends JsonSerializable {
   QueryPayload({
     this.operationName,
-    @required this.query,
-    @required this.variables,
+    required this.query,
+    required this.variables,
   });
 
-  final String operationName;
+  final String? operationName;
   final String query;
   final Map<String, dynamic> variables;
 

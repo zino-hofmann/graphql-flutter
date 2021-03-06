@@ -7,12 +7,12 @@ import 'package:gql_link/gql_link.dart' show LinkException;
 class NetworkException extends LinkException {
   NetworkException({
     dynamic originalException,
-    @required this.message,
-    @required this.uri,
+    required this.message,
+    required this.uri,
   }) : super(originalException);
 
   final String message;
-  final Uri uri;
+  final Uri? uri;
 
   String toString() =>
       'Failed to connect to $uri: ${message ?? originalException}';
@@ -23,7 +23,7 @@ class NetworkException extends LinkException {
 /// Once `gql_link` has robust http and socket exception handling,
 /// this and `./network.dart` can be removed and `./exceptions_next.dart`
 /// will be all that is necessary
-NetworkException translateFailure(dynamic failure) {
+NetworkException? translateFailure(dynamic failure) {
   if (failure is http.ClientException) {
     return NetworkException(
       originalException: failure,

@@ -12,17 +12,17 @@ import 'package:graphql/src/core/policies.dart';
 /// Query options.
 class QueryOptions extends BaseOptions {
   QueryOptions({
-    DocumentNode document,
+    DocumentNode? document,
     @Deprecated('Use `document` instead. Will be removed in 5.0.0')
-        DocumentNode documentNode,
-    String operationName,
+        DocumentNode? documentNode,
+    String? operationName,
     Map<String, dynamic> variables = const {},
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    CacheRereadPolicy cacheRereadPolicy,
-    Object optimisticResult,
+    FetchPolicy? fetchPolicy,
+    ErrorPolicy? errorPolicy,
+    CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
     this.pollInterval,
-    Context context,
+    Context? context,
   })  : assert(
           (document ?? documentNode) != null,
           'document must not be null',
@@ -39,10 +39,10 @@ class QueryOptions extends BaseOptions {
         );
 
   /// The time interval on which this query should be re-fetched from the server.
-  Duration pollInterval;
+  Duration? pollInterval;
 
   @override
-  List<Object> get properties => [...super.properties, pollInterval];
+  List<Object?> get properties => [...super.properties, pollInterval];
 
   WatchQueryOptions asWatchQueryOptions({bool fetchResults = true}) =>
       WatchQueryOptions(
@@ -60,14 +60,14 @@ class QueryOptions extends BaseOptions {
 
 class SubscriptionOptions extends BaseOptions {
   SubscriptionOptions({
-    @required DocumentNode document,
-    String operationName,
+    required DocumentNode document,
+    String? operationName,
     Map<String, dynamic> variables = const {},
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    CacheRereadPolicy cacheRereadPolicy,
-    Object optimisticResult,
-    Context context,
+    FetchPolicy? fetchPolicy,
+    ErrorPolicy? errorPolicy,
+    CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Context? context,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -80,25 +80,25 @@ class SubscriptionOptions extends BaseOptions {
         );
 
   /// An optimistic first result to eagerly add to the subscription stream
-  Object optimisticResult;
+  Object? optimisticResult;
 }
 
 class WatchQueryOptions extends QueryOptions {
   WatchQueryOptions({
-    @required DocumentNode document,
+    required DocumentNode? document,
     @Deprecated('Use `document` instead. Will be removed in 5.0.0')
-        DocumentNode documentNode,
-    String operationName,
+        DocumentNode? documentNode,
+    String? operationName,
     Map<String, dynamic> variables = const {},
-    FetchPolicy fetchPolicy,
-    ErrorPolicy errorPolicy,
-    CacheRereadPolicy cacheRereadPolicy,
-    Object optimisticResult,
-    Duration pollInterval,
+    FetchPolicy? fetchPolicy,
+    ErrorPolicy? errorPolicy,
+    CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Duration? pollInterval,
     this.fetchResults = false,
     this.carryForwardDataOnException = true,
-    bool eagerlyFetchResults,
-    Context context,
+    bool? eagerlyFetchResults,
+    Context? context,
   })  : assert(
           (document ?? documentNode) != null,
           'document must not be null',
@@ -128,7 +128,7 @@ class WatchQueryOptions extends QueryOptions {
   bool carryForwardDataOnException;
 
   @override
-  List<Object> get properties =>
+  List<Object?> get properties =>
       [...super.properties, fetchResults, eagerlyFetchResults];
 
   WatchQueryOptions copy() => WatchQueryOptions(
@@ -155,11 +155,11 @@ class WatchQueryOptions extends QueryOptions {
 /// To mitigate this, [FetchMoreOptions.partial] has been provided.
 class FetchMoreOptions {
   FetchMoreOptions({
-    DocumentNode document,
+    DocumentNode? document,
     @Deprecated('Use `document` instead. Will be removed in 5.0.0')
-        DocumentNode documentNode,
+        DocumentNode? documentNode,
     this.variables = const {},
-    @required this.updateQuery,
+    required this.updateQuery,
   })  : assert(updateQuery != null),
         this.document = document ?? documentNode;
 
@@ -169,9 +169,9 @@ class FetchMoreOptions {
   /// from the newly fetched result, and don't want to worry about
   /// structural inconsistencies while merging.
   static FetchMoreOptions partial({
-    DocumentNode document,
+    DocumentNode? document,
     Map<String, dynamic> variables = const {},
-    @required UpdateQuery updateQuery,
+    required UpdateQuery updateQuery,
   }) =>
       FetchMoreOptions(
         document: document,
@@ -179,7 +179,7 @@ class FetchMoreOptions {
         updateQuery: partialUpdater(updateQuery),
       );
 
-  DocumentNode document;
+  DocumentNode? document;
 
   Map<String, dynamic> variables;
 
@@ -195,9 +195,9 @@ class FetchMoreOptions {
 }
 
 /// merge fetchMore result data with earlier result data
-typedef Map<String, dynamic> UpdateQuery(
-  Map<String, dynamic> previousResultData,
-  Map<String, dynamic> fetchMoreResultData,
+typedef Map<String, dynamic>? UpdateQuery(
+  Map<String, dynamic>? previousResultData,
+  Map<String, dynamic>? fetchMoreResultData,
 );
 
 extension WithType on Request {
@@ -207,7 +207,7 @@ extension WithType on Request {
         .toList();
     if (operation.operationName != null) {
       definitions.removeWhere(
-        (node) => node.name.value != operation.operationName,
+        (node) => node.name!.value != operation.operationName,
       );
     }
     // TODO differentiate error types, add exception

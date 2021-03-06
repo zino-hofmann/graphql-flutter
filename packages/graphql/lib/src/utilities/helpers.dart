@@ -5,17 +5,17 @@ import 'package:gql/language.dart';
 import 'package:http/http.dart' show MultipartFile;
 import 'package:normalize/utils.dart';
 
-bool notNull(Object any) {
+bool notNull(Object? any) {
   return any != null;
 }
 
-Map<String, dynamic> _recursivelyAddAll(
-  Map<String, dynamic> target,
-  Map<String, dynamic> source,
+Map<String, dynamic>? _recursivelyAddAll(
+  Map<String, dynamic>? target,
+  Map<String, dynamic>? source,
 ) {
-  target = Map<String, dynamic>.from(target);
-  source.forEach((String key, dynamic value) {
-    if (target.containsKey(key) &&
+  target = Map<String, dynamic>.from(target!);
+  source!.forEach((String key, dynamic value) {
+    if (target!.containsKey(key) &&
         target[key] is Map<String, dynamic> &&
         value != null &&
         value is Map<String, dynamic>) {
@@ -44,11 +44,11 @@ Map<String, dynamic> _recursivelyAddAll(
 /// ```
 ///
 /// Conflicting [List]s are overwritten like scalars
-Map<String, dynamic> deeplyMergeLeft(
-  Iterable<Map<String, dynamic>> maps,
+Map<String, dynamic>? deeplyMergeLeft(
+  Iterable<Map<String, dynamic>?> maps,
 ) {
   // prepend an empty literal for functional immutability
-  return (<Map<String, dynamic>>[{}]..addAll(maps)).reduce(_recursivelyAddAll);
+  return (<Map<String, dynamic>?>[{}]..addAll(maps)).reduce(_recursivelyAddAll);
 }
 
 /// Parse a GraphQL [document] into a [DocumentNode],
@@ -63,14 +63,14 @@ DocumentNode gql(String document) => transform(
     );
 
 /// Converts [MultipartFile]s to a string representation containing hashCode. Default argument to [variableSanitizer]
-Object sanitizeFilesForCache(dynamic object) {
+Object? sanitizeFilesForCache(dynamic object) {
   if (object is MultipartFile) {
     return 'MultipartFile(filename=${object.filename} hashCode=${object.hashCode})';
   }
   return object.toJson();
 }
 
-typedef SanitizeVariables = Map<String, dynamic> Function(
+typedef SanitizeVariables = Map<String, dynamic>? Function(
   Map<String, dynamic> variables,
 );
 
@@ -79,7 +79,7 @@ typedef SanitizeVariables = Map<String, dynamic> Function(
 /// [sanitizeVariables] is passed to [jsonEncode] as `toEncodable`. The default is  [defaultSanitizeVariables],
 /// which convets [MultipartFile]s to a string representation containing hashCode)
 SanitizeVariables variableSanitizer(
-  Object Function(Object) sanitizeVariables,
+  Object? Function(Object?) sanitizeVariables,
 ) =>
     // TODO use more efficient traversal method
     sanitizeVariables == null

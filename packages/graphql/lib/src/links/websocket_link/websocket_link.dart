@@ -22,7 +22,7 @@ class WebSocketLink extends Link {
   final SocketClientConfig config;
 
   // cannot be final because we're changing the instance upon a header change.
-  SocketClient _socketClient;
+  SocketClient? _socketClient;
 
   @override
   Stream<Response> request(Request request, [forward]) async* {
@@ -30,7 +30,7 @@ class WebSocketLink extends Link {
       connectOrReconnect();
     }
 
-    yield* _socketClient.subscribe(request, true);
+    yield* _socketClient!.subscribe(request, true);
   }
 
   /// Connects or reconnects to the server with the specified headers.

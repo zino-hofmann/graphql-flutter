@@ -21,7 +21,7 @@ typedef OnException = FutureOr<String> Function(
 /// [gql reference auth link]: https://github.com/gql-dart/gql/blob/1884596904a411363165bcf3c7cfa9dcc2a61c26/examples/gql_example_http_auth_link/lib/http_auth_link.dart
 class AuthLink extends _AsyncReqTransformLink {
   AuthLink({
-    @required this.getToken,
+    required this.getToken,
     this.headerKey = 'Authorization',
   }) : super(requestTransformer: transform(headerKey, getToken));
 
@@ -53,18 +53,18 @@ class _AsyncReqTransformLink extends Link {
   final _RequestTransformer requestTransformer;
 
   _AsyncReqTransformLink({
-    this.requestTransformer,
+    required this.requestTransformer,
   }) : assert(requestTransformer != null);
 
   @override
   Stream<Response> request(
     Request request, [
-    NextLink forward,
+    NextLink? forward,
   ]) async* {
     final req = requestTransformer != null
         ? await requestTransformer(request)
         : request;
 
-    yield* forward(req);
+    yield* forward!(req);
   }
 }

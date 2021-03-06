@@ -10,7 +10,7 @@ import 'package:normalize/normalize.dart';
 
 /// Internal writeQuery wrapper
 typedef _IntWriteQuery = void Function(
-    Request request, Map<String, dynamic> data);
+    Request request, Map<String, dynamic>? data);
 
 /// Internal [PartialDataException] handling callback
 typedef _IntPartialDataHandler = MismatchedDataStructureException Function(
@@ -24,21 +24,21 @@ extension InternalQueryWriteHandling on QueryManager {
   /// and edits the [queryResult] inplace.
   bool _writeQueryOrSetExceptionOnQueryResult(
     Request request,
-    Map<String, dynamic> data,
-    QueryResult queryResult, {
-    @required _IntWriteQuery writeQuery,
-    @required _IntPartialDataHandler onPartial,
+    Map<String, dynamic>? data,
+    QueryResult? queryResult, {
+    required _IntWriteQuery writeQuery,
+    required _IntPartialDataHandler onPartial,
   }) {
     try {
       writeQuery(request, data);
       return true;
     } on CacheMisconfigurationException catch (failure) {
-      queryResult.exception = coalesceErrors(
+      queryResult!.exception = coalesceErrors(
         exception: queryResult.exception,
         linkException: failure,
       );
     } on PartialDataException catch (failure) {
-      queryResult.exception = coalesceErrors(
+      queryResult!.exception = coalesceErrors(
         exception: queryResult.exception,
         linkException: onPartial(failure),
       );
@@ -60,15 +60,15 @@ extension InternalQueryWriteHandling on QueryManager {
     Policies policies,
     Request request,
     Response response,
-    QueryResult queryResult,
+    QueryResult? queryResult,
   ) =>
-      (policies.fetch == FetchPolicy.noCache || queryResult.data == null)
+      (policies.fetch == FetchPolicy.noCache || queryResult!.data == null)
           ? false
           : _writeQueryOrSetExceptionOnQueryResult(
                 request,
                 response.data,
                 queryResult,
-                writeQuery: (req, data) => cache.writeQuery(req, data: data),
+                writeQuery: (req, data) => cache.writeQuery(req, data: data!),
                 onPartial: (failure) => UnexpectedResponseStructureException(
                   failure,
                   request: request,
@@ -83,9 +83,9 @@ extension InternalQueryWriteHandling on QueryManager {
   /// client-side wrapper for [_writeQueryOrSetExceptionOnQueryResult]
   bool attemptCacheWriteFromClient(
     Request request,
-    Map<String, dynamic> data,
+    Map<String, dynamic>? data,
     QueryResult queryResult, {
-    @required _IntWriteQuery writeQuery,
+    required _IntWriteQuery writeQuery,
   }) =>
       _writeQueryOrSetExceptionOnQueryResult(
         request,
@@ -101,11 +101,11 @@ extension InternalQueryWriteHandling on QueryManager {
 
   /// Reread the request into the result from the cache,
   /// adding a [CacheMissException] if it fails to do so
-  void attempCacheRereadIntoResult(Request request, QueryResult queryResult) {
+  void attempCacheRereadIntoResult(Request request, QueryResult? queryResult) {
     // normalize results if previously written
     final rereadData = cache.readQuery(request);
     if (rereadData == null) {
-      queryResult.exception = coalesceErrors(
+      queryResult!.exception = coalesceErrors(
         exception: queryResult.exception,
         linkException: CacheMissException(
           'Round trip cache re-read failed: cache.readQuery(request) returned null',
@@ -114,7 +114,7 @@ extension InternalQueryWriteHandling on QueryManager {
         ),
       );
     } else {
-      queryResult.data = rereadData;
+      queryResult!.data = rereadData;
     }
   }
 }

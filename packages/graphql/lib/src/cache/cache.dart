@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
 import 'package:meta/meta.dart';
 
@@ -28,11 +29,11 @@ typedef VariableEncoder = Object Function(Object t);
 /// > 3. The `id` or `_id` field (respectively) are used.
 class GraphQLCache extends NormalizingDataProxy {
   GraphQLCache({
-    Store store,
+    Store? store,
     this.dataIdFromObject,
     this.typePolicies = const {},
     this.partialDataPolicy = PartialDataCachePolicy.acceptForOptimisticData,
-    Object Function(Object) sanitizeVariables = sanitizeFilesForCache,
+    Object? Function(Object?) sanitizeVariables = sanitizeFilesForCache,
   })  : sanitizeVariables = variableSanitizer(sanitizeVariables),
         store = store ?? InMemoryStore();
 
@@ -60,7 +61,7 @@ class GraphQLCache extends NormalizingDataProxy {
   final Map<String, TypePolicy> typePolicies;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
-  final DataIdResolver dataIdFromObject;
+  final DataIdResolver? dataIdFromObject;
 
   /// Input variable sanitizer for referencing custom scalar types in cache keys.
   ///
@@ -102,19 +103,19 @@ class GraphQLCache extends NormalizingDataProxy {
 
   /// Reads dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
-  Object readNormalized(String rootId, {bool optimistic = true}) {
-    Object value = store.get(rootId);
+  Object? readNormalized(String rootId, {bool? optimistic = true}) {
+    Object? value = store.get(rootId);
 
-    if (!optimistic) {
+    if (!optimistic!) {
       return value;
     }
 
     for (final patch in optimisticPatches) {
       if (patch.data.containsKey(rootId)) {
-        final Object patchData = patch.data[rootId];
+        final Object? patchData = patch.data[rootId];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
           value = deeplyMergeLeft([
-            value as Map<String, Object>,
+            value,
             patchData,
           ]);
         } else {
@@ -143,7 +144,7 @@ class GraphQLCache extends NormalizingDataProxy {
     }
   }
 
-  String _parentPatchId(String id) {
+  String? _parentPatchId(String id) {
     final List<String> parts = id.split('.');
     if (parts.length > 1) {
       return parts.first;
@@ -152,9 +153,8 @@ class GraphQLCache extends NormalizingDataProxy {
   }
 
   bool _patchExistsFor(String id) =>
-      optimisticPatches.firstWhere(
+      optimisticPatches.firstWhereOrNull(
         (patch) => patch.id == id,
-        orElse: () => null,
       ) !=
       null;
 
@@ -163,7 +163,7 @@ class GraphQLCache extends NormalizingDataProxy {
   /// if a server result is returned before an optimistic update is finished,
   /// that update is discarded
   bool _safeToAdd(String id) {
-    final String parentId = _parentPatchId(id);
+    final String? parentId = _parentPatchId(id);
     return parentId == null || _patchExistsFor(parentId);
   }
 

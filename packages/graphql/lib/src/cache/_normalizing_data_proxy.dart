@@ -8,7 +8,7 @@ import 'package:normalize/normalize.dart';
 import './data_proxy.dart';
 import '../utilities/helpers.dart';
 
-typedef DataIdResolver = String Function(Map<String, Object> object);
+typedef DataIdResolver = String? Function(Map<String, Object?> object);
 
 /// Implements the core (de)normalization api leveraged by the cache and proxy,
 ///
@@ -18,7 +18,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   Map<String, TypePolicy> get typePolicies;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
-  DataIdResolver get dataIdFromObject;
+  DataIdResolver? get dataIdFromObject;
 
   /// Whether to add `__typename` automatically.
   ///
@@ -62,7 +62,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// The key differentiating factor for an implementing `cache` or `proxy`
   /// is usually how they handle [optimistic] reads.
   @protected
-  dynamic readNormalized(String rootId, {bool optimistic});
+  dynamic readNormalized(String rootId, {bool? optimistic});
 
   /// Write normalized data into the cache.
   ///
@@ -73,11 +73,11 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   /// Variable sanitizer for referencing custom scalar types in cache keys.
   @protected
-  SanitizeVariables sanitizeVariables;
+  late SanitizeVariables sanitizeVariables;
 
-  Map<String, dynamic> readQuery(
+  Map<String, dynamic>? readQuery(
     Request request, {
-    bool optimistic = true,
+    bool? optimistic = true,
   }) =>
       denormalizeOperation(
         // provided from cache
@@ -91,12 +91,12 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         // provided from request
         document: request.operation.document,
         operationName: request.operation.operationName,
-        variables: sanitizeVariables(request.variables),
+        variables: sanitizeVariables(request.variables)!,
       );
 
-  Map<String, dynamic> readFragment(
+  Map<String, dynamic>? readFragment(
     FragmentRequest fragmentRequest, {
-    bool optimistic = true,
+    bool? optimistic = true,
   }) =>
       denormalizeFragment(
         // provided from cache
@@ -111,13 +111,13 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         document: fragmentRequest.fragment.document,
         idFields: fragmentRequest.idFields,
         fragmentName: fragmentRequest.fragment.fragmentName,
-        variables: sanitizeVariables(fragmentRequest.variables),
+        variables: sanitizeVariables(fragmentRequest.variables)!,
       );
 
   void writeQuery(
     Request request, {
-    Map<String, dynamic> data,
-    bool broadcast = true,
+    required Map<String, dynamic> data,
+    bool? broadcast = true,
   }) {
     try {
       normalizeOperation(
@@ -131,7 +131,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         // provided from request
         document: request.operation.document,
         operationName: request.operation.operationName,
-        variables: sanitizeVariables(request.variables),
+        variables: sanitizeVariables(request.variables)!,
         // data
         data: data,
       );
@@ -152,8 +152,8 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   void writeFragment(
     FragmentRequest request, {
-    @required Map<String, dynamic> data,
-    bool broadcast = true,
+    required Map<String, dynamic> data,
+    bool? broadcast = true,
   }) {
     try {
       normalizeFragment(
@@ -168,7 +168,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         document: request.fragment.document,
         idFields: request.idFields,
         fragmentName: request.fragment.fragmentName,
-        variables: sanitizeVariables(request.variables),
+        variables: sanitizeVariables(request.variables)!,
         // data
         data: data,
       );

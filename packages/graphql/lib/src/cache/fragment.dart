@@ -16,14 +16,14 @@ class Fragment {
   /// Name of the fragment definition
   ///
   /// Must be specified if [document] contains more than one [FragmentDefinitionNode]
-  final String fragmentName;
+  final String? fragmentName;
 
   const Fragment({
-    @required this.document,
+    required this.document,
     this.fragmentName,
   }) : assert(document != null);
 
-  List<Object> _getChildren() => [
+  List<Object?> _getChildren() => [
         document,
         fragmentName,
       ];
@@ -32,7 +32,7 @@ class Fragment {
   bool operator ==(Object o) =>
       identical(this, o) ||
       (o is Fragment &&
-          const ListEquality<Object>(
+          const ListEquality<Object?>(
             DeepCollectionEquality(),
           ).equals(
             o._getChildren(),
@@ -40,7 +40,7 @@ class Fragment {
           ));
 
   @override
-  int get hashCode => const ListEquality<Object>(
+  int get hashCode => const ListEquality<Object?>(
         DeepCollectionEquality(),
       ).hash(
         _getChildren(),
@@ -55,7 +55,7 @@ class Fragment {
   /// helper for building a [FragmentRequest]
   @experimental
   FragmentRequest asRequest({
-    @required Map<String, dynamic> idFields,
+    required Map<String, dynamic> idFields,
     Map<String, dynamic> variables = const <String, dynamic>{},
   }) =>
       FragmentRequest(fragment: this, idFields: idFields, variables: variables);
@@ -74,8 +74,8 @@ class FragmentRequest {
   final Map<String, dynamic> idFields;
 
   const FragmentRequest({
-    @required this.fragment,
-    @required this.idFields,
+    required this.fragment,
+    required this.idFields,
     this.variables = const <String, dynamic>{},
   })  : assert(fragment != null),
         assert(idFields != null);
@@ -90,7 +90,7 @@ class FragmentRequest {
   bool operator ==(Object o) =>
       identical(this, o) ||
       (o is FragmentRequest &&
-          const ListEquality<Object>(
+          const ListEquality<Object?>(
             DeepCollectionEquality(),
           ).equals(
             o._getChildren(),
@@ -98,7 +98,7 @@ class FragmentRequest {
           ));
 
   @override
-  int get hashCode => const ListEquality<Object>(
+  int get hashCode => const ListEquality<Object?>(
         DeepCollectionEquality(),
       ).hash(
         _getChildren(),
