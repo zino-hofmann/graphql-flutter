@@ -45,6 +45,47 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
   GraphQLSocketMessage(this.type);
 
   final String type;
+
+  @override
+  Map<String, dynamic> toJson() => <String, dynamic>{"type": type};
+
+  static GraphQLSocketMessage parse(dynamic message) {
+    final Map<String, dynamic> map =
+        json.decode(message as String) as Map<String, dynamic>;
+    final String type = (map['type'] ?? 'unknown') as String;
+    final dynamic payload = map['payload'] ?? <String, dynamic>{};
+    final String id = (map['id'] ?? 'none') as String;
+
+    switch (type) {
+      // for completeness
+      case MessageTypes.connectionInit:
+        return InitOperation(payload);
+      case MessageTypes.connectionTerminate:
+        return TerminateOperation();
+
+      case MessageTypes.connectionAck:
+        return ConnectionAck();
+      case MessageTypes.connectionError:
+        return ConnectionError(payload);
+      case MessageTypes.connectionKeepAlive:
+        return ConnectionKeepAlive();
+
+      // for completeness
+      case MessageTypes.start:
+        return StartOperation(id, payload);
+      case MessageTypes.stop:
+        return StopOperation(id);
+
+      case MessageTypes.data:
+        return SubscriptionData(id, payload['data'], payload['errors']);
+      case MessageTypes.error:
+        return SubscriptionError(id, payload);
+      case MessageTypes.complete:
+        return SubscriptionComplete(id);
+      default:
+        return UnknownData(map);
+    }
+  }
 }
 
 /// After establishing a connection with the server, the client will
@@ -56,16 +97,15 @@ class InitOperation extends GraphQLSocketMessage {
   final dynamic payload;
 
   @override
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> jsonMap = <String, dynamic>{};
-    jsonMap["type"] = type;
+  toJson() => {
+        "type": type,
+        if (payload != null) "payload": payload,
+      };
+}
 
-    if (payload != null) {
-      jsonMap["payload"] = payload;
-    }
-
-    return jsonMap;
-  }
+/// The client sends this message to terminate the connection.
+class TerminateOperation extends GraphQLSocketMessage {
+  TerminateOperation() : super(MessageTypes.connectionTerminate);
 }
 
 /// Represent the payload used during a Start query operation.
@@ -73,15 +113,18 @@ class InitOperation extends GraphQLSocketMessage {
 /// defined in the query provided. Additional variables can be provided
 /// and sent to the server for processing.
 class QueryPayload extends JsonSerializable {
-  QueryPayload(
-      {this.operationName, @required this.query, @required this.variables});
+  QueryPayload({
+    this.operationName,
+    @required this.query,
+    @required this.variables,
+  });
 
   final String operationName;
   final String query;
   final Map<String, dynamic> variables;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  toJson() => {
         "operationName": operationName,
         "query": query,
         "variables": variables,
@@ -101,7 +144,7 @@ class StartOperation extends GraphQLSocketMessage {
   final Map<String, dynamic> payload;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  toJson() => {
         "type": type,
         "id": id,
         "payload": payload,
@@ -116,21 +159,13 @@ class StopOperation extends GraphQLSocketMessage {
   final String id;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        "type": type,
-        "id": id,
-      };
+  toJson() => {"type": type, "id": id};
 }
 
 /// The server will send this acknowledgment message after receiving the init
 /// command from the client if the init was successful.
 class ConnectionAck extends GraphQLSocketMessage {
   ConnectionAck() : super(MessageTypes.connectionAck);
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        "type": type,
-      };
 }
 
 /// The server will send this error message after receiving the init command
@@ -141,20 +176,12 @@ class ConnectionError extends GraphQLSocketMessage {
   final dynamic payload;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        "type": type,
-        "payload": payload,
-      };
+  toJson() => {"type": type, "payload": payload};
 }
 
 /// The server will send this message to keep the connection alive
 class ConnectionKeepAlive extends GraphQLSocketMessage {
   ConnectionKeepAlive() : super(MessageTypes.connectionKeepAlive);
-
-  @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        "type": type,
-      };
 }
 
 /// Data sent from the server to the client with subscription data or error
@@ -168,7 +195,7 @@ class SubscriptionData extends GraphQLSocketMessage {
   final dynamic errors;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  toJson() => {
         "type": type,
         "data": data,
         "errors": errors,
@@ -191,7 +218,7 @@ class SubscriptionError extends GraphQLSocketMessage {
   final dynamic payload;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
+  toJson() => {
         "type": type,
         "id": id,
         "payload": payload,
@@ -206,10 +233,7 @@ class SubscriptionComplete extends GraphQLSocketMessage {
   final String id;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        "type": type,
-        "id": id,
-      };
+  toJson() => {"type": type, "id": id};
 }
 
 /// Not expected to be created. Indicates there are problems parsing the server
@@ -221,8 +245,5 @@ class UnknownData extends GraphQLSocketMessage {
   final dynamic payload;
 
   @override
-  Map<String, dynamic> toJson() => <String, dynamic>{
-        "type": type,
-        "payload": payload,
-      };
+  toJson() => {"type": type, "payload": payload};
 }

@@ -17,9 +17,6 @@ import 'package:uuid/uuid_util.dart';
 
 import './websocket_messages.dart';
 
-// create uuid generator
-final _uuid = Uuid(options: {'grng': UuidUtil.cryptoRNG});
-
 typedef GetInitPayload = FutureOr<dynamic> Function();
 
 /// A definition for functions that returns a connected [WebSocketChannel]
@@ -28,10 +25,8 @@ typedef WebSocketConnect = WebSocketChannel Function(
   Iterable<String> protocols,
 );
 
-final _kDefaultWebSocketConnect = (uri, protocols) => WebSocketChannel.connect(
-      uri,
-      protocols: protocols,
-    );
+// create uuid generator
+final _uuid = Uuid(options: {'grng': UuidUtil.cryptoRNG});
 
 class SubscriptionListener {
   Function callback;
@@ -39,6 +34,8 @@ class SubscriptionListener {
 
   SubscriptionListener(this.callback, this.hasBeenTriggered);
 }
+
+enum SocketConnectionState { notConnected, connecting, connected }
 
 class SocketClientConfig {
   const SocketClientConfig({
@@ -48,6 +45,7 @@ class SocketClientConfig {
     this.queryAndMutationTimeout = const Duration(seconds: 10),
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
+    this.connect = defaultConnect,
     this.onConnectOrReconnect,
     dynamic initialPayload,
     @deprecated dynamic initPayload,
@@ -81,10 +79,27 @@ class SocketClientConfig {
   /// If null, no timeout is applied, although not recommended.
   final Duration queryAndMutationTimeout;
 
-  /// Callback for handling connections and reconnections.
+  /// Deprecated: Callback for handling connections and reconnections.
+  /// Now that we have [connect], one can just
   ///
   /// Useful for registering custom listeners or extracting the socket for other non-graphql features.
+  @Deprecated('Use `connect` instead. Will be removed in 5.0.0')
   final void Function(WebSocketChannel socketChannel) onConnectOrReconnect;
+
+  /// Connect or reconnect to the websocket.
+  ///
+  /// Useful supplying custom headers to an IO client, registering custom listeners,
+  /// and extracting the socket for other non-graphql features.
+  ///
+  /// To supply custom headers to an IO client one can supply the following:
+  /// ```dart
+  /// connect: (url, protocols) =>
+  ///   IOWebSocketChannel.connect(url, protocols: protocols, headers: myCustomHeaders)
+  /// ```
+  final WebSocketConnect connect;
+
+  static WebSocketChannel defaultConnect(Uri uri, Iterable<String> protocols) =>
+      WebSocketChannel.connect(uri, protocols: protocols);
 
   /// Payload to be sent with the connection_init request.
   ///
@@ -113,8 +128,6 @@ class SocketClientConfig {
   }
 }
 
-enum SocketConnectionState { notConnected, connecting, connected }
-
 /// Wraps a standard web socket instance to marshal and un-marshal the server /
 /// client payloads into dart object representation.
 ///
@@ -126,13 +139,13 @@ enum SocketConnectionState { notConnected, connecting, connected }
 class SocketClient {
   SocketClient(
     this.url, {
-    this.protocols = const <String>[
-      'graphql-ws',
-    ],
+    this.protocols = const ['graphql-ws'],
     WebSocketConnect connect,
     this.config = const SocketClientConfig(),
     @visibleForTesting this.randomBytesForUuid,
-  }) : this._connectFunc = connect ?? _kDefaultWebSocketConnect {
+    @visibleForTesting this.onMessage,
+    @visibleForTesting this.onStreamError = _defaultOnStreamError,
+  }) {
     _connect();
   }
 
@@ -140,7 +153,6 @@ class SocketClient {
   final String url;
   final Iterable<String> protocols;
   final SocketClientConfig config;
-  final WebSocketConnect _connectFunc;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
@@ -155,7 +167,13 @@ class SocketClient {
   @visibleForTesting
   WebSocketChannel socketChannel;
 
-  Stream<GraphQLSocketMessage> _messageStream;
+  @visibleForTesting
+  void Function(GraphQLSocketMessage) onMessage;
+
+  @visibleForTesting
+  void Function(Object error, StackTrace stackTrace) onStreamError;
+
+  Stream<GraphQLSocketMessage> _messages;
 
   StreamSubscription<ConnectionKeepAlive> _keepAliveSubscription;
   StreamSubscription<GraphQLSocketMessage> _messageSubscription;
@@ -165,6 +183,20 @@ class SocketClient {
 
   Response Function(Map<String, dynamic>) get parse =>
       config.parser.parseResponse;
+
+  void disconnectOnKeepAliveTimeout(Stream<GraphQLSocketMessage> messages) =>
+      _keepAliveSubscription =
+          messages.whereType<ConnectionKeepAlive>().timeout(
+        config.inactivityTimeout,
+        onTimeout: (EventSink<ConnectionKeepAlive> event) {
+          print(
+            "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
+          );
+          event.close();
+          socketChannel.sink.close(ws_status.goingAway);
+          _connectionStateController.add(SocketConnectionState.notConnected);
+        },
+      ).listen(null);
 
   /// Connects to the server.
   ///
@@ -180,56 +212,41 @@ class SocketClient {
     print('Connecting to websocket: $url...');
 
     try {
-      // Even though _connectFunc is sync, we call async in order to make the
+      // Even though config.connect is sync, we call async in order to make the
       // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
-      socketChannel = await _connectFunc(
-        Uri.parse(url),
-        protocols,
-      );
+      socketChannel = await config.connect(Uri.parse(url), protocols);
       _connectionStateController.add(SocketConnectionState.connected);
       print('Connected to websocket.');
       _write(initOperation);
 
-      _messageStream = socketChannel.stream.map<GraphQLSocketMessage>(
-        _parseSocketMessage,
-      );
+      _messages = socketChannel.graphQLMessageStream;
 
       if (config.inactivityTimeout != null) {
-        _keepAliveSubscription = _messagesOfType<ConnectionKeepAlive>().timeout(
-          config.inactivityTimeout,
-          onTimeout: (EventSink<ConnectionKeepAlive> event) {
-            print(
-              "Haven't received keep alive message for ${config.inactivityTimeout.inSeconds} seconds. Disconnecting..",
-            );
-            event.close();
-            socketChannel.sink.close(ws_status.goingAway);
-            _connectionStateController.add(SocketConnectionState.notConnected);
-          },
-        ).listen(null);
+        disconnectOnKeepAliveTimeout(_messages);
       }
 
-      _messageSubscription = _messageStream.listen(
-          (dynamic data) {
-            // print('data: $data');
-          },
-          onDone: () {
-            // print('done');
-            onConnectionLost();
-          },
-          cancelOnError: true,
-          onError: (dynamic e) {
-            print('error: $e');
-          });
+      _messageSubscription = _messages.listen(
+        onMessage,
+        onDone: onConnectionLost,
+        cancelOnError: true,
+        onError: onStreamError,
+      );
 
       if (_connectionWasLost) {
-        for (SubscriptionListener s in _subscriptionInitializers.values) {
+        for (final s in _subscriptionInitializers.values) {
           s.callback();
         }
 
         _connectionWasLost = false;
       }
 
+      // ignore: deprecated_member_use_from_same_package
       if (config.onConnectOrReconnect != null) {
+        print(
+          'onConnectOrReconnect is deprecated and will be removed in the next major release. '
+          'Instead, supply a custom connect function and work with the socketChannel there.',
+        );
+        // ignore: deprecated_member_use_from_same_package
         config.onConnectOrReconnect(socketChannel);
       }
     } catch (e) {
@@ -293,33 +310,6 @@ class SocketClient {
     ].where((future) => future != null).toList());
   }
 
-  static GraphQLSocketMessage _parseSocketMessage(dynamic message) {
-    final Map<String, dynamic> map =
-        json.decode(message as String) as Map<String, dynamic>;
-    final String type = (map['type'] ?? 'unknown') as String;
-    final dynamic payload = map['payload'] ?? <String, dynamic>{};
-    final String id = (map['id'] ?? 'none') as String;
-
-    switch (type) {
-      case MessageTypes.connectionAck:
-        return ConnectionAck();
-      case MessageTypes.connectionError:
-        return ConnectionError(payload);
-      case MessageTypes.connectionKeepAlive:
-        return ConnectionKeepAlive();
-      case MessageTypes.data:
-        final dynamic data = payload['data'];
-        final dynamic errors = payload['errors'];
-        return SubscriptionData(id, data, errors);
-      case MessageTypes.error:
-        return SubscriptionError(id, payload);
-      case MessageTypes.complete:
-        return SubscriptionComplete(id);
-      default:
-        return UnknownData(map);
-    }
-  }
-
   void _write(final GraphQLSocketMessage message) {
     if (_connectionStateController.value == SocketConnectionState.connected) {
       socketChannel.sink.add(
@@ -375,8 +365,7 @@ class SocketClient {
           : waitForConnectedStateWithoutTimeout;
 
       sub = waitForConnectedState.listen((_) {
-        final Stream<GraphQLSocketMessage> dataErrorComplete =
-            _messageStream.where(
+        final Stream<GraphQLSocketMessage> dataErrorComplete = _messages.where(
           (GraphQLSocketMessage message) {
             if (message is SubscriptionData) {
               return message.id == id;
@@ -458,14 +447,18 @@ class SocketClient {
   /// A stream that emits the last value of the connection state upon subscription.
   Stream<SocketConnectionState> get connectionState =>
       _connectionStateController.stream;
+}
 
-  /// Filter `_messageStream` for messages of the given type of [GraphQLSocketMessage]
+extension GraphQLWebsocket on WebSocketChannel {
+  /// Multi-subscription stream of messages from the other endpoint.
+  /// GraphQLSocketMessage
   ///
-  /// Example usages:
-  /// `_messagesOfType<ConnectionAck>()` for init acknowledgments
-  /// `_messagesOfType<ConnectionError>()` for errors
-  /// `_messagesOfType<UnknownData>()` for unknown data messages
-  Stream<M> _messagesOfType<M extends GraphQLSocketMessage>() => _messageStream
-      .where((GraphQLSocketMessage message) => message is M)
-      .cast<M>();
+  Stream<GraphQLSocketMessage> get graphQLMessageStream => stream
+      .asBroadcastStream()
+      .map<GraphQLSocketMessage>(GraphQLSocketMessage.parse);
+}
+
+void _defaultOnStreamError(Object error, StackTrace st) {
+  print('[SocketClient] message stream ecnountered error: $error\n'
+      'stacktrace:\n${st.toString()}');
 }
