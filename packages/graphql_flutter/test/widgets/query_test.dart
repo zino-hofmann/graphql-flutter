@@ -9,7 +9,19 @@ import 'package:graphql_flutter/src/widgets/query.dart';
 import 'package:http/http.dart' as http;
 import 'package:mockito/mockito.dart';
 
-class MockHttpClient extends Mock implements http.Client {}
+class MockHttpClient extends Mock implements http.Client {
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest? request) =>
+      super.noSuchMethod(
+        Invocation.method(#send, [request]),
+        returnValue: Future.value(
+          http.StreamedResponse(
+            Stream.fromIterable(const [<int>[]]),
+            500,
+          ),
+        ),
+      ) as Future<http.StreamedResponse>;
+}
 
 final query = gql("""
   query Foo {
@@ -35,12 +47,12 @@ Future<void> mockApplicationDocumentsDirectory() async {
 }
 
 class Page extends StatefulWidget {
-  final Map<String, dynamic> variables;
-  final FetchPolicy fetchPolicy;
-  final ErrorPolicy errorPolicy;
+  final Map<String, dynamic>? variables;
+  final FetchPolicy? fetchPolicy;
+  final ErrorPolicy? errorPolicy;
 
   Page({
-    Key key,
+    Key? key,
     this.variables,
     this.fetchPolicy,
     this.errorPolicy,
@@ -51,9 +63,9 @@ class Page extends StatefulWidget {
 }
 
 class PageState extends State<Page> {
-  Map<String, dynamic> variables;
-  FetchPolicy fetchPolicy;
-  ErrorPolicy errorPolicy;
+  Map<String, dynamic>? variables;
+  FetchPolicy? fetchPolicy;
+  ErrorPolicy? errorPolicy;
 
   @override
   void initState() {
@@ -69,13 +81,13 @@ class PageState extends State<Page> {
     });
   }
 
-  setFetchPolicy(FetchPolicy newFetchPolicy) {
+  setFetchPolicy(FetchPolicy? newFetchPolicy) {
     setState(() {
       fetchPolicy = newFetchPolicy;
     });
   }
 
-  setErrorPolicy(ErrorPolicy newErrorPolicy) {
+  setErrorPolicy(ErrorPolicy? newErrorPolicy) {
     setState(() {
       errorPolicy = newErrorPolicy;
     });
@@ -86,11 +98,11 @@ class PageState extends State<Page> {
     return Query(
       options: QueryOptions(
         document: query,
-        variables: variables,
+        variables: variables!,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
       ),
-      builder: (QueryResult result, {Refetch refetch, FetchMore fetchMore}) =>
+      builder: (QueryResult result, {Refetch? refetch, FetchMore? fetchMore}) =>
           Container(),
     );
   }
@@ -103,9 +115,9 @@ void main() {
   });
 
   group('Query', () {
-    MockHttpClient mockHttpClient;
+    late MockHttpClient mockHttpClient;
     HttpLink httpLink;
-    ValueNotifier<GraphQLClient> client;
+    ValueNotifier<GraphQLClient>? client;
 
     setUp(() async {
       mockHttpClient = MockHttpClient();

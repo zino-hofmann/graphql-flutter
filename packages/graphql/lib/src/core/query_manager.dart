@@ -342,7 +342,7 @@ class QueryManager {
   void addQueryResult(
     Request request,
     String? queryId,
-    QueryResult? queryResult,
+    QueryResult queryResult,
   ) {
     final ObservableQuery? observableQuery = getQuery(queryId);
 

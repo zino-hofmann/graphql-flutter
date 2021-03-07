@@ -6,21 +6,21 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef RunMutation = MultiSourceResult Function(
   Map<String, dynamic> variables, {
-  Object optimisticResult,
+  Object? optimisticResult,
 });
 
 typedef MutationBuilder = Widget Function(
   RunMutation runMutation,
-  QueryResult result,
+  QueryResult? result,
 );
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
 class Mutation extends StatefulWidget {
   const Mutation({
-    final Key key,
-    @required this.options,
-    @required this.builder,
+    final Key? key,
+    required this.options,
+    required this.builder,
   }) : super(key: key);
 
   final MutationOptions options;
@@ -31,10 +31,10 @@ class Mutation extends StatefulWidget {
 }
 
 class MutationState extends State<Mutation> {
-  GraphQLClient client;
-  ObservableQuery observableQuery;
+  GraphQLClient? client;
+  ObservableQuery? observableQuery;
 
-  WatchQueryOptions __cachedOptions;
+  WatchQueryOptions? __cachedOptions;
 
   WatchQueryOptions get _providedOptions {
     final _options = WatchQueryOptions(
@@ -64,14 +64,13 @@ class MutationState extends State<Mutation> {
   // TODO is it possible to extract shared logic into mixin
   void _initQuery() {
     observableQuery?.close();
-    observableQuery = client.watchMutation(_providedOptions.copy());
+    observableQuery = client!.watchMutation(_providedOptions.copy());
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final GraphQLClient client = GraphQLProvider.of(context).value;
-    assert(client != null);
     if (client != this.client) {
       this.client = client;
       _initQuery();
@@ -92,15 +91,15 @@ class MutationState extends State<Mutation> {
   /// returning a [MultiSourceResult] for handling both the eager and network results
   MultiSourceResult runMutation(
     Map<String, dynamic> variables, {
-    Object optimisticResult,
+    Object? optimisticResult,
   }) {
     final mutationCallbacks = MutationCallbackHandler(
-      cache: client.cache,
-      queryId: observableQuery.queryId,
+      cache: client!.cache,
+      queryId: observableQuery!.queryId,
       options: widget.options,
     );
 
-    return (observableQuery
+    return (observableQuery!
           ..variables = variables
           ..options.optimisticResult = optimisticResult
           ..onData(mutationCallbacks.callbacks) // add callbacks to observable
@@ -116,12 +115,12 @@ class MutationState extends State<Mutation> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QueryResult>(
+    return StreamBuilder<QueryResult?>(
       initialData: observableQuery?.latestResult ?? QueryResult.unexecuted,
       stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,
-        AsyncSnapshot<QueryResult> snapshot,
+        AsyncSnapshot<QueryResult?> snapshot,
       ) {
         return widget.builder(
           runMutation,

@@ -142,7 +142,7 @@ class WatchQueryOptions extends QueryOptions {
 /// To mitigate this, [FetchMoreOptions.partial] has been provided.
 class FetchMoreOptions {
   FetchMoreOptions({
-    required this.document,
+    this.document,
     this.variables = const {},
     required this.updateQuery,
   });

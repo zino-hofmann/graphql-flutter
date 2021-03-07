@@ -9,7 +9,7 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef OnSubscriptionResult = void Function(
   QueryResult subscriptionResult,
-  GraphQLClient client,
+  GraphQLClient? client,
 );
 
 typedef SubscriptionBuilder = Widget Function(QueryResult result);
@@ -66,33 +66,33 @@ typedef SubscriptionBuilder = Widget Function(QueryResult result);
 /// {@end-tool}
 class Subscription extends StatefulWidget {
   const Subscription({
-    @required this.options,
-    @required this.builder,
+    required this.options,
+    required this.builder,
     this.onSubscriptionResult,
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   final SubscriptionOptions options;
   final SubscriptionBuilder builder;
-  final OnSubscriptionResult onSubscriptionResult;
+  final OnSubscriptionResult? onSubscriptionResult;
 
   @override
   _SubscriptionState createState() => _SubscriptionState();
 }
 
 class _SubscriptionState extends State<Subscription> {
-  Stream<QueryResult> stream;
-  GraphQLClient client;
+  Stream<QueryResult>? stream;
+  GraphQLClient? client;
 
-  ConnectivityResult _currentConnectivityResult;
-  StreamSubscription<ConnectivityResult> _networkSubscription;
+  ConnectivityResult? _currentConnectivityResult;
+  StreamSubscription<ConnectivityResult>? _networkSubscription;
 
   void _initSubscription() {
-    stream = client.subscribe(widget.options);
+    stream = client!.subscribe(widget.options);
 
     if (widget.onSubscriptionResult != null) {
-      stream = stream.map((result) {
-        widget.onSubscriptionResult(result, client);
+      stream = stream!.map((result) {
+        widget.onSubscriptionResult!(result, client);
         return result;
       });
     }
@@ -110,7 +110,6 @@ class _SubscriptionState extends State<Subscription> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final GraphQLClient newClient = GraphQLProvider.of(context).value;
-    assert(newClient != null);
     if (client != newClient) {
       client = newClient;
       _initSubscription();
@@ -163,15 +162,17 @@ class _SubscriptionState extends State<Subscription> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QueryResult>(
-      initialData: widget.options?.optimisticResult != null
-          ? QueryResult.optimistic(data: widget.options?.optimisticResult)
+      initialData: widget.options.optimisticResult != null
+          ? QueryResult.optimistic(
+              data: widget.options.optimisticResult as Map<String, dynamic>?,
+            )
           : QueryResult.loading(),
       stream: stream,
       builder: (
         BuildContext buildContext,
         AsyncSnapshot<QueryResult> snapshot,
       ) {
-        return widget?.builder(snapshot.data);
+        return widget.builder(snapshot.data!);
       },
     );
   }

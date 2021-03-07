@@ -71,7 +71,7 @@ class ObservableQuery {
       _latestWasEagerlyFetched = true;
       fetchResults();
     }
-    controller = StreamController<QueryResult?>.broadcast(
+    controller = StreamController<QueryResult>.broadcast(
       onListen: onListen,
     );
   }
@@ -104,9 +104,9 @@ class ObservableQuery {
 
   WatchQueryOptions options;
 
-  late StreamController<QueryResult?> controller;
+  late StreamController<QueryResult> controller;
 
-  Stream<QueryResult?> get stream => controller.stream;
+  Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.polling;
 
   bool get isRefetchSafe {
@@ -171,7 +171,7 @@ class ObservableQuery {
       // so we have to add them manually now that
       // the stream is available
       if (!controller.isClosed && latestResult != null) {
-        controller.add(latestResult);
+        controller.add(latestResult!);
       }
       return;
     }
@@ -235,18 +235,18 @@ class ObservableQuery {
   /// if it is set to `null`.
   ///
   /// Called internally by the [QueryManager]
-  void addResult(QueryResult? result, {bool fromRebroadcast = false}) {
+  void addResult(QueryResult result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
-        latestResult!.timestamp.isAfter(result!.timestamp)) {
+        latestResult!.timestamp.isAfter(result.timestamp)) {
       return;
     }
 
-    if (options.carryForwardDataOnException && result!.hasException) {
+    if (options.carryForwardDataOnException && result.hasException) {
       result.data ??= latestResult?.data;
     }
 
-    if (lifecycle == QueryLifecycle.pending && result!.isConcrete) {
+    if (lifecycle == QueryLifecycle.pending && result.isConcrete) {
       lifecycle = QueryLifecycle.completed;
     }
 
@@ -257,7 +257,7 @@ class ObservableQuery {
       controller.add(result);
     }
 
-    if (result!.isNotLoading) {
+    if (result.isNotLoading) {
       _applyCallbacks(result, fromRebroadcast: fromRebroadcast);
     }
   }

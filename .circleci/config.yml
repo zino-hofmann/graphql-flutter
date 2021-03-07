@@ -143,22 +143,15 @@ jobs:
       - run: *setup_github_bot
       - run: *setup_pub_credentials
       - run:
-          name: Patch pubspec with version (graphql)
+          name: Patch pubspec versions
           command: |
+            export VERSION=${CIRCLE_TAG#"v"}
+
             cd packages/graphql
-
-            export VERSION=${CIRCLE_TAG#"v"}
-
             ~/yq -P -i eval '.version=env(VERSION)' pubspec.yaml
-      - run:
-          name: Patch pubspec with version (graphql_flutter)
-          command: |
-            cd packages/graphql_flutter
 
-            export VERSION=${CIRCLE_TAG#"v"}
-            export GRAPHQL_DEP="^${VERSION}"
-
-            ~/yq -P -i  eval '.version=env(VERSION) | .dependencies.graphql=env(GRAPHQL_DEP) | del(.publish_to)' pubspec.yaml
+            cd ../graphql_flutter
+            ~/yq -P -i  eval '.version=env(VERSION)' pubspec.yaml
       - run:
           name: Bump version numbers
           command: |
@@ -178,7 +171,11 @@ jobs:
       - run:
           name: Pub deployment (graphql_flutter)
           command: |
+            export VERSION=${CIRCLE_TAG#"v"}
+            export GRAPHQL_DEP="^${VERSION}"
+
             cd packages/graphql_flutter
+            ~/yq -P -i  eval '.dependencies.graphql=env(GRAPHQL_DEP) | del(.publish_to)' pubspec.yaml
             pub publish -f
 workflows:
   nightly:

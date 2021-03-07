@@ -22,7 +22,7 @@ Future<QueryResult> fetchMoreImplementation(
   required QueryOptions originalOptions,
   required QueryManager queryManager,
   required QueryResult previousResult,
-  String? queryId,
+  required String queryId,
 }) async {
   // fetch more and udpate
 
