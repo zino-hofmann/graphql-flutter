@@ -12,12 +12,8 @@ class GraphQLProvider extends StatefulWidget {
   final ValueNotifier<GraphQLClient>? client;
   final Widget? child;
 
-  static ValueNotifier<GraphQLClient> of(BuildContext context) {
-    final _InheritedGraphQLProvider inheritedGraphqlProvider =
-        _InheritedGraphQLProvider.of(context);
-
-    return inheritedGraphqlProvider.client;
-  }
+  static ValueNotifier<GraphQLClient> of(BuildContext context) =>
+      _InheritedGraphQLProvider.of(context).client;
 
   @override
   State<StatefulWidget> createState() => _GraphQLProviderState();
@@ -56,8 +52,12 @@ class _InheritedGraphQLProvider extends InheritedWidget {
   })   : clientValue = client.value,
         super(child: child);
 
-  factory _InheritedGraphQLProvider.of(BuildContext context) =>
-      context.dependOnInheritedWidgetOfExactType<_InheritedGraphQLProvider>()!;
+  factory _InheritedGraphQLProvider.of(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<_InheritedGraphQLProvider>();
+    assert(provider != null);
+    return provider!;
+  }
 
   final ValueNotifier<GraphQLClient> client;
   final GraphQLClient clientValue;

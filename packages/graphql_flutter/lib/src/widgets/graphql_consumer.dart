@@ -12,12 +12,11 @@ class GraphQLConsumer extends StatelessWidget {
     required this.builder,
   }) : super(key: key);
 
-  final GraphQLConsumerBuilder? builder;
+  final GraphQLConsumerBuilder builder;
 
   @override
   Widget build(BuildContext context) {
     /// Gets the client from the closest wrapping [GraphQLProvider].
-    final GraphQLClient client = GraphQLProvider.of(context).value;
-    return builder!(client);
+    return builder(GraphQLProvider.of(context).value);
   }
 }

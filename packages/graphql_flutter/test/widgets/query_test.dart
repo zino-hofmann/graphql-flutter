@@ -63,14 +63,14 @@ class Page extends StatefulWidget {
 }
 
 class PageState extends State<Page> {
-  Map<String, dynamic>? variables;
+  Map<String, dynamic> variables = const {};
   FetchPolicy? fetchPolicy;
   ErrorPolicy? errorPolicy;
 
   @override
   void initState() {
     super.initState();
-    variables = widget.variables;
+    variables = widget.variables ?? const {};
     fetchPolicy = widget.fetchPolicy;
     errorPolicy = widget.errorPolicy;
   }
@@ -98,7 +98,7 @@ class PageState extends State<Page> {
     return Query(
       options: QueryOptions(
         document: query,
-        variables: variables!,
+        variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
       ),
