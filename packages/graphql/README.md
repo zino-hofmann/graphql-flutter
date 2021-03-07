@@ -307,6 +307,7 @@ subscription = client.subscribe(
   ),
 );
 subscription.listen(reactToAddedReview)
+```
 
 #### Customizing WebSocket Connections
 
