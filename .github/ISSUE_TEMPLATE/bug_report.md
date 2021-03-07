@@ -2,13 +2,13 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: 'bug'
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe the issue**
+A clear and concise description of what the problem is.
 
 **To Reproduce**
 Steps to reproduce the behavior:
@@ -17,20 +17,38 @@ Steps to reproduce the behavior:
 3. Scroll down to '....'
 4. See error
 
+
 **Expected behavior**
 A clear and concise description of what you expected to happen.
 
-**Screenshots**
-If applicable, add screenshots to help explain your problem.
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Version [e.g. 22]
+**device / execution context**
+Are you on iOS, android, web, in a simulator, running from the terminal etc? This is especially important for `localhost` connection issues.
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Version [e.g. 22]
+### Other useful/optional fields
 
-**Additional context**
-Add any other context about the problem here.
+Please fill or delete these sections if you don't fill them in
+
+<details>
+  <summary>Stacktrace:</summary>
+
+```dart
+{my stacktrace here}
+```
+
+</details>
+
+
+**screenshots**
+
+
+**additional context**
+* What backend are you trying to use?
+* If you have a network issue, does your operation work with [GraphiQL](https://www.electronjs.org/apps/graphiql)?
+
+
+**additional notes**
+Did you struggle to understand the docs or examples, or dislike the current api? 
+
+
+If you want to troubleshoot or discuss in real time, consider coming to the `support` channel in the [discord](https://discord.gg/tXTtBfC)
