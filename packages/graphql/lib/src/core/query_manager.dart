@@ -124,11 +124,16 @@ class QueryManager {
     }
   }
 
-  Future<QueryResult> query(QueryOptions options) => fetchQuery('0', options);
+  Future<QueryResult> query(QueryOptions options) async {
+    final result = await fetchQuery('0', options);
+
+    maybeRebroadcastQueries();
+
+    return result;
+  }
 
   Future<QueryResult> mutate(MutationOptions options) async {
     final result = await fetchQuery('0', options);
-    // not sure why query id is '0', may be needs improvements
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
     final mutationCallbacks = MutationCallbackHandler(
@@ -143,8 +148,7 @@ class QueryManager {
       await callback(result);
     }
 
-    /// [fetchQuery] attempts to broadcast from the observable,
-    /// but now we've called all our side effects.
+    /// wait until callbacks complete to rebroadcast
     maybeRebroadcastQueries();
 
     return result;
