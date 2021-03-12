@@ -43,7 +43,11 @@ void main() {
       }
     }
   ''';
-  readRepositoryData({withTypenames = true, withIds = true}) {
+  readRepositoryData({
+    bool withTypenames = true,
+    bool withIds = true,
+    bool viewerHasStarred = false,
+  }) {
     return {
       'viewer': {
         'repositories': {
@@ -51,17 +55,17 @@ void main() {
             {
               if (withIds) 'id': 'MDEwOlJlcG9zaXRvcnkyNDgzOTQ3NA==',
               'name': 'pq',
-              'viewerHasStarred': false
+              'viewerHasStarred': viewerHasStarred
             },
             {
               if (withIds) 'id': 'MDEwOlJlcG9zaXRvcnkzMjkyNDQ0Mw==',
               'name': 'go-evercookie',
-              'viewerHasStarred': false
+              'viewerHasStarred': viewerHasStarred
             },
             {
               if (withIds) 'id': 'MDEwOlJlcG9zaXRvcnkzNTA0NjgyNA==',
               'name': 'watchbot',
-              'viewerHasStarred': false
+              'viewerHasStarred': viewerHasStarred
             },
           ]
               .map((map) =>
@@ -97,7 +101,7 @@ void main() {
 
     group('query', () {
       test('successful response', () async {
-        final WatchQueryOptions _options = WatchQueryOptions(
+        final _options = QueryOptions(
           document: parseString(readRepositories),
           variables: <String, dynamic>{
             'nRepositories': 42,
@@ -169,7 +173,7 @@ void main() {
           withIds: false,
         );
 
-        final WatchQueryOptions _options = WatchQueryOptions(
+        final _options = QueryOptions(
           document: readUnidentifiedRepositories,
           variables: {'nRepositories': 42},
         );
@@ -187,9 +191,44 @@ void main() {
         verify(link.request(_options.asRequest));
         expect(r.data, equals(repoData));
       });
+      test('correct consecutive responses', () async {
+        final _options = QueryOptions(
+          fetchPolicy: FetchPolicy.networkOnly,
+          document: parseString(readRepositories),
+          variables: <String, dynamic>{
+            'nRepositories': 42,
+          },
+        );
+        final firstData =
+            readRepositoryData(withTypenames: true, viewerHasStarred: false);
+        final secondData =
+            readRepositoryData(withTypenames: true, viewerHasStarred: true);
+
+        final resp = (d) => Stream.fromIterable([
+              Response(
+                data: d,
+                context: Context().withEntry(
+                  HttpLinkResponseContext(
+                    statusCode: 200,
+                    headers: {'foo': 'bar'},
+                  ),
+                ),
+              )
+            ]);
+
+        when(link.request(any)).thenAnswer((_) => resp(firstData));
+        QueryResult r = await client.query(_options);
+        expect(r.exception, isNull);
+        expect(r.data, equals(firstData));
+
+        when(link.request(any)).thenAnswer((_) => resp(secondData));
+        r = await client.query(_options);
+        expect(r.exception, isNull);
+        expect(r.data, equals(secondData));
+      });
 
       test('malformed server response', () async {
-        final WatchQueryOptions _options = WatchQueryOptions(
+        final _options = QueryOptions(
           document: parseString(readRepositories),
           variables: {'nRepositories': 42},
         );
