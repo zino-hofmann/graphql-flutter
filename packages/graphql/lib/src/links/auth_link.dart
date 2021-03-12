@@ -25,14 +25,14 @@ class AuthLink extends _AsyncReqTransformLink {
   }) : super(requestTransformer: transform(headerKey, getToken));
 
   /// Authentication callback. Note – must include prefixes, e.g. `'Bearer $token'`
-  final FutureOr<String> Function() getToken;
+  final FutureOr<String>? Function() getToken;
 
   /// Header key to set to the result of [getToken]
   final String headerKey;
 
   static _RequestTransformer transform(
     String headerKey,
-    FutureOr<String> Function() getToken,
+    FutureOr<String>? Function() getToken,
   ) =>
       (Request request) async {
         final token = await getToken();
@@ -40,7 +40,7 @@ class AuthLink extends _AsyncReqTransformLink {
           (headers) => HttpLinkHeaders(
             headers: <String, String>{
               ...headers?.headers ?? <String, String>{},
-              headerKey: token,
+              if (token != null) headerKey: token,
             },
           ),
         );

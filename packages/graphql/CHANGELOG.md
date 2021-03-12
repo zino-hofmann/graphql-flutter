@@ -1,4 +1,4 @@
-# 5.0.0-nullsafety.1
+# 5.0.0-nullsafety.2
 
 Null safety pre-release.
 

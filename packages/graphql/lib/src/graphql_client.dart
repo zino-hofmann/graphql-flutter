@@ -24,10 +24,10 @@ class GraphQLClient implements GraphQLDataProxy {
   GraphQLClient({
     required this.link,
     required this.cache,
-    this.defaultPolicies,
+    DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
   }) {
-    defaultPolicies ??= DefaultPolicies();
+    defaultPolicies = defaultPolicies ?? DefaultPolicies();
     queryManager = QueryManager(
       link: link,
       cache: cache,
@@ -36,10 +36,10 @@ class GraphQLClient implements GraphQLDataProxy {
   }
 
   /// The default [Policies] to set for each client action
-  DefaultPolicies? defaultPolicies;
+  late final DefaultPolicies defaultPolicies;
 
   /// The [Link] over which GraphQL documents will be resolved into a [Response].
-  final Link? link;
+  final Link link;
 
   /// The initial [Cache] to use in the data store.
   final GraphQLCache cache;
@@ -91,7 +91,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// {@end-tool}
   ObservableQuery watchQuery(WatchQueryOptions options) {
     options.policies =
-        defaultPolicies!.watchQuery.withOverrides(options.policies);
+        defaultPolicies.watchQuery.withOverrides(options.policies);
     return queryManager.watchQuery(options);
   }
 
@@ -102,7 +102,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// For more details, see https://github.com/zino-app/graphql-flutter/issues/774
   ObservableQuery watchMutation(WatchQueryOptions options) {
     options.policies =
-        defaultPolicies!.watchMutation.withOverrides(options.policies);
+        defaultPolicies.watchMutation.withOverrides(options.policies);
     return queryManager.watchQuery(options);
   }
 
@@ -147,14 +147,14 @@ class GraphQLClient implements GraphQLDataProxy {
   /// {@end-tool}
 
   Future<QueryResult> query(QueryOptions options) {
-    options.policies = defaultPolicies!.query.withOverrides(options.policies);
+    options.policies = defaultPolicies.query.withOverrides(options.policies);
     return queryManager.query(options);
   }
 
   /// This resolves a single mutation according to the [MutationOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
   Future<QueryResult> mutate(MutationOptions options) {
-    options.policies = defaultPolicies!.mutate.withOverrides(options.policies);
+    options.policies = defaultPolicies.mutate.withOverrides(options.policies);
     return queryManager.mutate(options);
   }
 
@@ -195,7 +195,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// ```
   /// {@end-tool}
   Stream<QueryResult> subscribe(SubscriptionOptions options) {
-    options.policies = defaultPolicies!.subscribe.withOverrides(
+    options.policies = defaultPolicies.subscribe.withOverrides(
       options.policies,
     );
     return queryManager.subscribe(options);

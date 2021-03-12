@@ -82,7 +82,7 @@ void main() {
     }
   ''';
 
-  MockLink? link;
+  late MockLink link;
   late GraphQLClient client;
 
   group('simple json', () {
@@ -106,7 +106,7 @@ void main() {
         final repoData = readRepositoryData(withTypenames: true);
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             Response(
@@ -124,7 +124,7 @@ void main() {
         final QueryResult r = await client.query(_options);
 
         verify(
-          link!.request(
+          link.request(
             Request(
               operation: Operation(
                 document: parseString(readRepositories),
@@ -175,7 +175,7 @@ void main() {
         );
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             Response(data: repoData),
@@ -184,7 +184,7 @@ void main() {
 
         final QueryResult r = await client.query(_options);
 
-        verify(link!.request(_options.asRequest));
+        verify(link.request(_options.asRequest));
         expect(r.data, equals(repoData));
       });
 
@@ -202,7 +202,7 @@ void main() {
         };
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
             Response(data: malformedRepoData),
@@ -225,7 +225,7 @@ void main() {
         final e = Exception();
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromFuture(Future.error(e)),
         );
@@ -246,7 +246,7 @@ void main() {
         final e = Exception('');
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromFuture(Future.error(e)),
         );
@@ -282,7 +282,7 @@ void main() {
           },
         );
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [initialQueryResponse],
@@ -331,7 +331,7 @@ void main() {
           },
         );
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [mutationResponseWithNewName],
@@ -352,7 +352,7 @@ void main() {
         );
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [
@@ -372,7 +372,7 @@ void main() {
         final QueryResult response = await client.mutate(_options);
 
         verify(
-          link!.request(
+          link.request(
             Request(
               operation: Operation(
                 document: parseString(addStar),
@@ -398,7 +398,7 @@ void main() {
         );
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(
             [
@@ -424,7 +424,7 @@ void main() {
         final result = await observableQuery.fetchResults().networkResult!;
 
         verify(
-          link!.request(
+          link.request(
             Request(
               operation: Operation(
                 document: parseString(addStar),
@@ -464,7 +464,7 @@ void main() {
               },
             ));
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(responses),
         );
@@ -510,7 +510,7 @@ void main() {
         );
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenAnswer(
           (_) => Stream.error(ex),
         );
@@ -547,7 +547,7 @@ void main() {
         final err = Error();
 
         when(
-          link!.request(any),
+          link.request(any),
         ).thenThrow(err);
 
         final stream = client.subscribe(

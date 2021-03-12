@@ -32,13 +32,14 @@ class QueryManager {
     );
   }
 
-  final Link? link;
+  final Link link;
   final GraphQLCache cache;
 
   /// Whether to skip deep equality checks in [maybeRebroadcastQueries]
   final bool alwaysRebroadcast;
 
   QueryScheduler? scheduler;
+  static final _oneOffOpId = '0';
   int idCounter = 1;
 
   /// [ObservableQuery] registry
@@ -84,7 +85,7 @@ class QueryManager {
     }
 
     try {
-      yield* link!.request(request).map((response) {
+      yield* link.request(request).map((response) {
         QueryResult? queryResult;
         bool rereadFromCache = false;
         try {
@@ -124,17 +125,21 @@ class QueryManager {
     }
   }
 
-  Future<QueryResult> query(QueryOptions options) => fetchQuery('0', options);
+  Future<QueryResult> query(QueryOptions options) async {
+    final result = await fetchQuery(_oneOffOpId, options);
+    maybeRebroadcastQueries();
+    return result;
+  }
 
   Future<QueryResult> mutate(MutationOptions options) async {
-    final result = await fetchQuery('0', options);
-    // not sure why query id is '0', may be needs improvements
+    final result = await fetchQuery(_oneOffOpId, options);
+    // not sure why query id is _oneOffOpId, may be needs improvements
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
     final mutationCallbacks = MutationCallbackHandler(
       cache: cache,
       options: options,
-      queryId: '0',
+      queryId: _oneOffOpId,
     );
 
     final callbacks = mutationCallbacks.callbacks;
@@ -199,7 +204,7 @@ class QueryManager {
 
     try {
       // execute the request through the provided link(s)
-      response = await link!.request(request).first;
+      response = await link.request(request).first;
 
       queryResult = mapFetchResultToQueryResult(
         response,
@@ -231,7 +236,10 @@ class QueryManager {
       attempCacheRereadIntoResult(request, queryResult);
     }
 
-    addQueryResult(request, queryId, queryResult);
+    // one off operations do not have an ObservableQuery to add to
+    if (queryId != _oneOffOpId) {
+      addQueryResult(request, queryId, queryResult);
+    }
 
     return queryResult;
   }
@@ -294,7 +302,11 @@ class QueryManager {
     // This is undefined-ish behavior/edge case, but still better than just
     // ignoring a provided optimisticResult.
     // Would probably be better to add it ignoring the cache in such cases
-    addQueryResult(request, queryId, queryResult);
+    //
+    // one off operations do not have an ObservableQuery to add to
+    if (queryId != _oneOffOpId) {
+      addQueryResult(request, queryId, queryResult);
+    }
 
     return queryResult;
   }
