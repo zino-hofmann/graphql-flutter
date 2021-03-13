@@ -28,6 +28,7 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
     - [Subscriptions](#subscriptions)
     - [`client.watchQuery` and `ObservableQuery`](#clientwatchquery-and-observablequery)
     - [`client.watchMutation`](#clientwatchmutation)
+    - [Normalization](#normalization)
   - [Direct Cache Access API](#direct-cache-access-api)
     - [`Request`, `readQuery`, and `writeQuery`](#request-readquery-and-writequery)
     - [`FragmentRequest`, `readFragment`, and `writeFragment`](#fragmentrequest-readfragment-and-writefragment)
@@ -366,6 +367,34 @@ See [Rebroadcasting](#rebroadcasting) for more details.
 > but you can have a look at how `graphql_flutter` registers them through
 > [`onData`](https://pub.dev/documentation/graphql/latest/graphql/ObservableQuery/onData.html) in
 > [`Mutation.runMutation`](https://pub.dev/documentation/graphql_flutter/latest/graphql_flutter/MutationState/runMutation.html).
+
+### Normalization
+The [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLCache-class.html) automatically normalizes data from the server, and heavily leverages the [`normalize`] library. Data IDs are pulled from each selection set and used as keys in the cache.
+The [default approach](https://pub.dev/documentation/normalize/latest/utils/resolveDataId.html) is roughly:
+```dart
+String dataIdFromObject(Map<String, Object> data) {
+  final typename = data['__typename'];
+  if (typename == null) return null;
+
+  final id = data['id'] ?? data['_id'];
+  return id == null ? null : '$typename:$id';
+}
+```
+To disable cache normalization entirely, you could pass `(data) => null`.
+If you only cared about `nodeId`, you could pass `(data) => data['nodeId']`.
+
+Here's a more detailed example where the system involved contains versioned entities you don't want to clobber:
+```dart 
+String customDataIdFromObject(Map<String, Object> data) {
+    final typeName = data['__typename'];
+    final entityId = data['entityId'];
+    final version = data['version'];
+    if (typeName == null || entityId == null || version == null){
+      return null;
+    }
+    return '${typeName}/${entityId}/${version}';
+}
+```
 
 ## Direct Cache Access API
 
