@@ -59,7 +59,7 @@ class QueryState extends State<Query> {
     final GraphQLClient client = GraphQLProvider.of(context).value;
 
     final optionsWithOverrides = _options;
-    optionsWithOverrides.policies = client.defaultPolicies!.watchQuery
+    optionsWithOverrides.policies = client.defaultPolicies.watchQuery
         .withOverrides(optionsWithOverrides.policies);
 
     if (!observableQuery!.options.equal(optionsWithOverrides)) {
