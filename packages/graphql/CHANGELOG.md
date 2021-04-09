@@ -1,6 +1,7 @@
-# 5.0.0-nullsafety.3
+# 5.0.0-nullsafety.4
 
-Null safety pre-release.
+* Null safety pre-release.
+* **fix:** only return subscriptions eagerly from cache when a cache-enabled policy is used
 
 # [4.1.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.2-beta.1...v4.1.0-beta.1) (2021-03-06)
 
