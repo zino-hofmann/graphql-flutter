@@ -29,7 +29,6 @@ GraphQLClient getGithubGraphQLClient() {
   final Link _link = HttpLink(
     'https://api.github.com/graphql',
     defaultHeaders: {
-      // ignore: undefined_identifier
       'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     },
   );
@@ -76,7 +75,7 @@ void readRepositories() async {
   }
 
   final List<dynamic> repositories =
-      result.data['viewer']['repositories']['nodes'] as List<dynamic>;
+      result.data!['viewer']['repositories']['nodes'] as List<dynamic>;
 
   repositories.forEach(
     (dynamic f) => {stdout.writeln('Id: ${f['id']} Name: ${f['name']}')},
@@ -86,7 +85,7 @@ void readRepositories() async {
 }
 
 // mutation example - add star to repository
-void starRepository(String repositoryID) async {
+void starRepository(String? repositoryID) async {
   if (repositoryID == '') {
     stderr.writeln('The ID of the Repository is Required!');
     exit(2);
@@ -119,7 +118,7 @@ void starRepository(String repositoryID) async {
   }
 
   final bool isStarrred =
-      result.data['action']['starrable']['viewerHasStarred'] as bool;
+      result.data!['action']['starrable']['viewerHasStarred'] as bool;
 
   if (isStarrred) {
     stdout.writeln('Thanks for your star!');
@@ -129,7 +128,7 @@ void starRepository(String repositoryID) async {
 }
 
 // mutation example - remove star from repository
-void removeStarFromRepository(String repositoryID) async {
+void removeStarFromRepository(String? repositoryID) async {
   if (repositoryID == '') {
     stderr.writeln('The ID of the Repository is Required!');
     exit(2);
@@ -162,7 +161,7 @@ void removeStarFromRepository(String repositoryID) async {
   }
 
   final bool isStarrred =
-      result.data['action']['starrable']['viewerHasStarred'] as bool;
+      result.data!['action']['starrable']['viewerHasStarred'] as bool;
 
   if (!isStarrred) {
     stdout.writeln('Sorry you changed your mind!');
