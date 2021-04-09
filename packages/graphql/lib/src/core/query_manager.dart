@@ -71,7 +71,7 @@ class QueryManager {
       // TODO optimisticResults for streams just skip the cache for now
       yield QueryResult.optimistic(
           data: options.optimisticResult as Map<String, dynamic>?);
-    } else if (options.fetchPolicy != FetchPolicy.noCache) {
+    } else if (shouldRespondEagerlyFromCache(options.fetchPolicy)) {
       final cacheResult = cache.readQuery(
         request,
         optimistic: options.policies.mergeOptimisticData,

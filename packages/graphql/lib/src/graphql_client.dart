@@ -26,14 +26,12 @@ class GraphQLClient implements GraphQLDataProxy {
     required this.cache,
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
-  }) {
-    this.defaultPolicies = defaultPolicies ?? DefaultPolicies();
-    queryManager = QueryManager(
-      link: link,
-      cache: cache,
-      alwaysRebroadcast: alwaysRebroadcast,
-    );
-  }
+  })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
+        queryManager = QueryManager(
+          link: link,
+          cache: cache,
+          alwaysRebroadcast: alwaysRebroadcast,
+        );
 
   /// The default [Policies] to set for each client action
   late final DefaultPolicies defaultPolicies;
@@ -44,7 +42,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// The initial [Cache] to use in the data store.
   final GraphQLCache cache;
 
-  late QueryManager queryManager;
+  late final QueryManager queryManager;
 
   /// This registers a query in the [QueryManager] and returns an [ObservableQuery]
   /// based on the provided [WatchQueryOptions].
