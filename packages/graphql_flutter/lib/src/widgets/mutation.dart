@@ -39,6 +39,7 @@ class MutationState extends State<Mutation> {
   WatchQueryOptions get _providedOptions {
     final _options = WatchQueryOptions(
       document: widget.options.document,
+      operationName: widget.options.operationName,
       variables: widget.options.variables,
       fetchPolicy: widget.options.fetchPolicy,
       errorPolicy: widget.options.errorPolicy,
