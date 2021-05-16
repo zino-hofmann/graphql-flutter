@@ -454,7 +454,7 @@ void main() {
           ),
         );
 
-        final observableQuery = await client.watchQuery(WatchQueryOptions(
+        final observableQuery = client.watchQuery(WatchQueryOptions(
           document: _options.document,
           variables: _options.variables,
           fetchResults: false,
