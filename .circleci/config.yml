@@ -79,7 +79,7 @@ jobs:
             dartfmt **/*.dart -n --set-exit-if-changed
             pub get
             dartanalyzer lib test
-            cd example && pub get && dartanalyzer .
+            cd example && pub get && dartanalyzer lib bin
       - run:
           name: Code formating and analyzing (graphql_flutter)
           command: |
