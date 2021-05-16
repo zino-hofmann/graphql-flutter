@@ -96,10 +96,9 @@ jobs:
           name: Code coverage (graphql, vm only)
           command: |
             cd packages/graphql
-            pub global activate coverage
             pub get
-            pub run test_coverage
-            dart --enable_asserts --enable-vm-service test/.test_coverage.dart
+            pub global activate coverage
+            dart --enable_asserts --enable-vm-service test/coverage.dart
       - run:
           name: Code coverage (graphql_flutter)
           command: |
