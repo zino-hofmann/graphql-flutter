@@ -1,17 +1,16 @@
-import 'package:meta/meta.dart';
 import 'package:flutter/widgets.dart';
 
 /// Same as a fold combine for lists
 ///
 /// Return `null` to avoid setting state.
-typedef Accumulator<Element> = List<Element> Function(
+typedef Accumulator<Element> = List<Element>? Function(
   List<Element> previousValue,
   Element element,
 );
 
-List<T> _append<T>(List<T> results, T latest) => [...results, latest];
+List<T>? _append<T>(List<T> results, T latest) => [...results, latest];
 
-List<T> _appendUnique<T>(List<T> results, T latest) {
+List<T>? _appendUnique<T>(List<T> results, T latest) {
   if (!results.contains(latest)) {
     return [...results, latest];
   }
@@ -23,14 +22,14 @@ List<T> _appendUnique<T>(List<T> results, T latest) {
 /// Useful for handling [Subscription] results.
 class ResultAccumulator<T> extends StatefulWidget {
   const ResultAccumulator({
-    @required this.latest,
-    @required this.builder,
-    Accumulator<T> accumulator,
+    required this.latest,
+    required this.builder,
+    Accumulator<T>? accumulator,
   }) : accumulator = accumulator ?? _append;
 
   const ResultAccumulator.appendUniqueEntries({
-    @required this.latest,
-    @required this.builder,
+    required this.latest,
+    required this.builder,
   }) : accumulator = _appendUnique;
 
   /// The latest entry in the stream
@@ -43,14 +42,14 @@ class ResultAccumulator<T> extends StatefulWidget {
   final Accumulator<T> accumulator;
 
   /// Builds the resulting widget with all accumulated results.
-  final Widget Function(BuildContext, {@required List<T> results}) builder;
+  final Widget Function(BuildContext, {required List<T>? results}) builder;
 
   @override
   _ResultAccumulatorState createState() => _ResultAccumulatorState<T>();
 }
 
 class _ResultAccumulatorState<T> extends State<ResultAccumulator<T>> {
-  List<T> results;
+  List<T> results = [];
 
   @override
   void initState() {
@@ -63,7 +62,6 @@ class _ResultAccumulatorState<T> extends State<ResultAccumulator<T>> {
     super.didUpdateWidget(oldWidget);
 
     final newResults = widget.accumulator(results, widget.latest);
-
     if (newResults != null) {
       setState(() {
         results = newResults;

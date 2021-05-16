@@ -51,8 +51,8 @@ void main() {
     };
   }
 
-  MockLink link;
-  GraphQLClient client;
+  late MockLink link;
+  late GraphQLClient client;
 
   group('FetchPolicy', () {
     setUp(() {

@@ -1,7 +1,7 @@
 import 'package:args/args.dart';
 import 'package:example/main.dart';
 
-ArgResults argResults;
+late ArgResults argResults;
 
 /// CLI fro executing github actions
 ///
@@ -23,8 +23,8 @@ void main(List<String> arguments) {
 
   argResults = parser.parse(arguments);
 
-  final String action = argResults['action'] as String;
-  final String id = argResults['id'] as String;
+  final String? action = argResults['action'] as String?;
+  final String? id = argResults['id'] as String?;
 
   switch (action) {
     case 'star':

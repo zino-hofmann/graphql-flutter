@@ -1,7 +1,6 @@
 // Adapted to `gql` by @iscriptology
 
 import "dart:convert";
-import "package:meta/meta.dart";
 
 /// These messages represent the structures used for Client-server communication
 /// in a GraphQL web-socket subscription. Each message is represented in a JSON
@@ -94,7 +93,7 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
 class InitOperation extends GraphQLSocketMessage {
   InitOperation(this.payload) : super(MessageTypes.connectionInit);
 
-  final dynamic payload;
+  final dynamic? payload;
 
   @override
   toJson() => {
@@ -115,11 +114,11 @@ class TerminateOperation extends GraphQLSocketMessage {
 class QueryPayload extends JsonSerializable {
   QueryPayload({
     this.operationName,
-    @required this.query,
-    @required this.variables,
+    required this.query,
+    required this.variables,
   });
 
-  final String operationName;
+  final String? operationName;
   final String query;
   final Map<String, dynamic> variables;
 

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:graphql/client.dart';
-import 'package:meta/meta.dart';
 
 import "package:gql_exec/gql_exec.dart";
 import "package:gql_http_link/gql_http_link.dart";
@@ -21,19 +20,19 @@ typedef OnException = FutureOr<String> Function(
 /// [gql reference auth link]: https://github.com/gql-dart/gql/blob/1884596904a411363165bcf3c7cfa9dcc2a61c26/examples/gql_example_http_auth_link/lib/http_auth_link.dart
 class AuthLink extends _AsyncReqTransformLink {
   AuthLink({
-    @required this.getToken,
+    required this.getToken,
     this.headerKey = 'Authorization',
   }) : super(requestTransformer: transform(headerKey, getToken));
 
   /// Authentication callback. Note – must include prefixes, e.g. `'Bearer $token'`
-  final FutureOr<String> Function() getToken;
+  final FutureOr<String?> Function() getToken;
 
   /// Header key to set to the result of [getToken]
   final String headerKey;
 
   static _RequestTransformer transform(
     String headerKey,
-    FutureOr<String> Function() getToken,
+    FutureOr<String?> Function() getToken,
   ) =>
       (Request request) async {
         final token = await getToken();
@@ -41,7 +40,7 @@ class AuthLink extends _AsyncReqTransformLink {
           (headers) => HttpLinkHeaders(
             headers: <String, String>{
               ...headers?.headers ?? <String, String>{},
-              headerKey: token,
+              if (token != null) headerKey: token,
             },
           ),
         );
@@ -53,18 +52,16 @@ class _AsyncReqTransformLink extends Link {
   final _RequestTransformer requestTransformer;
 
   _AsyncReqTransformLink({
-    this.requestTransformer,
-  }) : assert(requestTransformer != null);
+    required this.requestTransformer,
+  });
 
   @override
   Stream<Response> request(
     Request request, [
-    NextLink forward,
+    NextLink? forward,
   ]) async* {
-    final req = requestTransformer != null
-        ? await requestTransformer(request)
-        : request;
+    final req = await requestTransformer(request);
 
-    yield* forward(req);
+    yield* forward!(req);
   }
 }

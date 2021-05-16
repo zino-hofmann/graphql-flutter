@@ -14,13 +14,13 @@ abstract class MutableDataClass {
 
   /// identifying properties for the inheriting class
   @protected
-  List<Object> get properties;
+  List<Object?> get properties;
 
   /// [properties] based deep equality check
   bool equal(MutableDataClass other) =>
       identical(this, other) ||
       (runtimeType == other.runtimeType &&
-          const ListEquality<Object>(
+          const ListEquality<Object?>(
             DeepCollectionEquality(),
           ).equals(
             other.properties,

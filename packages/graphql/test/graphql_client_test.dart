@@ -86,8 +86,8 @@ void main() {
     }
   ''';
 
-  MockLink link;
-  GraphQLClient client;
+  late MockLink link;
+  late GraphQLClient client;
 
   group('simple json', () {
     setUp(() {
@@ -146,11 +146,11 @@ void main() {
         expect(r.data, equals(repoData));
 
         expect(
-          r.context.entry<HttpLinkResponseContext>().statusCode,
+          r.context.entry<HttpLinkResponseContext>()!.statusCode,
           equals(200),
         );
         expect(
-          r.context.entry<HttpLinkResponseContext>().headers['foo'],
+          r.context.entry<HttpLinkResponseContext>()!.headers['foo'],
           equals('bar'),
         );
       });
@@ -236,7 +236,7 @@ void main() {
           'viewer': {
             // maybe the server doesn't validate response structures properly,
             // or a user generates a response on the client, etc
-            'repos': readRepositoryData()['viewer']['repositories']
+            'repos': readRepositoryData()['viewer']!['repositories']
           },
         };
 
@@ -276,7 +276,7 @@ void main() {
         );
 
         expect(
-          r.exception.linkException.originalException,
+          r.exception!.linkException!.originalException,
           e,
         );
       });
@@ -297,7 +297,7 @@ void main() {
         );
 
         expect(
-          r.exception.linkException.originalException,
+          r.exception!.linkException!.originalException,
           e,
         );
       });
@@ -347,12 +347,12 @@ void main() {
                 true,
               ),
               isA<QueryResult>().having(
-                (result) => result.data['single']['name'],
+                (result) => result.data!['single']['name'],
                 'initial query result',
                 'initialQueryName',
               ),
               isA<QueryResult>().having(
-                (result) => result.data['single']['name'],
+                (result) => result.data!['single']['name'],
                 'result caused by mutation',
                 'newNameFromMutation',
               )
@@ -382,7 +382,7 @@ void main() {
         final QueryResult response = await client.mutate(MutationOptions(
             document: parseString(writeSingle), variables: variables));
 
-        expect(response.data['updateSingle']['name'], variables['name']);
+        expect(response.data!['updateSingle']['name'], variables['name']);
       });
 
       test('successful mutation', () async {
@@ -425,8 +425,8 @@ void main() {
 
         expect(response.exception, isNull);
         expect(response.data, isNotNull);
-        final bool viewerHasStarred =
-            response.data['action']['starrable']['viewerHasStarred'] as bool;
+        final bool? viewerHasStarred =
+            response.data!['action']['starrable']['viewerHasStarred'] as bool?;
         expect(viewerHasStarred, true);
       });
 
@@ -460,7 +460,7 @@ void main() {
           fetchResults: false,
         ));
 
-        final result = await observableQuery.fetchResults().networkResult;
+        final result = await observableQuery.fetchResults().networkResult!;
 
         verify(
           link.request(
@@ -477,8 +477,8 @@ void main() {
 
         expect(result.hasException, isFalse);
         expect(result.data, isNotNull);
-        final bool viewerHasStarred =
-            result.data['action']['starrable']['viewerHasStarred'] as bool;
+        final bool? viewerHasStarred =
+            result.data!['action']['starrable']['viewerHasStarred'] as bool?;
         expect(viewerHasStarred, true);
       });
     });
@@ -528,12 +528,12 @@ void main() {
           emitsInOrder(
             [
               isA<QueryResult>().having(
-                (result) => result.data['item']['name'],
+                (result) => result.data!['item']['name'],
                 'first subscription item',
                 'first',
               ),
               isA<QueryResult>().having(
-                (result) => result.data['item']['name'],
+                (result) => result.data!['item']['name'],
                 'second subscription item',
                 'second',
               )
@@ -574,7 +574,7 @@ void main() {
           emitsInOrder(
             [
               isA<QueryResult>().having(
-                (result) => result.exception.linkException,
+                (result) => result.exception!.linkException,
                 'wrapped exception',
                 ex,
               ),
@@ -609,7 +609,7 @@ void main() {
           emitsInOrder(
             [
               isA<QueryResult>().having(
-                (result) => result.exception.linkException.originalException,
+                (result) => result.exception!.linkException!.originalException,
                 'wrapped exception',
                 err,
               ),

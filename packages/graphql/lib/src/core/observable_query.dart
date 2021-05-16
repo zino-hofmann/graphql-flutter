@@ -10,7 +10,7 @@ import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
 /// Side effect to register for execution when data is received
-typedef OnData = void Function(QueryResult result);
+typedef OnData = FutureOr<void> Function(QueryResult? result);
 
 /// Lifecycle states for [ObservableQuery.lifecycle]
 enum QueryLifecycle {
@@ -64,8 +64,8 @@ enum QueryLifecycle {
 /// [apollo_oq]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ObservableQuery/
 class ObservableQuery {
   ObservableQuery({
-    @required this.queryManager,
-    @required this.options,
+    required this.queryManager,
+    required this.options,
   }) : queryId = queryManager.generateQueryId().toString() {
     if (options.eagerlyFetchResults) {
       _latestWasEagerlyFetched = true;
@@ -86,7 +86,7 @@ class ObservableQuery {
   final QueryManager queryManager;
 
   @protected
-  QueryScheduler get scheduler => queryManager.scheduler;
+  QueryScheduler? get scheduler => queryManager.scheduler;
 
   /// callbacks registered with [onData]
   List<OnData> _onDataCallbacks = [];
@@ -94,17 +94,17 @@ class ObservableQuery {
   /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
   ///
   /// Automatically appended as an [OnData]
-  void _maybeRebroadcast(QueryResult result) =>
+  FutureOr<void> _maybeRebroadcast(QueryResult? result) =>
       queryManager.maybeRebroadcastQueries(exclude: this);
 
   /// The most recently seen result from this operation's stream
-  QueryResult latestResult;
+  QueryResult? latestResult;
 
   QueryLifecycle lifecycle = QueryLifecycle.unexecuted;
 
   WatchQueryOptions options;
 
-  StreamController<QueryResult> controller;
+  late StreamController<QueryResult> controller;
 
   Stream<QueryResult> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.polling;
@@ -126,14 +126,13 @@ class ObservableQuery {
       case QueryLifecycle.sideEffectsBlocking:
         return false;
     }
-    return false;
   }
 
   /// Attempts to refetch _on the network_, throwing error if not refetch safe
   ///
   /// **NOTE:** overrides any present non-network-only [FetchPolicy],
   /// as refetching from the `cache` does not make sense.
-  Future<QueryResult> refetch() {
+  Future<QueryResult?> refetch() {
     if (isRefetchSafe) {
       addResult(QueryResult.loading(data: latestResult?.data));
       return queryManager.refetchQuery(queryId);
@@ -162,7 +161,6 @@ class ObservableQuery {
       case QueryLifecycle.sideEffectsBlocking:
         return false;
     }
-    return false;
   }
 
   void onListen() {
@@ -173,7 +171,7 @@ class ObservableQuery {
       // so we have to add them manually now that
       // the stream is available
       if (!controller.isClosed && latestResult != null) {
-        controller.add(latestResult);
+        controller.add(latestResult!);
       }
       return;
     }
@@ -201,7 +199,7 @@ class ObservableQuery {
           : QueryLifecycle.pending;
     }
 
-    if (options.pollInterval != null && options.pollInterval > Duration.zero) {
+    if (options.pollInterval != null && options.pollInterval! > Duration.zero) {
       startPolling(options.pollInterval);
     }
 
@@ -219,15 +217,13 @@ class ObservableQuery {
   ///
   /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
-    assert(fetchMoreOptions.updateQuery != null);
-
     addResult(QueryResult.loading(data: latestResult?.data));
 
     return fetchMoreImplementation(
       fetchMoreOptions,
       originalOptions: options,
       queryManager: queryManager,
-      previousResult: latestResult,
+      previousResult: latestResult!,
       queryId: queryId,
     );
   }
@@ -242,7 +238,7 @@ class ObservableQuery {
   void addResult(QueryResult result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
-        latestResult.timestamp.isAfter(result.timestamp)) {
+        latestResult!.timestamp.isAfter(result.timestamp)) {
       return;
     }
 
@@ -275,15 +271,14 @@ class ObservableQuery {
   /// handling the resolution of [lifecycle] from
   /// [QueryLifecycle.sideEffectsBlocking] to [QueryLifecycle.completed]
   /// as appropriate
-  void onData(Iterable<OnData> callbacks) =>
-      _onDataCallbacks.addAll(callbacks ?? []);
+  void onData(Iterable<OnData> callbacks) => _onDataCallbacks.addAll(callbacks);
 
   /// Applies [onData] callbacks at the end of [addResult]
   ///
   /// [fromRebroadcast] is used to avoid the super-edge case of infinite rebroadcasts
   /// (not sure if it's even possible)
   void _applyCallbacks(
-    QueryResult result, {
+    QueryResult? result, {
     bool fromRebroadcast = false,
   }) async {
     final callbacks = [
@@ -294,12 +289,12 @@ class ObservableQuery {
       await callback(result);
     }
 
-    if (this == null || lifecycle == QueryLifecycle.closed) {
+    if (lifecycle == QueryLifecycle.closed) {
       // .close(force: true) was called
       return;
     }
 
-    if (result.isConcrete) {
+    if (result!.isConcrete) {
       // avoid removing new callbacks
       _onDataCallbacks.removeWhere((cb) => callbacks.contains(cb));
 
@@ -320,7 +315,7 @@ class ObservableQuery {
   /// Poll the server periodically for results.
   ///
   /// Will be called by [fetchResults] automatically if [options.pollInterval] is set
-  void startPolling(Duration pollInterval) {
+  void startPolling(Duration? pollInterval) {
     if (options.fetchPolicy == FetchPolicy.cacheFirst ||
         options.fetchPolicy == FetchPolicy.cacheOnly) {
       throw Exception(
@@ -329,17 +324,17 @@ class ObservableQuery {
     }
 
     if (isCurrentlyPolling) {
-      scheduler.stopPollingQuery(queryId);
+      scheduler!.stopPollingQuery(queryId);
     }
 
     options.pollInterval = pollInterval;
     lifecycle = QueryLifecycle.polling;
-    scheduler.startPollingQuery(options, queryId);
+    scheduler!.startPollingQuery(options, queryId);
   }
 
   void stopPolling() {
     if (isCurrentlyPolling) {
-      scheduler.stopPollingQuery(queryId);
+      scheduler!.stopPollingQuery(queryId);
       options.pollInterval = null;
       lifecycle = QueryLifecycle.pollingStopped;
     }

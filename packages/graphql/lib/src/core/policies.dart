@@ -38,16 +38,16 @@ enum FetchPolicy {
 
 // TODO investigate the relationship between optimistic results
 // and policy in flutter
-bool shouldRespondEagerlyFromCache(FetchPolicy fetchPolicy) =>
+bool shouldRespondEagerlyFromCache(FetchPolicy? fetchPolicy) =>
     fetchPolicy == FetchPolicy.cacheFirst ||
     fetchPolicy == FetchPolicy.cacheAndNetwork ||
     fetchPolicy == FetchPolicy.cacheOnly;
 
-bool shouldStopAtCache(FetchPolicy fetchPolicy) =>
+bool shouldStopAtCache(FetchPolicy? fetchPolicy) =>
     fetchPolicy == FetchPolicy.cacheFirst ||
     fetchPolicy == FetchPolicy.cacheOnly;
 
-bool willAlwaysExecuteOnNetwork(FetchPolicy policy) {
+bool willAlwaysExecuteOnNetwork(FetchPolicy? policy) {
   switch (policy) {
     case FetchPolicy.noCache:
     case FetchPolicy.networkOnly:
@@ -55,9 +55,9 @@ bool willAlwaysExecuteOnNetwork(FetchPolicy policy) {
     case FetchPolicy.cacheFirst:
     case FetchPolicy.cacheAndNetwork:
     case FetchPolicy.cacheOnly:
+    case null:
       return false;
   }
-  return false;
 }
 
 /// [ErrorPolicy] determines the level of events for GraphQL Errors in the execution result. The options are:
@@ -126,13 +126,13 @@ enum CacheRereadPolicy {
 @immutable
 class Policies {
   /// Specifies the [FetchPolicy] to be used.
-  final FetchPolicy fetch;
+  final FetchPolicy? fetch;
 
   /// Specifies the [ErrorPolicy] to be used.
-  final ErrorPolicy error;
+  final ErrorPolicy? error;
 
   /// Specifies the [CacheRereadPolicy] to be used.
-  final CacheRereadPolicy cacheReread;
+  final CacheRereadPolicy? cacheReread;
 
   bool get mergeOptimisticData =>
       cacheReread == CacheRereadPolicy.mergeOptimistic;
@@ -144,20 +144,18 @@ class Policies {
   });
 
   Policies.safe(
-    this.fetch,
-    this.error,
-    this.cacheReread,
-  )   : assert(fetch != null, 'fetch policy must be specified'),
-        assert(error != null, 'error policy must be specified'),
-        assert(cacheReread != null, 'cacheReread policy must be specified');
+    FetchPolicy this.fetch,
+    ErrorPolicy this.error,
+    CacheRereadPolicy this.cacheReread,
+  );
 
-  Policies withOverrides([Policies overrides]) => Policies.safe(
-        overrides?.fetch ?? fetch,
-        overrides?.error ?? error,
-        overrides?.cacheReread ?? cacheReread,
+  Policies withOverrides([Policies? overrides]) => Policies.safe(
+        overrides?.fetch ?? fetch!,
+        overrides?.error ?? error!,
+        overrides?.cacheReread ?? cacheReread!,
       );
 
-  Policies copyWith({FetchPolicy fetch, ErrorPolicy error}) =>
+  Policies copyWith({FetchPolicy? fetch, ErrorPolicy? error}) =>
       Policies(fetch: fetch, error: error, cacheReread: cacheReread);
 
   operator ==(Object other) =>
@@ -168,7 +166,7 @@ class Policies {
           cacheReread == other.cacheReread);
 
   @override
-  int get hashCode => const ListEquality<Object>(
+  int get hashCode => const ListEquality<Object?>(
         DeepCollectionEquality(),
       ).hash([fetch, error, cacheReread]);
 
@@ -247,11 +245,11 @@ class DefaultPolicies {
   final Policies subscribe;
 
   DefaultPolicies({
-    Policies watchQuery,
-    Policies watchMutation,
-    Policies query,
-    Policies mutate,
-    Policies subscribe,
+    Policies? watchQuery,
+    Policies? watchMutation,
+    Policies? query,
+    Policies? mutate,
+    Policies? subscribe,
   })  : watchQuery = _watchQueryDefaults.withOverrides(watchQuery),
         watchMutation = _mutateDefaults.withOverrides(watchMutation),
         query = _queryDefaults.withOverrides(query),
@@ -283,11 +281,11 @@ class DefaultPolicies {
   );
 
   DefaultPolicies copyWith({
-    Policies watchQuery,
-    Policies query,
-    Policies watchMutation,
-    Policies mutate,
-    Policies subscribe,
+    Policies? watchQuery,
+    Policies? query,
+    Policies? watchMutation,
+    Policies? mutate,
+    Policies? subscribe,
   }) =>
       DefaultPolicies(
         watchQuery: watchQuery,
@@ -309,7 +307,7 @@ class DefaultPolicies {
   bool operator ==(Object o) =>
       identical(this, o) ||
       (o is DefaultPolicies &&
-          const ListEquality<Object>(
+          const ListEquality<Object?>(
             DeepCollectionEquality(),
           ).equals(
             o._getChildren(),
@@ -317,7 +315,7 @@ class DefaultPolicies {
           ));
 
   @override
-  int get hashCode => const ListEquality<Object>(
+  int get hashCode => const ListEquality<Object?>(
         DeepCollectionEquality(),
       ).hash(
         _getChildren(),

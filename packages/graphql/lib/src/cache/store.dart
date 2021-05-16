@@ -7,10 +7,10 @@ import 'package:meta/meta.dart';
 /// Raw key-value datastore API leveraged by the [Cache]
 @immutable
 abstract class Store {
-  Map<String, dynamic> get(String dataId);
+  Map<String, dynamic>? get(String dataId);
 
   /// Write [value] into this store under the key [dataId]
-  void put(String dataId, Map<String, dynamic> value);
+  void put(String dataId, Map<String, dynamic>? value);
 
   /// [put] all entries from [data] into the store
   ///
@@ -42,14 +42,14 @@ class InMemoryStore extends Store {
   /// Creates an InMemoryStore inititalized with [data],
   /// which defaults to an empty [HashMap]
   InMemoryStore([
-    Map<String, dynamic> data,
+    Map<String, dynamic>? data,
   ]) : data = data ?? HashMap<String, dynamic>();
 
   @override
-  Map<String, dynamic> get(String dataId) => data[dataId];
+  Map<String, dynamic>? get(String dataId) => data[dataId];
 
   @override
-  void put(String dataId, Map<String, dynamic> value) => data[dataId] = value;
+  void put(String dataId, Map<String, dynamic>? value) => data[dataId] = value;
 
   @override
   void putAll(Map<String, Map<String, dynamic>> entries) =>

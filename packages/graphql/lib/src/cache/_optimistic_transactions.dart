@@ -54,8 +54,8 @@ class OptimisticProxy extends NormalizingDataProxy {
   HashMap<String, dynamic> data = HashMap<String, dynamic>();
 
   @override
-  dynamic readNormalized(String rootId, {bool optimistic = true}) {
-    if (!optimistic) {
+  dynamic readNormalized(String rootId, {bool? optimistic = true}) {
+    if (!optimistic!) {
       return cache.readNormalized(rootId, optimistic: false);
     }
     // the cache calls `patch.data.containsKey(rootId)`,

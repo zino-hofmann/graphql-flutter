@@ -6,8 +6,8 @@ import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 class CacheProvider extends StatefulWidget {
   const CacheProvider({
-    final Key key,
-    @required this.child,
+    final Key? key,
+    required this.child,
   }) : super(key: key);
 
   final Widget child;
@@ -18,13 +18,13 @@ class CacheProvider extends StatefulWidget {
 
 class _CacheProviderState extends State<CacheProvider>
     with WidgetsBindingObserver {
-  GraphQLClient client;
+  GraphQLClient? client;
 
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
@@ -42,7 +42,7 @@ class _CacheProviderState extends State<CacheProvider>
   void dispose() {
     super.dispose();
 
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
   }
 
 /*
