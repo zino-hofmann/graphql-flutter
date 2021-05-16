@@ -1,6 +1,10 @@
-# 5.0.0-nullsafety.2
+# [4.1.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v4.1.0-beta.1...v4.1.0-beta.2) (2021-03-12)
 
-Null safety pre-release.
+
+### Bug Fixes
+
+* **client:** fix rebroadcasting for regular queries ([0c6b0e7](https://github.com/zino-app/graphql-flutter/commit/0c6b0e7593598bb9d799e82235d927f1bb6b4ea5))
+
 
 # [4.1.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.2-beta.1...v4.1.0-beta.1) (2021-03-06)
 

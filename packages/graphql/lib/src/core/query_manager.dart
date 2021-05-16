@@ -133,7 +133,7 @@ class QueryManager {
 
   Future<QueryResult> mutate(MutationOptions options) async {
     final result = await fetchQuery(_oneOffOpId, options);
-    // not sure why query id is _oneOffOpId, may be needs improvements
+
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
     final mutationCallbacks = MutationCallbackHandler(

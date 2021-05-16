@@ -1,7 +1,7 @@
 version: 2.1
 aliases:
   - &flutter_environment
-    - image: cirrusci/flutter:stable
+    - image: cirrusci/flutter:2.3.0-1.0.pre
   - &node_environment
     - image: circleci/node:10
   - &restore_cache
@@ -78,8 +78,8 @@ jobs:
             cd packages/graphql
             dartfmt **/*.dart -n --set-exit-if-changed
             pub get
-            dartanalyzer lib test
-            cd example && pub get && dartanalyzer .
+            dart analyze
+            cd example && pub get && dart analyze
       - run:
           name: Code formating and analyzing (graphql_flutter)
           command: |
@@ -96,10 +96,9 @@ jobs:
           name: Code coverage (graphql, vm only)
           command: |
             cd packages/graphql
-            pub global activate coverage
             pub get
-            pub run test_coverage
-            dart --enable_asserts --enable-vm-service test/.test_coverage.dart
+            pub global activate coverage
+            dart --enable_asserts --enable-vm-service test/coverage.dart
       - run:
           name: Code coverage (graphql_flutter)
           command: |
@@ -181,7 +180,7 @@ workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "38 * * * *"
+          cron: "07 * * * *"
           filters:
             branches:
               only:
