@@ -127,12 +127,16 @@ class UnexpectedResponseStructureException extends ServerException
 class UnknownException extends LinkException {
   String get message => 'Unhandled Client-Side Exception: $originalException';
 
+  final StackTrace originalStackTrace;
+
   const UnknownException(
     dynamic originalException,
+    this.originalStackTrace,
   ) : super(originalException);
 
   @override
-  String toString() => "UnknownException($originalException)";
+  String toString() =>
+      "UnknownException($originalException, stack:\n$originalStackTrace\n)";
 }
 
 /// Container for both [graphqlErrors] returned from the server
