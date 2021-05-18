@@ -101,13 +101,13 @@ class QueryManager {
             response,
             queryResult,
           );
-        } catch (failure) {
+        } catch (failure, trace) {
           // we set the source to indicate where the source of failure
           queryResult ??= QueryResult(source: QueryResultSource.network);
 
           queryResult.exception = coalesceErrors(
             exception: queryResult.exception,
-            linkException: translateFailure(failure),
+            linkException: translateFailure(failure, trace),
           );
         }
 
@@ -118,10 +118,10 @@ class QueryManager {
 
         return queryResult;
       }).transform(StreamTransformer.fromHandlers(
-        handleError: (err, trace, sink) => sink.add(_wrapFailure(err)),
+        handleError: (err, trace, sink) => sink.add(_wrapFailure(err, trace)),
       ));
-    } catch (ex) {
-      yield* Stream.fromIterable([_wrapFailure(ex)]);
+    } catch (ex, trace) {
+      yield* Stream.fromIterable([_wrapFailure(ex, trace)]);
     }
   }
 
@@ -218,13 +218,13 @@ class QueryManager {
         response,
         queryResult,
       );
-    } catch (failure) {
+    } catch (failure, trace) {
       // we set the source to indicate where the source of failure
       queryResult ??= QueryResult(source: QueryResultSource.network);
 
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
-        linkException: translateFailure(failure),
+        linkException: translateFailure(failure, trace),
       );
     }
 
@@ -288,10 +288,10 @@ class QueryManager {
           );
         }
       }
-    } catch (failure) {
+    } catch (failure, trace) {
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
-        linkException: translateFailure(failure),
+        linkException: translateFailure(failure, trace),
       );
     }
 
@@ -504,8 +504,8 @@ class QueryManager {
   }
 }
 
-QueryResult _wrapFailure(dynamic ex) => QueryResult(
+QueryResult _wrapFailure(dynamic ex, trace) => QueryResult(
       // we set the source to indicate where the source of failure
       source: QueryResultSource.network,
-      exception: coalesceErrors(linkException: translateFailure(ex)),
+      exception: coalesceErrors(linkException: translateFailure(ex, trace)),
     );
