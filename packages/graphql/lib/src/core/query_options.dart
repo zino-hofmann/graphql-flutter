@@ -40,6 +40,7 @@ class QueryOptions extends BaseOptions {
   WatchQueryOptions asWatchQueryOptions({bool fetchResults = true}) =>
       WatchQueryOptions(
         document: document,
+        operationName: operationName,
         variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
