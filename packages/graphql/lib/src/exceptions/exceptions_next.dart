@@ -127,6 +127,7 @@ class UnexpectedResponseStructureException extends ServerException
 class UnknownException extends LinkException {
   String get message => 'Unhandled Client-Side Exception: $originalException';
 
+  /// stacktrace of the [originalException].
   final StackTrace originalStackTrace;
 
   const UnknownException(
