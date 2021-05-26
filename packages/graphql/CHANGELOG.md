@@ -1,3 +1,10 @@
+# [5.0.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v5.0.0-beta.1...v5.0.0-beta.2) (2021-05-26)
+
+
+### Features
+
+* **client:** Capture stack traces in UnknownExceptions ([4b36c09](https://github.com/zino-app/graphql-flutter/commit/4b36c09d9b2fd0df16fbae540d679ea590a0aece))
+
 # [5.0.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.1.0-beta.2...v5.0.0-beta.1) (2021-05-16)
 
 
