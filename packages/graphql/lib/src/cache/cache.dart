@@ -32,6 +32,7 @@ class GraphQLCache extends NormalizingDataProxy {
     Store? store,
     this.dataIdFromObject,
     this.typePolicies = const {},
+    this.possibleTypes = const {},
     this.partialDataPolicy = PartialDataCachePolicy.acceptForOptimisticData,
     Object? Function(Object?) sanitizeVariables = sanitizeFilesForCache,
   })  : sanitizeVariables = variableSanitizer(sanitizeVariables),
@@ -59,6 +60,9 @@ class GraphQLCache extends NormalizingDataProxy {
 
   /// `typePolicies` to pass down to [normalize]
   final Map<String, TypePolicy> typePolicies;
+
+  /// `possibleTypes` to pass down to [normalize]
+  final Map<String, Set<String>> possibleTypes;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   final DataIdResolver? dataIdFromObject;
