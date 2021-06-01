@@ -260,6 +260,7 @@ mutation($files: [Upload!]!) {
 
 ```dart
 import "package:http/http.dart" show Multipartfile;
+import 'package:http_parser/http_parser.dart' show MediaType;
 
 // ...
 
