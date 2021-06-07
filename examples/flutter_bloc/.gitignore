@@ -71,6 +71,5 @@
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
-lib/local.dart
 /ios/Flutter/Flutter.podspec
 /ios/Flutter/flutter_export_environment.sh

@@ -3,7 +3,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 import '../graphql_operation/queries/readRepositories.dart' as queries;
 
-// ignore: uri_does_not_exist
+// to run the example, replace <YOUR_PERSONAL_ACCESS_TOKEN> with your GitHub token in ../local.dart
 import '../local.dart';
 
 class FetchMoreWidgetScreen extends StatelessWidget {
@@ -38,11 +38,11 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({
-    Key key,
+    Key? key,
     this.title,
   }) : super(key: key);
 
-  final String title;
+  final String? title;
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -55,7 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void changeQuery(String query) {
     setState(() {
       print(query);
-      _searchQuery = query ?? 'flutter';
+      _searchQuery = query;
     });
   }
 
@@ -63,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title!),
       ),
       body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -89,7 +89,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
                 //pollInterval: 10,
               ),
-              builder: (QueryResult result, {refetch, FetchMore fetchMore}) {
+              builder: (QueryResult result, {refetch, FetchMore? fetchMore}) {
                 if (result.hasException) {
                   return Text(result.exception.toString());
                 }
@@ -107,10 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
 
                 // result.data can be either a [List<dynamic>] or a [Map<String, dynamic>]
                 final repositories =
-                    (result.data['search']['nodes'] as List<dynamic>);
+                    (result.data!['search']['nodes'] as List<dynamic>);
 
-                final Map pageInfo = result.data['search']['pageInfo'];
-                final String fetchMoreCursor = pageInfo['endCursor'];
+                final Map pageInfo = result.data!['search']['pageInfo'];
+                final String? fetchMoreCursor = pageInfo['endCursor'];
                 final opts = FetchMoreOptions(
                   variables: {'cursor': fetchMoreCursor},
                   updateQuery: (previousResultData, fetchMoreResultData) {
@@ -118,8 +118,10 @@ class _MyHomePageState extends State<MyHomePage> {
                     // in this case, we want to display previous repos plus next repos
                     // so, we combine data in both into a single list of repos
                     final repos = [
-                      ...previousResultData['search']['nodes'] as List<dynamic>,
-                      ...fetchMoreResultData['search']['nodes'] as List<dynamic>
+                      ...previousResultData!['search']['nodes']
+                          as List<dynamic>,
+                      ...fetchMoreResultData!['search']['nodes']
+                          as List<dynamic>
                     ];
 
                     // to avoid alot of work, lets just update the list of repos in returned
@@ -153,16 +155,16 @@ class _MyHomePageState extends State<MyHomePage> {
                         ),
                       Text('note: this example has no mutations',
                           style: Theme.of(context).textTheme.caption),
-                      RaisedButton(
+                      ElevatedButton(
+                        onPressed: () {
+                          fetchMore!(opts);
+                        },
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Text('Load More'),
                           ],
                         ),
-                        onPressed: () {
-                          fetchMore(opts);
-                        },
                       )
                     ],
                   ),

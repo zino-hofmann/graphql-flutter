@@ -1,3 +1,60 @@
+# [5.0.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v5.0.0-beta.1...v5.0.0-beta.2) (2021-05-26)
+
+
+### Features
+
+* **client:** Capture stack traces in UnknownExceptions ([4b36c09](https://github.com/zino-app/graphql-flutter/commit/4b36c09d9b2fd0df16fbae540d679ea590a0aece))
+
+# [5.0.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.1.0-beta.2...v5.0.0-beta.1) (2021-05-16)
+
+
+### Bug Fixes
+
+* **ci:** refine dartanalyzer for example ([e7b5830](https://github.com/zino-app/graphql-flutter/commit/e7b5830555187039ad3cf57f6e9e260e17073893))
+* **ci:** stop using test_coverage ([28e499e](https://github.com/zino-app/graphql-flutter/commit/28e499e1bc650a193ab3178beaf47c0c6b8a7d90))
+* **ci:** try dart analyze ([61e9f81](https://github.com/zino-app/graphql-flutter/commit/61e9f813c35354b169a2d8713a174419e9c14317))
+* **client:** AuthLink getToken result should be nullable. ([7f36a68](https://github.com/zino-app/graphql-flutter/commit/7f36a688c09a80c58f77ad925b2d887a5b803376))
+* **examples:** upgrade to nullsafety ([fe69bce](https://github.com/zino-app/graphql-flutter/commit/fe69bced878d8d0ccb1f9b60663f48f998589b7b))
+* **flutter:** make sure starwars works with nullsafe changes ([6d27c64](https://github.com/zino-app/graphql-flutter/commit/6d27c64ce606900190226ff02c950c180e4dd2f9))
+* **graphql:** only return subscriptions eagerly from cache when a cache-enabled policy is used ([8af2edd](https://github.com/zino-app/graphql-flutter/commit/8af2edd31cfaaa193388c5ac1f2fe5bb4676fed4))
+
+
+### Features
+
+* **client:** null safe by default ([802185a](https://github.com/zino-app/graphql-flutter/commit/802185a73fa2e75ae0f145e9bd7af217fad47813))
+
+
+### BREAKING CHANGES
+
+* **client:** Null Safety
+
+# [4.1.0-beta.2](https://github.com/zino-app/graphql-flutter/compare/v4.1.0-beta.1...v4.1.0-beta.2) (2021-03-12)
+
+
+### Bug Fixes
+
+* **client:** fix rebroadcasting for regular queries ([0c6b0e7](https://github.com/zino-app/graphql-flutter/commit/0c6b0e7593598bb9d799e82235d927f1bb6b4ea5))
+
+# [4.1.0-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.2-beta.1...v4.1.0-beta.1) (2021-03-06)
+
+
+### Bug Fixes
+
+* **ci:** graphql coverage ([d47852a](https://github.com/zino-app/graphql-flutter/commit/d47852a2c4159570881017063c5fd13ed07e007b))
+* **client:** always only pull broadcast stream once ([1b6a9e6](https://github.com/zino-app/graphql-flutter/commit/1b6a9e66d460f29f929772547f9a502af4921b39))
+
+
+### Features
+
+* **client:** SocketClient with web_socket_channel ([6631f42](https://github.com/zino-app/graphql-flutter/commit/6631f42bf1fcf0e66fb51c5aa770097b2ea51e07))
+
+## [4.0.2-beta.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.1...v4.0.2-beta.1) (2021-02-08)
+
+
+### Bug Fixes
+
+* **client:** hotfix dataIdFromObject passthrough in cache.readQuery ([e3e04f8](https://github.com/zino-app/graphql-flutter/commit/e3e04f8c25427f4850ac407b44a7eea7a6264bdf))
+
 ## [4.0.1](https://github.com/zino-app/graphql-flutter/compare/v4.0.0...v4.0.1) (2021-02-07)
 
 

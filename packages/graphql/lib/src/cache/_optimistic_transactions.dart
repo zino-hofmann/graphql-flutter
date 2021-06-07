@@ -44,6 +44,9 @@ class OptimisticProxy extends NormalizingDataProxy {
   /// `typePolicies` to pass down to `normalize` (proxied from [cache])
   get typePolicies => cache.typePolicies;
 
+  /// `possibleTypeOf` to pass down to `normalize` (proxied from [cache])
+  get possibleTypes => cache.possibleTypes;
+
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   /// (proxied from [cache])
   get dataIdFromObject => cache.dataIdFromObject;
@@ -54,8 +57,8 @@ class OptimisticProxy extends NormalizingDataProxy {
   HashMap<String, dynamic> data = HashMap<String, dynamic>();
 
   @override
-  dynamic readNormalized(String rootId, {bool optimistic = true}) {
-    if (!optimistic) {
+  dynamic readNormalized(String rootId, {bool? optimistic = true}) {
+    if (!optimistic!) {
       return cache.readNormalized(rootId, optimistic: false);
     }
     // the cache calls `patch.data.containsKey(rootId)`,

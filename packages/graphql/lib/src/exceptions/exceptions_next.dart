@@ -23,7 +23,7 @@ class CacheMissException extends LinkException {
   final Request request;
 
   /// The data just written to the cache under [request], if any.
-  final Map<String, dynamic> expectedData;
+  final Map<String, dynamic>? expectedData;
 
   @override
   String toString() => [
@@ -42,11 +42,11 @@ class MismatchedDataStructureException extends LinkException {
   const MismatchedDataStructureException(
     this.originalException, {
     this.request,
-    @required this.data,
+    required this.data,
   }) : super(originalException);
 
-  final Map<String, dynamic> data;
-  final Request request;
+  final Map<String, dynamic>? data;
+  final Request? request;
   final PartialDataException originalException;
 
   @override
@@ -68,11 +68,11 @@ class CacheMisconfigurationException extends LinkException
     this.originalException, {
     this.request,
     this.fragmentRequest,
-    @required this.data,
+    required this.data,
   }) : super(originalException);
 
-  final Request request;
-  final FragmentRequest fragmentRequest;
+  final Request? request;
+  final FragmentRequest? fragmentRequest;
   final Map<String, dynamic> data;
 
   @override
@@ -98,8 +98,8 @@ class UnexpectedResponseStructureException extends ServerException
     implements MismatchedDataStructureException {
   const UnexpectedResponseStructureException(
     this.originalException, {
-    @required this.request,
-    @required Response parsedResponse,
+    required this.request,
+    required Response parsedResponse,
   }) : super(
             parsedResponse: parsedResponse,
             originalException: originalException);
@@ -108,7 +108,7 @@ class UnexpectedResponseStructureException extends ServerException
   final Request request;
 
   @override
-  get data => parsedResponse.data;
+  get data => parsedResponse!.data;
 
   @override
   final PartialDataException originalException;
@@ -127,12 +127,17 @@ class UnexpectedResponseStructureException extends ServerException
 class UnknownException extends LinkException {
   String get message => 'Unhandled Client-Side Exception: $originalException';
 
+  /// stacktrace of the [originalException].
+  final StackTrace originalStackTrace;
+
   const UnknownException(
     dynamic originalException,
+    this.originalStackTrace,
   ) : super(originalException);
 
   @override
-  String toString() => "UnknownException($originalException)";
+  String toString() =>
+      "UnknownException($originalException, stack:\n$originalStackTrace\n)";
 }
 
 /// Container for both [graphqlErrors] returned from the server
@@ -143,7 +148,7 @@ class OperationException implements Exception {
 
   // generalize to include cache error, etc
   /// Errors encountered during execution such as network or cache errors
-  LinkException linkException;
+  LinkException? linkException;
 
   OperationException({
     this.linkException,
@@ -164,10 +169,10 @@ class OperationException implements Exception {
 /// merges both optional graphqlErrors and an optional container
 /// into a single optional container
 /// NOTE: NULL returns expected
-OperationException coalesceErrors({
-  List<GraphQLError> graphqlErrors,
-  LinkException linkException,
-  OperationException exception,
+OperationException? coalesceErrors({
+  List<GraphQLError>? graphqlErrors,
+  LinkException? linkException,
+  OperationException? exception,
 }) {
   if (exception != null ||
       linkException != null ||
@@ -176,7 +181,7 @@ OperationException coalesceErrors({
       linkException: linkException ?? exception?.linkException,
       graphqlErrors: [
         if (graphqlErrors != null) ...graphqlErrors,
-        if (exception?.graphqlErrors != null) ...exception.graphqlErrors
+        if (exception?.graphqlErrors != null) ...exception!.graphqlErrors
       ],
     );
   }

@@ -4,7 +4,7 @@ import 'bloc.dart' show Bloc, Repo;
 
 class GraphQLBlocPatternScreen extends StatefulWidget {
   GraphQLBlocPatternScreen({
-    Key key,
+    Key? key,
     this.title = 'GraphQL Widget',
   })  : bloc = Bloc(),
         super(key: key);
@@ -40,10 +40,10 @@ class _MyHomePageState extends State<GraphQLBlocPatternScreen> {
               onChanged: (String n) =>
                   bloc.updateNumberOfRepoSink.add(int.parse(n)),
             ),
-            StreamBuilder<List<Repo>>(
+            StreamBuilder<List<Repo>?>(
               stream: bloc.repoStream,
               builder:
-                  (BuildContext context, AsyncSnapshot<List<Repo>> snapshot) {
+                  (BuildContext context, AsyncSnapshot<List<Repo>?> snapshot) {
                 if (snapshot.hasError) {
                   return Text('\nErrors: \n  ' +
                       (snapshot.error as List<dynamic>).join(',\n  '));
@@ -54,7 +54,7 @@ class _MyHomePageState extends State<GraphQLBlocPatternScreen> {
                   );
                 }
 
-                final repositories = snapshot.data;
+                final repositories = snapshot.data!;
 
                 return Expanded(
                   child: ListView.builder(
@@ -75,42 +75,42 @@ class _MyHomePageState extends State<GraphQLBlocPatternScreen> {
 
 class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
-    Key key,
-    @required this.repository,
-    @required this.bloc,
+    Key? key,
+    required this.repository,
+    required this.bloc,
   }) : super(key: key);
 
   final Bloc bloc;
   final Repo repository;
 
-  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
-    final action = data['action'] as Map<String, Object>;
+  Map<String, Object>? extractRepositoryData(Map<String, Object> data) {
+    final action = data['action'] as Map<String, Object>?;
 
     if (action == null) {
       return null;
     }
 
-    return action['starrable'] as Map<String, Object>;
+    return action['starrable'] as Map<String, Object>?;
   }
 
-  bool get viewerHasStarred => repository.viewerHasStarred;
+  bool? get viewerHasStarred => repository.viewerHasStarred;
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<String>(
+    return StreamBuilder<String?>(
       stream: bloc.toggleStarLoadingStream,
       initialData: null,
-      builder: (BuildContext context, AsyncSnapshot<String> result) {
+      builder: (BuildContext context, AsyncSnapshot<String?> result) {
         final loading = repository.id == result.data;
         return ListTile(
-          leading: viewerHasStarred
+          leading: viewerHasStarred!
               ? const Icon(
                   Icons.star,
                   color: Colors.amber,
                 )
               : const Icon(Icons.star_border),
           trailing: loading ? const CircularProgressIndicator() : null,
-          title: Text(repository.name),
+          title: Text(repository.name!),
           onTap: () {
             bloc.toggleStarSink.add(repository);
           },

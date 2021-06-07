@@ -22,21 +22,19 @@ import 'package:graphql/src/core/fetch_more.dart';
 class GraphQLClient implements GraphQLDataProxy {
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
   GraphQLClient({
-    @required this.link,
-    @required this.cache,
-    this.defaultPolicies,
-    @experimental bool alwaysRebroadcast = false,
-  }) {
-    defaultPolicies ??= DefaultPolicies();
-    queryManager = QueryManager(
-      link: link,
-      cache: cache,
-      alwaysRebroadcast: alwaysRebroadcast ?? false,
-    );
-  }
+    required this.link,
+    required this.cache,
+    DefaultPolicies? defaultPolicies,
+    bool alwaysRebroadcast = false,
+  })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
+        queryManager = QueryManager(
+          link: link,
+          cache: cache,
+          alwaysRebroadcast: alwaysRebroadcast,
+        );
 
   /// The default [Policies] to set for each client action
-  DefaultPolicies defaultPolicies;
+  late final DefaultPolicies defaultPolicies;
 
   /// The [Link] over which GraphQL documents will be resolved into a [Response].
   final Link link;
@@ -44,7 +42,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// The initial [Cache] to use in the data store.
   final GraphQLCache cache;
 
-  QueryManager queryManager;
+  late final QueryManager queryManager;
 
   /// This registers a query in the [QueryManager] and returns an [ObservableQuery]
   /// based on the provided [WatchQueryOptions].
@@ -211,8 +209,8 @@ class GraphQLClient implements GraphQLDataProxy {
   @experimental
   Future<QueryResult> fetchMore(
     FetchMoreOptions fetchMoreOptions, {
-    @required QueryOptions originalOptions,
-    @required QueryResult previousResult,
+    required QueryOptions originalOptions,
+    required QueryResult previousResult,
   }) =>
       fetchMoreImplementation(
         fetchMoreOptions,
@@ -236,7 +234,7 @@ class GraphQLClient implements GraphQLDataProxy {
       );
 
   /// pass through to [cache.writeQuery] and then rebroadcast any changes.
-  void writeQuery(request, {data, broadcast = true}) {
+  void writeQuery(request, {required data, broadcast = true}) {
     cache.writeQuery(request, data: data, broadcast: broadcast);
     queryManager.maybeRebroadcastQueries();
   }
@@ -245,7 +243,7 @@ class GraphQLClient implements GraphQLDataProxy {
   void writeFragment(
     fragmentRequest, {
     broadcast = true,
-    data,
+    required data,
   }) {
     cache.writeFragment(
       fragmentRequest,
@@ -258,7 +256,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// Resets the contents of the store with [cache.store.reset()]
   /// and then refetches of all queries unless [refetchQueries] is disabled
   @experimental
-  Future<List<QueryResult>> resetStore({bool refetchQueries = true}) {
+  Future<List<QueryResult?>>? resetStore({bool refetchQueries = true}) {
     cache.store.reset();
     if (refetchQueries) {
       return queryManager.refetchSafeQueries();

@@ -1,5 +1,4 @@
 import 'package:gql_exec/gql_exec.dart' show Request;
-import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
 import 'package:graphql/src/exceptions/exceptions_next.dart';
 
 import './fragment.dart';
@@ -99,16 +98,16 @@ import './fragment.dart';
 /// ```
 abstract class GraphQLDataProxy {
   /// Reads a GraphQL query from the root query id.
-  Map<String, dynamic> readQuery(Request request, {bool optimistic});
+  Map<String, dynamic>? readQuery(Request request, {bool? optimistic});
 
   /// Reads a GraphQL fragment from any arbitrary id.
   ///
   /// If there is more than one fragment in the provided document
   /// then a `fragmentName` must be provided to `fragmentRequest.fragment`
   /// to select the correct fragment.
-  Map<String, dynamic> readFragment(
+  Map<String, dynamic>? readFragment(
     FragmentRequest fragmentRequest, {
-    bool optimistic,
+    bool? optimistic,
   });
 
   /// Writes a GraphQL query to the root query id,
@@ -126,8 +125,8 @@ abstract class GraphQLDataProxy {
   /// or a [CacheMisconfigurationException] if the write fails for some other reason.
   void writeQuery(
     Request request, {
-    Map<String, dynamic> data,
-    bool broadcast,
+    required Map<String, dynamic> data,
+    bool? broadcast,
   });
 
   /// Writes a GraphQL fragment to any arbitrary id.
@@ -145,7 +144,7 @@ abstract class GraphQLDataProxy {
   /// or a [CacheMisconfigurationException] if the write fails for some other reason.
   void writeFragment(
     FragmentRequest fragmentRequest, {
-    Map<String, dynamic> data,
-    bool broadcast,
+    required Map<String, dynamic> data,
+    bool? broadcast,
   });
 }

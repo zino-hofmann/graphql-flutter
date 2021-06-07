@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 
 import 'package:hive/hive.dart' show Hive;
 import 'package:path_provider/path_provider.dart'

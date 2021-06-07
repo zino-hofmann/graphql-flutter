@@ -21,7 +21,7 @@ class HiveStore extends Store {
   /// For full configuration of a [Box] use [HiveStore()] in tandem with [openBox] / [Hive.openBox]
   static Future<HiveStore> open({
     String boxName = defaultBoxName,
-    String path,
+    String? path,
   }) async =>
       HiveStore(await openBox(boxName, path: path));
 
@@ -37,17 +37,17 @@ class HiveStore extends Store {
   /// This lets us decouple the async initialization logic, making store usage elsewhere much more straightforward.
   ///
   /// [opened]: https://docs.hivedb.dev/#/README?id=open-a-box
-  HiveStore([Box box]) : this.box = box ?? Hive.box(defaultBoxName);
+  HiveStore([Box? box]) : this.box = box ?? Hive.box(defaultBoxName);
 
   @override
-  Map<String, dynamic> get(String dataId) {
+  Map<String, dynamic>? get(String dataId) {
     final result = box.get(dataId);
     if (result == null) return null;
     return Map.from(result);
   }
 
   @override
-  void put(String dataId, Map<String, dynamic> value) {
+  void put(String dataId, Map<String, dynamic>? value) {
     box.put(dataId, value);
   }
 

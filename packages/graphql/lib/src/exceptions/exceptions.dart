@@ -11,9 +11,10 @@ import 'package:graphql/src/exceptions/network.dart'
 export 'package:graphql/src/exceptions/network.dart'
     if (dart.library.io) 'package:graphql/src/exceptions/network_io.dart';
 
-LinkException translateFailure(dynamic failure) {
+LinkException translateFailure(dynamic failure, StackTrace trace) {
   if (failure is LinkException) {
     return failure;
   }
-  return network.translateFailure(failure) ?? UnknownException(failure);
+  return network.translateFailure(failure) ??
+      UnknownException(failure, trace);
 }

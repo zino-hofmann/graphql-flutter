@@ -58,7 +58,7 @@ class PagingReviews extends StatelessWidget {
                 ? Center(
                     child: CircularProgressIndicator(),
                   )
-                : RaisedButton(
+                : ElevatedButton(
                     onPressed: () {
                       fetchMore(
                         FetchMoreOptions.partial(

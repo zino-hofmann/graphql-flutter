@@ -1,10 +1,11 @@
 name: graphql_flutter_bloc_example
 description: A new Flutter project.
 
+publish_to: none
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.3.0 <3.0.0"
+  sdk: ">=2.10.0 <3.0.0"
 
 dependencies:
   flutter:
@@ -16,7 +17,7 @@ dependencies:
   flutter_bloc: ^6.0.5
   freezed_annotation: 0.12.0
   path_provider: ^1.6.18
-  hive: ^1.4.4
+  hive: ^2.0.0
   equatable: ^0.2.0
 
 dev_dependencies:
@@ -31,3 +32,4 @@ flutter:
 dependency_overrides:
   graphql:
     path: ../../packages/graphql
+    

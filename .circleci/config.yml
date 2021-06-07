@@ -1,7 +1,7 @@
 version: 2.1
 aliases:
   - &flutter_environment
-    - image: cirrusci/flutter:latest-web
+    - image: cirrusci/flutter:stable
   - &node_environment
     - image: circleci/node:10
   - &restore_cache
@@ -13,21 +13,18 @@ aliases:
   - &install_yaml_processor
     name: Install yq yaml processor
     command: |
+
       sudo apt update && \
       sudo apt install -y wget
 
-      wget https://github.com/mikefarah/yq/releases/download/2.4.1/yq_linux_amd64 -O ~/yq
+      version="4.6.1"
+      binary="yq_linux_amd64"
+      source="https://github.com/mikefarah/yq/releases/download"
+
+      wget "${source}/v${version}/${binary}" -O ~/yq
       sudo chmod +x ~/yq
 
       sudo apt remove -y wget
-  - &graphql_from_path
-    name: Switch to graphql from path
-    command: |
-      cd packages/graphql_flutter
-
-      ~/yq w pubspec.yaml dependencies.graphql.path "../graphql" > patched_pubspec.yaml
-      rm pubspec.yaml
-      mv patched_pubspec.yaml pubspec.yaml
   - &setup_github_bot
     name: Setup Github bot
     command: |
@@ -55,7 +52,6 @@ jobs:
       - checkout
       - restore_cache: *restore_cache
       - run: *install_yaml_processor
-      - run: *graphql_from_path
       - run:
           name: Install dependencies (graphql)
           command: |
@@ -76,15 +72,14 @@ jobs:
       - checkout
       - restore_cache: *restore_cache
       - run: *install_yaml_processor
-      - run: *graphql_from_path
       - run:
           name: Code formating and analyzing (graphql)
           command: |
             cd packages/graphql
             dartfmt **/*.dart -n --set-exit-if-changed
             pub get
-            dartanalyzer lib test
-            cd example && pub get && dartanalyzer .
+            dart analyze lib
+            cd example && pub get && dart analyze
       - run:
           name: Code formating and analyzing (graphql_flutter)
           command: |
@@ -97,15 +92,13 @@ jobs:
       - checkout
       - restore_cache: *restore_cache
       - run: *install_yaml_processor
-      - run: *graphql_from_path
       - run:
           name: Code coverage (graphql, vm only)
           command: |
             cd packages/graphql
-            pub global activate coverage
             pub get
-            pub run test_coverage
-            dart --enable_asserts --enable-vm-service test/.test_coverage.dart
+            pub global activate coverage
+            dart --enable_asserts --enable-vm-service test/coverage.dart
       - run:
           name: Code coverage (graphql_flutter)
           command: |
@@ -149,34 +142,15 @@ jobs:
       - run: *setup_github_bot
       - run: *setup_pub_credentials
       - run:
-          name: Patch pubspec with version (graphql)
+          name: Patch pubspec versions
           command: |
+            export VERSION=${CIRCLE_TAG#"v"}
+
             cd packages/graphql
+            ~/yq -P -i eval '.version=env(VERSION)' pubspec.yaml
 
-            VERSION=${CIRCLE_TAG}
-            VERSION=${VERSION#"v"}
-
-            # patch version
-            ~/yq w pubspec.yaml version $VERSION > patched_pubspec.yaml
-            rm pubspec.yaml
-            mv patched_pubspec.yaml pubspec.yaml
-      - run:
-          name: Patch pubspec with version (graphql_flutter)
-          command: |
-            cd packages/graphql_flutter
-
-            VERSION=${CIRCLE_TAG}
-            VERSION=${VERSION#"v"}
-
-            # patch version
-            ~/yq w pubspec.yaml version $VERSION > patched_pubspec.yaml
-            rm pubspec.yaml
-            mv patched_pubspec.yaml pubspec.yaml
-
-            # patch graphql dependency version
-            ~/yq w pubspec.yaml dependencies.graphql ^$VERSION > patched_pubspec.yaml
-            rm pubspec.yaml
-            mv patched_pubspec.yaml pubspec.yaml
+            cd ../graphql_flutter
+            ~/yq -P -i  eval '.version=env(VERSION)' pubspec.yaml
       - run:
           name: Bump version numbers
           command: |
@@ -196,13 +170,17 @@ jobs:
       - run:
           name: Pub deployment (graphql_flutter)
           command: |
+            export VERSION=${CIRCLE_TAG#"v"}
+            export GRAPHQL_DEP="^${VERSION}"
+
             cd packages/graphql_flutter
+            ~/yq -P -i  eval '.dependencies.graphql=env(GRAPHQL_DEP) | del(.publish_to)' pubspec.yaml
             pub publish -f
 workflows:
   nightly:
     triggers:
       - schedule:
-          cron: "0 0 * * *"
+          cron: "0 12 * * *"
           filters:
             branches:
               only:
