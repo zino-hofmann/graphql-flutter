@@ -44,6 +44,9 @@ class OptimisticProxy extends NormalizingDataProxy {
   /// `typePolicies` to pass down to `normalize` (proxied from [cache])
   get typePolicies => cache.typePolicies;
 
+  /// `possibleTypeOf` to pass down to `normalize` (proxied from [cache])
+  get possibleTypes => cache.possibleTypes;
+
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   /// (proxied from [cache])
   get dataIdFromObject => cache.dataIdFromObject;

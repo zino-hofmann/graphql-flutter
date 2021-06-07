@@ -17,6 +17,9 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// `typePolicies` to pass down to `normalize`
   Map<String, TypePolicy> get typePolicies;
 
+  /// `possibleTypes` to pass down to [normalize]
+  Map<String, Set<String>> get possibleTypes;
+
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   DataIdResolver? get dataIdFromObject;
 
@@ -92,6 +95,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         document: request.operation.document,
         operationName: request.operation.operationName,
         variables: sanitizeVariables(request.variables)!,
+        possibleTypes: possibleTypes,
       );
 
   Map<String, dynamic>? readFragment(
@@ -112,6 +116,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         idFields: fragmentRequest.idFields,
         fragmentName: fragmentRequest.fragment.fragmentName,
         variables: sanitizeVariables(fragmentRequest.variables)!,
+        possibleTypes: possibleTypes,
       );
 
   void writeQuery(
@@ -134,6 +139,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         variables: sanitizeVariables(request.variables)!,
         // data
         data: data,
+        possibleTypes: possibleTypes,
       );
       if (broadcast ?? true) {
         broadcastRequested = true;
@@ -171,6 +177,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
         variables: sanitizeVariables(request.variables)!,
         // data
         data: data,
+        possibleTypes: possibleTypes,
       );
       if (broadcast ?? true) {
         broadcastRequested = true;
