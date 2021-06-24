@@ -101,6 +101,8 @@ class QueryManager {
             response,
             queryResult,
           );
+
+          maybeRebroadcastQueries();
         } catch (failure, trace) {
           // we set the source to indicate where the source of failure
           queryResult ??= QueryResult(source: QueryResultSource.network);
