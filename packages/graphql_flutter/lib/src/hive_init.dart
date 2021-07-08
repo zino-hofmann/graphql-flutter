@@ -26,8 +26,6 @@ Future<void> initHiveForFlutter({String? subDir,  Iterable<String> boxes = const
     Hive.init(path);
   }
 
-  for (var box in boxes){
-    await Hive.openBox(box);
-  }
-
+  final futures = boxes.map(Hive.openBox);
+  await Future.wait(futures);
 }
