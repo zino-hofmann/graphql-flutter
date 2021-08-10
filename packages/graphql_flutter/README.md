@@ -97,7 +97,7 @@ void main() async {
     GraphQLClient(
       link: link,
       // The default store is the InMemoryStore, which does NOT persist to disk
-      store: GraphQLCache(store: HiveStore()),
+      cache: GraphQLCache(store: HiveStore()),
     ),
   );
 
