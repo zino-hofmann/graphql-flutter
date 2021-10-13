@@ -665,7 +665,7 @@ final Link _link = Link.from([_authLink, _httpLink]);
 link = Link.split((request) => request.isSubscription, websocketLink, link);
 ```
 
-When combining links, **it isimportant to note that**:
+When combining links, **it is important to note that**:
 
 - Terminating links like `HttpLink` and `WebsocketLink` must come at the end of a route, and will not call links following them.
 - Link order is very important. In `HttpLink(myEndpoint).concat(AuthLink(getToken: authenticate))`, the `AuthLink` will never be called.
