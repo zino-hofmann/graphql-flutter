@@ -86,31 +86,31 @@ jobs:
             cd packages/graphql_flutter
             dartfmt **/*.dart -n --set-exit-if-changed
             flutter analyze
-  coverage:
-    docker: *flutter_environment
-    steps:
-      - checkout
-      - restore_cache: *restore_cache
-      - run: *install_yaml_processor
-      - run:
-          name: Code coverage (graphql, vm only)
-          command: |
-            cd packages/graphql
-            pub get
-            pub global activate coverage
-            dart --enable_asserts --enable-vm-service test/coverage.dart
-      - run:
-          name: Code coverage (graphql_flutter)
-          command: |
-            cd packages/graphql_flutter
-            flutter test --coverage
-      - run:
-          name: Upload coverage
-          command: |
-            bash <(curl -s https://codecov.io/bash) -F graphql_flutter
-            bash <(curl -s https://codecov.io/bash) -F graphql_flutter -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_flutter
-            bash <(curl -s https://codecov.io/bash) -F graphql_client
-            bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
+  # coverage:
+  #  docker: *flutter_environment
+  #  steps:
+      #    - checkout
+      #- restore_cache: *restore_cache
+      #- run: *install_yaml_processor
+          #- run:
+          #name: Code coverage (graphql, vm only)
+            #command: |
+            #cd packages/graphql
+            #pub get
+            #pub global activate coverage
+          #dart --enable_asserts --enable-vm-service test/coverage.dart
+          #- run:
+          #name: Code coverage (graphql_flutter)
+            #command: |
+            #cd packages/graphql_flutter
+          #flutter test --coverage
+          #- run:
+          #name: Upload coverage
+            #command: |
+            #bash <(curl -s https://codecov.io/bash) -F graphql_flutter
+            #bash <(curl -s https://codecov.io/bash) -F graphql_flutter -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_flutter
+            #bash <(curl -s https://codecov.io/bash) -F graphql_client
+          #bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
   release:
     docker: *node_environment
     steps:
@@ -190,14 +190,14 @@ workflows:
       - lint:
           requires:
             - dependencies
-      - coverage:
-          requires:
-            - dependencies
+      #- coverage:
+            #    requires:
+            #- dependencies
       - release:
           requires:
             - dependencies
             - lint
-            - coverage
+            #- coverage
   weekly:
     triggers:
       - schedule:
@@ -211,14 +211,14 @@ workflows:
       - lint:
           requires:
             - dependencies
-      - coverage:
-          requires:
-            - dependencies
+          #- coverage:
+            #requires:
+            #- dependencies
       - release:
           requires:
             - dependencies
             - lint
-            - coverage
+            #- coverage
       - sync_with_beta:
           requires:
             - release
@@ -234,12 +234,12 @@ workflows:
           filters:
             tags:
               ignore: /^.*$/
-      - coverage:
-          requires:
-            - dependencies
-          filters:
-            tags:
-              ignore: /^.*$/
+          #- coverage:
+              #requires:
+            #- dependencies
+            #filters:
+              #tags:
+              #ignore: /^.*$/
       - publish:
           requires:
             - dependencies
