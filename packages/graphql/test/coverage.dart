@@ -15,6 +15,6 @@ void main() {
   cache_graphql_cache_test.main();
   fetch_policy_test.main();
   anonymous_operations_test.main();
-  websocket_test.main();
+  //websocket_test.main();
   graphql_client_test.main();
 }
