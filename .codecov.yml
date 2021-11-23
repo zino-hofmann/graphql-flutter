@@ -18,4 +18,6 @@ coverage:
 # don't factor tests into coverage scores
 ignore:
   - packages/graphql_flutter/test
+  - packages/graphql_flutter/example
   - packages/graphql/test
+  - packages/graphql/example
