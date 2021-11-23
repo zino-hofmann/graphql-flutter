@@ -66,26 +66,6 @@ jobs:
           key: pub-packages-v1-{{ checksum "packages/graphql/pubspec.yaml" }}-{{ checksum "packages/graphql_flutter/pubspec.yaml" }}
           paths:
             - ~/.pub-cache
-  lint:
-    docker: *flutter_environment
-    steps:
-      - checkout
-      - restore_cache: *restore_cache
-      - run: *install_yaml_processor
-      - run:
-          name: Code formating and analyzing (graphql)
-          command: |
-            cd packages/graphql
-            dartfmt **/*.dart -n --set-exit-if-changed
-            pub get
-            dart analyze lib
-            cd example && pub get && dart analyze
-      - run:
-          name: Code formating and analyzing (graphql_flutter)
-          command: |
-            cd packages/graphql_flutter
-            dartfmt **/*.dart -n --set-exit-if-changed
-            flutter analyze
   coverage:
     docker: *flutter_environment
     steps:
@@ -117,7 +97,7 @@ jobs:
       - checkout
       - run:
           name: Generate release tags
-          command: npx -p semantic-release -p @semantic-release/changelog -p @semantic-release/git semantic-release
+          command: nvm install 'lts/*' && npx -p semantic-release -p @semantic-release/changelog -p @semantic-release/git semantic-release
   sync_with_beta:
     docker: *node_environment
     steps:
@@ -187,16 +167,12 @@ workflows:
                 - beta
     jobs:
       - dependencies
-      - lint:
-          requires:
-            - dependencies
       - coverage:
           requires:
             - dependencies
       - release:
           requires:
             - dependencies
-            - lint
             - coverage
   weekly:
     triggers:
@@ -208,16 +184,12 @@ workflows:
                 - master
     jobs:
       - dependencies
-      - lint:
-          requires:
-            - dependencies
       - coverage:
           requires:
             - dependencies
       - release:
           requires:
             - dependencies
-            - lint
             - coverage
       - sync_with_beta:
           requires:
@@ -228,12 +200,6 @@ workflows:
           filters:
             tags:
               only: /^.*$/
-      - lint:
-          requires:
-            - dependencies
-          filters:
-            tags:
-              ignore: /^.*$/
       - coverage:
           requires:
             - dependencies
