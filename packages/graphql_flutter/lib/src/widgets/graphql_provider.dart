@@ -49,7 +49,7 @@ class _InheritedGraphQLProvider extends InheritedWidget {
   _InheritedGraphQLProvider({
     required this.client,
     required Widget child,
-  })   : clientValue = client.value,
+  })  : clientValue = client.value,
         super(child: child);
 
   factory _InheritedGraphQLProvider.of(BuildContext context) {

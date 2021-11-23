@@ -18,9 +18,11 @@ jobs:
           dart pub get
 
       - name: Code formatting check
-        run: dart format --set-exit-if-changed packages/graphql
+        run: |
+          cd packages/graphql
+          dart format --set-exit-if-changed .
 
       - name: Code analyze check
         run: |
-          dart analyze packages/graphql/lib
-          dart analyze packages/graphql/test
+          cd packages/graphql
+          dart analyze .

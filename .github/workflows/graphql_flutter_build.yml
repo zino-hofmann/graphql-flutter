@@ -17,8 +17,10 @@ jobs:
           cd packages/graphql_flutter
           flutter pub get
 
-      - run: flutter format --set-exit-if-changed packages/graphql_flutter
+      - run: |
+          cd packages/graphql_flutter
+          flutter format --set-exit-if-changed .
 
       - run: |
-          flutter analyze packages/graphql_flutter/lib
-          flutter analyze packages/graphql_flutter/test
+          cd packages/graphql_flutter
+          flutter analyze .
