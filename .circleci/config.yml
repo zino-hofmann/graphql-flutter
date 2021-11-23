@@ -3,7 +3,7 @@ aliases:
   - &flutter_environment
     - image: cirrusci/flutter:stable
   - &node_environment
-    - image: circleci/node:10
+    - image: circleci/node:16
   - &restore_cache
     keys:
       # when lock file changes, use increasingly general patterns to restore cache
