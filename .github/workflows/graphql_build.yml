@@ -25,4 +25,5 @@ jobs:
       - name: Code analyze check
         run: |
           cd packages/graphql
-          dart analyze .
+          dart analyze lib
+          dart analyze test
