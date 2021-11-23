@@ -15,6 +15,5 @@ LinkException translateFailure(dynamic failure, StackTrace trace) {
   if (failure is LinkException) {
     return failure;
   }
-  return network.translateFailure(failure) ??
-      UnknownException(failure, trace);
+  return network.translateFailure(failure) ?? UnknownException(failure, trace);
 }

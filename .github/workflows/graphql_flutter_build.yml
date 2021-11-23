@@ -1,0 +1,24 @@
+name: graphql-flutter Dart Code sanity check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    # This job will run on ubuntu virtual machine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+
+      - run: |
+          cd packages/graphql_flutter
+          flutter pub get
+
+      - run: flutter format --set-exit-if-changed packages/graphql_flutter
+
+      - run: |
+          flutter analyze packages/graphql_flutter/lib
+          flutter analyze packages/graphql_flutter/test

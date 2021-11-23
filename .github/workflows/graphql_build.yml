@@ -1,0 +1,26 @@
+name: graphql Dart Code sanity check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+
+      - name: Install dependencies
+        run: |
+          cd packages/graphql
+          dart pub get
+
+      - name: Code formatting check
+        run: dart format --set-exit-if-changed packages/graphql
+
+      - name: Code analyze check
+        run: |
+          dart analyze packages/graphql/lib
+          dart analyze packages/graphql/test
