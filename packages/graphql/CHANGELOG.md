@@ -1,3 +1,10 @@
+## [5.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v5.0.0...v5.0.1-beta.1) (2021-12-07)
+
+
+### Performance Improvements
+
+* open Hive boxes concurrently ([33ea16e](https://github.com/zino-app/graphql-flutter/commit/33ea16e700375eb5e874ae56591c03e1f11c4a4c))
+
 ## [5.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v5.0.0...v5.0.1-beta.1) (2021-12-06)
 
 
