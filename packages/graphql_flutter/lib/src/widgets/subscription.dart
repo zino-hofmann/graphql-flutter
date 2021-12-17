@@ -3,9 +3,7 @@ import 'dart:io';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
-import 'package:graphql/client.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 typedef OnSubscriptionResult = void Function(
   QueryResult subscriptionResult,

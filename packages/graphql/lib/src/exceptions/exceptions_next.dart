@@ -4,9 +4,6 @@ import 'package:graphql/client.dart';
 /// these should be the only exceptions we need
 import 'package:meta/meta.dart';
 
-import 'package:gql_link/gql_link.dart' show LinkException, ServerException;
-import 'package:gql_exec/gql_exec.dart' show GraphQLError, Request, Response;
-
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
 export 'package:normalize/normalize.dart' show PartialDataException;
 

@@ -1,4 +1,3 @@
-import 'package:gql_exec/gql_exec.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 

@@ -1,6 +1,5 @@
 import 'dart:async' show FutureOr;
 import 'package:graphql/client.dart';
-import 'package:graphql/src/exceptions.dart';
 
 /// The source of the result data contained
 ///
