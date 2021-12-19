@@ -3,10 +3,8 @@ import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 
 import 'package:gql/ast.dart';
-import 'package:gql_exec/gql_exec.dart';
 
 import 'package:graphql/client.dart';
-import 'package:graphql/src/core/policies.dart';
 
 /// Query options.
 class QueryOptions extends BaseOptions {

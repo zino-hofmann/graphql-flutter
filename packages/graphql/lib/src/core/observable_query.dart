@@ -2,11 +2,7 @@ import 'dart:async';
 import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
-import 'package:graphql/src/core/query_manager.dart';
-import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/fetch_more.dart';
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/policies.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
 /// Side effect to register for execution when data is received

@@ -1,12 +1,5 @@
 import 'package:graphql/client.dart';
 
-import 'package:gql_exec/gql_exec.dart';
-
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/policies.dart';
-import 'package:graphql/src/exceptions.dart';
-import 'package:normalize/normalize.dart';
-
 /// Internal writeQuery wrapper
 typedef _IntWriteQuery = void Function(
     Request request, Map<String, dynamic>? data);

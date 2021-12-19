@@ -4,8 +4,6 @@ import 'package:graphql/client.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:test/test.dart';
 
-import 'package:graphql/src/cache/store.dart';
-
 void main() {
   group('InMemoryStore', () {
     final data = {

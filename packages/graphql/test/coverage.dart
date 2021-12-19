@@ -7,7 +7,7 @@ import 'cache/store_test.dart' as cache_store_test;
 import 'fetch_policy_test.dart' as fetch_policy_test;
 import 'graphql_client_test.dart' as graphql_client_test;
 import 'query_options_test.dart' as query_options_test;
-import 'websocket_test.dart' as websocket_test;
+//import 'websocket_test.dart' as websocket_test;
 
 void main() {
   query_options_test.main();

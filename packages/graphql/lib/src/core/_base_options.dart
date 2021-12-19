@@ -1,10 +1,8 @@
 import 'package:graphql/src/core/_data_class.dart';
 
 import 'package:gql/ast.dart';
-import 'package:gql_exec/gql_exec.dart';
 
 import 'package:graphql/client.dart';
-import 'package:graphql/src/core/policies.dart';
 
 /// TODO refactor into [Request] container
 /// Base options.

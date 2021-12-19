@@ -2,11 +2,6 @@ import 'dart:async';
 
 import 'package:graphql/client.dart';
 
-import 'package:graphql/src/core/query_manager.dart';
-import 'package:graphql/src/core/query_options.dart';
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/policies.dart';
-
 import 'package:graphql/src/core/_query_write_handling.dart';
 
 /// Fetch more results and then merge them with [previousResult]
