@@ -10,10 +10,10 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-        - run: |
-            cd packages/graphql_flutter
-            flutter test --coverage
-        - run: |
-            cd packages/graphql_flutter
-            bash <(curl -s https://codecov.io/bash) -F graphql_client
-            bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
+      - run: |
+          cd packages/graphql_flutter
+          flutter test --coverage
+      - run: |
+          cd packages/graphql_flutter
+          bash <(curl -s https://codecov.io/bash) -F graphql_client
+          bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
