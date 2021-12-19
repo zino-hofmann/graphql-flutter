@@ -5,23 +5,19 @@ on: [push, pull_request]
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-
       - name: Install dependencies
         run: |
           cd packages/graphql
           dart pub get
-
       - name: Code formatting check
         run: |
           cd packages/graphql
           dart format --set-exit-if-changed .
-
       - name: Code analyze check
         run: |
           cd packages/graphql
