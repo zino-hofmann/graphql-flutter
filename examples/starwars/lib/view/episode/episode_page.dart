@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import './episode.dart';
-import './hero_query.dart';
+import '../../model/episode/episode.dart';
+import 'hero_query.dart';
 
 class EpisodePage extends StatefulWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(
