@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-import './episode.dart';
+import '../../model/episode/episode.dart';
 
 class HeroForEpisode extends StatelessWidget {
   const HeroForEpisode({@required this.episode});

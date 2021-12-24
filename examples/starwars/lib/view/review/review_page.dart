@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import './review_subscription.dart';
+import 'review_subscription.dart';
 
 class ReviewsPage extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(

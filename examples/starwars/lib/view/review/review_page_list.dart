@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:starwars_app/reviews/review.dart';
+import 'package:starwars_app/view/review/review_view.dart';
 
 class PagingReviews extends StatelessWidget {
   static const BottomNavigationBarItem navItem = BottomNavigationBarItem(

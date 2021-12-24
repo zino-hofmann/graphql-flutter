@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:starwars_app/view/client/graphql_view.dart';
 import 'package:universal_platform/universal_platform.dart';
 
-import './client_provider.dart';
-import './episode/episode_page.dart';
-import './reviews/review_page.dart';
-import './reviews/review_page_list.dart';
+import 'view/episode/episode_page.dart';
+import 'view/review/review_page.dart';
+import 'view/review/review_page_list.dart';
 
 String get host {
 // https://github.com/flutter/flutter/issues/36126#issuecomment-596215587

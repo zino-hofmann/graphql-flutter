@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-
-import './review.dart';
+import 'package:starwars_app/view/review/review_view.dart';
 
 class ReviewFeed extends StatelessWidget {
   @override
