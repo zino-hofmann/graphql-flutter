@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:graphql/src/links/gql_links.dart';
+import 'package:graphql/src/utilities/platform.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/query_options.dart' show WithType;
@@ -22,7 +23,7 @@ import './websocket_messages.dart';
 typedef GetInitPayload = FutureOr<dynamic> Function();
 
 /// A definition for functions that returns a connected [WebSocketChannel]
-typedef WebSocketConnect = WebSocketChannel Function(
+typedef WebSocketConnect = FutureOr<WebSocketChannel> Function(
   Uri uri,
   Iterable<String>? protocols,
 );
@@ -102,11 +103,15 @@ class SocketClientConfig {
   /// ```
   final WebSocketConnect connect;
 
-  static WebSocketChannel defaultConnect(
+  static Future<WebSocketChannel> defaultConnect(
     Uri uri,
     Iterable<String>? protocols,
-  ) =>
-      WebSocketChannel.connect(uri, protocols: protocols).forGraphQL();
+  ) async {
+    return defaultConnectPlatform(
+      uri,
+      protocols,
+    );
+  }
 
   /// Payload to be sent with the connection_init request.
   ///
@@ -221,8 +226,8 @@ class SocketClient {
     try {
       // Even though config.connect is sync, we call async in order to make the
       // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
-      socketChannel =
-          await config.connect(Uri.parse(url), protocols).forGraphQL();
+      var connection = await config.connect(Uri.parse(url), protocols);
+      socketChannel = connection.forGraphQL();
       _connectionStateController.add(SocketConnectionState.connected);
       print('Connected to websocket.');
       _write(initOperation);
