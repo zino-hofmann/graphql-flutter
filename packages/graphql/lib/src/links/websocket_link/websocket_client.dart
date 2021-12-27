@@ -226,8 +226,8 @@ class SocketClient {
     try {
       // Even though config.connect is sync, we call async in order to make the
       // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
-      socketChannel =
-          (await config.connect(Uri.parse(url), protocols)).forGraphQL();
+      var connection = await config.connect(Uri.parse(url), protocols);
+      socketChannel = connection.forGraphQL();
       _connectionStateController.add(SocketConnectionState.connected);
       print('Connected to websocket.');
       _write(initOperation);
