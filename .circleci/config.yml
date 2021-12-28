@@ -132,35 +132,6 @@ jobs:
             ~/yq -P -i  eval '.dependencies.graphql=env(GRAPHQL_DEP) | del(.publish_to)' pubspec.yaml
             pub publish -f
 workflows:
-  nightly:
-    triggers:
-      - schedule:
-          cron: "0 12 * * *"
-          filters:
-            branches:
-              only:
-                - beta
-    jobs:
-      - dependencies
-      - release:
-          requires:
-            - dependencies
-  weekly:
-    triggers:
-      - schedule:
-          cron: "0 21 * * 1"
-          filters:
-            branches:
-              only:
-                - master
-    jobs:
-      - dependencies
-      - release:
-          requires:
-            - dependencies
-      - sync_with_beta:
-          requires:
-            - release
   default:
     jobs:
       - dependencies:

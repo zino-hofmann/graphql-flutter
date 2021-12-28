@@ -1,0 +1,19 @@
+name: graphql-flutter Tests case
+
+on: [ push, pull_request ]
+
+jobs:
+  build:
+    # This job will run on ubuntu virtual machine
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v1
+        with:
+          channel: 'stable'
+      - run: |
+          cd packages/graphql_flutter
+          flutter pub get
+      - run: |
+          cd packages/graphql_flutter
+          flutter test .
