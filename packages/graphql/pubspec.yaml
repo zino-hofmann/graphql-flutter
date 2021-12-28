@@ -7,8 +7,8 @@ dependencies:
   path: ^1.8.0
   gql: ^0.13.0
   gql_exec: 0.3.0
-  gql_link: ^0.4.0
-  gql_http_link: ^0.4.0
+  gql_link: 0.4.0
+  gql_http_link: 0.4.0
   gql_transform_link: ^0.2.0
   gql_error_link: ^0.2.0
   gql_dedupe_link: ^2.0.0
