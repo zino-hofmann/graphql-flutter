@@ -10,8 +10,6 @@
 
 ### 📌 &nbsp; Bulletin
 * See the [`v3 -> v4` Migration Guide](./changelog-v3-v4.md) if you're still on `v3`.
-* [Maintenance status: Low](https://github.com/zino-app/graphql-flutter/issues/763).
-  * Follow [#762](https://github.com/zino-app/graphql-flutter/issues/762) for updates on the planned architecture walk through videos.
 * [Join the discord.][discord-link]
 
 ## About this project
@@ -121,8 +119,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/kentcdodds
 
 This project follows the [all-contributors](https://github.com/kentcdodds/all-contributors) specification. Contributions of any kind are welcome!
 
-[build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
-[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
+[build-status-badge]: https://img.shields.io/github/workflow/status/zino-hofmann/graphql-flutter/graphql-flutter%20Tests%20case?style=flat-square
+[build-status-link]: https://github.com/zino-hofmann/graphql-flutter/actions
 [coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg?style=flat-square
 [coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
