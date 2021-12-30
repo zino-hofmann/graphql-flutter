@@ -422,6 +422,10 @@ String customDataIdFromObject(Map<String, Object> data) {
 }
 ```
 
+#### Normalization of fragments
+
+The `normalize` package relies on object introspection through the `__typename` and a `possibleTypes` map. You can generate the possible types map through [graphql_codegen](https://pub.dev/packages/graphql_codegen).
+
 ## Direct Cache Access API
 
 The [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLCache-class.html)
