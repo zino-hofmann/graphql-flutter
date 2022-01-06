@@ -51,7 +51,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^5.0.0
+  graphql_flutter: ^<last version on github release>
 ```
 
 And then import it inside your dart code:
@@ -61,7 +61,6 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 ```
 
 ## Migration Guide
-<!-- TODO: initialize changelog-v4-v5 file and update the link here -->
 Find the migration from version 3 to version 4 [here](./../../changelog-v3-v4.md).
 
 ## Usage
