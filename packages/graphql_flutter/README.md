@@ -51,7 +51,7 @@ First, depend on this package:
 
 ```yaml
 dependencies:
-  graphql_flutter: ^4.0.0-beta
+  graphql_flutter: ^5.0.0
 ```
 
 And then import it inside your dart code:
@@ -61,14 +61,14 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 ```
 
 ## Migration Guide
-
+<!-- TODO: initialize changelog-v4-v5 file and update the link here -->
 Find the migration from version 3 to version 4 [here](./../../changelog-v3-v4.md).
 
 ## Usage
 
 To connect to a GraphQL Server, we first need to create a `GraphQLClient`. A `GraphQLClient` requires both a `cache` and a `link` to be initialized.
 
-In our example below, we will be using the Github Public API. we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our github access token. For the cache, we are going to use `GraphQLCache`.
+In our example below, we will be using the Github Public API. we are going to use `HttpLink` which we will concatenate with `AuthLink` so as to attach our [github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token). For the cache, we are going to use `GraphQLCache`.
 
 ```dart
 ...
@@ -157,28 +157,31 @@ Query(
     variables: {
       'nRepositories': 50,
     },
-    pollInterval: Duration(seconds: 10),
+    pollInterval: const Duration(seconds: 10),
   ),
   // Just like in apollo refetch() could be used to manually trigger a refetch
   // while fetchMore() can be used for pagination purpose
-  builder: (QueryResult result, { VoidCallback refetch, FetchMore fetchMore }) {
+  builder: (QueryResult result, { VoidCallback? refetch, FetchMore? fetchMore }) {
     if (result.hasException) {
         return Text(result.exception.toString());
     }
 
     if (result.isLoading) {
-      return Text('Loading');
+      return const Text('Loading');
     }
 
-    // it can be either Map or List
-    List repositories = result.data['viewer']['repositories']['nodes'];
+    List? repositories = result.data?['viewer']?['repositories']?['nodes'];
+
+    if (repositories == null) {
+      return const Text('No repositories');
+    }
 
     return ListView.builder(
       itemCount: repositories.length,
       itemBuilder: (context, index) {
         final repository = repositories[index];
 
-        return Text(repository['name']);
+        return Text(repository['name'] ?? '');
     });
   },
 );
