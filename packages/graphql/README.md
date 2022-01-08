@@ -422,6 +422,79 @@ String customDataIdFromObject(Map<String, Object> data) {
 }
 ```
 
+Normalize requires you to specify the possible types map for fragments to work correctly. This
+is a mapping from abstract union and interface types to their concrete object types. E.g. take the
+schema
+
+```graphql
+
+interface PersonI {
+  name: String
+  age: Int
+}
+
+type Employee implements PersonI {
+  name: String
+  age: Int
+  daysOfEmployement: Int
+}
+
+type InStoreCustomer implements PersonI {
+  name: String
+  age: Int
+  numberOfPurchases: Int
+}
+
+type OnlineCustomer implements PersonI {
+  name: String
+  age: Int
+  numberOfPurchases: Int
+}
+
+union CustomerU = OnlineCustomer | InStoreCustomer
+
+```
+
+the possible types map would be:
+
+```dart
+const POSSIBLE_TYPES = const {
+  'CustomerU': {'InStoreCustomer', 'OnlineCustomer'},
+  'PersonI': {'Employee', 'InStoreCustomer', 'OnlineCustomer'},
+}
+
+// Here's how it's parsed to the cache
+final client = GraphQLClient(
+  cache: GraphQLCache(
+    possibleTypes: POSSIBLE_TYPES,
+  ),
+)
+```
+
+You can generate the `POSSIBLE_TYPES` map, e.g., using [graphql_codegen](https://pub.dev/packages/graphql_codegen).
+
+Furthermore, for normalize to correctly resolve the type you should always make sure you're querying the `__typename`. Given the example above a query could look something like
+
+```graphql
+
+query {
+  people {
+    __typename # Needed to decide where which entry to update in the cache
+    ... on Employee {
+      name
+      age
+    }
+    ... on Customer {
+      name
+      age
+    }
+  }
+}
+
+```
+
+if you're not providing the possible type map and introspecting the typename, the cache can't be updated. 
+
 ## Direct Cache Access API
 
 The [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLCache-class.html)
