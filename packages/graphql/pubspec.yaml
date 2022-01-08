@@ -13,7 +13,7 @@ dependencies:
   gql_error_link: ^0.2.0
   gql_dedupe_link: ^2.0.0
   hive: ^2.0.0
-  normalize: ^0.5.3
+  normalize: ^0.6.0
   http: ^0.13.0
   collection: ^1.15.0
   web_socket_channel: ^2.0.0
