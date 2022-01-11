@@ -221,7 +221,6 @@ class SocketClient {
     }
 
     _connectionStateController.add(SocketConnectionState.connecting);
-    print('Connecting to websocket: $url...');
 
     try {
       // Even though config.connect is sync, we call async in order to make the
