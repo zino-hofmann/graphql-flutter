@@ -200,9 +200,6 @@ class SocketClient {
     _keepAliveSubscription = messages.whereType<ConnectionKeepAlive>().timeout(
       config.inactivityTimeout!,
       onTimeout: (EventSink<ConnectionKeepAlive> event) {
-        print(
-          "Haven't received keep alive message for ${config.inactivityTimeout!.inSeconds} seconds. Disconnecting..",
-        );
         event.close();
         socketChannel!.sink.close(ws_status.goingAway);
         _connectionStateController.add(SocketConnectionState.notConnected);
@@ -228,7 +225,6 @@ class SocketClient {
       var connection = await config.connect(Uri.parse(url), protocols);
       socketChannel = connection.forGraphQL();
       _connectionStateController.add(SocketConnectionState.connected);
-      print('Connected to websocket.');
       _write(initOperation);
 
       if (config.inactivityTimeout != null) {
@@ -278,10 +274,6 @@ class SocketClient {
 
     if (config.autoReconnect && !_connectionStateController.isClosed) {
       if (config.delayBetweenReconnectionAttempts != null) {
-        print(
-          'Scheduling to connect in ${config.delayBetweenReconnectionAttempts!.inSeconds} seconds...',
-        );
-
         _reconnectTimer = Timer(
           config.delayBetweenReconnectionAttempts!,
           () {
@@ -392,7 +384,6 @@ class SocketClient {
                 .timeout(
                 config.queryAndMutationTimeout!,
                 onTimeout: (EventSink<GraphQLSocketMessage> event) {
-                  print('Request timed out.');
                   response.addError(TimeoutException('Request timed out.'));
                   event.close();
                   response.close();
