@@ -1,4 +1,4 @@
-name: graphql-flutter Dart Code sanity check
+name: graphql-flutter Code coverage
 
 on: [ push, pull_request ]
 
@@ -12,8 +12,10 @@ jobs:
           channel: 'stable'
       - run: |
           cd packages/graphql_flutter
+          flutter pub get
           flutter test --coverage
-      - run: |
-          cd packages/graphql_flutter
-          bash <(curl -s https://codecov.io/bash) -F graphql_client
-          bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: packages/graphql_flutter/coverage/lcov.info
