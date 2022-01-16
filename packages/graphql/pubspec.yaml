@@ -23,7 +23,8 @@ dependencies:
 dev_dependencies:
   async: ^2.5.0
   mockito: ^5.0.0
-  test: ^1.5.3
+  test: ^1.18.2
+  coverage: ^1.0.3
   http_parser: ^4.0.0
   lints: ^1.0.1
 environment:

@@ -11,13 +11,14 @@ jobs:
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: stable
-      - run: |
+      - name: Run tests with coverage
+        run: |
           cd packages/graphql
-          pub get
-          pub global activate coverage
-          dart --enable_asserts --enable-vm-service test/coverage.dart
-      - run: |
-          cd packages/graphql
-          bash <(curl -s https://codecov.io/bash) -F graphql_client
-          bash <(curl -s https://codecov.io/bash) -F graphql_client -B `git rev-parse --abbrev-ref HEAD`_pseudo_branch_package_graphql_client
-          dart analyze test
+          dart pub get
+          pub run test --coverage="coverage"
+          pub run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.packages --report-on=lib
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v1.0.2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+          file: packages/graphql/coverage.lcov
