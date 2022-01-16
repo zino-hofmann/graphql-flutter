@@ -1,4 +1,4 @@
-@Skip('currently failing for web socket services unavailable')
+//@Skip('currently failing for web socket services unavailable')
 
 import 'dart:async';
 
@@ -14,6 +14,7 @@ import 'package:graphql/client.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import './helpers.dart';
+import './mock_server/ws_echo_server.dart';
 
 class EchoSink extends DelegatingStreamSink implements WebSocketSink {
   final StreamSink sink;
@@ -85,8 +86,10 @@ class EchoSocket implements WebSocketChannel {
       throw UnimplementedError();
 }
 
-SocketClient getTestClient([StreamController? controller]) => SocketClient(
-      'ws://echo.websocket.org',
+SocketClient getTestClient(
+        {required String wsUrl, StreamController? controller}) =>
+    SocketClient(
+      wsUrl,
       connect: (_, __) => EchoSocket.connect(controller ?? BehaviorSubject()),
       config: SocketClientConfig(
         delayBetweenReconnectionAttempts: Duration(milliseconds: 1),
@@ -96,7 +99,8 @@ SocketClient getTestClient([StreamController? controller]) => SocketClient(
       ),
     );
 
-void main() {
+Future<void> main() async {
+  String wsUrl = await runWebSocketServer();
   group('InitOperation', () {
     test('null payload', () {
       // ignore: deprecated_member_use_from_same_package
@@ -139,7 +143,7 @@ void main() {
         r'}';
     setUp(overridePrint((log) {
       controller = StreamController(sync: true);
-      socketClient = getTestClient(controller);
+      socketClient = getTestClient(controller: controller, wsUrl: wsUrl);
     }));
     tearDown(overridePrint(
       (log) => socketClient.dispose(),
@@ -263,7 +267,7 @@ void main() {
 
     setUp(overridePrint((log) {
       socketClient = SocketClient(
-        'ws://echo.websocket.org',
+        wsUrl,
         connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
         config: SocketClientConfig(initialPayload: () => initPayload),
       );
@@ -295,7 +299,7 @@ void main() {
 
     setUp(overridePrint((log) {
       socketClient = SocketClient(
-        'ws://echo.websocket.org',
+        wsUrl,
         connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
         config: SocketClientConfig(
           initialPayload: () async {
