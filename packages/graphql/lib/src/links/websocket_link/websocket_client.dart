@@ -247,7 +247,9 @@ class SocketClient {
       _messageSubscription = _messages.listen(
         onMessage,
         onDone: onConnectionLost,
-        cancelOnError: true,
+        // onDone will not be triggered if the subscription is
+        // auto-cancelled on error; make sure to pass false
+        cancelOnError: false,
         onError: onStreamError,
       );
 
@@ -457,7 +459,7 @@ class SocketClient {
 }
 
 void _defaultOnStreamError(Object error, StackTrace st) {
-  print('[SocketClient] message stream ecnountered error: $error\n'
+  print('[SocketClient] message stream encountered error: $error\n'
       'stacktrace:\n${st.toString()}');
 }
 
