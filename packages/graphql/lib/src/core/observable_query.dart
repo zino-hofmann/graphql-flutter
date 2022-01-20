@@ -58,7 +58,7 @@ enum QueryLifecycle {
 /// And a handful of internally leveraged methods.
 ///
 /// [apollo_oq]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ObservableQuery/
-class ObservableQuery {
+class ObservableQuery<TParsed> {
   ObservableQuery({
     required this.queryManager,
     required this.options,
@@ -67,7 +67,7 @@ class ObservableQuery {
       _latestWasEagerlyFetched = true;
       fetchResults();
     }
-    controller = StreamController<QueryResult>.broadcast(
+    controller = StreamController<QueryResult<TParsed>>.broadcast(
       onListen: onListen,
     );
   }
@@ -94,15 +94,15 @@ class ObservableQuery {
       queryManager.maybeRebroadcastQueries(exclude: this);
 
   /// The most recently seen result from this operation's stream
-  QueryResult? latestResult;
+  QueryResult<TParsed>? latestResult;
 
   QueryLifecycle lifecycle = QueryLifecycle.unexecuted;
 
-  WatchQueryOptions options;
+  WatchQueryOptions<TParsed> options;
 
-  late StreamController<QueryResult> controller;
+  late StreamController<QueryResult<TParsed>> controller;
 
-  Stream<QueryResult> get stream => controller.stream;
+  Stream<QueryResult<TParsed>> get stream => controller.stream;
   bool get isCurrentlyPolling => lifecycle == QueryLifecycle.polling;
 
   bool get isRefetchSafe {
@@ -128,10 +128,13 @@ class ObservableQuery {
   ///
   /// **NOTE:** overrides any present non-network-only [FetchPolicy],
   /// as refetching from the `cache` does not make sense.
-  Future<QueryResult?> refetch() {
+  Future<QueryResult<TParsed>?> refetch() {
     if (isRefetchSafe) {
-      addResult(QueryResult.loading(data: latestResult?.data));
-      return queryManager.refetchQuery(queryId);
+      addResult(QueryResult.loading(
+        data: latestResult?.data,
+        parserFn: options.parserFn,
+      ));
+      return queryManager.refetchQuery<TParsed>(queryId);
     }
     throw Exception('Query is not refetch safe');
   }
@@ -179,8 +182,8 @@ class ObservableQuery {
   /// Fetch results based on [options.fetchPolicy]
   ///
   /// Will [startPolling] if [options.pollInterval] is set
-  MultiSourceResult fetchResults() {
-    final MultiSourceResult allResults =
+  MultiSourceResult<TParsed> fetchResults() {
+    final MultiSourceResult<TParsed> allResults =
         queryManager.fetchQueryAsMultiSourceResult(queryId, options);
     latestResult ??= allResults.eagerResult;
 
@@ -212,8 +215,12 @@ class ObservableQuery {
   /// it is easy to make mistakes in writing [updateQuery].
   ///
   /// To mitigate this, [FetchMoreOptions.partial] has been provided.
-  Future<QueryResult> fetchMore(FetchMoreOptions fetchMoreOptions) async {
-    addResult(QueryResult.loading(data: latestResult?.data));
+  Future<QueryResult<TParsed>> fetchMore(
+      FetchMoreOptions fetchMoreOptions) async {
+    addResult(QueryResult.loading(
+      data: latestResult?.data,
+      parserFn: options.parserFn,
+    ));
 
     return fetchMoreImplementation(
       fetchMoreOptions,
@@ -231,7 +238,7 @@ class ObservableQuery {
   /// if it is set to `null`.
   ///
   /// Called internally by the [QueryManager]
-  void addResult(QueryResult result, {bool fromRebroadcast = false}) {
+  void addResult(QueryResult<TParsed> result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
         latestResult!.timestamp.isAfter(result.timestamp)) {

@@ -3,14 +3,16 @@ import 'package:graphql/src/core/_data_class.dart';
 import 'package:gql/ast.dart';
 
 import 'package:graphql/client.dart';
+import 'package:graphql/src/core/result_parser.dart';
 
 /// TODO refactor into [Request] container
 /// Base options.
-abstract class BaseOptions extends MutableDataClass {
+abstract class BaseOptions<TParsed> extends MutableDataClass {
   BaseOptions({
     required this.document,
     this.variables = const {},
     this.operationName,
+    ResultParserFn<TParsed>? parserFn,
     Context? context,
     FetchPolicy? fetchPolicy,
     ErrorPolicy? errorPolicy,
@@ -21,7 +23,11 @@ abstract class BaseOptions extends MutableDataClass {
           error: errorPolicy,
           cacheReread: cacheRereadPolicy,
         ),
-        context = context ?? Context();
+        context = context ?? Context(),
+        parserFn = parserFn ??
+            ((d) => throw UnimplementedError(
+                  "Please provide a parser function to support result parsing.",
+                ));
 
   /// Document containing at least one [OperationDefinitionNode]
   DocumentNode document;
@@ -49,6 +55,8 @@ abstract class BaseOptions extends MutableDataClass {
 
   /// Context to be passed to link execution chain.
   Context context;
+
+  ResultParserFn<TParsed> parserFn;
 
   // TODO consider inverting this relationship
   /// Resolve these options into a request

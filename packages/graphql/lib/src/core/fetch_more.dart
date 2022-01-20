@@ -12,11 +12,11 @@ import 'package:graphql/src/core/_query_write_handling.dart';
 ///
 /// This is the **Internal Implementation**,
 /// used by [ObservableQuery] and [GraphQLCLient.fetchMore]
-Future<QueryResult> fetchMoreImplementation(
+Future<QueryResult<TParsed>> fetchMoreImplementation<TParsed>(
   FetchMoreOptions fetchMoreOptions, {
-  required QueryOptions originalOptions,
+  required QueryOptions<TParsed> originalOptions,
   required QueryManager queryManager,
-  required QueryResult previousResult,
+  required QueryResult<TParsed> previousResult,
   String? queryId,
 }) async {
   // fetch more and udpate
@@ -24,7 +24,7 @@ Future<QueryResult> fetchMoreImplementation(
   final document = (fetchMoreOptions.document ?? originalOptions.document);
   final request = originalOptions.asRequest;
 
-  final combinedOptions = QueryOptions(
+  final combinedOptions = QueryOptions<TParsed>(
     fetchPolicy: FetchPolicy.noCache,
     errorPolicy: originalOptions.errorPolicy,
     document: document,
@@ -34,7 +34,8 @@ Future<QueryResult> fetchMoreImplementation(
     },
   );
 
-  QueryResult fetchMoreResult = await queryManager.query(combinedOptions);
+  QueryResult<TParsed> fetchMoreResult =
+      await queryManager.query(combinedOptions);
 
   try {
     // combine the query with the new query, using the function provided by the user

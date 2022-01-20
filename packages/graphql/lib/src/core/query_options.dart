@@ -1,5 +1,7 @@
 // ignore_for_file: deprecated_member_use_from_same_package
+import 'package:gql/language.dart';
 import 'package:graphql/src/core/_base_options.dart';
+import 'package:graphql/src/core/result_parser.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 
 import 'package:gql/ast.dart';
@@ -7,7 +9,7 @@ import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 
 /// Query options.
-class QueryOptions extends BaseOptions {
+class QueryOptions<TParsed> extends BaseOptions<TParsed> {
   QueryOptions({
     required DocumentNode document,
     String? operationName,
@@ -18,6 +20,7 @@ class QueryOptions extends BaseOptions {
     Object? optimisticResult,
     this.pollInterval,
     Context? context,
+    ResultParserFn<TParsed>? parserFn,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -27,6 +30,7 @@ class QueryOptions extends BaseOptions {
           variables: variables,
           context: context,
           optimisticResult: optimisticResult,
+          parserFn: parserFn,
         );
 
   /// The time interval on which this query should be re-fetched from the server.
@@ -35,7 +39,7 @@ class QueryOptions extends BaseOptions {
   @override
   List<Object?> get properties => [...super.properties, pollInterval];
 
-  WatchQueryOptions asWatchQueryOptions({bool fetchResults = true}) =>
+  WatchQueryOptions<TParsed> asWatchQueryOptions({bool fetchResults = true}) =>
       WatchQueryOptions(
         document: document,
         operationName: operationName,
@@ -47,10 +51,11 @@ class QueryOptions extends BaseOptions {
         fetchResults: fetchResults,
         context: context,
         optimisticResult: optimisticResult,
+        parserFn: this.parserFn,
       );
 }
 
-class SubscriptionOptions extends BaseOptions {
+class SubscriptionOptions<TParsed> extends BaseOptions<TParsed> {
   SubscriptionOptions({
     required DocumentNode document,
     String? operationName,
@@ -60,6 +65,7 @@ class SubscriptionOptions extends BaseOptions {
     CacheRereadPolicy? cacheRereadPolicy,
     Object? optimisticResult,
     Context? context,
+    ResultParserFn<TParsed>? parserFn,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -69,13 +75,14 @@ class SubscriptionOptions extends BaseOptions {
           variables: variables,
           context: context,
           optimisticResult: optimisticResult,
+          parserFn: parserFn,
         );
 
   /// An optimistic first result to eagerly add to the subscription stream
   Object? optimisticResult;
 }
 
-class WatchQueryOptions extends QueryOptions {
+class WatchQueryOptions<TParsed> extends QueryOptions<TParsed> {
   WatchQueryOptions({
     required DocumentNode document,
     String? operationName,
@@ -89,6 +96,7 @@ class WatchQueryOptions extends QueryOptions {
     this.carryForwardDataOnException = true,
     bool? eagerlyFetchResults,
     Context? context,
+    ResultParserFn<TParsed>? parserFn,
   })  : eagerlyFetchResults = eagerlyFetchResults ?? fetchResults,
         super(
           document: document,
@@ -100,6 +108,7 @@ class WatchQueryOptions extends QueryOptions {
           pollInterval: pollInterval,
           context: context,
           optimisticResult: optimisticResult,
+          parserFn: parserFn,
         );
 
   /// Whether or not to fetch results
@@ -117,7 +126,7 @@ class WatchQueryOptions extends QueryOptions {
   List<Object?> get properties =>
       [...super.properties, fetchResults, eagerlyFetchResults];
 
-  WatchQueryOptions copy() => WatchQueryOptions(
+  WatchQueryOptions<TParsed> copy() => WatchQueryOptions<TParsed>(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -130,6 +139,7 @@ class WatchQueryOptions extends QueryOptions {
         eagerlyFetchResults: eagerlyFetchResults,
         carryForwardDataOnException: carryForwardDataOnException,
         context: context,
+        parserFn: parserFn,
       );
 }
 

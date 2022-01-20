@@ -6,6 +6,7 @@ import 'package:graphql/src/core/observable_query.dart';
 
 import 'package:gql/ast.dart';
 import 'package:gql_exec/gql_exec.dart';
+import 'package:graphql/src/core/result_parser.dart';
 
 import 'package:graphql/src/exceptions.dart';
 import 'package:graphql/src/core/query_result.dart';
@@ -19,7 +20,7 @@ typedef OnMutationUpdate = FutureOr<void> Function(
 );
 typedef OnError = FutureOr<void> Function(OperationException? error);
 
-class MutationOptions extends BaseOptions {
+class MutationOptions<TParsed> extends BaseOptions<TParsed> {
   MutationOptions({
     required DocumentNode document,
     String? operationName,
@@ -32,6 +33,7 @@ class MutationOptions extends BaseOptions {
     this.onCompleted,
     this.update,
     this.onError,
+    ResultParserFn<TParsed>? parserFn,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -41,6 +43,7 @@ class MutationOptions extends BaseOptions {
           variables: variables,
           context: context,
           optimisticResult: optimisticResult,
+          parserFn: parserFn,
         );
 
   final OnMutationCompleted? onCompleted;

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:graphql/src/core/result_parser.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
@@ -48,8 +49,9 @@ class QueryManager {
   /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
   bool rebroadcastLocked = false;
 
-  ObservableQuery watchQuery(WatchQueryOptions options) {
-    final ObservableQuery observableQuery = ObservableQuery(
+  ObservableQuery<TParsed> watchQuery<TParsed>(
+      WatchQueryOptions<TParsed> options) {
+    final ObservableQuery<TParsed> observableQuery = ObservableQuery<TParsed>(
       queryManager: this,
       options: options,
     );
@@ -59,7 +61,8 @@ class QueryManager {
     return observableQuery;
   }
 
-  Stream<QueryResult> subscribe(SubscriptionOptions options) async* {
+  Stream<QueryResult<TParsed>> subscribe<TParsed>(
+      SubscriptionOptions<TParsed> options) async* {
     assert(
       options.fetchPolicy != FetchPolicy.cacheOnly,
       "Cannot subscribe with FetchPolicy.cacheOnly: $options",
@@ -70,7 +73,9 @@ class QueryManager {
     if (options.optimisticResult != null) {
       // TODO optimisticResults for streams just skip the cache for now
       yield QueryResult.optimistic(
-          data: options.optimisticResult as Map<String, dynamic>?);
+        data: options.optimisticResult as Map<String, dynamic>?,
+        parserFn: options.parserFn,
+      );
     } else if (shouldRespondEagerlyFromCache(options.fetchPolicy)) {
       final cacheResult = cache.readQuery(
         request,
@@ -80,6 +85,7 @@ class QueryManager {
         yield QueryResult(
           source: QueryResultSource.cache,
           data: cacheResult,
+          parserFn: options.parserFn,
         );
       }
     }
@@ -103,7 +109,10 @@ class QueryManager {
           );
         } catch (failure, trace) {
           // we set the source to indicate where the source of failure
-          queryResult ??= QueryResult(source: QueryResultSource.network);
+          queryResult ??= QueryResult(
+            source: QueryResultSource.network,
+            parserFn: options.parserFn,
+          );
 
           queryResult.exception = coalesceErrors(
             exception: queryResult.exception,
@@ -118,21 +127,33 @@ class QueryManager {
 
         return queryResult;
       }).transform(StreamTransformer.fromHandlers(
-        handleError: (err, trace, sink) => sink.add(_wrapFailure(err, trace)),
+        handleError: (err, trace, sink) => sink.add(_wrapFailure(
+          err,
+          trace,
+          options.parserFn,
+        )),
       ));
     } catch (ex, trace) {
-      yield* Stream.fromIterable([_wrapFailure(ex, trace)]);
+      yield* Stream.fromIterable([
+        _wrapFailure(
+          ex,
+          trace,
+          options.parserFn,
+        )
+      ]);
     }
   }
 
-  Future<QueryResult> query(QueryOptions options) async {
+  Future<QueryResult<TParsed>> query<TParsed>(
+      QueryOptions<TParsed> options) async {
     final result = await fetchQuery(_oneOffOpId, options);
     maybeRebroadcastQueries();
 
     return result;
   }
 
-  Future<QueryResult> mutate(MutationOptions options) async {
+  Future<QueryResult<TParsed>> mutate<TParsed>(
+      MutationOptions<TParsed> options) async {
     final result = await fetchQuery(_oneOffOpId, options);
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
@@ -154,25 +175,25 @@ class QueryManager {
     return result;
   }
 
-  Future<QueryResult> fetchQuery(
+  Future<QueryResult<TParsed>> fetchQuery<TParsed>(
     String queryId,
-    BaseOptions options,
+    BaseOptions<TParsed> options,
   ) async {
-    final MultiSourceResult allResults =
+    final MultiSourceResult<TParsed> allResults =
         fetchQueryAsMultiSourceResult(queryId, options);
     return allResults.networkResult ?? allResults.eagerResult;
   }
 
   /// Wrap both the `eagerResult` and `networkResult` future in a `MultiSourceResult`
   /// if the cache policy precludes a network request, `networkResult` will be `null`
-  MultiSourceResult fetchQueryAsMultiSourceResult(
+  MultiSourceResult<TParsed> fetchQueryAsMultiSourceResult<TParsed>(
     String queryId,
-    BaseOptions options,
+    BaseOptions<TParsed> options,
   ) {
     // create a new request to execute
     final request = options.asRequest;
 
-    final QueryResult eagerResult = _resolveQueryEagerly(
+    final QueryResult<TParsed> eagerResult = _resolveQueryEagerly(
       request,
       queryId,
       options,
@@ -181,6 +202,7 @@ class QueryManager {
     // _resolveQueryEagerly handles cacheOnly,
     // so if we're loading + cacheFirst we continue to network
     return MultiSourceResult(
+      parserFn: options.parserFn,
       eagerResult: eagerResult,
       networkResult:
           (shouldStopAtCache(options.fetchPolicy) && !eagerResult.isLoading)
@@ -191,13 +213,13 @@ class QueryManager {
 
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
-  Future<QueryResult> _resolveQueryOnNetwork(
+  Future<QueryResult<TParsed>> _resolveQueryOnNetwork<TParsed>(
     Request request,
     String queryId,
-    BaseOptions options,
+    BaseOptions<TParsed> options,
   ) async {
     Response response;
-    QueryResult? queryResult;
+    QueryResult<TParsed>? queryResult;
 
     bool rereadFromCache = false;
 
@@ -219,7 +241,10 @@ class QueryManager {
       );
     } catch (failure, trace) {
       // we set the source to indicate where the source of failure
-      queryResult ??= QueryResult(source: QueryResultSource.network);
+      queryResult ??= QueryResult(
+        source: QueryResultSource.network,
+        parserFn: options.parserFn,
+      );
 
       queryResult.exception = coalesceErrors(
         exception: queryResult.exception,
@@ -245,12 +270,14 @@ class QueryManager {
 
   /// Add an eager cache response to the stream if possible,
   /// based on `fetchPolicy` and `optimisticResults`
-  QueryResult _resolveQueryEagerly(
+  QueryResult<TParsed> _resolveQueryEagerly<TParsed>(
     Request request,
     String queryId,
-    BaseOptions options,
+    BaseOptions<TParsed> options,
   ) {
-    QueryResult queryResult = QueryResult.loading();
+    QueryResult<TParsed> queryResult = QueryResult.loading(
+      parserFn: options.parserFn,
+    );
 
     try {
       if (options.optimisticResult != null) {
@@ -258,6 +285,7 @@ class QueryManager {
           request,
           queryId: queryId,
           optimisticResult: options.optimisticResult,
+          options: options,
         );
       }
 
@@ -271,6 +299,7 @@ class QueryManager {
           queryResult = QueryResult(
             data: data,
             source: QueryResultSource.cache,
+            parserFn: options.parserFn,
           );
         }
 
@@ -278,6 +307,7 @@ class QueryManager {
             queryResult.isLoading) {
           queryResult = QueryResult(
             source: QueryResultSource.cache,
+            parserFn: options.parserFn,
             exception: OperationException(
               linkException: CacheMissException(
                 'Could not resolve the given request against the cache. (FetchPolicy.cacheOnly)',
@@ -312,8 +342,9 @@ class QueryManager {
 
   /// Refetch the [ObservableQuery] referenced by [queryId],
   /// overriding any present non-network-only [FetchPolicy].
-  Future<QueryResult?> refetchQuery(String queryId) {
-    final WatchQueryOptions options = queries[queryId]!.options.copy();
+  Future<QueryResult<TParsed>?> refetchQuery<TParsed>(String queryId) {
+    final WatchQueryOptions<TParsed> options =
+        queries[queryId]!.options.copy() as WatchQueryOptions<TParsed>;
     if (!willAlwaysExecuteOnNetwork(options.fetchPolicy)) {
       options.policies = options.policies.copyWith(
         fetch: FetchPolicy.networkOnly,
@@ -350,12 +381,13 @@ class QueryManager {
   /// Will [maybeRebroadcastQueries] from [ObservableQuery.addResult] if the [cache] has flagged the need to.
   ///
   /// Queries are registered via [setQuery] and [watchQuery]
-  void addQueryResult(
+  void addQueryResult<TParsed>(
     Request request,
     String? queryId,
-    QueryResult queryResult,
+    QueryResult<TParsed> queryResult,
   ) {
-    final ObservableQuery? observableQuery = getQuery(queryId);
+    final ObservableQuery<TParsed>? observableQuery =
+        getQuery(queryId) as ObservableQuery<TParsed>?;
 
     if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.addResult(queryResult);
@@ -363,13 +395,15 @@ class QueryManager {
   }
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
-  QueryResult _getOptimisticQueryResult(
+  QueryResult<TParsed> _getOptimisticQueryResult<TParsed>(
     Request request, {
     required String queryId,
     required Object? optimisticResult,
+    required BaseOptions<TParsed> options,
   }) {
-    QueryResult queryResult = QueryResult(
+    QueryResult<TParsed> queryResult = QueryResult(
       source: QueryResultSource.optimisticResult,
+      parserFn: options.parserFn,
     );
 
     attemptCacheWriteFromClient(
@@ -462,9 +496,9 @@ class QueryManager {
     return requestId;
   }
 
-  QueryResult mapFetchResultToQueryResult(
+  QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
     Response response,
-    BaseOptions options, {
+    BaseOptions<TParsed> options, {
     required QueryResultSource source,
   }) {
     List<GraphQLError>? errors;
@@ -499,12 +533,19 @@ class QueryManager {
       context: response.context,
       source: source,
       exception: coalesceErrors(graphqlErrors: errors),
+      parserFn: options.parserFn,
     );
   }
 }
 
-QueryResult _wrapFailure(dynamic ex, trace) => QueryResult(
+QueryResult<TParsed> _wrapFailure<TParsed>(
+  dynamic ex,
+  trace,
+  ResultParserFn<TParsed> parserFn,
+) =>
+    QueryResult(
       // we set the source to indicate where the source of failure
       source: QueryResultSource.network,
       exception: coalesceErrors(linkException: translateFailure(ex, trace)),
+      parserFn: parserFn,
     );
