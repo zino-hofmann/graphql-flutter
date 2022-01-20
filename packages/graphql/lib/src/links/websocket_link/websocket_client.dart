@@ -173,6 +173,7 @@ class SocketClient {
       HashMap();
 
   bool _connectionWasLost = false;
+  bool _wasDisposed = false;
 
   Timer? _reconnectTimer;
 
@@ -201,10 +202,22 @@ class SocketClient {
       config.inactivityTimeout!,
       onTimeout: (EventSink<ConnectionKeepAlive> event) {
         event.close();
-        socketChannel!.sink.close(ws_status.goingAway);
-        _connectionStateController.add(SocketConnectionState.notConnected);
+        unawaited(_closeSocketChannel());
       },
     ).listen(null);
+  }
+
+  Future<void> _closeSocketChannel() async {
+    // avoid race condition in onCancel by setting socket connection
+    // state to notConnected prior to closing socket. This ensures we don't
+    // attempt to send a message over the channel that we're closing
+    // if we are forcefully closing the socket
+    if (!_connectionStateController.isClosed &&
+        _connectionStateController.value !=
+            SocketConnectionState.notConnected) {
+      _connectionStateController.add(SocketConnectionState.notConnected);
+    }
+    await socketChannel?.sink.close(ws_status.normalClosure);
   }
 
   /// Connects to the server.
@@ -213,7 +226,7 @@ class SocketClient {
   Future<void> _connect() async {
     final InitOperation initOperation = await config.initOperation;
 
-    if (_connectionStateController.isClosed) {
+    if (_connectionStateController.isClosed || _wasDisposed) {
       return;
     }
 
@@ -234,7 +247,9 @@ class SocketClient {
       _messageSubscription = _messages.listen(
         onMessage,
         onDone: onConnectionLost,
-        cancelOnError: true,
+        // onDone will not be triggered if the subscription is
+        // auto-cancelled on error; make sure to pass false
+        cancelOnError: false,
         onError: onStreamError,
       );
 
@@ -250,8 +265,8 @@ class SocketClient {
     }
   }
 
-  void onConnectionLost([e]) {
-    socketChannel?.sink.close(ws_status.goingAway);
+  void onConnectionLost([e]) async {
+    await _closeSocketChannel();
     if (e != null) {
       print('There was an error causing connection lost: $e');
     }
@@ -260,19 +275,16 @@ class SocketClient {
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
 
-    if (_connectionStateController.isClosed) {
+    if (_connectionStateController.isClosed || _wasDisposed) {
       return;
     }
 
     _connectionWasLost = true;
     _subscriptionInitializers.values.forEach((s) => s.hasBeenTriggered = false);
 
-    if (_connectionStateController.value !=
-        SocketConnectionState.notConnected) {
-      _connectionStateController.add(SocketConnectionState.notConnected);
-    }
-
-    if (config.autoReconnect && !_connectionStateController.isClosed) {
+    if (config.autoReconnect &&
+        !_connectionStateController.isClosed &&
+        !_wasDisposed) {
       if (config.delayBetweenReconnectionAttempts != null) {
         _reconnectTimer = Timer(
           config.delayBetweenReconnectionAttempts!,
@@ -293,11 +305,15 @@ class SocketClient {
   /// Use this method if you'd like to disconnect from the specified server permanently,
   /// and you'd like to connect to another server instead of the current one.
   Future<void> dispose() async {
+    // Make sure we do not attempt to reconnect when we close the socket
+    // and onConnectionLost is called (as part of onDone)
+    _wasDisposed = true;
     print('Disposing socket client..');
     _reconnectTimer?.cancel();
+    _keepAliveSubscription?.cancel();
 
     await Future.wait([
-      socketChannel?.sink.close(ws_status.goingAway),
+      _closeSocketChannel(),
       _messageSubscription?.cancel(),
       _connectionStateController.close(),
     ].where((future) => future != null).cast<Future<dynamic>>().toList());
@@ -375,7 +391,7 @@ class SocketClient {
 
             return false;
           },
-        ).takeWhile((_) => !response.isClosed);
+        ).takeWhile((_) => (!response.isClosed && !_wasDisposed));
 
         final Stream<GraphQLSocketMessage> subscriptionComplete = addTimeout
             ? dataErrorComplete
@@ -443,7 +459,7 @@ class SocketClient {
 }
 
 void _defaultOnStreamError(Object error, StackTrace st) {
-  print('[SocketClient] message stream ecnountered error: $error\n'
+  print('[SocketClient] message stream encountered error: $error\n'
       'stacktrace:\n${st.toString()}');
 }
 

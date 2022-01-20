@@ -121,8 +121,8 @@ This project follows the [all-contributors](https://github.com/kentcdodds/all-co
 
 [build-status-badge]: https://img.shields.io/github/workflow/status/zino-hofmann/graphql-flutter/graphql-flutter%20Tests%20case?style=flat-square
 [build-status-link]: https://github.com/zino-hofmann/graphql-flutter/actions
-[coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg?style=flat-square
-[coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
+[coverage-badge]: https://img.shields.io/codecov/c/github/zino-hofmann/graphql-flutter/beta?style=flat-square
+[coverage-link]: https://app.codecov.io/gh/zino-hofmann/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
 [package-link]: https://pub.dartlang.org/packages/graphql_flutter
 [package-link-client]: https://pub.dartlang.org/packages/graphql
