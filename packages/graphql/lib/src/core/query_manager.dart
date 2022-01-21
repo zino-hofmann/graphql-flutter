@@ -92,7 +92,7 @@ class QueryManager {
 
     try {
       yield* link.request(request).map((response) {
-        QueryResult? queryResult;
+        QueryResult<TParsed>? queryResult;
         bool rereadFromCache = false;
         try {
           queryResult = mapFetchResultToQueryResult(
