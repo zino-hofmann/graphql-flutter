@@ -49,7 +49,8 @@ class SocketClientConfig {
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.initialPayload,
-    @experimental this.connect = defaultConnect,
+    this.customHeaders,
+    @experimental this.customConnect,
   });
 
   /// Serializer used to serialize request
@@ -86,7 +87,7 @@ class SocketClientConfig {
   /// Warning: if you want to listen to the listen to the stream,
   /// wrap your channel with our [GraphQLWebSocketChannel] using the `.forGraphQL()` helper:
   /// ```dart
-  /// connect: (url, protocols) {
+  /// customConnect: (url, protocols) {
   ///    var channel = WebSocketChannel.connect(url, protocols: protocols)
   ///    // without this line, our client won't be able to listen to stream events,
   ///    // because you are already listening.
@@ -101,15 +102,28 @@ class SocketClientConfig {
   /// connect: (url, protocols) =>
   ///   IOWebSocketChannel.connect(url, protocols: protocols, headers: myCustomHeaders)
   /// ```
-  final WebSocketConnect connect;
+  final WebSocketConnect? customConnect;
 
-  static Future<WebSocketChannel> defaultConnect(
-    Uri uri,
-    Iterable<String>? protocols,
-  ) async {
+  /// Custom header to add inside the client
+  final Map<String, dynamic>? customHeaders;
+
+  /// Function to define another connection without call directly
+  /// the connection function
+  FutureOr<WebSocketChannel> connect(
+      {required Uri uri,
+      Iterable<String>? protocols,
+      Map<String, dynamic>? headers,
+      WebSocketConnect? fnConnect}) {
+    if (fnConnect != null) {
+      return fnConnect(uri, protocols);
+    }
+    if (customConnect != null) {
+      return customConnect!(uri, protocols);
+    }
     return defaultConnectPlatform(
       uri,
       protocols,
+      headers: headers,
     );
   }
 
@@ -152,7 +166,6 @@ class SocketClient {
   SocketClient(
     this.url, {
     this.protocols = const ['graphql-ws'],
-    WebSocketConnect? connect,
     this.config = const SocketClientConfig(),
     @visibleForTesting this.randomBytesForUuid,
     @visibleForTesting this.onMessage,
@@ -235,7 +248,8 @@ class SocketClient {
     try {
       // Even though config.connect is sync, we call async in order to make the
       // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
-      var connection = await config.connect(Uri.parse(url), protocols);
+      var connection =
+          await config.connect(uri: Uri.parse(url), protocols: protocols);
       socketChannel = connection.forGraphQL();
       _connectionStateController.add(SocketConnectionState.connected);
       _write(initOperation);

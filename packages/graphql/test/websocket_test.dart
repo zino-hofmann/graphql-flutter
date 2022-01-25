@@ -58,16 +58,16 @@ class EchoSocket implements WebSocketChannel {
       throw UnimplementedError();
 
   @override
-  int get closeCode => throw UnimplementedError();
+  int get closeCode => 1000;
 
   @override
-  String get closeReason => throw UnimplementedError();
+  String get closeReason => "";
 
   @override
   void pipe(StreamChannel other) {}
 
   @override
-  String get protocol => throw UnimplementedError();
+  String get protocol => "ws";
 
   @override
   StreamChannel<S> transform<S>(
@@ -96,10 +96,11 @@ SocketClient getTestClient(
             const Duration(milliseconds: 1)}) =>
     SocketClient(
       wsUrl,
-      connect: (_, __) => EchoSocket.connect(controller ?? BehaviorSubject()),
       config: SocketClientConfig(
         autoReconnect: autoReconnect,
         delayBetweenReconnectionAttempts: delayBetweenReconnectionAttempts,
+        customConnect: (_, __) =>
+            EchoSocket.connect(controller ?? BehaviorSubject()),
       ),
       randomBytesForUuid: Uint8List.fromList(
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
@@ -429,8 +430,9 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
-        config: SocketClientConfig(initialPayload: () => initPayload),
+        config: SocketClientConfig(
+            initialPayload: () => initPayload,
+            customConnect: (_, __) => EchoSocket.connect(BehaviorSubject())),
       );
     }));
 
@@ -461,8 +463,8 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        connect: (_, __) => EchoSocket.connect(BehaviorSubject()),
         config: SocketClientConfig(
+          customConnect: (_, __) => EchoSocket.connect(BehaviorSubject()),
           initialPayload: () async {
             await Future.delayed(Duration(seconds: 3));
             return initPayload;
