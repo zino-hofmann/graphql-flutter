@@ -51,8 +51,8 @@ class QueryResult<TParsed> {
   /// etc.
   static final unexecuted = QueryResult(
     source: null,
-    parserFn: (d) => throw new UnimplementedError(
-        "Unexecuted query data can not be parsed."),
+    parserFn: (d) =>
+        throw UnimplementedError("Unexecuted query data can not be parsed."),
   )..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
   factory QueryResult.loading({

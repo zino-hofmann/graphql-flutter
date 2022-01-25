@@ -19,7 +19,7 @@ Future<QueryResult<TParsed>> fetchMoreImplementation<TParsed>(
   required QueryResult<TParsed> previousResult,
   String? queryId,
 }) async {
-  // fetch more and udpate
+  // fetch more and update
 
   final document = (fetchMoreOptions.document ?? originalOptions.document);
   final request = originalOptions.asRequest;
