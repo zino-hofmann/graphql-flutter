@@ -1,5 +1,6 @@
 import 'dart:async' show FutureOr;
 import 'package:graphql/client.dart';
+import 'package:graphql/src/core/result_parser.dart';
 
 /// The source of the result data contained
 ///
@@ -37,33 +38,41 @@ final _eagerSources = {
 };
 
 /// A single operation result
-class QueryResult {
+class QueryResult<TParsed> {
   QueryResult({
     this.data,
     this.exception,
     this.context = const Context(),
+    required this.parserFn,
     required this.source,
   }) : timestamp = DateTime.now();
 
   /// Unexecuted singleton, used as a placeholder for mutations,
   /// etc.
-  static final unexecuted = QueryResult(source: null)
-    ..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
+  static final unexecuted = QueryResult(
+    source: null,
+    parserFn: (d) =>
+        throw UnimplementedError("Unexecuted query data can not be parsed."),
+  )..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
   factory QueryResult.loading({
     Map<String, dynamic>? data,
+    required ResultParserFn<TParsed> parserFn,
   }) =>
       QueryResult(
         data: data,
         source: QueryResultSource.loading,
+        parserFn: parserFn,
       );
 
   factory QueryResult.optimistic({
     Map<String, dynamic>? data,
+    required ResultParserFn<TParsed> parserFn,
   }) =>
       QueryResult(
         data: data,
         source: QueryResultSource.optimisticResult,
+        parserFn: parserFn,
       );
 
   DateTime timestamp;
@@ -81,6 +90,8 @@ class QueryResult {
   Context context;
 
   OperationException? exception;
+
+  ResultParserFn<TParsed> parserFn;
 
   /// [data] has yet to be specified from any source
   /// for the _most recent_ operation
@@ -107,6 +118,17 @@ class QueryResult {
   /// Whether the response includes an [exception]
   bool get hasException => (exception != null);
 
+  /// If a parserFn is provided, this getter can be used to fetch the parsed data.
+  TParsed? get parsedData {
+    final data = this.data;
+    final parserFn = this.parserFn;
+
+    if (data == null) {
+      return null;
+    }
+    return parserFn(data);
+  }
+
   @override
   String toString() => 'QueryResult('
       'source: $source, '
@@ -117,16 +139,17 @@ class QueryResult {
       ')';
 }
 
-class MultiSourceResult {
+class MultiSourceResult<TParsed> {
   MultiSourceResult({
-    QueryResult? eagerResult,
+    QueryResult<TParsed>? eagerResult,
     this.networkResult,
-  })  : eagerResult = eagerResult ?? QueryResult.loading(),
+    required ResultParserFn<TParsed> parserFn,
+  })  : eagerResult = eagerResult ?? QueryResult.loading(parserFn: parserFn),
         assert(
           eagerResult!.source != QueryResultSource.network,
           'An eager result cannot be gotten from the network',
         );
 
-  QueryResult eagerResult;
-  FutureOr<QueryResult>? networkResult;
+  QueryResult<TParsed> eagerResult;
+  FutureOr<QueryResult<TParsed>>? networkResult;
 }

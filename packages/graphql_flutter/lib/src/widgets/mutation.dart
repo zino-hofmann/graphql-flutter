@@ -4,40 +4,40 @@ import 'package:graphql/client.dart';
 
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
-typedef RunMutation = MultiSourceResult Function(
+typedef RunMutation<TParsed> = MultiSourceResult<TParsed> Function(
   Map<String, dynamic> variables, {
   Object? optimisticResult,
 });
 
-typedef MutationBuilder = Widget Function(
+typedef MutationBuilder<TParsed> = Widget Function(
   RunMutation runMutation,
-  QueryResult? result,
+  QueryResult<TParsed>? result,
 );
 
 /// Builds a [Mutation] widget based on the a given set of [MutationOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
-class Mutation extends StatefulWidget {
+class Mutation<TParsed> extends StatefulWidget {
   const Mutation({
     final Key? key,
     required this.options,
     required this.builder,
   }) : super(key: key);
 
-  final MutationOptions options;
-  final MutationBuilder builder;
+  final MutationOptions<TParsed> options;
+  final MutationBuilder<TParsed> builder;
 
   @override
-  MutationState createState() => MutationState();
+  MutationState<TParsed> createState() => MutationState();
 }
 
-class MutationState extends State<Mutation> {
+class MutationState<TParsed> extends State<Mutation<TParsed>> {
   GraphQLClient? client;
-  ObservableQuery? observableQuery;
+  ObservableQuery<TParsed>? observableQuery;
 
-  WatchQueryOptions? __cachedOptions;
+  WatchQueryOptions<TParsed>? __cachedOptions;
 
-  WatchQueryOptions get _providedOptions {
-    final _options = WatchQueryOptions(
+  WatchQueryOptions<TParsed> get _providedOptions {
+    final _options = WatchQueryOptions<TParsed>(
       document: widget.options.document,
       operationName: widget.options.operationName,
       variables: widget.options.variables,
@@ -46,6 +46,7 @@ class MutationState extends State<Mutation> {
       cacheRereadPolicy: widget.options.cacheRereadPolicy,
       fetchResults: false,
       context: widget.options.context,
+      parserFn: widget.options.parserFn,
     );
     __cachedOptions ??= _options;
     return _options;
@@ -79,7 +80,7 @@ class MutationState extends State<Mutation> {
   }
 
   @override
-  void didUpdateWidget(Mutation oldWidget) {
+  void didUpdateWidget(Mutation<TParsed> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     // TODO @micimize - investigate why/if this was causing issues
@@ -90,7 +91,7 @@ class MutationState extends State<Mutation> {
 
   /// Run the mutation with the given `variables` and `optimisticResult`,
   /// returning a [MultiSourceResult] for handling both the eager and network results
-  MultiSourceResult runMutation(
+  MultiSourceResult<TParsed> runMutation(
     Map<String, dynamic> variables, {
     Object? optimisticResult,
   }) {
@@ -116,12 +117,12 @@ class MutationState extends State<Mutation> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QueryResult?>(
+    return StreamBuilder<QueryResult<TParsed>?>(
       initialData: observableQuery?.latestResult ?? QueryResult.unexecuted,
       stream: observableQuery?.stream,
       builder: (
         BuildContext buildContext,
-        AsyncSnapshot<QueryResult?> snapshot,
+        AsyncSnapshot<QueryResult<TParsed>?> snapshot,
       ) {
         return widget.builder(
           runMutation,

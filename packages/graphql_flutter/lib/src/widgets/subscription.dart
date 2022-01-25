@@ -5,12 +5,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-typedef OnSubscriptionResult = void Function(
-  QueryResult subscriptionResult,
+typedef OnSubscriptionResult<TParsed> = void Function(
+  QueryResult<TParsed> subscriptionResult,
   GraphQLClient? client,
 );
 
-typedef SubscriptionBuilder = Widget Function(QueryResult result);
+typedef SubscriptionBuilder<TParsed> = Widget Function(
+    QueryResult<TParsed> result);
 
 /// Creats a subscription with [GraphQLClient.subscribe].
 ///
@@ -62,7 +63,7 @@ typedef SubscriptionBuilder = Widget Function(QueryResult result);
 /// }
 /// ```
 /// {@end-tool}
-class Subscription extends StatefulWidget {
+class Subscription<TParsed> extends StatefulWidget {
   const Subscription({
     required this.options,
     required this.builder,
@@ -70,16 +71,16 @@ class Subscription extends StatefulWidget {
     Key? key,
   }) : super(key: key);
 
-  final SubscriptionOptions options;
-  final SubscriptionBuilder builder;
-  final OnSubscriptionResult? onSubscriptionResult;
+  final SubscriptionOptions<TParsed> options;
+  final SubscriptionBuilder<TParsed> builder;
+  final OnSubscriptionResult<TParsed>? onSubscriptionResult;
 
   @override
-  _SubscriptionState createState() => _SubscriptionState();
+  _SubscriptionState<TParsed> createState() => _SubscriptionState();
 }
 
-class _SubscriptionState extends State<Subscription> {
-  Stream<QueryResult>? stream;
+class _SubscriptionState<TParsed> extends State<Subscription<TParsed>> {
+  Stream<QueryResult<TParsed>>? stream;
   GraphQLClient? client;
 
   ConnectivityResult? _currentConnectivityResult;
@@ -115,7 +116,7 @@ class _SubscriptionState extends State<Subscription> {
   }
 
   @override
-  void didUpdateWidget(Subscription oldWidget) {
+  void didUpdateWidget(Subscription<TParsed> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (!widget.options.equal(oldWidget.options)) {
@@ -159,16 +160,17 @@ class _SubscriptionState extends State<Subscription> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QueryResult>(
+    return StreamBuilder<QueryResult<TParsed>>(
       initialData: widget.options.optimisticResult != null
           ? QueryResult.optimistic(
               data: widget.options.optimisticResult as Map<String, dynamic>?,
+              parserFn: widget.options.parserFn,
             )
-          : QueryResult.loading(),
+          : QueryResult.loading(parserFn: widget.options.parserFn),
       stream: stream,
       builder: (
         BuildContext buildContext,
-        AsyncSnapshot<QueryResult> snapshot,
+        AsyncSnapshot<QueryResult<TParsed>> snapshot,
       ) {
         return widget.builder(snapshot.data!);
       },

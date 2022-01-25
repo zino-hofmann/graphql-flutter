@@ -5,37 +5,39 @@ import 'package:graphql/client.dart';
 import 'package:graphql_flutter/src/widgets/graphql_provider.dart';
 
 // method to call from widget to fetchmore queries
-typedef FetchMore = Future<QueryResult> Function(FetchMoreOptions options);
+typedef FetchMore<TParsed> = Future<QueryResult<TParsed>> Function(
+    FetchMoreOptions options);
 
-typedef Refetch = Future<QueryResult?> Function();
+typedef Refetch<TParsed> = Future<QueryResult<TParsed>?> Function();
 
-typedef QueryBuilder = Widget Function(
-  QueryResult result, {
-  Refetch? refetch,
-  FetchMore? fetchMore,
+typedef QueryBuilder<TParsed> = Widget Function(
+  QueryResult<TParsed> result, {
+  Refetch<TParsed>? refetch,
+  FetchMore<TParsed>? fetchMore,
 });
 
 /// Builds a [Query] widget based on the a given set of [QueryOptions]
 /// that streams [QueryResult]s into the [QueryBuilder].
-class Query extends StatefulWidget {
+class Query<TParsed> extends StatefulWidget {
   const Query({
     final Key? key,
     required this.options,
     required this.builder,
   }) : super(key: key);
 
-  final QueryOptions options;
-  final QueryBuilder builder;
+  final QueryOptions<TParsed> options;
+  final QueryBuilder<TParsed> builder;
 
   @override
-  QueryState createState() => QueryState();
+  QueryState<TParsed> createState() => QueryState();
 }
 
-class QueryState extends State<Query> {
-  ObservableQuery? observableQuery;
+class QueryState<TParsed> extends State<Query<TParsed>> {
+  ObservableQuery<TParsed>? observableQuery;
   GraphQLClient? _client;
 
-  WatchQueryOptions get _options => widget.options.asWatchQueryOptions();
+  WatchQueryOptions<TParsed> get _options =>
+      widget.options.asWatchQueryOptions();
 
   void _initQuery() {
     observableQuery?.close();
@@ -53,7 +55,7 @@ class QueryState extends State<Query> {
   }
 
   @override
-  void didUpdateWidget(Query oldWidget) {
+  void didUpdateWidget(Query<TParsed> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     final GraphQLClient client = GraphQLProvider.of(context).value;
@@ -75,12 +77,15 @@ class QueryState extends State<Query> {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QueryResult>(
-      initialData: observableQuery?.latestResult ?? QueryResult.loading(),
+    return StreamBuilder<QueryResult<TParsed>>(
+      initialData: observableQuery?.latestResult ??
+          QueryResult.loading(
+            parserFn: widget.options.parserFn,
+          ),
       stream: observableQuery!.stream,
       builder: (
         BuildContext buildContext,
-        AsyncSnapshot<QueryResult> snapshot,
+        AsyncSnapshot<QueryResult<TParsed>> snapshot,
       ) {
         return widget.builder(
           snapshot.data!,

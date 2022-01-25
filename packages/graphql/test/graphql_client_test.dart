@@ -1,3 +1,4 @@
+import 'package:graphql/src/core/result_parser.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -41,7 +42,7 @@ void main() {
       }
     }
   ''';
-  readRepositoryData({
+  Map<String, dynamic> readRepositoryData({
     bool withTypenames = true,
     bool withIds = true,
     bool viewerHasStarred = false,
@@ -142,6 +143,75 @@ void main() {
 
         expect(r.exception, isNull);
         expect(r.data, equals(repoData));
+
+        expect(
+          r.context.entry<HttpLinkResponseContext>()!.statusCode,
+          equals(200),
+        );
+        expect(
+          r.context.entry<HttpLinkResponseContext>()!.headers['foo'],
+          equals('bar'),
+        );
+      });
+      test('successful response with parser', () async {
+        final ResultParserFn<List<String>> parserFn = (data) {
+          return data['viewer']['repositories']['nodes']
+              .map<String>((node) => node['name'] as String)
+              .toList();
+        };
+        final _options = QueryOptions(
+          document: parseString(readRepositories),
+          variables: <String, dynamic>{
+            'nRepositories': 42,
+          },
+          parserFn: parserFn,
+        );
+        final repoData = readRepositoryData(withTypenames: true);
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            Response(
+              data: repoData,
+              context: Context().withEntry(
+                HttpLinkResponseContext(
+                  statusCode: 200,
+                  headers: {'foo': 'bar'},
+                ),
+              ),
+            ),
+          ]),
+        );
+
+        final QueryResult<List<String>> r = await client.query(_options);
+
+        verify(
+          link.request(
+            Request(
+              operation: Operation(
+                document: parseString(readRepositories),
+                //operationName: 'ReadRepositories',
+              ),
+              variables: <String, dynamic>{
+                'nRepositories': 42,
+              },
+              context: Context(),
+            ),
+          ),
+        );
+
+        expect(r.exception, isNull);
+        expect(r.data, equals(repoData));
+
+        List<String>? parsedData = r.parsedData;
+        expect(
+            parsedData,
+            equals([
+              'pq',
+              'go-evercookie',
+              'watchbot',
+            ]));
 
         expect(
           r.context.entry<HttpLinkResponseContext>()!.statusCode,
@@ -427,6 +497,54 @@ void main() {
             response.data!['action']['starrable']['viewerHasStarred'] as bool?;
         expect(viewerHasStarred, true);
       });
+      test('successful mutation with parser', () async {
+        final ResultParserFn<bool> resultParser =
+            (data) => data['action']['starrable']['viewerHasStarred'] as bool;
+        final MutationOptions _options = MutationOptions(
+          document: parseString(addStar),
+          parserFn: resultParser,
+        );
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [
+              Response(
+                data: <String, dynamic>{
+                  'action': {
+                    'starrable': {
+                      'viewerHasStarred': true,
+                    },
+                  },
+                },
+              ),
+            ],
+          ),
+        );
+
+        final QueryResult response = await client.mutate(_options);
+
+        verify(
+          link.request(
+            Request(
+              operation: Operation(
+                document: parseString(addStar),
+                //operationName: 'AddStar',
+              ),
+              variables: <String, dynamic>{},
+              context: Context(),
+            ),
+          ),
+        );
+        final bool parsedResult = response.parsedData;
+        expect(parsedResult, isTrue);
+        expect(response.exception, isNull);
+        expect(response.data, isNotNull);
+        final bool? viewerHasStarred =
+            response.data!['action']['starrable']['viewerHasStarred'] as bool?;
+        expect(viewerHasStarred, true);
+      });
 
       test('successful mutation through watchQuery', () async {
         final _options = MutationOptions(
@@ -537,6 +655,59 @@ void main() {
               )
             ],
           ),
+        );
+      });
+      test('parses results', () async {
+        final responses = [
+          {
+            'id': '1',
+            'name': 'first',
+          },
+          {
+            'id': '2',
+            'name': 'second',
+          },
+        ].map((item) => Response(
+              data: <String, dynamic>{
+                'item': {
+                  '__typename': 'Item',
+                  ...item,
+                },
+              },
+            ));
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(responses),
+        );
+
+        final ResultParserFn<String> parserFn =
+            (data) => data['item']['name'] as String;
+        ;
+
+        final stream = client.subscribe(
+          SubscriptionOptions(
+            parserFn: parserFn,
+            document: parseString(
+              r'''
+                subscription {
+                  item {
+                    id
+                    name
+                  }
+                }
+              ''',
+            ),
+          ),
+        );
+
+        expect(
+          stream,
+          emitsInOrder(['first', 'second']
+              .map((e) => isA<QueryResult<String>>().having((result) {
+                    final String? parsed = result.parsedData;
+                    return parsed;
+                  }, "Parsed item", e))),
         );
       });
 

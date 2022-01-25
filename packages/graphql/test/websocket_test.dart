@@ -16,6 +16,7 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import './helpers.dart';
 import './mock_server/ws_echo_server.dart';
+import 'mock_server/ws_echo_server.dart';
 
 class EchoSink extends DelegatingStreamSink implements WebSocketSink {
   final StreamSink sink;
