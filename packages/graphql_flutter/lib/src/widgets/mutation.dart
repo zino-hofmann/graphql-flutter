@@ -10,7 +10,7 @@ typedef RunMutation<TParsed> = MultiSourceResult<TParsed> Function(
 });
 
 typedef MutationBuilder<TParsed> = Widget Function(
-  RunMutation runMutation,
+  RunMutation<TParsed> runMutation,
   QueryResult<TParsed>? result,
 );
 
