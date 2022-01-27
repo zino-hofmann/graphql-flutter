@@ -9,7 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  graphql: ^5.0.1-beta.5
+  graphql:
+    path: ../graphql
   gql_exec: 0.3.0
   meta: ^1.3.0
   path_provider: ^2.0.1
