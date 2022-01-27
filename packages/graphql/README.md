@@ -831,16 +831,16 @@ final HttpLink _httpLink = HttpLink(
 final Link _link = _apqLink.concat(_httpLink);
 ```
 
-[build-status-badge]: https://img.shields.io/circleci/build/github/zino-app/graphql-flutter.svg?style=flat-square
-[build-status-link]: https://circleci.com/gh/zino-app/graphql-flutter
-[coverage-badge]: https://img.shields.io/codecov/c/github/zino-app/graphql-flutter.svg?style=flat-square
-[coverage-link]: https://codecov.io/gh/zino-app/graphql-flutter
+[build-status-badge]: https://img.shields.io/github/workflow/status/zino-hofmann/graphql-flutter/graphql-flutter%20Tests%20case?style=flat-square
+[build-status-link]: https://github.com/zino-hofmann/graphql-flutter/actions
+[coverage-badge]: https://img.shields.io/codecov/c/github/zino-hofmann/graphql-flutter/beta?style=flat-square
+[coverage-link]: https://app.codecov.io/gh/zino-hofmann/graphql-flutter
 [version-badge]: https://img.shields.io/pub/v/graphql_flutter.svg?style=flat-square
 [package-link]: https://pub.dartlang.org/packages/graphql/versions
 [license-badge]: https://img.shields.io/github/license/zino-app/graphql-flutter.svg?style=flat-square
 [license-link]: https://github.com/zino-app/graphql-flutter/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
-[prs-link]: http://makeapullrequest.com
+[prs-link]: https://makeapullrequest.com
 [github-watch-badge]: https://img.shields.io/github/watchers/zino-app/graphql-flutter.svg?style=flat-square&logo=github&logoColor=ffffff
 [github-watch-link]: https://github.com/zino-app/graphql-flutter/watchers
 [github-star-badge]: https://img.shields.io/github/stars/zino-app/graphql-flutter.svg?style=flat-square&logo=github&logoColor=ffffff
