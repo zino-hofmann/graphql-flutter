@@ -16,12 +16,14 @@ SocketClient getTestClient(
         {required String wsUrl,
         StreamController? controller,
         bool autoReconnect = true,
+        Map<String, dynamic>? customHeaders,
         Duration delayBetweenReconnectionAttempts =
             const Duration(milliseconds: 1)}) =>
     SocketClient(
       wsUrl,
-      config: SocketClientConfig(
+      config: customConnect(
         autoReconnect: autoReconnect,
+        customHeaders: customHeaders,
         delayBetweenReconnectionAttempts: delayBetweenReconnectionAttempts,
       ),
       randomBytesForUuid: Uint8List.fromList(
@@ -352,7 +354,7 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        config: SocketClientConfig(initialPayload: () => initPayload),
+        config: customConnect(initialPayload: () => initPayload),
       );
     }));
 
@@ -383,7 +385,7 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        config: SocketClientConfig(
+        config: customConnect(
           initialPayload: () async {
             await Future.delayed(Duration(seconds: 3));
             return initPayload;
@@ -408,5 +410,22 @@ Future<void> main() async {
         emits(initPayload),
       );
     });
+
+    /*
+    FIXME: Testing the correct header in the request
+    group('SocketClient with custom headers with const payload', () {
+      const customHeaders = {'myHeader': 'myHeader'};
+
+      setUp(overridePrint((log) {
+        socketClient = getTestClient(wsUrl: wsUrl, customHeaders: customHeaders);
+      }));
+
+      test('check header', () async {
+        await socketClient.connectionState
+            .where((state) => state == SocketConnectionState.notConnected)
+            .first;
+      });
+    });
+    */
   });
 }

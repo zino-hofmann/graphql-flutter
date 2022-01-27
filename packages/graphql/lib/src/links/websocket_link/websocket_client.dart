@@ -40,8 +40,8 @@ class SubscriptionListener {
 
 enum SocketConnectionState { notConnected, connecting, connected }
 
-class SocketClientConfig {
-  const SocketClientConfig({
+class customConnect {
+  const customConnect({
     this.serializer = const RequestSerializer(),
     this.parser = const ResponseParser(),
     this.autoReconnect = true,
@@ -87,25 +87,19 @@ class SocketClientConfig {
   /// Warning: if you want to listen to the listen to the stream,
   /// wrap your channel with our [GraphQLWebSocketChannel] using the `.forGraphQL()` helper:
   /// ```dart
-  /// customConnect: (url, protocols) {
+  /// connectFn: (url, protocols) {
   ///    var channel = WebSocketChannel.connect(url, protocols: protocols)
   ///    // without this line, our client won't be able to listen to stream events,
   ///    // because you are already listening.
   ///    channel = channel.forGraphQL();
   ///    channel.stream.listen(myListener)
   ///    return channel;
-  /// }socketChannel
+  /// }
   /// ```
-  ///
-  /// To supply custom headers to an IO client:
-  /// ```dart
-  /// connect: (url, protocols) =>
-  ///   IOWebSocketChannel.connect(url, protocols: protocols, headers: myCustomHeaders)
-  /// ```
-  final WebSocketConnect? customConnect;
+  final WebSocketConnect? connectFn;
 
   /// Custom header to add inside the client
-  final Map<String, dynamic>? customHeaders;
+  final Map<String, dynamic>? headers;
 
   /// Function to define another connection without call directly
   /// the connection function
@@ -113,12 +107,12 @@ class SocketClientConfig {
       {required Uri uri,
       Iterable<String>? protocols,
       Map<String, dynamic>? headers,
-      WebSocketConnect? fnConnect}) {
-    if (fnConnect != null) {
-      return fnConnect(uri, protocols);
+      WebSocketConnect? connectFn}) {
+    if (connectFn != null) {
+      return connectFn(uri, protocols);
     }
-    if (customConnect != null) {
-      return customConnect!(uri, protocols);
+    if (this.connectFn != null) {
+      return this.connectFn!(uri, protocols);
     }
     return defaultConnectPlatform(
       uri,
@@ -166,7 +160,7 @@ class SocketClient {
   SocketClient(
     this.url, {
     this.protocols = const ['graphql-ws'],
-    this.config = const SocketClientConfig(),
+    this.config = const customConnect(),
     @visibleForTesting this.randomBytesForUuid,
     @visibleForTesting this.onMessage,
     @visibleForTesting this.onStreamError = _defaultOnStreamError,
@@ -177,7 +171,7 @@ class SocketClient {
   Uint8List? randomBytesForUuid;
   final String url;
   final Iterable<String>? protocols;
-  final SocketClientConfig config;
+  final customConnect config;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
@@ -347,7 +341,7 @@ class SocketClient {
   /// Sends a query, mutation or subscription request to the server, and returns a stream of the response.
   ///
   /// If the request is a query or mutation, a timeout will be applied to the request as specified by
-  /// [SocketClientConfig]'s [queryAndMutationTimeout] field.
+  /// [customConnect]'s [queryAndMutationTimeout] field.
   ///
   /// If the request is a subscription, obviously no timeout is applied.
   ///
