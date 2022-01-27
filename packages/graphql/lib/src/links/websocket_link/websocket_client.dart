@@ -94,7 +94,7 @@ class SocketClientConfig {
   ///    channel = channel.forGraphQL();
   ///    channel.stream.listen(myListener)
   ///    return channel;
-  /// }
+  /// }socketChannel
   /// ```
   ///
   /// To supply custom headers to an IO client:

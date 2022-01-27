@@ -1,92 +1,16 @@
-//@Skip('currently failing for web socket services unavailable')
-
 import 'dart:async';
 import 'dart:io';
 
-import 'package:async/async.dart';
-import 'package:rxdart/subjects.dart';
-import 'package:stream_channel/stream_channel.dart';
 import 'package:test/test.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import './helpers.dart';
 import './mock_server/ws_echo_server.dart';
 import 'mock_server/ws_echo_server.dart';
-
-class EchoSink extends DelegatingStreamSink implements WebSocketSink {
-  final StreamSink sink;
-
-  EchoSink(StreamSink sink)
-      : this.sink = sink,
-        super(sink);
-
-  @override
-  Future close([int? closeCode, String? closeReason]) {
-    return super.close();
-  }
-}
-
-class EchoSocket implements WebSocketChannel {
-  final StreamController controller;
-
-  EchoSocket.connect(this.controller) : sink = EchoSink(controller.sink);
-
-  @override
-  Stream get stream => controller.stream;
-
-  @override
-  final WebSocketSink sink;
-
-  @override
-  StreamChannel<S> cast<S>() => throw UnimplementedError();
-
-  @override
-  StreamChannel changeSink(
-    StreamSink Function(StreamSink p1) change,
-  ) =>
-      throw UnimplementedError();
-
-  @override
-  StreamChannel changeStream(
-    Stream Function(Stream p1) change,
-  ) =>
-      throw UnimplementedError();
-
-  @override
-  int get closeCode => 1000;
-
-  @override
-  String get closeReason => "";
-
-  @override
-  void pipe(StreamChannel other) {}
-
-  @override
-  String get protocol => "ws";
-
-  @override
-  StreamChannel<S> transform<S>(
-    StreamChannelTransformer<S, dynamic> transformer,
-  ) =>
-      throw UnimplementedError();
-
-  @override
-  StreamChannel transformSink(
-    StreamSinkTransformer transformer,
-  ) =>
-      throw UnimplementedError();
-
-  @override
-  StreamChannel transformStream(
-    StreamTransformer transformer,
-  ) =>
-      throw UnimplementedError();
-}
 
 SocketClient getTestClient(
         {required String wsUrl,
@@ -99,8 +23,6 @@ SocketClient getTestClient(
       config: SocketClientConfig(
         autoReconnect: autoReconnect,
         delayBetweenReconnectionAttempts: delayBetweenReconnectionAttempts,
-        customConnect: (_, __) =>
-            EchoSocket.connect(controller ?? BehaviorSubject()),
       ),
       randomBytesForUuid: Uint8List.fromList(
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
@@ -430,9 +352,7 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        config: SocketClientConfig(
-            initialPayload: () => initPayload,
-            customConnect: (_, __) => EchoSocket.connect(BehaviorSubject())),
+        config: SocketClientConfig(initialPayload: () => initPayload),
       );
     }));
 
@@ -464,7 +384,6 @@ Future<void> main() async {
       socketClient = SocketClient(
         wsUrl,
         config: SocketClientConfig(
-          customConnect: (_, __) => EchoSocket.connect(BehaviorSubject()),
           initialPayload: () async {
             await Future.delayed(Duration(seconds: 3));
             return initPayload;
