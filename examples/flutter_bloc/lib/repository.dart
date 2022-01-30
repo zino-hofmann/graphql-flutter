@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
 import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
@@ -12,7 +11,7 @@ import 'package:graphql_flutter_bloc_example/graphql_operation/queries/readRepos
 class GithubRepository {
   final GraphQLClient client;
 
-  GithubRepository({@required this.client}) : assert(client != null);
+  GithubRepository({required this.client});
 
   Future<QueryResult> getRepositories(int numOfRepositories) async {
     final WatchQueryOptions _options = WatchQueryOptions(
@@ -29,11 +28,11 @@ class GithubRepository {
 
   Future<QueryResult> toggleRepoStar(Repo repo) async {
     var document =
-        repo.viewerHasStarred ? mutations.removeStar : mutations.addStar;
+        repo.viewerHasStarred! ? mutations.removeStar : mutations.addStar;
 
     final MutationOptions _options = MutationOptions(
       document: parseString(document),
-      variables: <String, String>{
+      variables: <String, String?>{
         'starrableId': repo.id,
       },
     );

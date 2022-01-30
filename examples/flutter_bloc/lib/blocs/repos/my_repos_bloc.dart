@@ -1,21 +1,21 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/events.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/states.dart';
 import 'package:graphql_flutter_bloc_example/repository.dart';
 
 class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
-  final GithubRepository githubRepository;
+  final GithubRepository? githubRepository;
 
   // this a bit of a hack
-  List<Repo> githubRepositories;
+  List<Repo> githubRepositories = [];
 
-  MyGithubReposBloc({@required this.githubRepository}) : super(ReposLoading());
+  MyGithubReposBloc({required this.githubRepository}) : super(ReposLoading());
 
-  @override
+  // TODO refactoring this class with the block 8.0
   Stream<MyGithubReposState> mapEventToState(
     MyGithubReposEvent event,
   ) async* {
@@ -25,11 +25,10 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
         // } else if (event is UpdateReposAfterMutations) {
         //   yield* _mapUpdateAfterMutatationToState(event.repo);
       } else if (event is MutateToggleStar) {
-        yield* _mapMutateStarRepositoryToState(event.repo);
+        yield* _mapMutateStarRepositoryToState(event.repo!);
       }
     } catch (_, stackTrace) {
       print('$_ $stackTrace');
-      yield state;
     }
   }
 
@@ -38,21 +37,21 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       yield ReposLoading();
 
       final queryResults =
-          await this.githubRepository.getRepositories(numOfRepositories);
+          await this.githubRepository!.getRepositories(numOfRepositories);
 
       if (queryResults.hasException) {
-        yield ReposNotLoaded(queryResults.exception.graphqlErrors);
+        yield ReposNotLoaded(queryResults.exception!.graphqlErrors);
         return;
       }
 
-      final List<dynamic> repos =
-          queryResults.data['viewer']['repositories']['nodes'] as List<dynamic>;
+      final List<dynamic> repos = queryResults.data!['viewer']['repositories']
+          ['nodes'] as List<dynamic>;
 
       final List<Repo> listOfRepos = repos
           .map((dynamic e) => Repo(
-                id: e['id'] as String,
-                name: e['name'] as String,
-                viewerHasStarred: e['viewerHasStarred'] as bool,
+                id: e['id'] as String?,
+                name: e['name'] as String?,
+                viewerHasStarred: e['viewerHasStarred'] as bool?,
               ))
           .toList();
 
@@ -61,7 +60,7 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       // pass the data instead
       yield ReposLoaded(results: listOfRepos);
     } catch (error) {
-      yield ReposNotLoaded(error);
+      yield ReposNotLoaded(error as List<GraphQLError>);
     }
   }
 
@@ -96,15 +95,15 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
       // pass the data instead
       yield ReposLoaded(results: githubRepositories);
 
-      final queryResults = await githubRepository.toggleRepoStar(repo);
+      final queryResults = await githubRepository!.toggleRepoStar(repo);
 
       if (queryResults.hasException) {
         // @TODO Improve error handling here, may be introduce a hasError Method
-        yield ReposNotLoaded(queryResults.exception.graphqlErrors);
+        yield ReposNotLoaded(queryResults.exception!.graphqlErrors);
         return;
       }
 
-      var mutatedRepo = extractRepositoryData(queryResults.data);
+      var mutatedRepo = extractRepositoryData(queryResults.data ?? {})!;
 
       final notloadingRepo = Repo(
         id: repo.id,
@@ -119,17 +118,12 @@ class MyGithubReposBloc extends Bloc<MyGithubReposEvent, MyGithubReposState> {
 
       yield ReposLoaded(results: githubRepositories);
     } catch (error) {
-      yield ReposNotLoaded(error);
+      yield ReposNotLoaded(error as List<GraphQLError>);
     }
   }
 
-  Map<String, Object> extractRepositoryData(Map<String, Object> data) {
-    final Map<String, Object> action = data['action'] as Map<String, Object>;
-
-    if (action == null) {
-      return null;
-    }
-
-    return action['starrable'] as Map<String, Object>;
+  Map<String, dynamic>? extractRepositoryData(Map<String, dynamic> data) {
+    final Map<String, dynamic> action = data['action'] as Map<String, dynamic>;
+    return action['starrable'] as Map<String, dynamic>?;
   }
 }

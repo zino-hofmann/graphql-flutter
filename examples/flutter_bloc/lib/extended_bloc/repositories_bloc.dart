@@ -5,7 +5,7 @@ import 'package:graphql_flutter_bloc/graphql_flutter_bloc.dart';
 class RepositoriesBloc extends QueryBloc<Map<String, dynamic>> {
   static int defaultLimit = 5;
 
-  RepositoriesBloc({GraphQLClient client, WatchQueryOptions options})
+  RepositoriesBloc({required GraphQLClient client, WatchQueryOptions? options})
       : super(
           client: client,
           options: options ??
@@ -48,11 +48,6 @@ class RepositoriesBloc extends QueryBloc<Map<String, dynamic>> {
         );
 
   @override
-  Map<String, dynamic> parseData(Map<String, dynamic> data) {
-    return data;
-  }
-
-  @override
   bool shouldFetchMore(int i, int threshold) {
     return state.maybeWhen(
         loaded: (data, result) {
@@ -64,7 +59,7 @@ class RepositoriesBloc extends QueryBloc<Map<String, dynamic>> {
         orElse: () => false);
   }
 
-  void fetchMore({String after}) {
+  void fetchMore({String? after}) {
     add(QueryEvent.fetchMore(
         options: FetchMoreOptions(
       variables: <String, dynamic>{'nRepositories': 5, 'after': after},
@@ -81,5 +76,10 @@ class RepositoriesBloc extends QueryBloc<Map<String, dynamic>> {
         return fetchMoreResultData;
       },
     )));
+  }
+
+  @override
+  Map<String, dynamic> parseData(Map<String, dynamic>? data) {
+    return data ?? {};
   }
 }

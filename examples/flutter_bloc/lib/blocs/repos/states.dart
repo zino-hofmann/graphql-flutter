@@ -1,14 +1,21 @@
 import 'package:equatable/equatable.dart';
 import 'package:graphql/client.dart';
 import 'package:graphql_flutter_bloc_example/blocs/repos/models.dart';
-import 'package:meta/meta.dart';
 
-@immutable
+// TODO this see how make this immutable
 abstract class MyGithubReposState extends Equatable {
-  MyGithubReposState([List props = const []]) : super(props);
+  List<dynamic> _props = const [];
+  MyGithubReposState(List props) {
+    _props = props;
+  }
+
+  @override
+  List<dynamic> get props => _props;
 }
 
 class ReposLoading extends MyGithubReposState {
+  ReposLoading({List props = const []}) : super(props);
+
   @override
   String toString() => 'ReposLoading';
 }
@@ -16,21 +23,27 @@ class ReposLoading extends MyGithubReposState {
 class ReposLoaded extends MyGithubReposState {
   final List<Repo> results;
 
-  ReposLoaded({@required this.results})
-      : assert(results != null),
-        super([results]);
+  ReposLoaded({required this.results}) : super([results]);
 
   @override
   String toString() => 'ReposLoaded: { Github Repositories: $results }';
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => throw UnimplementedError();
 }
 
 class ReposNotLoaded extends MyGithubReposState {
-  final List<GraphQLError> errors;
+  final List<GraphQLError>? errors;
 
-  ReposNotLoaded([this.errors]) : super([errors]);
+  ReposNotLoaded(this.errors) : super([errors]);
 
   @override
   String toString() => 'ReposNotLoaded';
+
+  @override
+  // TODO: implement props
+  List<Object?> get props => throw UnimplementedError();
 }
 
 // class ReposStarToggled extends MyGithubReposState {

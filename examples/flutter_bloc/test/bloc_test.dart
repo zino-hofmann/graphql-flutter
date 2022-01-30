@@ -42,22 +42,22 @@ const data = """
 }
 """;
 
-Map<String, dynamic> decodeGithubResponse = jsonDecode(data);
-final List<dynamic> mockedGithubRepos = decodeGithubResponse['data']['viewer']
-    ['repositories']['nodes'] as List<dynamic>;
+Map<String, dynamic>? decodeGithubResponse = jsonDecode(data);
+final List<dynamic>? mockedGithubRepos = decodeGithubResponse!['data']['viewer']
+    ['repositories']['nodes'] as List<dynamic>?;
 
-final List<Repo> mockedMappedRepos = mockedGithubRepos
+final List<Repo> mockedMappedRepos = mockedGithubRepos!
     .map((dynamic e) => Repo(
-          id: e['id'] as String,
-          name: e['name'] as String,
-          viewerHasStarred: e['viewerHasStarred'] as bool,
+          id: e['id'] as String?,
+          name: e['name'] as String?,
+          viewerHasStarred: e['viewerHasStarred'] as bool?,
         ))
     .toList();
 
 void main() {
   group('GithubReposBloc', () {
-    MyGithubReposBloc repoBloc;
-    MockGithubRepository githubRepository;
+    late MyGithubReposBloc repoBloc;
+    late MockGithubRepository githubRepository;
 
     final numOfRepos = 50;
 
@@ -79,9 +79,10 @@ void main() {
     group('Fetch Repositories', () {
       test('fetch repositories', () {
         final results = QueryResult(
-          data: decodeGithubResponse['data'],
+          data: decodeGithubResponse!['data'],
           exception: null,
           source: QueryResultSource.network,
+          parserFn: (Map<String, dynamic> data) => data,
         );
 
         when(

@@ -13,8 +13,8 @@ class ExtendedBloc extends StatefulWidget {
 }
 
 class _ExtendedBlocState extends State<ExtendedBloc> {
-  Completer<void> _refreshCompleter;
-  RepositoriesBloc bloc;
+  late Completer<void>? _refreshCompleter;
+  late RepositoriesBloc? bloc;
 
   @override
   void initState() {
@@ -25,12 +25,12 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
 
   Future _handleRefreshStart(RepositoriesBloc bloc) {
     bloc.refetch();
-    return _refreshCompleter.future;
+    return _refreshCompleter!.future;
   }
 
   @override
   void dispose() {
-    bloc.dispose();
+    bloc!.dispose();
     super.dispose();
   }
 
@@ -39,8 +39,8 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
     _refreshCompleter = Completer();
   }
 
-  Widget _displayResults(Map<String, dynamic> data, QueryResult result) {
-    final itemCount = data['viewer']['repositories']['nodes'].length;
+  Widget _displayResults(Map<String, dynamic>? data, QueryResult? result) {
+    final itemCount = data!['viewer']['repositories']['nodes'].length;
 
     if (itemCount == 0) {
       return ListView(children: [
@@ -63,8 +63,8 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
         itemBuilder: (BuildContext context, int index) {
           final pageInfo = data['viewer']['repositories']['pageInfo'];
 
-          if (bloc.shouldFetchMore(index, 1)) {
-            bloc.fetchMore(after: pageInfo['endCursor']);
+          if (bloc!.shouldFetchMore(index, 1)) {
+            bloc!.fetchMore(after: pageInfo['endCursor']);
           }
 
           final node = data['viewer']['repositories']['nodes'][index];
@@ -73,7 +73,7 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
             title: Text(node['name']),
           );
 
-          if (bloc.isFetchingMore && index == itemCount - 1) {
+          if (bloc!.isFetchingMore && index == itemCount - 1) {
             tile = Column(
               children: [
                 tile,
@@ -98,9 +98,9 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
         title: Text('Extended BLOC example'),
       ),
       body: RefreshIndicator(
-        onRefresh: () async => _handleRefreshStart(bloc),
+        onRefresh: () async => _handleRefreshStart(bloc!),
         child: BlocBuilder<RepositoriesBloc, QueryState<Map<String, dynamic>>>(
-            cubit: bloc,
+            bloc: bloc,
             builder: (_, state) {
               if (state is! QueryStateRefetch) {
                 _handleRefreshEnd();
@@ -111,7 +111,7 @@ class _ExtendedBlocState extends State<ExtendedBloc> {
                 loading: (_) => Center(child: CircularProgressIndicator()),
                 error: (_, __) => ListView(children: [
                   Text(
-                    bloc.getError,
+                    bloc!.getError!,
                     style: TextStyle(color: Theme.of(context).errorColor),
                   )
                 ]),

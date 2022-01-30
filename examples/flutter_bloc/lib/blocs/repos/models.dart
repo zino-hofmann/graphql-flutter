@@ -1,13 +1,13 @@
 class Repo {
   const Repo({
-    this.id,
-    this.name,
-    this.viewerHasStarred,
-    this.isLoading: false,
+    required this.id,
+    required this.name,
+    required this.viewerHasStarred,
+    this.isLoading = false,
   });
 
-  final String id;
-  final String name;
-  final bool viewerHasStarred;
+  final String? id;
+  final String? name;
+  final bool? viewerHasStarred;
   final bool isLoading;
 }

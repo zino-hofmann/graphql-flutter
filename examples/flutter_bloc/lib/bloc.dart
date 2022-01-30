@@ -44,7 +44,7 @@ class _BlocPageState extends State<BlocPage> {
               textAlign: TextAlign.center,
               onChanged: (String n) {
                 BlocProvider.of<MyGithubReposBloc>(context)
-                    .add(LoadMyRepos(numOfReposToLoad: int.parse(n) ?? 50));
+                    .add(LoadMyRepos(numOfReposToLoad: int.parse(n)));
               },
             ),
             SizedBox(
@@ -61,14 +61,14 @@ class _BlocPageState extends State<BlocPage> {
 }
 
 class LoadRepositories extends StatelessWidget {
-  final MyGithubReposBloc bloc;
+  final MyGithubReposBloc? bloc;
 
-  const LoadRepositories({Key key, this.bloc}) : super(key: key);
+  const LoadRepositories({Key? key, required this.bloc}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MyGithubReposBloc, MyGithubReposState>(
-      cubit: bloc,
+      bloc: bloc,
       builder: (BuildContext context, MyGithubReposState state) {
         if (state is ReposLoading) {
           return Expanded(
@@ -101,7 +101,7 @@ class LoadRepositories extends StatelessWidget {
           );
         }
 
-        return Text(null);
+        return Container();
       },
     );
   }
@@ -109,38 +109,36 @@ class LoadRepositories extends StatelessWidget {
 
 class StarrableRepository extends StatelessWidget {
   const StarrableRepository({
-    Key key,
-    @required this.repository,
-    @required this.reposBloc,
-  })  : assert(reposBloc != null),
-        assert(repository != null),
-        super(key: key);
+    Key? key,
+    required this.repository,
+    required this.reposBloc,
+  }) : super(key: key);
 
-  final Repo repository;
-  final MyGithubReposBloc reposBloc;
+  final Repo? repository;
+  final MyGithubReposBloc? reposBloc;
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
       leading: _isRepoStarred(),
       trailing: _showLoadingIndicator(),
-      title: Text(repository.name),
+      title: Text(repository!.name!),
       onTap: () {
-        reposBloc.add(MutateToggleStar(repo: repository));
+        reposBloc!.add(MutateToggleStar(repo: repository));
       },
     );
   }
 
   Widget _showLoadingIndicator() {
-    if (repository.isLoading) {
+    if (repository!.isLoading) {
       return CircularProgressIndicator();
     } else {
-      return null;
+      return Container();
     }
   }
 
   Widget _isRepoStarred() {
-    if (repository.viewerHasStarred) {
+    if (repository!.viewerHasStarred!) {
       return Icon(
         Icons.star,
         color: Colors.amber,

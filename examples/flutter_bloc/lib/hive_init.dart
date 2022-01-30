@@ -15,7 +15,7 @@ import 'package:graphql/client.dart' show HiveStore;
 ///
 /// [github]: https://github.com/hivedb/hive/blob/5bf355496650017409fef4e9905e8826c5dc5bf3/hive_flutter/lib/src/hive_extensions.dart
 Future<void> initHiveForFlutter({
-  String subDir,
+  String? subDir,
   Iterable<String> boxes = const [HiveStore.defaultBoxName],
 }) async {
   if (!kIsWeb) {
