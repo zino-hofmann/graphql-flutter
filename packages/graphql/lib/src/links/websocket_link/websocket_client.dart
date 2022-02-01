@@ -50,7 +50,7 @@ class SocketClientConfig {
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.initialPayload,
     this.headers,
-    @deprecated this.connectFn,
+    this.connectFn,
   });
 
   /// Serializer used to serialize request
@@ -106,13 +106,9 @@ class SocketClientConfig {
   FutureOr<WebSocketChannel> connect(
       {required Uri uri,
       Iterable<String>? protocols,
-      Map<String, dynamic>? headers,
-      WebSocketConnect? connectFn}) {
+      Map<String, dynamic>? headers}) {
     if (connectFn != null) {
-      return connectFn(uri, protocols);
-    }
-    if (this.connectFn != null) {
-      return this.connectFn!(uri, protocols);
+      return connectFn!(uri, protocols);
     }
     return defaultConnectPlatform(
       uri,
