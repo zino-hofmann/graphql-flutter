@@ -21,9 +21,9 @@ SocketClient getTestClient(
             const Duration(milliseconds: 1)}) =>
     SocketClient(
       wsUrl,
-      config: customConnect(
+      config: SocketClientConfig(
         autoReconnect: autoReconnect,
-        customHeaders: customHeaders,
+        headers: customHeaders,
         delayBetweenReconnectionAttempts: delayBetweenReconnectionAttempts,
       ),
       randomBytesForUuid: Uint8List.fromList(
@@ -354,7 +354,7 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        config: customConnect(initialPayload: () => initPayload),
+        config: SocketClientConfig(initialPayload: () => initPayload),
       );
     }));
 
@@ -385,7 +385,7 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       socketClient = SocketClient(
         wsUrl,
-        config: customConnect(
+        config: SocketClientConfig(
           initialPayload: () async {
             await Future.delayed(Duration(seconds: 3));
             return initPayload;

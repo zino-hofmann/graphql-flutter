@@ -15,11 +15,11 @@ class WebSocketLink extends Link {
   /// Creates a new [WebSocketLink] instance with the specified config.
   WebSocketLink(
     this.url, {
-    this.config = const customConnect(),
+    this.config = const SocketClientConfig(),
   });
 
   final String url;
-  final customConnect config;
+  final SocketClientConfig config;
 
   // cannot be final because we're changing the instance upon a header change.
   SocketClient? _socketClient;

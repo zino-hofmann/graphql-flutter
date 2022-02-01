@@ -40,8 +40,8 @@ class SubscriptionListener {
 
 enum SocketConnectionState { notConnected, connecting, connected }
 
-class customConnect {
-  const customConnect({
+class SocketClientConfig {
+  const SocketClientConfig({
     this.serializer = const RequestSerializer(),
     this.parser = const ResponseParser(),
     this.autoReconnect = true,
@@ -49,8 +49,8 @@ class customConnect {
     this.inactivityTimeout = const Duration(seconds: 30),
     this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
     this.initialPayload,
-    this.customHeaders,
-    @experimental this.customConnect,
+    this.headers,
+    @deprecated this.connectFn,
   });
 
   /// Serializer used to serialize request
@@ -117,7 +117,7 @@ class customConnect {
     return defaultConnectPlatform(
       uri,
       protocols,
-      headers: headers,
+      headers: headers ?? this.headers,
     );
   }
 
@@ -160,7 +160,7 @@ class SocketClient {
   SocketClient(
     this.url, {
     this.protocols = const ['graphql-ws'],
-    this.config = const customConnect(),
+    this.config = const SocketClientConfig(),
     @visibleForTesting this.randomBytesForUuid,
     @visibleForTesting this.onMessage,
     @visibleForTesting this.onStreamError = _defaultOnStreamError,
@@ -171,7 +171,7 @@ class SocketClient {
   Uint8List? randomBytesForUuid;
   final String url;
   final Iterable<String>? protocols;
-  final customConnect config;
+  final SocketClientConfig config;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
       BehaviorSubject<SocketConnectionState>();
@@ -341,7 +341,7 @@ class SocketClient {
   /// Sends a query, mutation or subscription request to the server, and returns a stream of the response.
   ///
   /// If the request is a query or mutation, a timeout will be applied to the request as specified by
-  /// [customConnect]'s [queryAndMutationTimeout] field.
+  /// [SocketClientConfig]'s [queryAndMutationTimeout] field.
   ///
   /// If the request is a subscription, obviously no timeout is applied.
   ///
