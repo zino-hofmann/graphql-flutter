@@ -15,10 +15,10 @@ jobs:
         run: |
           cd packages/graphql
           dart pub get
-          pub run test --coverage="coverage"
-          pub run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.packages --report-on=lib
+          dart run test --coverage="coverage"
+          dart run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.packages --report-on=lib
       - name: Upload coverage file
         run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov
           chmod +x codecov
-          ./codecov --file packages/graphql/coverage.lcov
+          ./codecov
