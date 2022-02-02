@@ -9,7 +9,6 @@
 # GraphQL Flutter
 
 ### 📌 &nbsp; Bulletin
-* See the [`v3 -> v4` Migration Guide](./changelog-v3-v4.md) if you're still on `v3`.
 * [Join the discord.][discord-link]
 
 ## About this project
@@ -37,7 +36,13 @@ This is a Monorepo which contains the following packages:
 Here are some examples you can follow:
 
 1. [Starwars Example](./examples/starwars)
-2. [`flutter_bloc` example](./examples/flutter_bloc)
+
+## Utils Tools
+
+Around graphql_flutter are builds awesome tools like:
+
+1. [graphql_flutter_bloc](https://github.com/artflutter/graphql_flutter_bloc)
+2. [graphql_codegen](https://github.com/heftapp/graphql_codegen)
 
 ## Articles and Videos
 
