@@ -52,20 +52,11 @@ class Bloc {
 
   Sink<int> get updateNumberOfRepoSink => _updateNumberOfRepo;
 
-  static final HttpLink _httpLink = HttpLink(
-    'https://api.github.com/graphql',
-  );
-
-  static final AuthLink _authLink = AuthLink(
-    // ignore: undefined_identifier
-    getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-  );
-
-  static final Link _link = _authLink.concat(_httpLink);
-
-  static final GraphQLClient _client = GraphQLClient(
+  final GraphQLClient _client = GraphQLClient(
     cache: GraphQLCache(),
-    link: _link,
+    link: HttpLink('https://api.github.com/graphql', defaultHeaders: {
+      'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    }),
   );
 
   Future<QueryResult> _mutateToggleStar(Repo repo) async {
