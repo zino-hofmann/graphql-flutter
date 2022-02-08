@@ -8,38 +8,19 @@ import '../helpers.dart' show withGenericHandling;
 // to run the example, replace <YOUR_PERSONAL_ACCESS_TOKEN> with your GitHub token in ../local.dart
 import '../local.dart';
 
-const bool ENABLE_WEBSOCKETS = false;
-
 class GraphQLWidgetScreen extends StatelessWidget {
   const GraphQLWidgetScreen() : super();
 
   @override
   Widget build(BuildContext context) {
-    final httpLink = HttpLink(
-      'https://api.github.com/graphql',
-    );
-
-    final authLink = AuthLink(
-      // ignore: undefined_identifier
-      getToken: () async => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-    );
-
-    var link = authLink.concat(httpLink);
-
-    if (ENABLE_WEBSOCKETS) {
-      final websocketLink = WebSocketLink('ws://localhost:8080/ws/graphql');
-
-      link = Link.split(
-        (request) => request.isSubscription,
-        websocketLink,
-        link,
-      );
-    }
+     var httpLink = HttpLink('https://api.github.com/graphql', defaultHeaders: {
+      'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    });
 
     final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: GraphQLCache(),
-        link: link,
+        link: httpLink,
       ),
     );
 
@@ -128,16 +109,6 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               ),
             ),
-            ENABLE_WEBSOCKETS
-                ? Subscription(
-                    options: SubscriptionOptions(
-                      document: gql(queries.testSubscription),
-                    ),
-                    builder: (result) => result.isLoading
-                        ? const Text('Loading...')
-                        : Text(result.data.toString()),
-                  )
-                : const Text(''),
           ],
         ),
       ),
@@ -152,16 +123,16 @@ class StarrableRepository extends StatelessWidget {
     required this.optimistic,
   }) : super(key: key);
 
-  final Map<String, Object> repository;
+  final Map<String, dynamic> repository;
   final bool optimistic;
 
   /// Extract the repository data for updating the fragment
-  Map<String, Object>? extractRepositoryData(Map<String, Object?> data) {
-    final action = data['action'] as Map<String, Object>?;
+  Map<String, dynamic>? extractRepositoryData(Map<String, dynamic> data) {
+    final action = data['action'] as Map<String, dynamic>?;
     if (action == null) {
       return null;
     }
-    return action['starrable'] as Map<String, Object>?;
+    return action['starrable'] as Map<String, dynamic>?;
   }
 
   /// Get whether the repository is currently starred, according to the current Query

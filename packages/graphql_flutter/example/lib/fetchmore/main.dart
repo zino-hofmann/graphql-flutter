@@ -11,19 +11,14 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final httpLink = HttpLink('https://api.github.com/graphql');
-
-    final authLink = AuthLink(
-      // ignore: undefined_identifier
-      getToken: () => 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
-    );
-
-    final link = authLink.concat(httpLink);
+    final httpLink = HttpLink('https://api.github.com/graphql', defaultHeaders: {
+      'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
+    });
 
     final client = ValueNotifier<GraphQLClient>(
       GraphQLClient(
         cache: GraphQLCache(),
-        link: link,
+        link: httpLink,
       ),
     );
 

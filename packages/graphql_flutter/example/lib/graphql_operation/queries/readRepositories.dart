@@ -42,6 +42,7 @@ const String searchRepositories = r'''
 const String testSubscription = r'''
 		subscription test {
 	    deviceChanged(id: 2) {
+	      __typename
         id
         name
       }

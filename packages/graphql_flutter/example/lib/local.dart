@@ -1,1 +1,2 @@
-const String YOUR_PERSONAL_ACCESS_TOKEN = '<YOUR_PERSONAL_ACCESS_TOKEN>';
+const String YOUR_PERSONAL_ACCESS_TOKEN =
+    '<YOU Github token>';

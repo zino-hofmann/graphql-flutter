@@ -1,8 +1,7 @@
-# Example App
+# graphql_flutter example
 
-A new Flutter project.
+A Github API wrapper example where you need to specify you token in the `local.dart` file
 
 ## Getting Started
 
-For help getting started with Flutter, view our online
-[documentation](https://flutter.io/).
+Just run `flutter pub get` and run your flutter app

@@ -4,20 +4,21 @@ description: A new Flutter project.
 publish_to: none
 
 module:
-  androidX: true // Add this line.
+  androidX: true
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^0.1.2
+  cupertino_icons: ^0.1.3
   graphql_flutter:
     path: ..
+  trash_themes: ^0.0.1
 
 dev_dependencies:
   pedantic: ^1.8.0+1
   flutter_test:
     sdk: flutter
-  test: ^1.5.1
+  test: ^1.17.12
 
 flutter:
   uses-material-design: true
