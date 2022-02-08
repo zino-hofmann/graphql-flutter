@@ -13,7 +13,7 @@ class GraphQLWidgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-     var httpLink = HttpLink('https://api.github.com/graphql', defaultHeaders: {
+    var httpLink = HttpLink('https://api.github.com/graphql', defaultHeaders: {
       'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     });
 

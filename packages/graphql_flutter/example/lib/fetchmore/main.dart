@@ -11,7 +11,8 @@ class FetchMoreWidgetScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final httpLink = HttpLink('https://api.github.com/graphql', defaultHeaders: {
+    final httpLink =
+        HttpLink('https://api.github.com/graphql', defaultHeaders: {
       'Authorization': 'Bearer $YOUR_PERSONAL_ACCESS_TOKEN',
     });
 
