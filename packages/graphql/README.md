@@ -53,9 +53,8 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
 
 First, depend on this package:
 
-```yaml
-dependencies:
-  graphql: ^4.0.0-beta
+```console
+$ flutter pub add graphql
 ```
 
 And then import it inside your dart code:
