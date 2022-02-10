@@ -49,9 +49,8 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
 
 First, depend on this package:
 
-```yaml
-dependencies:
-  graphql_flutter: ^<last version on github release>
+```console
+$ flutter pub add graphql_flutter
 ```
 
 And then import it inside your dart code:
