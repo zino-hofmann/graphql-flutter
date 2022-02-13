@@ -13,6 +13,7 @@ dependencies:
   connectivity_plus: ^2.0.3
   hive: ^2.0.0
   plugin_platform_interface: ^2.0.0
+  flutter_hooks: ^0.18.2
 dev_dependencies:
   pedantic: ^1.11.0
   mockito: ^5.0.0
