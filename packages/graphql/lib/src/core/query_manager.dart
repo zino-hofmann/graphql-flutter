@@ -343,12 +343,10 @@ class QueryManager {
   /// Refetch the [ObservableQuery] referenced by [queryId],
   /// overriding any present non-network-only [FetchPolicy].
   Future<QueryResult<TParsed>?> refetchQuery<TParsed>(String queryId) {
-    final WatchQueryOptions<TParsed> options =
-        queries[queryId]!.options.copy() as WatchQueryOptions<TParsed>;
+    WatchQueryOptions<TParsed> options =
+        queries[queryId]!.options as WatchQueryOptions<TParsed>;
     if (!willAlwaysExecuteOnNetwork(options.fetchPolicy)) {
-      options.policies = options.policies.copyWith(
-        fetch: FetchPolicy.networkOnly,
-      );
+      options = options.copyWithFetchPolicy(FetchPolicy.networkOnly);
     }
 
     // create a new request to execute

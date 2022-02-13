@@ -5,6 +5,29 @@ import 'package:test/test.dart';
 
 void main() {
   group('query options', () {
+    group('equality', () {
+      test('compares content', () {
+        final fn = (_d) => null;
+        final t1 = QueryOptions(
+          variables: {'foo': 'bar'},
+          document: parseString('query { bar }'),
+          parserFn: fn,
+        );
+        final t2 = QueryOptions(
+          variables: {'foo': 'bar'},
+          document: parseString('query { bar }'),
+          parserFn: fn,
+        );
+        final t3 = QueryOptions(
+          document: parseString('query { barz }'),
+          parserFn: fn,
+        );
+        expect(t1, equals(t2));
+        expect(t1.hashCode, equals(t2.hashCode));
+        expect(t1, isNot(equals(t3)));
+        expect(t1.hashCode, isNot(equals(t3.hashCode)));
+      });
+    });
     group('type getters', () {
       test('on QueryOptions', () {
         final options = QueryOptions(

@@ -330,7 +330,7 @@ class ObservableQuery<TParsed> {
       scheduler!.stopPollingQuery(queryId);
     }
 
-    options.pollInterval = pollInterval;
+    options = options.copyWithPollInterval(pollInterval);
     lifecycle = QueryLifecycle.polling;
     scheduler!.startPollingQuery(options, queryId);
   }
@@ -338,13 +338,18 @@ class ObservableQuery<TParsed> {
   void stopPolling() {
     if (isCurrentlyPolling) {
       scheduler!.stopPollingQuery(queryId);
-      options.pollInterval = null;
+      options = options.copyWithPollInterval(null);
       lifecycle = QueryLifecycle.pollingStopped;
     }
   }
 
-  set variables(Map<String, dynamic> variables) =>
-      options.variables = variables;
+  set variables(Map<String, dynamic> variables) {
+    options = options.copyWithVariables(variables);
+  }
+
+  set optimisticResult(Object? optimisticResult) {
+    options = options.copyWithOptimisticResult(optimisticResult);
+  }
 
   /// [onData] callbacks have het to be run
   ///

@@ -89,9 +89,8 @@ class GraphQLClient implements GraphQLDataProxy {
   /// {@end-tool}
   ObservableQuery<TParsed> watchQuery<TParsed>(
       WatchQueryOptions<TParsed> options) {
-    options.policies =
-        defaultPolicies.watchQuery.withOverrides(options.policies);
-    return queryManager.watchQuery(options);
+    final policies = defaultPolicies.watchQuery.withOverrides(options.policies);
+    return queryManager.watchQuery(options.copyWithPolicies(policies));
   }
 
   /// [watchMutation] is the same as [watchQuery], but with a different [defaultPolicies] that are more appropriate for mutations.
@@ -101,9 +100,9 @@ class GraphQLClient implements GraphQLDataProxy {
   /// For more details, see https://github.com/zino-app/graphql-flutter/issues/774
   ObservableQuery<TParsed> watchMutation<TParsed>(
       WatchQueryOptions<TParsed> options) {
-    options.policies =
+    final policies =
         defaultPolicies.watchMutation.withOverrides(options.policies);
-    return queryManager.watchQuery(options);
+    return queryManager.watchQuery(options.copyWithPolicies(policies));
   }
 
   /// This resolves a single query according to the [QueryOptions] specified and
@@ -149,16 +148,16 @@ class GraphQLClient implements GraphQLDataProxy {
   Future<QueryResult<TParsed>> query<TParsed>(
     QueryOptions<TParsed> options,
   ) async {
-    options.policies = defaultPolicies.query.withOverrides(options.policies);
-    return await queryManager.query(options);
+    final policies = defaultPolicies.query.withOverrides(options.policies);
+    return await queryManager.query(options.copyWithPolicies(policies));
   }
 
   /// This resolves a single mutation according to the [MutationOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
   Future<QueryResult<TParsed>> mutate<TParsed>(
       MutationOptions<TParsed> options) async {
-    options.policies = defaultPolicies.mutate.withOverrides(options.policies);
-    return await queryManager.mutate(options);
+    final policies = defaultPolicies.mutate.withOverrides(options.policies);
+    return await queryManager.mutate(options.copyWithPolicies(policies));
   }
 
   /// This subscribes to a GraphQL subscription according to the options specified and returns a
@@ -199,10 +198,10 @@ class GraphQLClient implements GraphQLDataProxy {
   /// {@end-tool}
   Stream<QueryResult<TParsed>> subscribe<TParsed>(
       SubscriptionOptions<TParsed> options) {
-    options.policies = defaultPolicies.subscribe.withOverrides(
+    final policies = defaultPolicies.subscribe.withOverrides(
       options.policies,
     );
-    return queryManager.subscribe(options);
+    return queryManager.subscribe(options.copyWithPolicies(policies));
   }
 
   /// Fetch more results and then merge them with the given [previousResult]

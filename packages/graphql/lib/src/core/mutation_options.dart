@@ -1,17 +1,12 @@
-// ignore_for_file: deprecated_member_use_from_same_package
 import 'dart:async';
-import 'package:graphql/src/cache/cache.dart';
+import 'package:graphql/client.dart';
 import 'package:graphql/src/core/_base_options.dart';
-import 'package:graphql/src/core/observable_query.dart';
 
 import 'package:gql/ast.dart';
-import 'package:gql_exec/gql_exec.dart';
 import 'package:graphql/src/core/result_parser.dart';
 
-import 'package:graphql/src/exceptions.dart';
-import 'package:graphql/src/core/query_result.dart';
 import 'package:graphql/src/utilities/helpers.dart';
-import 'package:graphql/src/core/policies.dart';
+import 'package:meta/meta.dart';
 
 typedef OnMutationCompleted = FutureOr<void> Function(dynamic data);
 typedef OnMutationUpdate = FutureOr<void> Function(
@@ -20,6 +15,7 @@ typedef OnMutationUpdate = FutureOr<void> Function(
 );
 typedef OnError = FutureOr<void> Function(OperationException? error);
 
+@immutable
 class MutationOptions<TParsed> extends BaseOptions<TParsed> {
   MutationOptions({
     required DocumentNode document,
@@ -51,8 +47,41 @@ class MutationOptions<TParsed> extends BaseOptions<TParsed> {
   final OnError? onError;
 
   @override
-  List<Object?> get properties =>
-      [...super.properties, onCompleted, update, onError];
+  List<Object?> get properties => [
+        ...super.properties,
+        onCompleted,
+        update,
+        onError,
+      ];
+
+  MutationOptions<TParsed> copyWithPolicies(Policies policies) =>
+      MutationOptions(
+        document: document,
+        operationName: operationName,
+        variables: variables,
+        fetchPolicy: policies.fetch,
+        errorPolicy: policies.error,
+        cacheRereadPolicy: policies.cacheReread,
+        context: context,
+        optimisticResult: optimisticResult,
+        onCompleted: onCompleted,
+        update: update,
+        onError: onError,
+        parserFn: parserFn,
+      );
+
+  WatchQueryOptions<TParsed> asWatchQueryOptions() =>
+      WatchQueryOptions<TParsed>(
+        document: document,
+        operationName: operationName,
+        variables: variables,
+        fetchPolicy: fetchPolicy,
+        errorPolicy: errorPolicy,
+        cacheRereadPolicy: cacheRereadPolicy,
+        fetchResults: false,
+        context: context,
+        parserFn: parserFn,
+      );
 }
 
 /// Handles execution of mutation `update`, `onCompleted`, and `onError` callbacks
