@@ -109,7 +109,7 @@ jobs:
       - run:
           name: Bump version numbers
           command: |
-            if [[ $CIRCLE_TAG =~ ^.*beta.*$ ]]; then BRANCH=beta; else BRANCH=master; fi 
+            if [[ $CIRCLE_TAG =~ ^.*beta.*$ ]]; then BRANCH=beta; else BRANCH=beta; fi
             git checkout $BRANCH
 
             git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
