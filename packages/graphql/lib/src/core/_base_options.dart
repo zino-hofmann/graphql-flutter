@@ -1,13 +1,18 @@
-import 'package:graphql/src/core/_data_class.dart';
-
+import 'package:collection/collection.dart';
 import 'package:gql/ast.dart';
 
 import 'package:graphql/client.dart';
 import 'package:graphql/src/core/result_parser.dart';
+import 'package:meta/meta.dart';
+
+TParsed unprovidedParserFn<TParsed>(_d) => throw UnimplementedError(
+      "Please provide a parser function to support result parsing.",
+    );
 
 /// TODO refactor into [Request] container
 /// Base options.
-abstract class BaseOptions<TParsed> extends MutableDataClass {
+@immutable
+abstract class BaseOptions<TParsed> {
   BaseOptions({
     required this.document,
     this.variables = const {},
@@ -24,28 +29,25 @@ abstract class BaseOptions<TParsed> extends MutableDataClass {
           cacheReread: cacheRereadPolicy,
         ),
         context = context ?? Context(),
-        parserFn = parserFn ??
-            ((d) => throw UnimplementedError(
-                  "Please provide a parser function to support result parsing.",
-                ));
+        parserFn = parserFn ?? unprovidedParserFn;
 
   /// Document containing at least one [OperationDefinitionNode]
-  DocumentNode document;
+  final DocumentNode document;
 
   /// Name of the executable definition
   ///
   /// Must be specified if [document] contains more than one [OperationDefinitionNode]
-  String? operationName;
+  final String? operationName;
 
   /// A map going from variable name to variable value, where the variables are used
   /// within the GraphQL query.
-  Map<String, dynamic> variables;
+  final Map<String, dynamic> variables;
 
   /// An optimistic result to eagerly add to the operation stream
-  Object? optimisticResult;
+  final Object? optimisticResult;
 
   /// Specifies the [Policies] to be used during execution.
-  Policies policies;
+  final Policies policies;
 
   FetchPolicy? get fetchPolicy => policies.fetch;
 
@@ -54,9 +56,9 @@ abstract class BaseOptions<TParsed> extends MutableDataClass {
   CacheRereadPolicy? get cacheRereadPolicy => policies.cacheReread;
 
   /// Context to be passed to link execution chain.
-  Context context;
+  final Context context;
 
-  ResultParserFn<TParsed> parserFn;
+  final ResultParserFn<TParsed> parserFn;
 
   // TODO consider inverting this relationship
   /// Resolve these options into a request
@@ -69,7 +71,7 @@ abstract class BaseOptions<TParsed> extends MutableDataClass {
         context: context,
       );
 
-  @override
+  @protected
   List<Object?> get properties => [
         document,
         operationName,
@@ -77,6 +79,7 @@ abstract class BaseOptions<TParsed> extends MutableDataClass {
         optimisticResult,
         policies,
         context,
+        parserFn,
       ];
 
   OperationType get type {
@@ -95,4 +98,21 @@ abstract class BaseOptions<TParsed> extends MutableDataClass {
   bool get isQuery => type == OperationType.query;
   bool get isMutation => type == OperationType.mutation;
   bool get isSubscription => type == OperationType.subscription;
+
+  /// [properties] based deep equality check
+  operator ==(Object other) =>
+      identical(this, other) ||
+      (other is BaseOptions &&
+          runtimeType == other.runtimeType &&
+          const ListEquality<Object?>(
+            DeepCollectionEquality(),
+          ).equals(
+            other.properties,
+            properties,
+          ));
+
+  @override
+  int get hashCode => const ListEquality<Object?>(
+        DeepCollectionEquality(),
+      ).hash(properties);
 }
