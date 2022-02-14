@@ -146,10 +146,21 @@ class QueryManager {
 
   Future<QueryResult<TParsed>> query<TParsed>(
       QueryOptions<TParsed> options) async {
-    final result = await fetchQuery(_oneOffOpId, options);
+    final results = fetchQueryAsMultiSourceResult(_oneOffOpId, options);
+    final eagerResult = results.eagerResult;
+    final networkResult = results.networkResult;
+    if (options.fetchPolicy != FetchPolicy.cacheAndNetwork ||
+        eagerResult.isLoading) {
+      final result = networkResult ?? eagerResult;
+      await result;
+      maybeRebroadcastQueries();
+      return result;
+    }
     maybeRebroadcastQueries();
-
-    return result;
+    if (networkResult is Future<QueryResult<TParsed>>) {
+      networkResult.then((value) => maybeRebroadcastQueries());
+    }
+    return eagerResult;
   }
 
   Future<QueryResult<TParsed>> mutate<TParsed>(
