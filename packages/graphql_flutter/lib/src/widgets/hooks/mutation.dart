@@ -1,6 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:graphql/client.dart';
 import 'package:graphql_flutter/src/widgets/hooks/graphql_client.dart';
-import 'package:graphql_flutter/src/widgets/query.dart';
 
 typedef RunMutation<TParsed> = MultiSourceResult<TParsed> Function(
   Map<String, dynamic> variables, {

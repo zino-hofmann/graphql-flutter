@@ -1,8 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-
-import 'package:graphql_flutter/graphql_flutter.dart';
-export 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql/client.dart';
+import 'package:graphql_flutter/src/widgets/hooks/query.dart';
 
 typedef QueryBuilder<TParsed> = Widget Function(
   QueryResult<TParsed> result, {

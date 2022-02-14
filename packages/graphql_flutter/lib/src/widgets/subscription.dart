@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql/client.dart';
+import 'package:graphql_flutter/src/widgets/hooks/subscription.dart';
 
 /// Creats a subscription with [GraphQLClient.subscribe].
 ///
