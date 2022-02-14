@@ -1,6 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:graphql_flutter/src/widgets/hooks/watch_query.dart';
 
 // method to call from widget to fetchmore queries
 typedef FetchMore<TParsed> = Future<QueryResult<TParsed>> Function(
