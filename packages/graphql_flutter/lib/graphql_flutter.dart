@@ -10,4 +10,9 @@ export 'package:graphql_flutter/src/widgets/query.dart';
 export 'package:graphql_flutter/src/widgets/subscription.dart';
 export 'package:graphql_flutter/src/widgets/result_accumulator.dart';
 
+export 'package:graphql_flutter/src/widgets/hooks/mutation.dart';
+export 'package:graphql_flutter/src/widgets/hooks/query.dart';
+export 'package:graphql_flutter/src/widgets/hooks/subscription.dart';
+export 'package:graphql_flutter/src/widgets/hooks/watch_query.dart';
+
 export 'package:graphql_flutter/src/hive_init.dart';

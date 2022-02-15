@@ -30,19 +30,21 @@ final query = gql("""
 
 /// https://flutter.dev/docs/cookbook/persistence/reading-writing-files#testing
 Future<void> mockApplicationDocumentsDirectory() async {
-// Create a temporary directory.
+  // Create a temporary directory.
   final directory = await Directory.systemTemp.createTemp();
-
-  // Mock out the MethodChannel for the path_provider plugin.
-  const MethodChannel('plugins.flutter.io/path_provider')
-      .setMockMethodCallHandler((MethodCall methodCall) async {
+  final handler = (MethodCall methodCall) async {
     // If you're getting the apps documents directory, return the path to the
     // temp directory on the test environment instead.
     if (methodCall.method == 'getApplicationDocumentsDirectory') {
       return directory.path;
     }
     return null;
-  });
+  };
+  // Mock out the MethodChannel for the path_provider plugin.
+  const MethodChannel('plugins.flutter.io/path_provider')
+      .setMockMethodCallHandler(handler);
+  const MethodChannel('plugins.flutter.io/path_provider_macos')
+      .setMockMethodCallHandler(handler);
 }
 
 class Page extends StatefulWidget {
@@ -339,7 +341,7 @@ void main() {
         'does not issues new network request when policies are effectively unchanged',
         (WidgetTester tester) async {
       final page = Page(
-        fetchPolicy: FetchPolicy.cacheAndNetwork,
+        fetchPolicy: client!.value.defaultPolicies.query.fetch,
         errorPolicy: null,
       );
 
