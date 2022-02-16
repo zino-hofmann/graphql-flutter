@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:graphql/src/core/result_parser.dart';
+import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
@@ -458,19 +459,16 @@ class QueryManager {
       return false;
     }
 
-    for (ObservableQuery query in queries.values) {
+    for (var query in queries.values) {
       if (query != exclude && query.isRebroadcastSafe) {
         final cachedData = cache.readQuery(
           query.options.asRequest,
           optimistic: query.options.policies.mergeOptimisticData,
         );
         if (_cachedDataHasChangedFor(query, cachedData)) {
-          query.addResult(
-            mapFetchResultToQueryResult(
-              Response(data: cachedData),
-              query.options,
-              source: QueryResultSource.cache,
-            ),
+          query.addFetchResult(
+            Response(data: cachedData),
+            QueryResultSource.cache,
             fromRebroadcast: true,
           );
         }
@@ -503,47 +501,6 @@ class QueryManager {
     idCounter++;
 
     return requestId;
-  }
-
-  QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
-    Response response,
-    BaseOptions<TParsed> options, {
-    required QueryResultSource source,
-  }) {
-    List<GraphQLError>? errors;
-    dynamic data;
-
-    // check if there are errors and apply the error policy if so
-    // in a nutshell: `ignore` swallows errors, `none` swallows data
-    if (response.errors != null && response.errors!.isNotEmpty) {
-      switch (options.errorPolicy) {
-        case ErrorPolicy.all:
-          // handle both errors and data
-          errors = response.errors;
-          data = response.data;
-          break;
-        case ErrorPolicy.ignore:
-          // ignore errors
-          data = response.data;
-          break;
-        case ErrorPolicy.none:
-        default:
-          // TODO not actually sure if apollo even casts graphql errors in `none` mode,
-          // it's also kind of legacy
-          errors = response.errors;
-          break;
-      }
-    } else {
-      data = response.data;
-    }
-
-    return QueryResult(
-      data: data,
-      context: response.context,
-      source: source,
-      exception: coalesceErrors(graphqlErrors: errors),
-      parserFn: options.parserFn,
-    );
   }
 }
 
