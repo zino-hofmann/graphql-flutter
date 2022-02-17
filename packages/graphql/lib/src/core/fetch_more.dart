@@ -21,18 +21,10 @@ Future<QueryResult<TParsed>> fetchMoreImplementation<TParsed>(
 }) async {
   // fetch more and update
 
-  final document = (fetchMoreOptions.document ?? originalOptions.document);
   final request = originalOptions.asRequest;
 
-  final combinedOptions = QueryOptions<TParsed>(
-    fetchPolicy: FetchPolicy.noCache,
-    errorPolicy: originalOptions.errorPolicy,
-    document: document,
-    variables: {
-      ...originalOptions.variables,
-      ...fetchMoreOptions.variables,
-    },
-  );
+  final combinedOptions =
+      originalOptions.withFetchMoreOptions(fetchMoreOptions);
 
   QueryResult<TParsed> fetchMoreResult =
       await queryManager.query(combinedOptions);

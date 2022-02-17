@@ -222,6 +222,76 @@ void main() {
           equals('bar'),
         );
       });
+      test('successful fetch-more with parser', () async {
+        final ResultParserFn<List<String>> parserFn = (data) {
+          return data['viewer']['repositories']['nodes']
+              .map<String>((node) => node['name'] as String)
+              .toList();
+        };
+        final _options = QueryOptions(
+          document: parseString(readRepositories),
+          variables: <String, dynamic>{
+            'nRepositories': 42,
+          },
+          parserFn: parserFn,
+        );
+        final repoData = readRepositoryData(withTypenames: true);
+
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            Response(
+              data: repoData,
+              context: Context().withEntry(
+                HttpLinkResponseContext(
+                  statusCode: 200,
+                  headers: {'foo': 'bar'},
+                ),
+              ),
+            ),
+          ]),
+        );
+
+        final QueryResult<List<String>> r1 = await client.query(_options);
+        expect(r1.exception, isNull);
+        expect(r1.data, equals(repoData));
+        expect(
+            r1.parsedData,
+            equals([
+              'pq',
+              'go-evercookie',
+              'watchbot',
+            ]));
+        final QueryResult<List<String>> r2 = await client.fetchMore(
+          FetchMoreOptions(
+            updateQuery: (d1, d2) => ({
+              'viewer': {
+                'repositories': {
+                  'nodes': [
+                    ...d1!['viewer']['repositories']['nodes'],
+                    ...d2!['viewer']['repositories']['nodes'],
+                  ]
+                }
+              }
+            }),
+          ),
+          previousResult: r1,
+          originalOptions: _options,
+        );
+
+        expect(r2.exception, isNull);
+        expect(
+            r2.parsedData,
+            equals([
+              'pq',
+              'go-evercookie',
+              'watchbot',
+              'pq',
+              'go-evercookie',
+              'watchbot',
+            ]));
+      });
 
       test('successful response without normalization', () async {
         final readUnidentifiedRepositories = parseString(r'''
