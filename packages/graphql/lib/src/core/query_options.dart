@@ -1,3 +1,4 @@
+import 'package:gql/language.dart';
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/result_parser.dart';
 import 'package:graphql/src/utilities/helpers.dart';
@@ -42,6 +43,22 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
         pollInterval,
       ];
 
+  QueryOptions<TParsed> withFetchMoreOptions(
+    FetchMoreOptions fetchMoreOptions,
+  ) =>
+      QueryOptions<TParsed>(
+        document: fetchMoreOptions.document ?? document,
+        operationName: operationName,
+        fetchPolicy: FetchPolicy.noCache,
+        errorPolicy: errorPolicy,
+        parserFn: parserFn,
+        context: context,
+        variables: {
+          ...variables,
+          ...fetchMoreOptions.variables,
+        },
+      );
+
   WatchQueryOptions<TParsed> asWatchQueryOptions({bool fetchResults = true}) =>
       WatchQueryOptions(
         document: document,
@@ -54,7 +71,7 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
         fetchResults: fetchResults,
         context: context,
         optimisticResult: optimisticResult,
-        parserFn: this.parserFn,
+        parserFn: parserFn,
       );
 
   QueryOptions<TParsed> copyWithPolicies(Policies policies) => QueryOptions(
