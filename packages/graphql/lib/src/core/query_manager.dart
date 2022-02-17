@@ -92,48 +92,55 @@ class QueryManager {
     }
 
     try {
-      yield* link.request(request).map((response) {
-        QueryResult<TParsed>? queryResult;
-        bool rereadFromCache = false;
-        try {
-          queryResult = mapFetchResultToQueryResult(
-            response,
-            options,
-            source: QueryResultSource.network,
-          );
+      yield* link
+          .request(request)
+          .map((response) {
+            QueryResult<TParsed>? queryResult;
+            bool rereadFromCache = false;
+            try {
+              queryResult = mapFetchResultToQueryResult(
+                response,
+                options,
+                source: QueryResultSource.network,
+              );
 
-          rereadFromCache = attemptCacheWriteFromResponse(
-            options.policies,
-            request,
-            response,
-            queryResult,
-          );
-        } catch (failure, trace) {
-          // we set the source to indicate where the source of failure
-          queryResult ??= QueryResult(
-            source: QueryResultSource.network,
-            parserFn: options.parserFn,
-          );
+              rereadFromCache = attemptCacheWriteFromResponse(
+                options.policies,
+                request,
+                response,
+                queryResult,
+              );
+            } catch (failure, trace) {
+              // we set the source to indicate where the source of failure
+              queryResult ??= QueryResult(
+                source: QueryResultSource.network,
+                parserFn: options.parserFn,
+              );
 
-          queryResult.exception = coalesceErrors(
-            exception: queryResult.exception,
-            linkException: translateFailure(failure, trace),
-          );
-        }
+              queryResult.exception = coalesceErrors(
+                exception: queryResult.exception,
+                linkException: translateFailure(failure, trace),
+              );
+            }
 
-        if (rereadFromCache) {
-          // normalize results if previously written
-          attempCacheRereadIntoResult(request, queryResult);
-        }
+            if (rereadFromCache) {
+              // normalize results if previously written
+              attempCacheRereadIntoResult(request, queryResult);
+            }
 
-        return queryResult;
-      }).transform(StreamTransformer.fromHandlers(
-        handleError: (err, trace, sink) => sink.add(_wrapFailure(
-          err,
-          trace,
-          options.parserFn,
-        )),
-      ));
+            return queryResult;
+          })
+          .transform<QueryResult<TParsed>>(StreamTransformer.fromHandlers(
+            handleError: (err, trace, sink) => sink.add(_wrapFailure(
+              err,
+              trace,
+              options.parserFn,
+            )),
+          ))
+          .map((QueryResult<TParsed> queryResult) {
+            maybeRebroadcastQueries();
+            return queryResult;
+          });
     } catch (ex, trace) {
       yield* Stream.fromIterable([
         _wrapFailure(

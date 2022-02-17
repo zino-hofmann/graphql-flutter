@@ -657,29 +657,109 @@ void main() {
           ),
         );
       });
-      test('parses results', () async {
+      test('broadcasts', () async {
+        const initialName = 'initial';
+        const firstUpdateName = 'first';
+        const secondUpdateName = 'second';
+        final initialQueryResponse = Response(
+          data: <String, dynamic>{
+            'single': {
+              'id': '1',
+              '__typename': 'Item',
+              'name': initialName,
+            },
+          },
+        );
+        when(
+          link.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable(
+            [initialQueryResponse],
+          ),
+        );
+
+        final ObservableQuery observable = client.watchQuery(
+          WatchQueryOptions(
+            document: parseString(readSingle),
+            eagerlyFetchResults: true,
+            variables: {'id': '1'},
+          ),
+        );
         final responses = [
-          {
-            'id': '1',
-            'name': 'first',
-          },
-          {
-            'id': '2',
-            'name': 'second',
-          },
-        ].map((item) => Response(
-              data: <String, dynamic>{
-                'item': {
-                  '__typename': 'Item',
-                  ...item,
-                },
-              },
-            ));
+          {'id': '1', 'name': firstUpdateName, '__typename': 'Item'},
+          {'id': '1', 'name': secondUpdateName, '__typename': 'Item'},
+        ].map((item) => Response(data: <String, dynamic>{'item': item}));
         when(
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable(responses),
         );
+        final stream = client.subscribe(
+          SubscriptionOptions(
+            document: parseString(
+              r'''
+                subscription {
+                  item {
+                    id
+                    name
+                  }
+                }
+              ''',
+            ),
+          ),
+        );
+        expect(
+          stream,
+          emitsInOrder(
+            [
+              isA<QueryResult>().having(
+                (result) => result.data!['item']['name'],
+                'name',
+                firstUpdateName,
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data!['item']['name'],
+                'name',
+                secondUpdateName,
+              )
+            ],
+          ),
+        );
+        expect(
+          observable.stream,
+          emitsInOrder(
+            [
+              isA<QueryResult>().having(
+                (result) => result.data,
+                'name',
+                null,
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data!['single']['name'],
+                'name',
+                initialName,
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data!['single']['name'],
+                'name',
+                firstUpdateName,
+              ),
+              isA<QueryResult>().having(
+                (result) => result.data!['single']['name'],
+                'name',
+                secondUpdateName,
+              )
+            ],
+          ),
+        );
+      });
+      test('parses results', () async {
+        final responses = [
+          {'id': '1', 'name': 'first', '__typename': 'Item'},
+          {'id': '2', 'name': 'second', '__typename': 'Item'},
+        ].map((item) => Response(data: <String, dynamic>{'item': item}));
+        when(link.request(any))
+            .thenAnswer((_) => Stream.fromIterable(responses));
 
         final ResultParserFn<String> parserFn =
             (data) => data['item']['name'] as String;
