@@ -329,10 +329,16 @@ connect: (url, protocols) {
 }
 ```
 
-To supply custom headers to an IO client:
+To supply custom headers (not supported on Flutter Web):
 ```dart
-connect: (url, protocols) =>
-  IOWebSocketChannel.connect(url, protocols: protocols, headers: myCustomHeaders)
+ SocketClient(
+    wsUrl,
+    config: SocketClientConfig(
+      autoReconnect: autoReconnect,
+      headers: customHeaders,
+      delayBetweenReconnectionAttempts: delayBetweenReconnectionAttempts,
+    ),
+ );
 ```
 
 ### `client.watchQuery` and `ObservableQuery`
