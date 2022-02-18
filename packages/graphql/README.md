@@ -41,7 +41,7 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
   - [Links](#links)
     - [Composing Links](#composing-links)
     - [AWS AppSync Support](#aws-appsync-support)
-  - [Parsing ASTs at build-time](#parsing-asts-at-build-time)
+  - [Code generation](#code-generation)
   - [`PersistedQueriesLink` (experimental) :warning: OUT OF SERVICE :warning:](#persistedquerieslink-experimental-warning-out-of-service-warning)
 
 **Useful API Docs:**
@@ -768,21 +768,17 @@ API key, IAM, and Federated provider authorization could be accomplished through
 - Making a custom link: [Comment on Issue 173](https://github.com/zino-app/graphql-flutter/issues/173#issuecomment-464435942)
 - AWS JS SDK `auth-link.ts`: [aws-mobile-appsync-sdk-js:auth-link.ts](https://github.com/awslabs/aws-mobile-appsync-sdk-js/blob/master/packages/aws-appsync-auth-link/src/auth-link.ts)
 
-## Parsing ASTs at build-time
+## Code generation
 
-All `document` arguments are `DocumentNode`s from `gql/ast`.
-We supply a `gql` helper for parsing, them, but you can also
-parse documents at build-time use `ast_builder` from
-[`package:gql_code_gen`](https://pub.dev/packages/gql_code_gen):
+This package does not support code-generation out of the box, but [graphql_codegen](https://pub.dev/packages/graphql_codegen) does!
 
-```yaml
-dev_dependencies:
-  gql_code_gen: ^0.1.5
-```
+This package extensions on the client which takes away the struggle of serialization and gives you confidence through type-safety. 
+It is also more performant than parsing GraphQL queries at runtime.
 
-**`add_star.graphql`**:
+For example, by creating the `.graphql` file
 
 ```graphql
+# add_star.graphql
 mutation AddStar($starrableId: ID!) {
   action: addStar(input: { starrableId: $starrableId }) {
     starrable {
@@ -792,19 +788,20 @@ mutation AddStar($starrableId: ID!) {
 }
 ```
 
+after building, you'll be able to execute your mutation on the client as:
+
 ```dart
-import 'package:gql/add_star.ast.g.dart' as add_star;
+// add_star.dart
+import 'add_star.graphql.dart';
 
-// ...
+// ..
 
-final MutationOptions options = MutationOptions(
-  document: add_star.document,
-  variables: <String, dynamic>{
-    'starrableId': repositoryID,
-  },
-);
 
-// ...
+  await client.mutateAddStar(
+    OptionsMutationAddStar(
+      variables: VariablesMutationAddStar(starableId: repositoryID)
+    )
+  );
 ```
 
 ## `PersistedQueriesLink` (experimental) :warning: OUT OF SERVICE :warning:

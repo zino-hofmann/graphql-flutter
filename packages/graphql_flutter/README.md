@@ -27,6 +27,8 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
       - [Optimism](#optimism)
     - [Subscriptions](#subscriptions)
     - [GraphQL Consumer](#graphql-consumer)
+    - [Other hooks](#other-hooks)
+  - [Code generation](#code-generation)
 
 **Useful sections in the [`graphql` README](../graphql/README.md):**
 
@@ -186,6 +188,48 @@ Query(
 // ...
 ```
 
+or if you prefer to use [flutter-hooks](https://pub.dev/packages/flutter_hooks), you can write the above as:
+
+
+```dart
+// ...
+final readRespositoriesResult = useQuery(
+  QueryOptions(
+    document: gql(readRepositories), // this is the query string you just created
+    variables: {
+      'nRepositories': 50,
+    },
+    pollInterval: const Duration(seconds: 10),
+  ),
+);
+final result = readRespositoriesResult.result;
+
+if (result.hasException) {
+    return Text(result.exception.toString());
+}
+
+if (result.isLoading) {
+  return const Text('Loading');
+}
+
+List? repositories = result.data?['viewer']?['repositories']?['nodes'];
+
+if (repositories == null) {
+  return const Text('No repositories');
+}
+
+return ListView.builder(
+  itemCount: repositories.length,
+  itemBuilder: (context, index) {
+    final repository = repositories[index];
+
+    return Text(repository['name'] ?? '');
+});
+// ...
+
+
+```
+
 #### Fetch More (Pagination)
 
 You can use `fetchMore()` function inside `Query` Builder to perform pagination. The `fetchMore()` function allows you to run an entirely new GraphQL operation and merge the new results with the original results. On top of that, you can re-use aspects of the Original query i.e. the Query or some of the Variables.
@@ -289,6 +333,36 @@ Mutation(
 
 ...
 ```
+The corresponding hook is
+
+```dart
+
+// ...
+
+final addStarMutation = useMutation(
+  MutationOptions(
+    document: gql(addStar), // this is the mutation string you just created
+    // you can update the cache based on results
+    update: (GraphQLDataProxy cache, QueryResult result) {
+      return cache;
+    },
+    // or do something with the result.data on completion
+    onCompleted: (dynamic resultData) {
+      print(resultData);
+    },
+  ),
+);
+return FloatingActionButton(
+  onPressed: () => addStarMutation.runMutation({
+    'starrableId': <A_STARTABLE_REPOSITORY_ID>,
+  }),
+  tooltip: 'Star',
+  child: Icon(Icons.star),
+);
+
+// ...
+```
+
 
 `graphql` also provides [file upload](../graphql/README.md#graphql-upload) support as well.
 
@@ -438,6 +512,63 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 ```
 
+the corresponding implementation with hooks is:
+
+
+```dart
+final subscriptionDocument = gql(
+  r'''
+    subscription reviewAdded {
+      reviewAdded {
+        stars, commentary, episode
+      }
+    }
+  ''',
+);
+
+class MyHomePage extends HooksWidget {
+  @override
+  Widget build(BuildContext context) {
+    final result = useSubscription(
+      SubscriptionOptions(
+        document: subscriptionDocument,
+      ),
+    );
+    
+    Widget child;
+    if (result.hasException) {
+      child = Text(result.exception.toString());
+    } else if (result.isLoading) {
+      child = Center(
+        child: const CircularProgressIndicator(),
+      );
+    } else {
+      child = ResultAccumulator.appendUniqueEntries(
+        latest: result.data,
+        builder: (context, {results}) => DisplayReviews(
+          reviews: results.reversed.toList(),
+        ),
+      );    
+    }
+    return Scaffold(
+      body: Center(child: child)
+    );
+  }
+}
+```
+
+### Other hooks
+
+Besides `useMutation`, `useQuery`, and `useSubscription`, this package contains the following hooks:
+
+```dart
+final client = useGraphQLClient(); // Fetch the current client
+final observableQuery = useWatchQuery(WatchQueryOptions(...)); // Watch a query
+final mutationObservableQuery = useWatchMutation(WatchQueryOptions(...)); // Watch a query
+```
+
+
+
 ### GraphQL Consumer
 
 If you want to use the `client` directly, say for some its
@@ -459,6 +590,52 @@ You can use `GraphQLConsumer` to grab it from any `context` descended from a `Gr
 
   ...
 ```
+
+## Code generation
+
+This package does not support code-generation out of the box, but [graphql_codegen](https://pub.dev/packages/graphql_codegen) does!
+
+This package generate hooks and options which takes away the struggle of serialization and gives you confidence through type-safety.
+
+For example, by creating the `.graphql` file
+
+```graphql
+  query ReadRepositories($nRepositories: Int!) {
+    viewer {
+      repositories(last: $nRepositories) {
+        nodes {
+          id
+          name
+        }
+      }
+    }
+  }
+```
+
+after building, you'll be able to query this in your code through the hook:
+
+```dart
+final queryResult = useQueryReadRepositories(
+  OptionsQueryReadRepositories(
+    variables: VariablesQueryReadRepositories(
+      nRepositories: 10
+    )
+  )
+);
+if (queryResult.result.hasException) {
+  return Text(result.exception.toString());
+}
+if (queryResult.result.isLoading) {
+  return Text(text: "LOADING");
+}
+final data = queryResult.result.parsedData;
+
+return Column(
+  children: data?.viewer.repositores.nodes.map((node) => Text(text: node.name));
+);
+```
+
+
 
 [build-status-badge]: https://img.shields.io/github/workflow/status/zino-hofmann/graphql-flutter/graphql-flutter%20Tests%20case?style=flat-square
 [build-status-link]: https://github.com/zino-hofmann/graphql-flutter/actions
