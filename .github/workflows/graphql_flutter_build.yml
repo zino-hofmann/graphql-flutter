@@ -19,4 +19,4 @@ jobs:
           flutter format --set-exit-if-changed .
       - run: |
           cd packages/graphql_flutter
-          flutter analyze .
+          flutter analyze . --fatal-infos
