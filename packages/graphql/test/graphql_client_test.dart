@@ -120,6 +120,7 @@ void main() {
                   headers: {'foo': 'bar'},
                 ),
               ),
+              response: {},
             ),
           ]),
         );
@@ -180,6 +181,7 @@ void main() {
                   headers: {'foo': 'bar'},
                 ),
               ),
+              response: {},
             ),
           ]),
         );
@@ -249,6 +251,7 @@ void main() {
                   headers: {'foo': 'bar'},
                 ),
               ),
+              response: {},
             ),
           ]),
         );
@@ -320,7 +323,7 @@ void main() {
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
-            Response(data: repoData),
+            Response(data: repoData, response: {}),
           ]),
         );
 
@@ -351,6 +354,7 @@ void main() {
                     headers: {'foo': 'bar'},
                   ),
                 ),
+                response: {},
               )
             ]);
 
@@ -382,7 +386,7 @@ void main() {
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
-            Response(data: malformedRepoData),
+            Response(data: malformedRepoData, response: {}),
           ]),
         );
 
@@ -457,6 +461,7 @@ void main() {
               'name': 'initialQueryName',
             },
           },
+          response: {},
         );
         when(
           link.request(any),
@@ -506,6 +511,7 @@ void main() {
               'name': 'newNameFromMutation',
             },
           },
+          response: {},
         );
         when(
           link.request(any),
@@ -541,6 +547,7 @@ void main() {
                     },
                   },
                 },
+                response: {},
               ),
             ],
           ),
@@ -588,6 +595,7 @@ void main() {
                     },
                   },
                 },
+                response: {},
               ),
             ],
           ),
@@ -635,6 +643,7 @@ void main() {
                     },
                   },
                 },
+                response: {},
               ),
             ],
           ),
@@ -687,6 +696,7 @@ void main() {
                   ...item,
                 },
               },
+              response: {},
             ));
         when(
           link.request(any),
@@ -739,6 +749,7 @@ void main() {
               'name': initialName,
             },
           },
+          response: {},
         );
         when(
           link.request(any),
@@ -758,7 +769,8 @@ void main() {
         final responses = [
           {'id': '1', 'name': firstUpdateName, '__typename': 'Item'},
           {'id': '1', 'name': secondUpdateName, '__typename': 'Item'},
-        ].map((item) => Response(data: <String, dynamic>{'item': item}));
+        ].map((item) =>
+            Response(data: <String, dynamic>{'item': item}, response: {}));
         when(
           link.request(any),
         ).thenAnswer(
@@ -827,7 +839,8 @@ void main() {
         final responses = [
           {'id': '1', 'name': 'first', '__typename': 'Item'},
           {'id': '2', 'name': 'second', '__typename': 'Item'},
-        ].map((item) => Response(data: <String, dynamic>{'item': item}));
+        ].map((item) =>
+            Response(data: <String, dynamic>{'item': item}, response: {}));
         when(link.request(any))
             .thenAnswer((_) => Stream.fromIterable(responses));
 

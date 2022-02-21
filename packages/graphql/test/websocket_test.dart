@@ -170,6 +170,7 @@ Future<void> main() async {
               GraphQLError(message: 'error and data can coexist'),
             ],
             context: Context().withEntry(ResponseExtensions(null)),
+            response: {},
           ),
         ),
       );
@@ -230,6 +231,7 @@ Future<void> main() async {
               GraphQLError(message: 'error and data can coexist'),
             ],
             context: Context().withEntry(ResponseExtensions(null)),
+            response: {},
           ),
         ),
       );
@@ -297,6 +299,7 @@ Future<void> main() async {
               GraphQLError(message: 'error and data can coexist'),
             ],
             context: Context().withEntry(ResponseExtensions(null)),
+            response: {},
           ),
         ),
       );
