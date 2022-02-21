@@ -474,7 +474,7 @@ class QueryManager {
         );
         if (_cachedDataHasChangedFor(query, cachedData)) {
           query.addFetchResult(
-            Response(data: cachedData),
+            Response(data: cachedData, response: {}),
             QueryResultSource.cache,
             fromRebroadcast: true,
           );
