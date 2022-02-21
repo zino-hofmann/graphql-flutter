@@ -50,7 +50,7 @@ class QueryManager {
   /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
   bool rebroadcastLocked = false;
 
-  ObservableQuery<TParsed> watchQuery<TParsed>(
+  ObservableQuery<TParsed> watchQuery<TParsed extends Object?>(
       WatchQueryOptions<TParsed> options) {
     final ObservableQuery<TParsed> observableQuery = ObservableQuery<TParsed>(
       queryManager: this,
@@ -62,7 +62,7 @@ class QueryManager {
     return observableQuery;
   }
 
-  Stream<QueryResult<TParsed>> subscribe<TParsed>(
+  Stream<QueryResult<TParsed>> subscribe<TParsed extends Object?>(
       SubscriptionOptions<TParsed> options) async* {
     assert(
       options.fetchPolicy != FetchPolicy.cacheOnly,
@@ -152,7 +152,7 @@ class QueryManager {
     }
   }
 
-  Future<QueryResult<TParsed>> query<TParsed>(
+  Future<QueryResult<TParsed>> query<TParsed extends Object?>(
       QueryOptions<TParsed> options) async {
     final results = fetchQueryAsMultiSourceResult(_oneOffOpId, options);
     final eagerResult = results.eagerResult;
@@ -171,7 +171,7 @@ class QueryManager {
     return eagerResult;
   }
 
-  Future<QueryResult<TParsed>> mutate<TParsed>(
+  Future<QueryResult<TParsed>> mutate<TParsed extends Object?>(
       MutationOptions<TParsed> options) async {
     final result = await fetchQuery(_oneOffOpId, options);
     // once the mutation has been process successfully, execute callbacks
@@ -194,7 +194,7 @@ class QueryManager {
     return result;
   }
 
-  Future<QueryResult<TParsed>> fetchQuery<TParsed>(
+  Future<QueryResult<TParsed>> fetchQuery<TParsed extends Object?>(
     String queryId,
     BaseOptions<TParsed> options,
   ) async {
@@ -205,7 +205,8 @@ class QueryManager {
 
   /// Wrap both the `eagerResult` and `networkResult` future in a `MultiSourceResult`
   /// if the cache policy precludes a network request, `networkResult` will be `null`
-  MultiSourceResult<TParsed> fetchQueryAsMultiSourceResult<TParsed>(
+  MultiSourceResult<TParsed>
+      fetchQueryAsMultiSourceResult<TParsed extends Object?>(
     String queryId,
     BaseOptions<TParsed> options,
   ) {
@@ -232,7 +233,7 @@ class QueryManager {
 
   /// Resolve the query on the network,
   /// negotiating any necessary cache edits / optimistic cleanup
-  Future<QueryResult<TParsed>> _resolveQueryOnNetwork<TParsed>(
+  Future<QueryResult<TParsed>> _resolveQueryOnNetwork<TParsed extends Object?>(
     Request request,
     String queryId,
     BaseOptions<TParsed> options,
@@ -289,7 +290,7 @@ class QueryManager {
 
   /// Add an eager cache response to the stream if possible,
   /// based on `fetchPolicy` and `optimisticResults`
-  QueryResult<TParsed> _resolveQueryEagerly<TParsed>(
+  QueryResult<TParsed> _resolveQueryEagerly<TParsed extends Object?>(
     Request request,
     String queryId,
     BaseOptions<TParsed> options,
@@ -361,7 +362,8 @@ class QueryManager {
 
   /// Refetch the [ObservableQuery] referenced by [queryId],
   /// overriding any present non-network-only [FetchPolicy].
-  Future<QueryResult<TParsed>?> refetchQuery<TParsed>(String queryId) {
+  Future<QueryResult<TParsed>?> refetchQuery<TParsed extends Object?>(
+      String queryId) {
     WatchQueryOptions<TParsed> options =
         queries[queryId]!.options as WatchQueryOptions<TParsed>;
     if (!willAlwaysExecuteOnNetwork(options.fetchPolicy)) {
@@ -398,7 +400,7 @@ class QueryManager {
   /// Will [maybeRebroadcastQueries] from [ObservableQuery.addResult] if the [cache] has flagged the need to.
   ///
   /// Queries are registered via [setQuery] and [watchQuery]
-  void addQueryResult<TParsed>(
+  void addQueryResult<TParsed extends Object?>(
     Request request,
     String? queryId,
     QueryResult<TParsed> queryResult,
@@ -412,7 +414,7 @@ class QueryManager {
   }
 
   /// Create an optimstic result for the query specified by `queryId`, if it exists
-  QueryResult<TParsed> _getOptimisticQueryResult<TParsed>(
+  QueryResult<TParsed> _getOptimisticQueryResult<TParsed extends Object?>(
     Request request, {
     required String queryId,
     required Object? optimisticResult,

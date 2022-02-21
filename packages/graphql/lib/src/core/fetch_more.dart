@@ -12,7 +12,7 @@ import 'package:graphql/src/core/_query_write_handling.dart';
 ///
 /// This is the **Internal Implementation**,
 /// used by [ObservableQuery] and [GraphQLCLient.fetchMore]
-Future<QueryResult<TParsed>> fetchMoreImplementation<TParsed>(
+Future<QueryResult<TParsed>> fetchMoreImplementation<TParsed extends Object?>(
   FetchMoreOptions fetchMoreOptions, {
   required QueryOptions<TParsed> originalOptions,
   required QueryManager queryManager,

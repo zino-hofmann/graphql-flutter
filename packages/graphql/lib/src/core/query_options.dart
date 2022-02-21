@@ -10,7 +10,7 @@ import 'package:meta/meta.dart';
 
 /// Query options.
 @immutable
-class QueryOptions<TParsed> extends BaseOptions<TParsed> {
+class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
   QueryOptions({
     required DocumentNode document,
     String? operationName,
@@ -89,7 +89,8 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
 }
 
 @immutable
-class SubscriptionOptions<TParsed> extends BaseOptions<TParsed> {
+class SubscriptionOptions<TParsed extends Object?>
+    extends BaseOptions<TParsed> {
   SubscriptionOptions({
     required DocumentNode document,
     String? operationName,
@@ -126,7 +127,7 @@ class SubscriptionOptions<TParsed> extends BaseOptions<TParsed> {
 }
 
 @immutable
-class WatchQueryOptions<TParsed> extends QueryOptions<TParsed> {
+class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
   WatchQueryOptions({
     required DocumentNode document,
     String? operationName,

@@ -2,7 +2,7 @@ import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/core.dart';
 import 'package:graphql/src/exceptions.dart';
 
-QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
+QueryResult<TParsed> mapFetchResultToQueryResult<TParsed extends Object?>(
   Response response,
   BaseOptions<TParsed> options, {
   required QueryResultSource source,

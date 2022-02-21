@@ -59,7 +59,7 @@ enum QueryLifecycle {
 /// And a handful of internally leveraged methods.
 ///
 /// [apollo_oq]: https://www.apollographql.com/docs/react/v3.0-beta/api/core/ObservableQuery/
-class ObservableQuery<TParsed> {
+class ObservableQuery<TParsed extends Object?> {
   ObservableQuery({
     required this.queryManager,
     required this.options,

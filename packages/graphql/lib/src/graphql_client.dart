@@ -87,7 +87,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// observableQuery.close();
   /// ```
   /// {@end-tool}
-  ObservableQuery<TParsed> watchQuery<TParsed>(
+  ObservableQuery<TParsed> watchQuery<TParsed extends Object?>(
       WatchQueryOptions<TParsed> options) {
     final policies = defaultPolicies.watchQuery.withOverrides(options.policies);
     return queryManager.watchQuery(options.copyWithPolicies(policies));
@@ -98,7 +98,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// This is a stop-gap solution to the problems created by the reliance of `graphql_flutter` on [ObservableQuery] for mutations.
   ///
   /// For more details, see https://github.com/zino-app/graphql-flutter/issues/774
-  ObservableQuery<TParsed> watchMutation<TParsed>(
+  ObservableQuery<TParsed> watchMutation<TParsed extends Object?>(
       WatchQueryOptions<TParsed> options) {
     final policies =
         defaultPolicies.watchMutation.withOverrides(options.policies);
@@ -145,7 +145,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// ```
   /// {@end-tool}
 
-  Future<QueryResult<TParsed>> query<TParsed>(
+  Future<QueryResult<TParsed>> query<TParsed extends Object?>(
     QueryOptions<TParsed> options,
   ) async {
     final policies = defaultPolicies.query.withOverrides(options.policies);
@@ -154,7 +154,7 @@ class GraphQLClient implements GraphQLDataProxy {
 
   /// This resolves a single mutation according to the [MutationOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
-  Future<QueryResult<TParsed>> mutate<TParsed>(
+  Future<QueryResult<TParsed>> mutate<TParsed extends Object?>(
       MutationOptions<TParsed> options) async {
     final policies = defaultPolicies.mutate.withOverrides(options.policies);
     return await queryManager.mutate(options.copyWithPolicies(policies));
@@ -196,7 +196,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// });
   /// ```
   /// {@end-tool}
-  Stream<QueryResult<TParsed>> subscribe<TParsed>(
+  Stream<QueryResult<TParsed>> subscribe<TParsed extends Object?>(
       SubscriptionOptions<TParsed> options) {
     final policies = defaultPolicies.subscribe.withOverrides(
       options.policies,
@@ -212,7 +212,7 @@ class GraphQLClient implements GraphQLDataProxy {
   ///
   /// To mitigate this, [FetchMoreOptions.partial] has been provided.
   @experimental
-  Future<QueryResult<TParsed>> fetchMore<TParsed>(
+  Future<QueryResult<TParsed>> fetchMore<TParsed extends Object?>(
     FetchMoreOptions fetchMoreOptions, {
     required QueryOptions<TParsed> originalOptions,
     required QueryResult<TParsed> previousResult,

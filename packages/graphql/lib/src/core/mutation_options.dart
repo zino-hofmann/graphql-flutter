@@ -16,7 +16,7 @@ typedef OnMutationUpdate = FutureOr<void> Function(
 typedef OnError = FutureOr<void> Function(OperationException? error);
 
 @immutable
-class MutationOptions<TParsed> extends BaseOptions<TParsed> {
+class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
   MutationOptions({
     required DocumentNode document,
     String? operationName,
