@@ -21,5 +21,5 @@ jobs:
       - name: Code analyze check
         run: |
           cd packages/graphql
-          dart analyze lib
-          dart analyze test
+          dart analyze lib --fatal-infos
+          dart analyze test --fatal-infos

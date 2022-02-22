@@ -1,0 +1,25 @@
+name: graphql_flutter
+
+ide:
+  intellij: true
+
+packages:
+  - packages/**
+
+scripts:
+  analyze:
+    run: melos exec -c 1 -- "dart analyze . --fatal-infos"
+    description: Run dart analyzer in a specific package.
+    select-package:
+
+  test:
+    description: Run tests in a specific package.
+    # TODO(Salakar) 'dart pub get' is necessary for the 'melos' package as we're using it on itself
+    run: melos exec --concurrency=1 -- "dart pub get"
+    select-package:
+      dir-exists:
+        - "test/"
+    env:
+      MELOS_TEST: true
+
+  format: dart format -o write .

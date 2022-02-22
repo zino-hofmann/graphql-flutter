@@ -1,4 +1,3 @@
-import 'package:gql/language.dart';
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/result_parser.dart';
 import 'package:graphql/src/utilities/helpers.dart';
