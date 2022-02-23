@@ -12,8 +12,10 @@ dep:
 check:
 	$(CC_TEST)
 
-analyze:
+fmt:
 	$(CC) run format --no-select
+
+analyze: fmt
 	$(CC) run analyze --no-select
 
 ci_check:
