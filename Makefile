@@ -19,6 +19,17 @@ analyze:
 ci_check:
 	$(CC) run test --no-select
 
+ci_check_flutter:
+	$(CC) run flutter_test --no-select
+
+ci_check_client:
+	$(CC) run client_test --no-select
+
+ci_fmt_client:
+	$(CC) run client_analyze --no-select
+
+check_client: ci_check_client
+
 ci: dep ci_check
 
 clean:
