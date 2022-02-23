@@ -13,4 +13,4 @@ jobs:
       - name: Install dependencies
         run: make dep
       - name: Code formatting check
-        run: make fmt
+        run: make analyze
