@@ -1,5 +1,5 @@
 Describe the purpose of the pull request.
-
+<!--
 ### Breaking changes
 
 - Broke ... because ... .
@@ -14,3 +14,4 @@ Describe the purpose of the pull request.
 
 - Added ... .
 - Updated ... .
+-->
