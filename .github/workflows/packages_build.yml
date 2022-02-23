@@ -1,0 +1,16 @@
+name: Packages sanity check
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: stable
+      - name: Install dependencies
+        run: make dep
+      - name: Code formatting check
+        run: make fmt
