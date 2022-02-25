@@ -341,6 +341,80 @@ To supply custom headers (not supported on Flutter Web):
  );
 ```
 
+
+#### Updating WebSocket socket connection
+
+in some cases you want to update your websocket connection like this issue #727
+to do that you have to do 2 things 
+
+1- create your custom websocket link
+
+```dart
+
+class SocketCustomLink extends Link {
+  SocketCustomLink(this.url);
+  final String url;
+  _Connection? _connection;
+
+  /// this will be called every time you make a subscription
+  @override
+  Stream<Response> request(Request request, [forward]) async* {
+    /// first get the token by your own way
+    String? token = "...";
+
+    /// check is connection is null or the token changed
+    if (_connection == null || _connection!.token != token) {
+      connectOrReconnect(token);
+    }
+    yield* _connection!.client.subscribe(request, true);
+  }
+
+  /// Connects or reconnects to the server with the specified headers.
+  void connectOrReconnect(String? token) {
+    _connection?.client.dispose();
+    var _url = Uri.parse(url);
+    if (kIsWeb) {
+      /// web don't support headers in sockets so you may need to pass it as query string
+      /// server must support that
+      _url = _url.replace(queryParameters: {"access_token": token});
+    }
+    _connection = _Connection(
+      client: SocketClient(
+        _url.toString(),
+        config: SocketClientConfig(
+          autoReconnect: true,
+          headers: kIsWeb || token == null
+              ? null
+              : {"Authorization": " Bearer $token"},
+        ),
+      ),
+      token: token,
+    );
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _connection?.client.dispose();
+    _connection = null;
+  }
+}
+/// this a wrapper for web socket to hold the used token
+class _Connection {
+  SocketClient client;
+  String? token;
+  _Connection({
+    required this.client,
+    required this.token,
+  });
+}
+
+```
+
+2- if you need to update your socket just cancel your subscription and resubscribe again using usual way 
+and if the token changed it will be reconnect with the new token otherwise it will use the same client
+
+
+
 ### `client.watchQuery` and `ObservableQuery`
 
 [`client.watchQuery`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLClient/watchQuery.html)
