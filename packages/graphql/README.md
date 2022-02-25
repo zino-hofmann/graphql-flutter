@@ -344,8 +344,7 @@ To supply custom headers (not supported on Flutter Web):
 
 #### Updating WebSocket socket connection
 
-in some cases you want to update your websocket connection like this issue #727
-to do that you have to do 2 things 
+In some cases, you want to update your web socket connection (as described in #727), in order to implement this functionality you need to do the following steps:
 
 1- create your custom websocket link
 
