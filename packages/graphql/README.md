@@ -397,6 +397,7 @@ class SocketCustomLink extends Link {
     _connection = null;
   }
 }
+
 /// this a wrapper for web socket to hold the used token
 class _Connection {
   SocketClient client;
