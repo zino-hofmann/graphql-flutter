@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:pedantic/pedantic.dart';
 
 import 'package:graphql/src/links/gql_links.dart';
 import 'package:graphql/src/utilities/platform.dart';

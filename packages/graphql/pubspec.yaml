@@ -20,6 +20,7 @@ dependencies:
   stream_channel: ^2.1.0
   rxdart: ^0.27.1
   uuid: ^3.0.1
+  pedantic:
 dev_dependencies:
   async: ^2.5.0
   mockito: ^5.0.0
