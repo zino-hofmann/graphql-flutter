@@ -4,7 +4,7 @@ version: 5.0.2-beta.3
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
 dependencies:
   graphql: ^5.0.2-beta.3
-  gql_exec: 0.3.0
+  gql_exec: ^0.4.0
   flutter:
     sdk: flutter
   meta: ^1.3.0
