@@ -8,15 +8,46 @@ packages:
 
 scripts:
   analyze:
-    run: melos exec -c 1 -- "dart analyze . --fatal-infos"
+    run: melos exec -c 1 -- "dart format --set-exit-if-changed . && dart analyze . --fatal-infos"
     description: Run dart analyzer in a specific package.
     select-package:
 
+  flutter_analyze:
+    run: melos exec --depends-on="graphql" -c 1 -- "flutter format --set-exit-if-changed . && flutter analyze . --fatal-infos"
+    description: Run dart analyzer in a specific package.
+    select-package:
+      scope: "graphql_flutter"
+
+  client_analyze:
+    run: melos exec -c 1 -- "dart format --set-exit-if-changed . && dart analyze . --fatal-infos"
+    description: Run dart analyzer in a specific package.
+    select-package:
+      scope: "graphql"
+
   test:
     description: Run tests in a specific package.
-    # TODO(Salakar) 'dart pub get' is necessary for the 'melos' package as we're using it on itself
-    run: melos exec --concurrency=1 -- "dart pub get"
+    run: melos exec --concurrency=2 -- "dart pub get && dart pub run test"
     select-package:
+      dir-exists:
+        - "test/"
+    env:
+      MELOS_TEST: true
+
+  flutter_test:
+    description: Run tests in a specific package.
+    run: melos exec --depends-on="graphql" --concurrency=2 -- "flutter pub get && flutter test"
+    select-package:
+      scope: "graphql_flutter"
+      dir-exists:
+        - "test/"
+    env:
+      MELOS_TEST: true
+
+  client_test:
+    description: Run tests in a specific package.
+    run: melos exec --concurrency=2 -- "dart pub get && dart pub run test"
+    select-package:
+      scope: "graphql"
       dir-exists:
         - "test/"
     env:
