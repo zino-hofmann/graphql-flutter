@@ -109,8 +109,7 @@ jobs:
       - run:
           name: Bump version numbers
           command: |
-            if [[ $CIRCLE_TAG =~ ^.*beta.*$ ]]; then BRANCH=beta; else BRANCH=beta; fi
-            git checkout $BRANCH
+            git checkout main
 
             git add packages/graphql/pubspec.yaml packages/graphql_flutter/pubspec.yaml
             git commit --allow-empty -m "build(Pub): Bump version numbers [skip ci]"
