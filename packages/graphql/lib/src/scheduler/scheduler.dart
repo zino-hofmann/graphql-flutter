@@ -23,7 +23,7 @@ class QueryScheduler {
   /// Map going from polling interval durations to polling timers.
   final Map<Duration?, Timer> _pollingTimers = <Duration?, Timer>{};
 
-  void fetchQueriesOnInterval(
+  void fetchQueriesOnInterval<TParsed>(
     Timer timer,
     Duration? interval,
   ) {
@@ -57,11 +57,12 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    intervalQueries[interval]!.forEach(queryManager!.refetchQuery);
+    intervalQueries[interval]!
+        .forEach((e) => queryManager!.refetchQuery<TParsed>(e));
   }
 
-  void startPollingQuery(
-    WatchQueryOptions options,
+  void startPollingQuery<TParsed>(
+    WatchQueryOptions<TParsed> options,
     String queryId,
   ) {
     assert(
@@ -79,7 +80,7 @@ class QueryScheduler {
 
       _pollingTimers[interval] = Timer.periodic(
         interval!,
-        (Timer timer) => fetchQueriesOnInterval(timer, interval),
+        (Timer timer) => fetchQueriesOnInterval<TParsed>(timer, interval),
       );
     }
   }

@@ -344,7 +344,7 @@ class ObservableQuery<TParsed> {
 
     options = options.copyWithPollInterval(pollInterval);
     lifecycle = QueryLifecycle.polling;
-    scheduler!.startPollingQuery(options, queryId);
+    scheduler!.startPollingQuery<TParsed>(options, queryId);
   }
 
   void stopPolling() {
