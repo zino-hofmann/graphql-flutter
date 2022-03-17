@@ -94,7 +94,7 @@ class _SubscriptionHookState<TParsed> extends HookState<
     super.dispose();
   }
 
-  Future _onNetworkChange(ConnectivityResult result) async {
+  Future<void> _onNetworkChange(ConnectivityResult result) async {
     //if from offline to online
     if (_currentConnectivityResult == ConnectivityResult.none &&
         (result == ConnectivityResult.mobile ||

@@ -8,7 +8,7 @@ QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
   required QueryResultSource source,
 }) {
   List<GraphQLError>? errors;
-  dynamic data;
+  Map<String, dynamic>? data;
 
   // check if there are errors and apply the error policy if so
   // in a nutshell: `ignore` swallows errors, `none` swallows data

@@ -156,7 +156,7 @@ void main() {
       });
       test('successful response with parser', () async {
         final ResultParserFn<List<String>> parserFn = (data) {
-          return data['viewer']['repositories']['nodes']
+          return (data['viewer']['repositories']['nodes'] as List)
               .map<String>((node) => node['name'] as String)
               .toList();
         };
@@ -226,7 +226,7 @@ void main() {
       });
       test('successful fetch-more with parser', () async {
         final ResultParserFn<List<String>> parserFn = (data) {
-          return data['viewer']['repositories']['nodes']
+          return (data['viewer']['repositories']['nodes'] as List)
               .map<String>((node) => node['name'] as String)
               .toList();
         };
@@ -272,8 +272,8 @@ void main() {
               'viewer': {
                 'repositories': {
                   'nodes': [
-                    ...d1!['viewer']['repositories']['nodes'],
-                    ...d2!['viewer']['repositories']['nodes'],
+                    ...(d1!['viewer']['repositories']['nodes'] as List),
+                    ...(d2!['viewer']['repositories']['nodes'] as List),
                   ]
                 }
               }
@@ -345,7 +345,7 @@ void main() {
         final secondData =
             readRepositoryData(withTypenames: true, viewerHasStarred: true);
 
-        final resp = (d) => Stream.fromIterable([
+        final resp = (Map<String, dynamic> d) => Stream.fromIterable([
               Response(
                 data: d,
                 context: Context().withEntry(
@@ -471,7 +471,7 @@ void main() {
           ),
         );
 
-        final ObservableQuery observable = client.watchQuery(
+        final observable = client.watchQuery(
           WatchQueryOptions(
             document: parseString(readSingle),
             eagerlyFetchResults: true,
@@ -577,7 +577,7 @@ void main() {
       test('successful mutation with parser', () async {
         final ResultParserFn<bool> resultParser =
             (data) => data['action']['starrable']['viewerHasStarred'] as bool;
-        final MutationOptions _options = MutationOptions(
+        final _options = MutationOptions(
           document: parseString(addStar),
           parserFn: resultParser,
         );
@@ -601,7 +601,7 @@ void main() {
           ),
         );
 
-        final QueryResult response = await client.mutate(_options);
+        final response = await client.mutate(_options);
 
         verify(
           link.request(
@@ -615,7 +615,7 @@ void main() {
             ),
           ),
         );
-        final bool parsedResult = response.parsedData;
+        final bool? parsedResult = response.parsedData;
         expect(parsedResult, isTrue);
         expect(response.exception, isNull);
         expect(response.data, isNotNull);
@@ -759,7 +759,7 @@ void main() {
           ),
         );
 
-        final ObservableQuery observable = client.watchQuery(
+        final observable = client.watchQuery(
           WatchQueryOptions(
             document: parseString(readSingle),
             eagerlyFetchResults: true,

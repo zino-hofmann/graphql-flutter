@@ -65,14 +65,14 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// The key differentiating factor for an implementing `cache` or `proxy`
   /// is usually how they handle [optimistic] reads.
   @protected
-  dynamic readNormalized(String rootId, {bool? optimistic});
+  Map<String, dynamic>? readNormalized(String rootId, {bool? optimistic});
 
   /// Write normalized data into the cache.
   ///
   /// Called from [writeQuery] and [writeFragment].
   /// Implementors are expected to handle deep merging results themselves
   @protected
-  void writeNormalized(String dataId, dynamic value);
+  void writeNormalized(String dataId, Map<String, dynamic>? value);
 
   /// Variable sanitizer for referencing custom scalar types in cache keys.
   @protected

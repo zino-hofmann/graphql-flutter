@@ -45,7 +45,7 @@ class ResultAccumulator<T> extends StatefulWidget {
   final Widget Function(BuildContext, {required List<T>? results}) builder;
 
   @override
-  _ResultAccumulatorState createState() => _ResultAccumulatorState<T>();
+  _ResultAccumulatorState<T> createState() => _ResultAccumulatorState<T>();
 }
 
 class _ResultAccumulatorState<T> extends State<ResultAccumulator<T>> {

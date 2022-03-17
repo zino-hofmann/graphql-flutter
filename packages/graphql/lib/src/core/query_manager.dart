@@ -45,7 +45,8 @@ class QueryManager {
   int idCounter = 1;
 
   /// [ObservableQuery] registry
-  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
+  Map<String, ObservableQuery<Object?>> queries =
+      <String, ObservableQuery<Object?>>{};
 
   /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
   bool rebroadcastLocked = false;
@@ -176,7 +177,7 @@ class QueryManager {
     final result = await fetchQuery(_oneOffOpId, options);
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
-    final mutationCallbacks = MutationCallbackHandler(
+    final mutationCallbacks = MutationCallbackHandler<TParsed>(
       cache: cache,
       options: options,
       queryId: _oneOffOpId,
@@ -312,7 +313,7 @@ class QueryManager {
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
           !queryResult.isOptimistic) {
-        final dynamic data = cache.readQuery(request, optimistic: false);
+        final data = cache.readQuery(request, optimistic: false);
         // we only push an eager query with data
         if (data != null) {
           queryResult = QueryResult(
@@ -375,7 +376,7 @@ class QueryManager {
   }
 
   @experimental
-  Future<List<QueryResult?>> refetchSafeQueries() async {
+  Future<List<QueryResult<Object?>?>> refetchSafeQueries() async {
     rebroadcastLocked = true;
     final results = await Future.wait(
       queries.values.where((q) => q.isRefetchSafe).map((q) => q.refetch()),
@@ -385,7 +386,7 @@ class QueryManager {
     return results;
   }
 
-  ObservableQuery? getQuery(String? queryId) {
+  ObservableQuery<Object?>? getQuery(String? queryId) {
     if (queries.containsKey(queryId)) {
       return queries[queryId!];
     }
@@ -455,7 +456,10 @@ class QueryManager {
   /// **Note on internal implementation details**:
   /// There is sometimes confusion on when this is called, but rebroadcasts are requested
   /// from every [addQueryResult] where `result.isNotLoading` as an [OnData] callback from [ObservableQuery].
-  bool maybeRebroadcastQueries({ObservableQuery? exclude, bool force = false}) {
+  bool maybeRebroadcastQueries({
+    ObservableQuery<Object?>? exclude,
+    bool force = false,
+  }) {
     if (rebroadcastLocked && !force) {
       return false;
     }
@@ -485,17 +489,18 @@ class QueryManager {
   }
 
   bool _cachedDataHasChangedFor(
-    ObservableQuery query,
+    ObservableQuery<Object?> query,
     Map<String, dynamic>? cachedData,
   ) =>
       cachedData != null &&
       (alwaysRebroadcast || !_deepEquals(query.latestResult!.data, cachedData));
 
-  void setQuery(ObservableQuery observableQuery) {
+  void setQuery(ObservableQuery<Object?> observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
   }
 
-  void closeQuery(ObservableQuery observableQuery, {bool fromQuery = false}) {
+  void closeQuery(ObservableQuery<Object?> observableQuery,
+      {bool fromQuery = false}) {
     if (!fromQuery) {
       observableQuery.close(fromManager: true);
     }
@@ -513,7 +518,7 @@ class QueryManager {
 
 QueryResult<TParsed> _wrapFailure<TParsed>(
   dynamic ex,
-  trace,
+  StackTrace trace,
   ResultParserFn<TParsed> parserFn,
 ) =>
     QueryResult(

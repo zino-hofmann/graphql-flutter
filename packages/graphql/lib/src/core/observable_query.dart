@@ -7,7 +7,7 @@ import 'package:graphql/src/core/fetch_more.dart';
 import 'package:graphql/src/scheduler/scheduler.dart';
 
 /// Side effect to register for execution when data is received
-typedef OnData = FutureOr<void> Function(QueryResult? result);
+typedef OnData<TParsed> = FutureOr<void> Function(QueryResult<TParsed>? result);
 
 /// Lifecycle states for [ObservableQuery.lifecycle]
 enum QueryLifecycle {
@@ -86,7 +86,7 @@ class ObservableQuery<TParsed> {
   QueryScheduler? get scheduler => queryManager.scheduler;
 
   /// callbacks registered with [onData]
-  List<OnData> _onDataCallbacks = [];
+  List<OnData<TParsed>> _onDataCallbacks = [];
 
   /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
   ///
@@ -129,13 +129,13 @@ class ObservableQuery<TParsed> {
   ///
   /// **NOTE:** overrides any present non-network-only [FetchPolicy],
   /// as refetching from the `cache` does not make sense.
-  Future<QueryResult<TParsed>?> refetch() {
+  Future<QueryResult<TParsed>?> refetch() async {
     if (isRefetchSafe) {
       addResult(QueryResult.loading(
         data: latestResult?.data,
         parserFn: options.parserFn,
       ));
-      return queryManager.refetchQuery<TParsed>(queryId);
+      return await queryManager.refetchQuery<TParsed>(queryId);
     }
     throw Exception('Query is not refetch safe');
   }
@@ -286,19 +286,20 @@ class ObservableQuery<TParsed> {
   /// handling the resolution of [lifecycle] from
   /// [QueryLifecycle.sideEffectsBlocking] to [QueryLifecycle.completed]
   /// as appropriate
-  void onData(Iterable<OnData> callbacks) => _onDataCallbacks.addAll(callbacks);
+  void onData(Iterable<OnData<TParsed>> callbacks) =>
+      _onDataCallbacks.addAll(callbacks);
 
   /// Applies [onData] callbacks at the end of [addResult]
   ///
   /// [fromRebroadcast] is used to avoid the super-edge case of infinite rebroadcasts
   /// (not sure if it's even possible)
   void _applyCallbacks(
-    QueryResult? result, {
+    QueryResult<TParsed>? result, {
     bool fromRebroadcast = false,
   }) async {
     final callbacks = [
       ..._onDataCallbacks,
-      if (!fromRebroadcast) _maybeRebroadcast
+      if (!fromRebroadcast) _maybeRebroadcast,
     ];
     for (final callback in callbacks) {
       await callback(result);

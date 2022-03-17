@@ -14,7 +14,7 @@ import 'mock_server/ws_echo_server.dart';
 
 SocketClient getTestClient(
         {required String wsUrl,
-        StreamController? controller,
+        StreamController<dynamic>? controller,
         bool autoReconnect = true,
         Map<String, dynamic>? customHeaders,
         Duration delayBetweenReconnectionAttempts =
@@ -68,7 +68,7 @@ Future<void> main() async {
 
   group('SocketClient without payload', () {
     late SocketClient socketClient;
-    StreamController controller;
+    StreamController<dynamic> controller;
     final expectedMessage = r'{'
         r'"type":"start","id":"01020304-0506-4708-890a-0b0c0d0e0f10",'
         r'"payload":{"operationName":null,"variables":{},"query":"subscription {\n  \n}"}'
@@ -125,7 +125,7 @@ Future<void> main() async {
 
       // Have to wait for socket close to be fully processed after we reach
       // the notConnected state, including updating channel with close code.
-      await Future.delayed(const Duration(milliseconds: 20));
+      await Future<void>.delayed(const Duration(milliseconds: 20));
 
       // The websocket should be in a fully closed state at this point,
       // we should have a confirmed close code in the channel.
@@ -326,7 +326,7 @@ Future<void> main() async {
 
   group('SocketClient without autoReconnect', () {
     late SocketClient socketClient;
-    StreamController controller;
+    StreamController<dynamic> controller;
     setUp(overridePrint((log) {
       controller = StreamController(sync: true);
       socketClient = getTestClient(
@@ -393,7 +393,7 @@ Future<void> main() async {
 
       await expectLater(
           socketClient.socketChannel!.stream.map((s) {
-            return jsonDecode(s)['payload'];
+            return jsonDecode(s as String)['payload'];
           }),
           emits(initPayload));
     });
@@ -408,7 +408,7 @@ Future<void> main() async {
         wsUrl,
         config: SocketClientConfig(
           initialPayload: () async {
-            await Future.delayed(Duration(seconds: 3));
+            await Future<void>.delayed(Duration(seconds: 3));
             return initPayload;
           },
         ),
@@ -426,7 +426,7 @@ Future<void> main() async {
 
       await expectLater(
         socketClient.socketChannel!.stream.map((s) {
-          return jsonDecode(s)['payload'];
+          return jsonDecode(s as String)['payload'];
         }),
         emits(initPayload),
       );

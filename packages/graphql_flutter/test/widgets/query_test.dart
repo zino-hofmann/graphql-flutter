@@ -76,19 +76,19 @@ class PageState extends State<Page> {
     errorPolicy = widget.errorPolicy;
   }
 
-  setVariables(Map<String, dynamic> newVariables) {
+  void setVariables(Map<String, dynamic> newVariables) {
     setState(() {
       variables = newVariables;
     });
   }
 
-  setFetchPolicy(FetchPolicy? newFetchPolicy) {
+  void setFetchPolicy(FetchPolicy? newFetchPolicy) {
     setState(() {
       fetchPolicy = newFetchPolicy;
     });
   }
 
-  setErrorPolicy(ErrorPolicy? newErrorPolicy) {
+  void setErrorPolicy(ErrorPolicy? newErrorPolicy) {
     setState(() {
       errorPolicy = newErrorPolicy;
     });
@@ -97,13 +97,13 @@ class PageState extends State<Page> {
   @override
   Widget build(BuildContext context) {
     return Query(
-      options: QueryOptions(
+      options: QueryOptions<Object?>(
         document: query,
         variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
       ),
-      builder: (QueryResult result, {Refetch? refetch, FetchMore? fetchMore}) =>
+      builder: (result, {Refetch? refetch, FetchMore? fetchMore}) =>
           Container(),
     );
   }

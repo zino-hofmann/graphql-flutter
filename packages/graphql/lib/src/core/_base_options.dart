@@ -12,7 +12,7 @@ TParsed unprovidedParserFn<TParsed>(_d) => throw UnimplementedError(
 /// TODO refactor into [Request] container
 /// Base options.
 @immutable
-abstract class BaseOptions<TParsed> {
+abstract class BaseOptions<TParsed extends Object?> {
   BaseOptions({
     required this.document,
     this.variables = const {},

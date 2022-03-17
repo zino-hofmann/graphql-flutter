@@ -38,7 +38,7 @@ final _eagerSources = {
 };
 
 /// A single operation result
-class QueryResult<TParsed> {
+class QueryResult<TParsed extends Object?> {
   QueryResult({
     this.data,
     this.exception,
