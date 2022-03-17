@@ -115,4 +115,18 @@ abstract class BaseOptions<TParsed extends Object?> {
   int get hashCode => const ListEquality<Object?>(
         DeepCollectionEquality(),
       ).hash(properties);
+
+  QueryResult<TParsed> createResult({
+    Map<String, dynamic>? data,
+    OperationException? exception,
+    Context context = const Context(),
+    required QueryResultSource source,
+  }) =>
+      QueryResult.internal(
+        parserFn: parserFn,
+        data: data,
+        exception: exception,
+        context: context,
+        source: source,
+      );
 }

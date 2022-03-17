@@ -1,6 +1,8 @@
 import 'dart:async' show FutureOr;
 import 'package:graphql/client.dart';
+import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/result_parser.dart';
+import 'package:meta/meta.dart';
 
 /// The source of the result data contained
 ///
@@ -39,7 +41,8 @@ final _eagerSources = {
 
 /// A single operation result
 class QueryResult<TParsed extends Object?> {
-  QueryResult({
+  @protected
+  QueryResult.internal({
     this.data,
     this.exception,
     this.context = const Context(),
@@ -47,32 +50,44 @@ class QueryResult<TParsed extends Object?> {
     required this.source,
   }) : timestamp = DateTime.now();
 
+  factory QueryResult({
+    required BaseOptions<TParsed> options,
+    Map<String, dynamic>? data,
+    OperationException? exception,
+    Context context = const Context(),
+    required QueryResultSource source,
+  }) =>
+      options.createResult(
+        source: source,
+        data: data,
+        exception: exception,
+        context: context,
+      );
+
   /// Unexecuted singleton, used as a placeholder for mutations,
   /// etc.
-  static final unexecuted = QueryResult(
+  static final unexecuted = QueryResult.internal(
     source: null,
     parserFn: (d) =>
         throw UnimplementedError("Unexecuted query data can not be parsed."),
   )..timestamp = DateTime.fromMillisecondsSinceEpoch(0);
 
   factory QueryResult.loading({
+    required BaseOptions<TParsed> options,
     Map<String, dynamic>? data,
-    required ResultParserFn<TParsed> parserFn,
   }) =>
-      QueryResult(
+      options.createResult(
         data: data,
         source: QueryResultSource.loading,
-        parserFn: parserFn,
       );
 
   factory QueryResult.optimistic({
+    required BaseOptions<TParsed> options,
     Map<String, dynamic>? data,
-    required ResultParserFn<TParsed> parserFn,
   }) =>
-      QueryResult(
+      options.createResult(
         data: data,
         source: QueryResultSource.optimisticResult,
-        parserFn: parserFn,
       );
 
   DateTime timestamp;
@@ -141,10 +156,10 @@ class QueryResult<TParsed extends Object?> {
 
 class MultiSourceResult<TParsed> {
   MultiSourceResult({
+    required BaseOptions<TParsed> options,
     QueryResult<TParsed>? eagerResult,
     this.networkResult,
-    required ResultParserFn<TParsed> parserFn,
-  })  : eagerResult = eagerResult ?? QueryResult.loading(parserFn: parserFn),
+  })  : eagerResult = eagerResult ?? QueryResult.loading(options: options),
         assert(
           eagerResult!.source != QueryResultSource.network,
           'An eager result cannot be gotten from the network',
