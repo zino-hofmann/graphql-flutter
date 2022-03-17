@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:graphql/client.dart';
-import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
@@ -133,7 +132,7 @@ class ObservableQuery<TParsed> {
     if (isRefetchSafe) {
       addResult(QueryResult.loading(
         data: latestResult?.data,
-        parserFn: options.parserFn,
+        options: options,
       ));
       return await queryManager.refetchQuery<TParsed>(queryId);
     }
@@ -220,7 +219,7 @@ class ObservableQuery<TParsed> {
       FetchMoreOptions fetchMoreOptions) async {
     addResult(QueryResult.loading(
       data: latestResult?.data,
-      parserFn: options.parserFn,
+      options: options,
     ));
 
     return fetchMoreImplementation(
@@ -229,17 +228,6 @@ class ObservableQuery<TParsed> {
       queryManager: queryManager,
       previousResult: latestResult!,
       queryId: queryId,
-    );
-  }
-
-  void addFetchResult(
-    Response response,
-    QueryResultSource source, {
-    bool fromRebroadcast = false,
-  }) {
-    addResult(
-      mapFetchResultToQueryResult<TParsed>(response, options, source: source),
-      fromRebroadcast: fromRebroadcast,
     );
   }
 
