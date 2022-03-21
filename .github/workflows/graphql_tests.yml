@@ -11,10 +11,6 @@ jobs:
         with:
           sdk: stable
       - name: Install dependencies
-        run: |
-          cd packages/graphql
-          dart pub get
-      - name: Code formatting check
-        run: |
-          cd packages/graphql
-          dart test .
+        run: make dep
+      - name: Tests
+        run: make ci_check_client

@@ -13,10 +13,8 @@ jobs:
           sdk: stable
       - name: Run tests with coverage
         run: |
-          cd packages/graphql
-          dart pub get
-          dart run test --coverage="coverage"
-          dart run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.packages --report-on=lib
+          make dep
+          make ci_coverage_client
       - name: Upload coverage file
         run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov
