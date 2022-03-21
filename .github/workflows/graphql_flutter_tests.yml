@@ -11,9 +11,7 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-      - run: |
-          cd packages/graphql_flutter
-          flutter pub get
-      - run: |
-          cd packages/graphql_flutter
-          flutter test .
+      - name: Install dependencies
+        run: make dep
+      -  name: Tests
+      - run: make ci_check_flutter

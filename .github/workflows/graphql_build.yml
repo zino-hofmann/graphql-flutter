@@ -11,15 +11,6 @@ jobs:
         with:
           sdk: stable
       - name: Install dependencies
-        run: |
-          cd packages/graphql
-          dart pub get
+        run: make dep
       - name: Code formatting check
-        run: |
-          cd packages/graphql
-          dart format --set-exit-if-changed .
-      - name: Code analyze check
-        run: |
-          cd packages/graphql
-          dart analyze lib --fatal-infos
-          dart analyze test --fatal-infos
+        run: make ci_fmt_client

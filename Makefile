@@ -29,6 +29,12 @@ ci_fmt_client:
 ci_fmt_flutter:
 	$(CC) run client_analyze --no-select
 
+ci_coverage_client:
+	$(CC) run client_test_coverage --no-select
+
+ci_coverage_flutter:
+	$(CC) run flutter_test_coverage --no-select
+
 check_client: ci_fmt_client ci_check_client
 
 check_flutter: ci_fmt_flutter ci_check_flutter
