@@ -11,7 +11,6 @@ jobs:
         with:
           channel: 'stable'
       - run: |
-          cd packages/graphql_flutter
           make dep
           make ci_coverage_flutter
       - name: Upload coverage file
