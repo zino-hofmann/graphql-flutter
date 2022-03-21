@@ -382,7 +382,7 @@ class QueryManager {
     return results;
   }
 
-  ObservableQuery<Object?>? getQuery(String? queryId) {
+  ObservableQuery<TParsed>? getQuery<TParsed>(String? queryId) {
     if (!queries.containsKey(queryId)) {
       return null;
     }
