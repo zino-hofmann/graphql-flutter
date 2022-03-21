@@ -269,7 +269,7 @@ class SocketClient {
     }
   }
 
-  void onConnectionLost([e]) async {
+  void onConnectionLost([Object? e]) async {
     await _closeSocketChannel();
     if (e != null) {
       print('There was an error causing connection lost: $e');
@@ -467,14 +467,14 @@ void _defaultOnStreamError(Object error, StackTrace st) {
       'stacktrace:\n${st.toString()}');
 }
 
-class GraphQLWebSocketChannel extends StreamChannelMixin
+class GraphQLWebSocketChannel extends StreamChannelMixin<dynamic>
     implements WebSocketChannel {
   GraphQLWebSocketChannel(this._webSocket)
       : stream = _webSocket.stream.asBroadcastStream();
 
   WebSocketChannel _webSocket;
 
-  Stream stream;
+  Stream<dynamic> stream;
   Stream<GraphQLSocketMessage>? _messages;
 
   /// Stream of messages from the endpoint parsed as GraphQLSocketMessages

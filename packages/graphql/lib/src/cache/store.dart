@@ -37,13 +37,13 @@ class InMemoryStore extends Store {
   /// Defaults to an empty [HashMap]
   @protected
   @visibleForTesting
-  final Map<String, dynamic> data;
+  final Map<String, Map<String, dynamic>?> data;
 
   /// Creates an InMemoryStore inititalized with [data],
   /// which defaults to an empty [HashMap]
   InMemoryStore([
-    Map<String, dynamic>? data,
-  ]) : data = data ?? HashMap<String, dynamic>();
+    Map<String, Map<String, dynamic>?>? data,
+  ]) : data = data ?? HashMap();
 
   @override
   Map<String, dynamic>? get(String dataId) => data[dataId];

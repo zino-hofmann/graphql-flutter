@@ -21,7 +21,7 @@ void main() {
       }
     }
   ''';
-  readRepositoryData({withTypenames = true, withIds = true}) {
+  readRepositoryData({bool withTypenames = true, bool withIds = true}) {
     return {
       'viewer': {
         'repositories': {

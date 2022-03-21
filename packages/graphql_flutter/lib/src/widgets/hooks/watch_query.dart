@@ -35,15 +35,15 @@ class _WatchQueryHookState<TParsed>
     super.dispose();
   }
 
-  _connect() {
+  void _connect() {
     _observableQuery = hook.client.queryManager.watchQuery(hook.options);
   }
 
-  _close() {
+  void _close() {
     _observableQuery.close();
   }
 
-  _reconnect() {
+  void _reconnect() {
     _close();
     _connect();
   }

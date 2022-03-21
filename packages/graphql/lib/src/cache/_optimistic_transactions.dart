@@ -9,6 +9,7 @@ import 'package:graphql/src/cache/data_proxy.dart';
 
 import 'package:graphql/src/cache/cache.dart'
     show GraphQLCache, PartialDataCachePolicy;
+import 'package:normalize/policies.dart';
 
 /// API for users to provide cache updates through
 typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
@@ -19,7 +20,7 @@ typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
 class OptimisticPatch {
   const OptimisticPatch(this.id, this.data);
   final String id;
-  final HashMap<String, dynamic> data;
+  final HashMap<String, Map<String, dynamic>?> data;
 }
 
 /// Proxy by which users record [_OptimisticPatch]s though
@@ -42,22 +43,23 @@ class OptimisticProxy extends NormalizingDataProxy {
       cache.partialDataPolicy != PartialDataCachePolicy.reject;
 
   /// `typePolicies` to pass down to `normalize` (proxied from [cache])
-  get typePolicies => cache.typePolicies;
+  Map<String, TypePolicy> get typePolicies => cache.typePolicies;
 
   /// `possibleTypeOf` to pass down to `normalize` (proxied from [cache])
-  get possibleTypes => cache.possibleTypes;
+  Map<String, Set<String>> get possibleTypes => cache.possibleTypes;
 
   /// Optional `dataIdFromObject` function to pass through to [normalize]
   /// (proxied from [cache])
-  get dataIdFromObject => cache.dataIdFromObject;
+  DataIdResolver? get dataIdFromObject => cache.dataIdFromObject;
 
   @override
   SanitizeVariables get sanitizeVariables => cache.sanitizeVariables;
 
-  HashMap<String, dynamic> data = HashMap<String, dynamic>();
+  HashMap<String, Map<String, dynamic>?> data = HashMap();
 
   @override
-  dynamic readNormalized(String rootId, {bool? optimistic = true}) {
+  Map<String, dynamic>? readNormalized(String rootId,
+      {bool? optimistic = true}) {
     if (!optimistic!) {
       return cache.readNormalized(rootId, optimistic: false);
     }
@@ -71,7 +73,8 @@ class OptimisticProxy extends NormalizingDataProxy {
   /// deeply merging maps with existing values
   ///
   /// Called from [writeQuery] and [writeFragment].
-  void writeNormalized(String dataId, dynamic value) {
+  @override
+  void writeNormalized(String dataId, Map<String, dynamic>? value) {
     if (value is Map<String, Object>) {
       final existing = data[dataId];
       data[dataId] =

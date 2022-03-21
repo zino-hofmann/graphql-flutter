@@ -29,7 +29,7 @@ class HiveStore extends Store {
   ///
   /// **WARNING**: Directly editing the contents of the store will not automatically
   /// rebroadcast operations.
-  final Box box;
+  final Box<Map<String, dynamic>?> box;
 
   /// Creates a HiveStore inititalized with the given [box], defaulting to `Hive.box(defaultBoxName)`
   ///
@@ -37,7 +37,8 @@ class HiveStore extends Store {
   /// This lets us decouple the async initialization logic, making store usage elsewhere much more straightforward.
   ///
   /// [opened]: https://docs.hivedb.dev/#/README?id=open-a-box
-  HiveStore([Box? box]) : this.box = box ?? Hive.box(defaultBoxName);
+  HiveStore([Box<Map<String, dynamic>?>? box])
+      : this.box = box ?? Hive.box(defaultBoxName);
 
   @override
   Map<String, dynamic>? get(String dataId) {

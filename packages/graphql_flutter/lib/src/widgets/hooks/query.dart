@@ -3,10 +3,11 @@ import 'package:graphql/client.dart';
 import 'package:graphql_flutter/src/widgets/hooks/watch_query.dart';
 
 // method to call from widget to fetchmore queries
-typedef FetchMore<TParsed> = Future<QueryResult<TParsed>> Function(
-    FetchMoreOptions options);
+typedef FetchMore<TParsed extends Object?> = Future<QueryResult<TParsed>>
+    Function(FetchMoreOptions options);
 
-typedef Refetch<TParsed> = Future<QueryResult<TParsed>?> Function();
+typedef Refetch<TParsed extends Object?> = Future<QueryResult<TParsed>?>
+    Function();
 
 class QueryHookResult<TParsed> {
   final QueryResult<TParsed> result;

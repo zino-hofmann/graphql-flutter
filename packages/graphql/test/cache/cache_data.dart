@@ -168,7 +168,7 @@ final updatedCValue = <String, dynamic>{
   'cField': 'changed value',
 };
 
-final Map? updatedCBasicTestData = deeplyMergeLeft([
+final Map<String, dynamic>? updatedCBasicTestData = deeplyMergeLeft([
   basicTest.data,
   {
     'a': {
@@ -217,7 +217,10 @@ final basicTestSubsetAValue = TestCase(
   },
 );
 
-getUpdatedSubsetOperationData({withUpdatedC = false}) => {
+Map<String, dynamic> getUpdatedSubsetOperationData({
+  bool withUpdatedC = false,
+}) =>
+    {
       'a': {
         '__typename': 'A',
         'id': 1,

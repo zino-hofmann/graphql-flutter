@@ -105,7 +105,7 @@ class UnexpectedResponseStructureException extends ServerException
   final Request request;
 
   @override
-  get data => parsedResponse!.data;
+  Map<String, dynamic>? get data => parsedResponse!.data;
 
   @override
   final PartialDataException originalException;
