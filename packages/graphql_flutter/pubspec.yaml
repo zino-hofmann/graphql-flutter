@@ -2,6 +2,7 @@ name: graphql_flutter
 description: A GraphQL client for Flutter, bringing all the features from a modern GraphQL client to one easy to use package.
 version: 5.0.2-beta.6
 homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_flutter
+
 dependencies:
   graphql: ^5.0.2-beta.3
   gql_exec: ^0.4.0
@@ -14,6 +15,7 @@ dependencies:
   hive: ^2.0.0
   plugin_platform_interface: ^2.0.0
   flutter_hooks: ^0.18.2
+
 dev_dependencies:
   pedantic: ^1.11.0
   mockito: ^5.0.0
@@ -21,5 +23,11 @@ dev_dependencies:
     sdk: flutter
   http: ^0.13.0
   test: ^1.17.12
+
+dependency_overrides:
+  graphql:
+    path: ../graphql
+
 environment:
   sdk: '>=2.12.0 <3.0.0'
+

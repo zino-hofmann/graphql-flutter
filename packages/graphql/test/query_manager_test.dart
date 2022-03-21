@@ -40,7 +40,7 @@ void main() {
           parserFn: (data) => data['fetchPerson']?['name'] as String?,
         ),
       );
-      client.queryManager.refetchQuery(observable.queryId);
+      client.queryManager.refetchQuery<dynamic>(observable.queryId);
     });
   });
 }
