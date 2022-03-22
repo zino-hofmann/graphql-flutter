@@ -1,3 +1,9 @@
+# v5.0.2-beta.7
+
+## New Feature
+-  Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). budde377 19-03-2022
+
+
 ## [5.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v5.0.0...v5.0.1-beta.1) (2021-12-09)
 
 
