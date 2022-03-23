@@ -35,10 +35,10 @@ QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
   }
 
   return QueryResult(
+    options: options,
     data: data,
     context: response.context,
     source: source,
     exception: coalesceErrors(graphqlErrors: errors),
-    parserFn: options.parserFn,
   );
 }

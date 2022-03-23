@@ -11,9 +11,8 @@ jobs:
         with:
           channel: 'stable'
       - run: |
-          cd packages/graphql_flutter
-          flutter pub get
-          flutter test --coverage
+          make dep
+          make ci_coverage_flutter
       - name: Upload coverage file
         run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov

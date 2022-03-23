@@ -7,14 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v1
         with:
-          sdk: stable
+          channel: 'stable'
       - name: Install dependencies
-        run: |
-          cd packages/graphql
-          dart pub get
-      - name: Code formatting check
-        run: |
-          cd packages/graphql
-          dart test .
+        run: make dep
+      - name: Tests
+        run: make ci_check_client

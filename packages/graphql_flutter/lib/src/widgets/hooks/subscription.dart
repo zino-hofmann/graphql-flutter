@@ -30,9 +30,9 @@ QueryResult<TParsed> useSubscription<TParsed>(
     initialData: options.optimisticResult != null
         ? QueryResult.optimistic(
             data: options.optimisticResult as Map<String, dynamic>?,
-            parserFn: options.parserFn,
+            options: options,
           )
-        : QueryResult.loading(parserFn: options.parserFn),
+        : QueryResult.loading(options: options),
   );
   return snapshot.data!;
 }
