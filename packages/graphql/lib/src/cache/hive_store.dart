@@ -28,6 +28,9 @@ class HiveStore extends Store {
   }) async =>
       HiveStore(await openBox(boxName: boxName, path: path));
 
+  /// Init Hive on specific Path
+  static void init({required String onPath}) => Hive.init(onPath);
+
   /// Direct access to the underlying [Box].
   ///
   /// **WARNING**: Directly editing the contents of the store will not automatically
