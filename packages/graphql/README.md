@@ -316,7 +316,7 @@ subscription.listen(reactToAddedReview)
 used to supply custom headers to an IO client, register custom listeners,
 and extract the socket for other non-graphql features.
 
-**Warning:** if you want to listen to the listen to the stream,
+**Warning:** if you want to listen to the stream,
 wrap your channel with our `GraphQLWebSocketChannel` using the `.forGraphQL()` helper:
 ```dart
 connect: (url, protocols) {
