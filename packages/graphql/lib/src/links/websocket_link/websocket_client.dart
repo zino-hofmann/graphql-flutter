@@ -84,7 +84,7 @@ class SocketClientConfig {
   /// Useful supplying custom headers to an IO client, registering custom listeners,
   /// and extracting the socket for other non-graphql features.
   ///
-  /// Warning: if you want to listen to the listen to the stream,
+  /// Warning: if you want to listen to the stream,
   /// wrap your channel with our [GraphQLWebSocketChannel] using the `.forGraphQL()` helper:
   /// ```dart
   /// connectFn: (url, protocols) {
