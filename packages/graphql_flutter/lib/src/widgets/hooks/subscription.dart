@@ -56,13 +56,11 @@ class _SubscriptionHook<TParsed> extends Hook<Stream<QueryResult<TParsed>>> {
 class _SubscriptionHookState<TParsed> extends HookState<
     Stream<QueryResult<TParsed>>, _SubscriptionHook<TParsed>> {
   late Stream<QueryResult<TParsed>> stream;
-  GraphQLClient? client;
-
   ConnectivityResult? _currentConnectivityResult;
   StreamSubscription<ConnectivityResult>? _networkSubscription;
 
   void _initSubscription() {
-    stream = client!.subscribe(hook.options);
+    stream = hook.client.subscribe(hook.options);
     final onSubscriptionResult = hook.onSubscriptionResult;
     if (onSubscriptionResult != null) {
       stream = stream.map((result) {
@@ -75,6 +73,7 @@ class _SubscriptionHookState<TParsed> extends HookState<
   @override
   void initHook() {
     super.initHook();
+    _initSubscription();
     _networkSubscription =
         Connectivity().onConnectivityChanged.listen(_onNetworkChange);
   }
