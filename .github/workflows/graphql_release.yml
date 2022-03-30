@@ -1,4 +1,4 @@
-name: graphql-flutter Release Package
+name: graphql Release Package
 
 on:
   release:

@@ -1,8 +1,14 @@
 # v5.0.2-beta.7
 
 ## New Feature
--  Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). budde377 19-03-2022
+- Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). @budde377 19-03-2022
+## Fixes
+- subscription hook return an uninitialized stream (https://github.com/zino-hofmann/graphql-flutter/commit/ebc4abd86b72b75ffe4e26a2f412411ab7dd2993). @PainteR 25-03-2022
 
+
+# v5.0.2-beta.6
+
+- due a bug we miss all the changelog until the version # v5.0.2-beta.6, we need to fix it soon
 
 ## [5.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v5.0.0...v5.0.1-beta.1) (2021-12-09)
 
