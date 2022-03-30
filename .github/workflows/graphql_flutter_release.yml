@@ -28,5 +28,5 @@ jobs:
           credentialJson: ${{ secrets.CREDENTIAL_JSON }}
           flutter: true
           skipTests: true
-          dryRunOnly: github.event_name != 'release'
+          dryRunOnly: ${{ github.event_name != 'release' }}
           relativePath: './packages/graphql_flutter/'

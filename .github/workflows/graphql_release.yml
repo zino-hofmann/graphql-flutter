@@ -29,5 +29,5 @@ jobs:
           flutter: false
           skipTests: true
           force: true
-          dryRunOnly: github.event_name != 'release'
+          dryRunOnly: ${{ github.event_name != 'release' }}
           relativePath: './packages/graphql/'
