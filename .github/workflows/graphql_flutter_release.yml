@@ -23,10 +23,10 @@ jobs:
         uses: actions/checkout@v2 # required!
 
       - name: 'publish graphql-flutter to to Pub.dev'
-        uses: sakebook/actions-flutter-pub-publisher@v1.4.0
+        uses: k-paxian/dart-package-publisher@master
         with:
-          credential: ${{ secrets.CREDENTIAL_JSON }}
-          flutter_package: true
-          skip_test: true
-          dry_run: github.event_name != 'release'
-          package_directory: './packages/graphql_flutter/'
+          credentialJson: ${{ secrets.CREDENTIAL_JSON }}
+          flutter: true
+          skipTests: true
+          dryRunOnly: github.event_name != 'release'
+          relativePath: './packages/graphql_flutter/'
