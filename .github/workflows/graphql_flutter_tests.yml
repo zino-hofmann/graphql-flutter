@@ -1,10 +1,9 @@
-name: graphql-flutter Tests case
+name: graphql_flutter tests case
 
-on: [ push, pull_request ]
+on: [push, pull_request]
 
 jobs:
   build:
-    # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -13,5 +12,5 @@ jobs:
           channel: 'stable'
       - name: Install dependencies
         run: make dep
-      -  name: Tests
-      - run: make ci_check_flutter
+      - name: Tests
+        run: make ci_check_flutter
