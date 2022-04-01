@@ -154,6 +154,7 @@ void main() {
           equals('bar'),
         );
       });
+
       test('successful response with parser', () async {
         final ResultParserFn<List<String>> parserFn = (data) {
           return (data['viewer']['repositories']['nodes'] as List)
@@ -1046,6 +1047,78 @@ void main() {
 
       /// `myField` is updated, but we don't have `someNewField`, as expected.
       expect(client.readQuery(queryRequest), equals(updatedQueryData));
+    });
+  });
+
+  group("Client management", () {
+    setUp(() {
+      link = MockLink();
+
+      client = GraphQLClient(
+        cache: getTestCache(),
+        link: link,
+      );
+    });
+
+    test('successful response with update link', () async {
+      final _options = QueryOptions(
+        document: parseString(readRepositories),
+        variables: <String, dynamic>{
+          'nRepositories': 42,
+        },
+      );
+      final repoData = readRepositoryData(withTypenames: true);
+
+      when(
+        link.request(any),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          Response(
+            data: repoData,
+            context: Context().withEntry(
+              HttpLinkResponseContext(
+                statusCode: 200,
+                headers: {'foo': 'bar'},
+              ),
+            ),
+            response: {},
+          ),
+        ]),
+      );
+      // FIXME(vincenzopalazzo): adding a new mock link, maybe to print some addition
+      // information.
+      link = MockLink();
+      when(
+        link.request(any),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          Response(
+            data: repoData,
+            context: Context().withEntry(
+              HttpLinkResponseContext(
+                statusCode: 200,
+                headers: {'foo': 'bar'},
+              ),
+            ),
+            response: {},
+          ),
+        ]),
+      );
+
+      client = client.copyWith(link: link);
+      final QueryResult r = await client.query(_options);
+
+      expect(r.exception, isNull);
+      expect(r.data, equals(repoData));
+
+      expect(
+        r.context.entry<HttpLinkResponseContext>()!.statusCode,
+        equals(200),
+      );
+      expect(
+        r.context.entry<HttpLinkResponseContext>()!.headers['foo'],
+        equals('bar'),
+      );
     });
   });
 }
