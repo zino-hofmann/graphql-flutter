@@ -13,9 +13,9 @@ class HiveStore extends Store {
   /// Opens a box. Convenience pass through to [Hive.openBox].
   ///
   /// If the box is already open, the instance is returned and all provided parameters are being ignored.
-  static Future<Box<Map<String, dynamic>>> openBox(
-      {required String boxName, String? path}) async {
-    return await Hive.openBox<Map<String, dynamic>>(boxName, path: path);
+  static Future<Box<Map<dynamic, dynamic>?>> openBox(String boxName,
+      {String? path}) async {
+    return await Hive.openBox<Map<dynamic, dynamic>?>(boxName, path: path);
   }
 
   /// Convenience factory for `HiveStore(await openBox(boxName ?? 'graphqlClientStore', path: path))`
@@ -26,7 +26,7 @@ class HiveStore extends Store {
     String boxName = defaultBoxName,
     String? path,
   }) async =>
-      HiveStore(await openBox(boxName: boxName, path: path));
+      HiveStore(await openBox(boxName, path: path));
 
   /// Init Hive on specific Path
   static void init({required String onPath}) => Hive.init(onPath);
@@ -35,7 +35,7 @@ class HiveStore extends Store {
   ///
   /// **WARNING**: Directly editing the contents of the store will not automatically
   /// rebroadcast operations.
-  final Box<Map<String, dynamic>?> box;
+  final Box<Map<dynamic, dynamic>?> box;
 
   /// Creates a HiveStore initialized with the given [box], defaulting to `Hive.box(defaultBoxName)`
   ///
@@ -43,14 +43,14 @@ class HiveStore extends Store {
   /// This lets us decouple the async initialization logic, making store usage elsewhere much more straightforward.
   ///
   /// [opened]: https://docs.hivedb.dev/#/README?id=open-a-box
-  HiveStore([Box<Map<String, dynamic>>? box])
-      : this.box = box ?? Hive.box<Map<String, dynamic>>(defaultBoxName);
+  HiveStore([Box<Map<dynamic, dynamic>?>? box])
+      : this.box = box ?? Hive.box<Map<dynamic, dynamic>?>(defaultBoxName);
 
   @override
   Map<String, dynamic>? get(String dataId) {
     final result = box.get(dataId);
     if (result == null) return null;
-    return Map.from(result);
+    return Map<String, dynamic>.from(result);
   }
 
   @override
@@ -59,7 +59,7 @@ class HiveStore extends Store {
   }
 
   @override
-  void putAll(Map<String, Map<String, dynamic>> data) {
+  void putAll(Map<String, Map<String, dynamic>?> data) {
     box.putAll(data);
   }
 
@@ -69,7 +69,7 @@ class HiveStore extends Store {
   }
 
   @override
-  Map<String, Map<String, dynamic>> toMap() => Map.unmodifiable(box.toMap());
+  Map<String, Map<String, dynamic>?> toMap() => Map.unmodifiable(box.toMap());
 
   Future<void> reset() => box.clear();
 }

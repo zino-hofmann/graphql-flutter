@@ -15,7 +15,7 @@ abstract class Store {
   /// [put] all entries from [data] into the store
   ///
   /// Functionally equivalent to `data.map(put);`
-  void putAll(Map<String, Map<String, dynamic>> data);
+  void putAll(Map<String, Map<String, dynamic>?> data);
 
   /// Delete the value of the [dataId] from the store, if preset
   void delete(String dataId);
@@ -27,7 +27,7 @@ abstract class Store {
   ///
   /// NOTE: some [Store]s might return mutable objects
   /// referenced by the store itself.
-  Map<String, Map<String, dynamic>> toMap();
+  Map<String, Map<String, dynamic>?> toMap();
 }
 
 /// Simplest possible [Map]-backed store
@@ -52,7 +52,7 @@ class InMemoryStore extends Store {
   void put(String dataId, Map<String, dynamic>? value) => data[dataId] = value;
 
   @override
-  void putAll(Map<String, Map<String, dynamic>> entries) =>
+  void putAll(Map<String, Map<String, dynamic>?> entries) =>
       data.addAll(entries);
 
   @override
@@ -60,7 +60,7 @@ class InMemoryStore extends Store {
 
   /// Return the  underlying [data] as an unmodifiable [Map].
   @override
-  Map<String, Map<String, dynamic>> toMap() => Map.unmodifiable(data);
+  Map<String, Map<String, dynamic>?> toMap() => Map.unmodifiable(data);
 
   void reset() => data.clear();
 }
