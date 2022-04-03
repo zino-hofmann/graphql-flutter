@@ -71,6 +71,49 @@ void main() {
 
       await store.box.deleteFromDisk();
     });
+    group("Re-open store works", () {
+      test("Can re-open store", () async {
+        final box1 = await HiveStore.openBox(
+          're-open-store',
+          path: path,
+        );
+        final store = HiveStore(box1);
+        store.put("id", {'foo': 'bar'});
+        final readData = await store.get("id");
+        expect(readData, equals({'foo': 'bar'}));
+        expect(readData, isA<Map<String, dynamic>>());
+        await box1.close();
+        final box2 = await HiveStore.openBox(
+          're-open-store',
+          path: path,
+        );
+        final store2 = HiveStore(box2);
+        final readData2 = await store2.get('id');
+        expect(readData2, equals({'foo': 'bar'}));
+        expect(readData2, isA<Map<String, dynamic>>());
+      });
+      test("Can put null", () async {
+        final box1 = await HiveStore.openBox(
+          'put-null',
+          path: path,
+        );
+        final store = HiveStore(box1);
+        store.put("id", {'foo': 'bar'});
+        store.put("id", null);
+        final readData = await store.get("id");
+        expect(readData, equals(null));
+        await box1.close();
+        final box2 = await HiveStore.openBox(
+          'put-null',
+          path: path,
+        );
+        final store2 = HiveStore(box2);
+        final readData2 = await store2.get('id');
+        expect(readData2, equals(null));
+        expect(store2.toMap(), isA<Map<String, Map<String, dynamic>?>>());
+        expect(store2.toMap(), equals({'id': null}));
+      });
+    });
 
     tearDownAll(() async {
       await Directory(path).delete(recursive: true);
