@@ -1,7 +1,10 @@
 # v5.0.2-beta.8
 
+## Fixes
+- Hive integration ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a8726cb41e1b98e9aaeb8ac3bf7192368de68981)). @budde377 03-04-2022
+
 ## New Feature
-- Stricter analysis ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44)). @budde377 19-03-2022
+- add possibility to update the client components ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1c37a09b33b4203550e611cf13b235bd7dce1855)). @vincenzopalazzo 01-04-2022
 
 
 # v5.0.2-beta.7
