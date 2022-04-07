@@ -87,6 +87,9 @@ class ObservableQuery<TParsed> {
   /// callbacks registered with [onData]
   List<OnData<TParsed>> _onDataCallbacks = [];
 
+  /// same as [_onDataCallbacks], but not removed after invocation
+  Set<OnData<TParsed>> _notRemovableOnDataCallbacks = Set();
+
   /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
   ///
   /// Automatically appended as an [OnData]
@@ -273,9 +276,24 @@ class ObservableQuery<TParsed> {
   /// result that [QueryResult.isConcrete],
   /// handling the resolution of [lifecycle] from
   /// [QueryLifecycle.sideEffectsBlocking] to [QueryLifecycle.completed]
-  /// as appropriate
-  void onData(Iterable<OnData<TParsed>> callbacks) =>
-      _onDataCallbacks.addAll(callbacks);
+  /// as appropriate, unless if [removeAfterInvocation] is set to false.
+  ///
+  /// Returns a function for removing the added callbacks
+  void Function() onData(
+    Iterable<OnData<TParsed>> callbacks, {
+    bool removeAfterInvocation = true,
+  }) {
+    _onDataCallbacks.addAll(callbacks);
+
+    if (!removeAfterInvocation) {
+      _notRemovableOnDataCallbacks.addAll(callbacks);
+    }
+
+    return () {
+      _onDataCallbacks.removeWhere((cb) => callbacks.contains(cb));
+      _notRemovableOnDataCallbacks.removeWhere((cb) => callbacks.contains(cb));
+    };
+  }
 
   /// Applies [onData] callbacks at the end of [addResult]
   ///
@@ -300,7 +318,8 @@ class ObservableQuery<TParsed> {
 
     if (result!.isConcrete) {
       // avoid removing new callbacks
-      _onDataCallbacks.removeWhere((cb) => callbacks.contains(cb));
+      _onDataCallbacks.removeWhere((cb) =>
+          callbacks.contains(cb) && !_notRemovableOnDataCallbacks.contains(cb));
 
       // if there are new callbacks, there is maybe another inflight mutation
       if (_onDataCallbacks.isEmpty) {

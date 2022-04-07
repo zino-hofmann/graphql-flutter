@@ -40,6 +40,15 @@ QueryHookResult<TParsed> useQueryOnClient<TParsed>(
     query.stream,
     initialData: query.latestResult,
   );
+
+  useEffect(() {
+    final cleanup = query.onData(
+      QueryCallbackHandler(options: options).callbacks,
+      removeAfterInvocation: false,
+    );
+    return cleanup;
+  }, [options, query]);
+
   return QueryHookResult(
     result: snapshot.data!,
     refetch: query.refetch,
