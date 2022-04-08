@@ -5,12 +5,12 @@ on:
     types: [created]
     tags:
       - graphql_flutter-v*
-      - v*
   pull_request:
   workflow_run:
     workflows:
       - "graphql-flutter Dart Code sanity check"
       - "graphql-flutter Tests case"
+      - "graphql Release Package"
     branches: [ main ]
     types:
       - completed

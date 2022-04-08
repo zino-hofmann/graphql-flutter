@@ -1,11 +1,13 @@
 CC=dart pub global run melos
 CC_TEST=spec
+CC_CHANGELOG=dart pub global run changelog_cmd
 
 default: analyze check
 
 dep:
 	dart pub global activate melos;
 	dart pub global activate spec_cli;
+	dart pub global activate changelog_cmd;
 	$(CC) bootstrap
 
 check:
@@ -38,6 +40,14 @@ ci_coverage_flutter:
 check_client: ci_fmt_client ci_check_client
 
 check_flutter: ci_fmt_flutter ci_check_flutter
+
+changelog_client:
+	cd packages/graphql && $(CC_CHANGELOG)
+
+changelog_flutter:
+	cd packages/graphql_flutter && $(CC_CHANGELOG)
+
+changelog: changelog_client changelog_flutter
 
 ci: dep check_client check_flutter
 
