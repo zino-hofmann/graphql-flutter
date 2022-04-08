@@ -4,7 +4,7 @@ on:
   release:
     types: [created]
     tags:
-      - v*
+      - v-*
 jobs:
   publishing_client:
     runs-on: ubuntu-latest
@@ -17,6 +17,7 @@ jobs:
           credentialJson: ${{ secrets.CREDENTIAL_JSON }}
           flutter: false
           skipTests: true
+          force: true
           dryRunOnly: ${{ github.event_name != 'release' }}
           relativePath: './packages/graphql/'
   publishing_flutter:
