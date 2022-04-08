@@ -136,17 +136,17 @@ all together.
 
 To prepare the release the following steps are required:
 
-- Bump the version number in the package before the release;
+- Bump the version number in the package before the release, and the version inside the `changelog.json` in the package root;
 - Generate the changelog related to the package:
-  - We use the [changelog.dat](https://github.com/vincenzopalazzo/changelog.dart/releases) to generate the correct CHANGELOG from the Github API.
-  - To use the changelog tools you need to run the following commands inside the package directory
-```
-export GITHUB_TOKEN="your_token"
-changelog-cli -p {package_name} -v v{version_number} -g zino-hofmann/graphql-flutter -b main -m header
-# create the CHANGELOG.md file, if already exist it will join the result, so it is important ran the tool inside the package directory
-```
+  - `export GITHUB_TOKEN="your_token"`
+  - `make {changelog_client|changelog_flutter|changelog}`, where
+      - `changelog_client`: generate the changelog for graphql;
+      - `changelog_flutter`: generate the changelog for graphql_flutter;
+      - `changelog`: generate both changelos.   
 - Make the Github release: To release a single package we need to create a release with the following tag `{package_name}-v{version_number}`, and 
 if we make a release with the tag `v{version_number}` this will release all the packages (useful for a major release of the package).
+
+
 
 >Programs must be written for people to read, and only incidentally for machines to execute.
 >                                                                            - Someone
