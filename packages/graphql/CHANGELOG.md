@@ -1,3 +1,9 @@
+# v5.1.1
+
+## New Feature
+- Tighten the OnMutationCompleted function ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/59ebaa94d44a531416687904788b823ef5c17b5d)). @budde377 09-04-2022
+
+
 # v5.1.0
 
 ## New Feature
