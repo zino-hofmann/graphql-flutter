@@ -7,7 +7,8 @@ import 'package:graphql/src/core/result_parser.dart';
 
 import 'package:meta/meta.dart';
 
-typedef OnMutationCompleted = FutureOr<void> Function(dynamic data);
+typedef OnMutationCompleted = FutureOr<void> Function(
+    Map<String, dynamic>? data);
 typedef OnMutationUpdate<TParsed> = FutureOr<void> Function(
   GraphQLDataProxy cache,
   QueryResult<TParsed>? result,
