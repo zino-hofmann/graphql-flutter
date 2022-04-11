@@ -5,7 +5,7 @@ on:
     types: [created]
     tags:
       - graphql-v*
-  pull_request:
+  push:
   workflow_run:
     workflows:
       - "graphql Test case"

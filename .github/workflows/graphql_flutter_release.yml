@@ -5,7 +5,7 @@ on:
     types: [created]
     tags:
       - graphql_flutter-v*
-  pull_request:
+  push:
   workflow_run:
     workflows:
       - "graphql-flutter Dart Code sanity check"
