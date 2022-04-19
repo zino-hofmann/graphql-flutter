@@ -66,6 +66,13 @@ ObservableQuery<TParsed> useWatchQuery<TParsed>(
   WatchQueryOptions<TParsed> options,
 ) {
   final client = useGraphQLClient();
+  return useWatchQueryOnClient(client, options);
+}
+
+ObservableQuery<TParsed> useWatchQueryOnClient<TParsed>(
+  GraphQLClient client,
+  WatchQueryOptions<TParsed> options,
+) {
   final overwrittenOptions = useMemoized(() {
     final policies =
         client.defaultPolicies.query.withOverrides(options.policies);
@@ -79,8 +86,16 @@ ObservableQuery<TParsed> useWatchQuery<TParsed>(
 }
 
 ObservableQuery<TParsed> useWatchMutation<TParsed>(
-    WatchQueryOptions<TParsed> options) {
+  WatchQueryOptions<TParsed> options,
+) {
   final client = useGraphQLClient();
+  return useWatchMutationOnClient(client, options);
+}
+
+ObservableQuery<TParsed> useWatchMutationOnClient<TParsed>(
+  GraphQLClient client,
+  WatchQueryOptions<TParsed> options,
+) {
   final overwrittenOptions = useMemoized(() {
     final policies =
         client.defaultPolicies.mutate.withOverrides(options.policies);

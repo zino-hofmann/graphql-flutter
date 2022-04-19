@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:graphql/client.dart';
+import 'package:graphql_flutter/src/widgets/hooks/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/hooks/watch_query.dart';
 
 // method to call from widget to fetchmore queries
@@ -22,11 +23,19 @@ class QueryHookResult<TParsed> {
 }
 
 QueryHookResult<TParsed> useQuery<TParsed>(QueryOptions<TParsed> options) {
+  final client = useGraphQLClient();
+  return useQueryOnClient(client, options);
+}
+
+QueryHookResult<TParsed> useQueryOnClient<TParsed>(
+  GraphQLClient client,
+  QueryOptions<TParsed> options,
+) {
   final watchQueryOptions = useMemoized(
     () => options.asWatchQueryOptions(),
     [options],
   );
-  final query = useWatchQuery(watchQueryOptions);
+  final query = useWatchQueryOnClient(client, watchQueryOptions);
   final snapshot = useStream(
     query.stream,
     initialData: query.latestResult,
