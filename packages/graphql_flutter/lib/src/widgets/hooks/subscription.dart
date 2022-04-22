@@ -20,6 +20,18 @@ QueryResult<TParsed> useSubscription<TParsed>(
   OnSubscriptionResult<TParsed>? onSubscriptionResult,
 }) {
   final client = useGraphQLClient();
+  return useSubscriptionOnClient(
+    client,
+    options,
+    onSubscriptionResult: onSubscriptionResult,
+  );
+}
+
+QueryResult<TParsed> useSubscriptionOnClient<TParsed>(
+  GraphQLClient client,
+  SubscriptionOptions<TParsed> options, {
+  OnSubscriptionResult<TParsed>? onSubscriptionResult,
+}) {
   final stream = use(_SubscriptionHook(
     client: client,
     onSubscriptionResult: onSubscriptionResult,

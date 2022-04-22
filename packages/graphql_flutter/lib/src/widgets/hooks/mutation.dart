@@ -21,12 +21,19 @@ class MutationHookResult<TParsed> {
 MutationHookResult<TParsed> useMutation<TParsed>(
   MutationOptions<TParsed> options,
 ) {
+  final client = useGraphQLClient();
+  return useMutationOnClient(client, options);
+}
+
+MutationHookResult<TParsed> useMutationOnClient<TParsed>(
+  GraphQLClient client,
+  MutationOptions<TParsed> options,
+) {
   final watchOptions = useMemoized(
     () => options.asWatchQueryOptions(),
     [options],
   );
-  final client = useGraphQLClient();
-  final query = useWatchMutation<TParsed>(watchOptions);
+  final query = useWatchMutationOnClient<TParsed>(client, watchOptions);
   final snapshot = useStream(
     query.stream,
     initialData: query.latestResult ?? QueryResult.unexecuted,
