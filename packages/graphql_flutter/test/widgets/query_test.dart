@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -52,12 +53,20 @@ class Page extends StatefulWidget {
   final FetchPolicy? fetchPolicy;
   final ErrorPolicy? errorPolicy;
 
-  Page({
-    Key? key,
-    this.variables,
-    this.fetchPolicy,
-    this.errorPolicy,
-  }) : super(key: key);
+  /// Query onComplete callback
+  final OnQueryComplete? onQueryComplete;
+
+  /// Query onError callbacks
+  final OnQueryError? onQueryError;
+
+  Page(
+      {Key? key,
+      this.variables,
+      this.fetchPolicy,
+      this.errorPolicy,
+      this.onQueryComplete,
+      this.onQueryError})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() => PageState();
@@ -102,6 +111,8 @@ class PageState extends State<Page> {
         variables: variables,
         fetchPolicy: fetchPolicy,
         errorPolicy: errorPolicy,
+        onComplete: widget.onQueryComplete,
+        onError: widget.onQueryError,
       ),
       builder: (result, {Refetch? refetch, FetchMore? fetchMore}) =>
           Container(),
@@ -369,6 +380,59 @@ void main() {
         ..setErrorPolicy(ErrorPolicy.none);
       await tester.pump();
       verifyNoMoreInteractions(mockHttpClient);
+    });
+
+    testWidgets('invokes onComplete callback once when completed',
+        (WidgetTester tester) async {
+      var onCompleteHits = 0;
+      final page = Page(
+        variables: {'foo': 1},
+        onQueryComplete: (a) {
+          onCompleteHits++;
+        },
+      );
+
+      await tester.pumpWidget(GraphQLProvider(
+        client: client,
+        child: page,
+      ));
+
+      expect(onCompleteHits, equals(1));
+    });
+
+    testWidgets('invokes onError callback once when error thrown',
+        (WidgetTester tester) async {
+      var errorMsg = "Something bad has happened!";
+      List<GraphQLError> errors = [];
+
+      final page = Page(
+        variables: {'foo': 1},
+        onQueryError: (a) {
+          errors.addAll(a?.graphqlErrors ?? []);
+        },
+      );
+
+      when(mockHttpClient.send(captureAny))
+          .thenAnswer((_) => Future<http.StreamedResponse>.value(
+                http.StreamedResponse(
+                  Stream.value(utf8.encode(jsonEncode({
+                    "data": null,
+                    "errors": [
+                      {"message": errorMsg}
+                    ],
+                  }))),
+                  200,
+                ),
+              ));
+
+      await tester.pumpWidget(GraphQLProvider(
+        client: client,
+        child: page,
+      ));
+
+      expect(errors, isNotEmpty);
+      expect(errors.map((e) => e.message).join(), contains(errorMsg));
+      expect(errors, hasLength(1));
     });
   });
 }

@@ -35,7 +35,7 @@ scripts:
 
   flutter_test:
     description: Run tests in a specific package.
-    run: melos exec --depends-on="graphql" --concurrency=2 -- "flutter pub get && flutter test"
+    run: melos exec --depends-on="graphql" --concurrency=2 -- "flutter test"
     select-package:
       scope: "graphql_flutter"
       dir-exists:
