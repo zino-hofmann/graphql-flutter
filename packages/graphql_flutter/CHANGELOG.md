@@ -1,3 +1,13 @@
+# v5.1.1-beta.1
+
+## New Feature
+- added query onError & onComplete callbacks ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8342d245ececc6007744d963c9a5d7ff8ed83f13)). @fabis94 22-04-2022
+- Decouple GraphQLClient Provider ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/750ca051f25a89df0b2a69176feab1499426f9b9)). @budde377 19-04-2022
+
+## Fixes
+- Correctly add web as supported platform ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9f45d441fe9e2933a4530647cefabd109393f09d)). @budde377 23-04-2022
+
+
 # v5.1.0
 
 ## New Feature
