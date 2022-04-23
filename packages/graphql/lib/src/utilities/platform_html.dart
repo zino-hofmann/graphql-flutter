@@ -7,7 +7,9 @@ Future<WebSocketChannel> defaultConnectPlatform(
   if (headers != null) {
     print("The headers on the web are not supported");
   }
-  final webSocketChannel =
-      await WebSocketChannel.connect(uri, protocols: protocols);
+  final webSocketChannel = WebSocketChannel.connect(
+    uri,
+    protocols: protocols,
+  );
   return webSocketChannel.forGraphQL();
 }
