@@ -324,7 +324,7 @@ class FetchMoreOptions {
 }
 
 /// merge fetchMore result data with earlier result data
-typedef Map<String, dynamic>? UpdateQuery(
+typedef UpdateQuery = Map<String, dynamic>? Function(
   Map<String, dynamic>? previousResultData,
   Map<String, dynamic>? fetchMoreResultData,
 );
