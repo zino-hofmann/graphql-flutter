@@ -1,3 +1,12 @@
+# v5.1.2-beta.1
+
+## New Feature
+- added query onError & onComplete callbacks ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8342d245ececc6007744d963c9a5d7ff8ed83f13)). @fabis94 22-04-2022
+
+## Fixes
+- Minor formatting issues ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/ff71f5dcadc7e41f2366c6401dffc58d7f7325b8)). @budde377 23-04-2022
+
+
 # v5.1.1
 
 ## New Feature
