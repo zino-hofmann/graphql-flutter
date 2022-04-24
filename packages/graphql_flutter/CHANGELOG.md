@@ -1,3 +1,9 @@
+# v5.1.1-beta.2
+
+## Fixes
+- Upgrade graphql version ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/59e711e97beffa4559f64fa3249fe969e9e84c62)). @budde377 23-04-2022
+
+
 # v5.1.1-beta.1
 
 ## New Feature
