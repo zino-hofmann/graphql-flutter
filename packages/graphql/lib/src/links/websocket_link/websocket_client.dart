@@ -35,7 +35,7 @@ class SubscriptionListener {
   SubscriptionListener(this.callback, this.hasBeenTriggered);
 }
 
-enum SocketConnectionState { notConnected, connecting, connected }
+enum SocketConnectionState { notConnected, handshake, connecting, connected }
 
 class SocketClientConfig {
   const SocketClientConfig({
@@ -231,11 +231,11 @@ class SocketClient {
   /// Connects to the server.
   ///
   /// If this instance is disposed, this method does nothing.
-  Future<void> _connect() async {
+  Future<SocketClient> _connect() async {
     final InitOperation initOperation = await config.initOperation;
 
     if (_connectionStateController.isClosed || _wasDisposed) {
-      return;
+      return this;
     }
 
     _connectionStateController.add(SocketConnectionState.connecting);
@@ -246,8 +246,21 @@ class SocketClient {
       var connection =
           await config.connect(uri: Uri.parse(url), protocols: [protocol]);
       socketChannel = connection.forGraphQL();
-      _connectionStateController.add(SocketConnectionState.connected);
+
+      if (protocol == SocketSubProtocol.graphqlTransportWs) {
+        _connectionStateController.add(SocketConnectionState.handshake);
+      } else {
+        _connectionStateController.add(SocketConnectionState.connected);
+      }
+      print('Initialising connection');
       _write(initOperation);
+      if (protocol == SocketSubProtocol.graphqlTransportWs) {
+        // wait for ack
+        // this blocks to prevent ping from being called before ack is recieved
+        await _messages.firstWhere(
+            (message) => message.type == MessageTypes.connectionAck);
+        _connectionStateController.add(SocketConnectionState.connected);
+      }
 
       if (config.inactivityTimeout != null) {
         if (protocol == SocketSubProtocol.graphqlWs) {
@@ -289,6 +302,7 @@ class SocketClient {
     } catch (e) {
       onConnectionLost(e);
     }
+    return this;
   }
 
   void onConnectionLost([Object? e]) async {
@@ -471,21 +485,17 @@ class SocketClient {
             .listen((message) => response.addError(message));
 
         if (!_subscriptionInitializers[id]!.hasBeenTriggered) {
+          GraphQLSocketMessage operation = StartOperation(
+            id,
+            serialize(payload),
+          );
           if (protocol == SocketSubProtocol.graphqlTransportWs) {
-            _write(
-              SubscribeOperation(
-                id,
-                serialize(payload),
-              ),
-            );
-          } else {
-            _write(
-              StartOperation(
-                id,
-                serialize(payload),
-              ),
+            operation = SubscribeOperation(
+              id,
+              serialize(payload),
             );
           }
+          _write(operation);
           _subscriptionInitializers[id]!.hasBeenTriggered = true;
         }
       });
