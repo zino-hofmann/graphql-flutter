@@ -474,7 +474,7 @@ class SocketClient {
 
         dataErrorComplete
             .where((message) => message is SubscriptionNext)
-            .cast<SubscriptionNext>()
+            .whereType<SubscriptionNext>()
             .listen((message) => response.add(
                   parse(message.toJson()),
                 ));
