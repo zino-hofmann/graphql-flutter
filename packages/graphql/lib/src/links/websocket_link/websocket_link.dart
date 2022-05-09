@@ -1,5 +1,5 @@
-import 'package:gql_link/gql_link.dart';
 import 'package:gql_exec/gql_exec.dart';
+import 'package:gql_link/gql_link.dart';
 
 import './websocket_client.dart';
 
@@ -16,9 +16,11 @@ class WebSocketLink extends Link {
   WebSocketLink(
     this.url, {
     this.config = const SocketClientConfig(),
+    this.subProtocol = SocketSubProtocol.graphqlWs,
   });
 
   final String url;
+  final String subProtocol;
   final SocketClientConfig config;
 
   // cannot be final because we're changing the instance upon a header change.
@@ -39,6 +41,7 @@ class WebSocketLink extends Link {
     _socketClient = SocketClient(
       url,
       config: config,
+      protocol: subProtocol,
     );
   }
 

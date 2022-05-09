@@ -3,20 +3,17 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:gql_exec/gql_exec.dart';
+import 'package:graphql/src/core/query_options.dart' show WithType;
 import 'package:graphql/src/links/gql_links.dart';
 import 'package:graphql/src/utilities/platform.dart';
 import 'package:meta/meta.dart';
-
-import 'package:graphql/src/core/query_options.dart' show WithType;
-import 'package:gql_exec/gql_exec.dart';
-
-import 'package:stream_channel/stream_channel.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/status.dart' as ws_status;
-
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_channel/stream_channel.dart';
 import 'package:uuid/uuid.dart';
 import 'package:uuid/uuid_util.dart';
+import 'package:web_socket_channel/status.dart' as ws_status;
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import './websocket_messages.dart';
 
@@ -38,7 +35,7 @@ class SubscriptionListener {
   SubscriptionListener(this.callback, this.hasBeenTriggered);
 }
 
-enum SocketConnectionState { notConnected, connecting, connected }
+enum SocketConnectionState { notConnected, handshake, connecting, connected }
 
 class SocketClientConfig {
   const SocketClientConfig({
@@ -144,6 +141,13 @@ class SocketClientConfig {
   }
 }
 
+class SocketSubProtocol {
+  SocketSubProtocol._();
+
+  static const String graphqlWs = "graphql-ws";
+  static const String graphqlTransportWs = "graphql-transport-ws";
+}
+
 /// Wraps a standard web socket instance to marshal and un-marshal the server /
 /// client payloads into dart object representation.
 ///
@@ -155,7 +159,7 @@ class SocketClientConfig {
 class SocketClient {
   SocketClient(
     this.url, {
-    this.protocols = const ['graphql-ws'],
+    this.protocol = SocketSubProtocol.graphqlWs,
     this.config = const SocketClientConfig(),
     @visibleForTesting this.randomBytesForUuid,
     @visibleForTesting this.onMessage,
@@ -166,7 +170,7 @@ class SocketClient {
 
   Uint8List? randomBytesForUuid;
   final String url;
-  final Iterable<String>? protocols;
+  final String protocol;
   final SocketClientConfig config;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
@@ -179,6 +183,7 @@ class SocketClient {
   bool _wasDisposed = false;
 
   Timer? _reconnectTimer;
+  Timer? _pingTimer;
 
   @visibleForTesting
   GraphQLWebSocketChannel? socketChannel;
@@ -226,11 +231,11 @@ class SocketClient {
   /// Connects to the server.
   ///
   /// If this instance is disposed, this method does nothing.
-  Future<void> _connect() async {
+  Future<SocketClient> _connect() async {
     final InitOperation initOperation = await config.initOperation;
 
     if (_connectionStateController.isClosed || _wasDisposed) {
-      return;
+      return this;
     }
 
     _connectionStateController.add(SocketConnectionState.connecting);
@@ -239,17 +244,47 @@ class SocketClient {
       // Even though config.connect is sync, we call async in order to make the
       // SocketConnectionState.connected attribution not overload SocketConnectionState.connecting
       var connection =
-          await config.connect(uri: Uri.parse(url), protocols: protocols);
+          await config.connect(uri: Uri.parse(url), protocols: [protocol]);
       socketChannel = connection.forGraphQL();
-      _connectionStateController.add(SocketConnectionState.connected);
+
+      if (protocol == SocketSubProtocol.graphqlTransportWs) {
+        _connectionStateController.add(SocketConnectionState.handshake);
+      } else {
+        _connectionStateController.add(SocketConnectionState.connected);
+      }
+      print('Initialising connection');
       _write(initOperation);
+      if (protocol == SocketSubProtocol.graphqlTransportWs) {
+        // wait for ack
+        // this blocks to prevent ping from being called before ack is recieved
+        await _messages.firstWhere(
+            (message) => message.type == MessageTypes.connectionAck);
+        _connectionStateController.add(SocketConnectionState.connected);
+      }
 
       if (config.inactivityTimeout != null) {
-        _disconnectOnKeepAliveTimeout(_messages);
+        if (protocol == SocketSubProtocol.graphqlWs) {
+          _disconnectOnKeepAliveTimeout(_messages);
+        }
+        if (protocol == SocketSubProtocol.graphqlTransportWs) {
+          _enqueuePing();
+        }
       }
 
       _messageSubscription = _messages.listen(
-        onMessage,
+        (message) {
+          if (onMessage != null) {
+            onMessage!(message);
+          }
+
+          if (protocol == SocketSubProtocol.graphqlTransportWs) {
+            if (message.type == 'ping') {
+              _write(PongMessage());
+            } else if (message.type == 'pong') {
+              _enqueuePing();
+            }
+          }
+        },
         onDone: onConnectionLost,
         // onDone will not be triggered if the subscription is
         // auto-cancelled on error; make sure to pass false
@@ -267,6 +302,7 @@ class SocketClient {
     } catch (e) {
       onConnectionLost(e);
     }
+    return this;
   }
 
   void onConnectionLost([Object? e]) async {
@@ -276,6 +312,7 @@ class SocketClient {
     }
     print('Disconnected from websocket.');
     _reconnectTimer?.cancel();
+    _pingTimer?.cancel();
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
 
@@ -302,6 +339,14 @@ class SocketClient {
     }
   }
 
+  void _enqueuePing() {
+    _pingTimer?.cancel();
+    _pingTimer = new Timer(
+      config.inactivityTimeout!,
+      () => _write(PingMessage()),
+    );
+  }
+
   /// Closes the underlying socket if connected, and stops reconnection attempts.
   /// After calling this method, this [SocketClient] instance must be considered
   /// unusable. Instead, create a new instance of this class.
@@ -314,6 +359,7 @@ class SocketClient {
     _wasDisposed = true;
     print('Disposing socket client..');
     _reconnectTimer?.cancel();
+    _pingTimer?.cancel();
     _keepAliveSubscription?.cancel();
 
     await Future.wait([
@@ -385,6 +431,10 @@ class SocketClient {
               return message.id == id;
             }
 
+            if (message is SubscriptionNext) {
+              return message.id == id;
+            }
+
             if (message is SubscriptionError) {
               return message.id == id;
             }
@@ -423,17 +473,29 @@ class SocketClient {
                 ));
 
         dataErrorComplete
+            .where((message) => message is SubscriptionNext)
+            .whereType<SubscriptionNext>()
+            .listen((message) => response.add(
+                  parse(message.toJson()),
+                ));
+
+        dataErrorComplete
             .where((message) => message is SubscriptionError)
             .cast<SubscriptionError>()
             .listen((message) => response.addError(message));
 
         if (!_subscriptionInitializers[id]!.hasBeenTriggered) {
-          _write(
-            StartOperation(
+          GraphQLSocketMessage operation = StartOperation(
+            id,
+            serialize(payload),
+          );
+          if (protocol == SocketSubProtocol.graphqlTransportWs) {
+            operation = SubscribeOperation(
               id,
               serialize(payload),
-            ),
-          );
+            );
+          }
+          _write(operation);
           _subscriptionInitializers[id]!.hasBeenTriggered = true;
         }
       });
@@ -445,7 +507,8 @@ class SocketClient {
       _subscriptionInitializers.remove(id);
 
       sub?.cancel();
-      if (_connectionStateController.value == SocketConnectionState.connected &&
+      if (protocol == SocketSubProtocol.graphqlWs &&
+          _connectionStateController.value == SocketConnectionState.connected &&
           socketChannel != null) {
         _write(StopOperation(id));
       }

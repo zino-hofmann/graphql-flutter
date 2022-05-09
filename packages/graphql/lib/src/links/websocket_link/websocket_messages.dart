@@ -20,11 +20,16 @@ class MessageTypes {
   static const String connectionKeepAlive = "ka";
 
   // client operations
+  static const String subscribe = "subscribe";
   static const String start = "start";
   static const String stop = "stop";
 
+  static const String ping = "ping";
+  static const String pong = "pong";
+
   // server operations
   static const String data = "data";
+  static const String next = "next";
   static const String error = "error";
   static const String complete = "complete";
 
@@ -71,13 +76,21 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
         return ConnectionKeepAlive();
 
       // for completeness
+      case MessageTypes.subscribe:
+        return SubscribeOperation(id, payload);
       case MessageTypes.start:
         return StartOperation(id, payload);
       case MessageTypes.stop:
         return StopOperation(id);
+      case MessageTypes.ping:
+        return PingMessage(payload);
+      case MessageTypes.pong:
+        return PongMessage(payload);
 
       case MessageTypes.data:
         return SubscriptionData(id, payload['data'], payload['errors']);
+      case MessageTypes.next:
+        return SubscriptionNext(id, payload['data'], payload['errors']);
       case MessageTypes.error:
         return SubscriptionError(id, payload);
       case MessageTypes.complete:
@@ -128,6 +141,46 @@ class QueryPayload extends JsonSerializable {
         "operationName": operationName,
         "query": query,
         "variables": variables,
+      };
+}
+
+class SubscribeOperation extends GraphQLSocketMessage {
+  SubscribeOperation(this.id, this.payload) : super(MessageTypes.subscribe);
+
+  final String id;
+
+  final Map<String, dynamic> payload;
+
+  @override
+  toJson() => {
+        "type": type,
+        "id": id,
+        "payload": payload,
+      };
+}
+
+class PingMessage extends GraphQLSocketMessage {
+  PingMessage([this.payload = const <String, dynamic>{}])
+      : super(MessageTypes.ping);
+
+  final Map<String, dynamic> payload;
+
+  @override
+  toJson() => {
+        "type": type,
+        "payload": payload,
+      };
+}
+
+class PongMessage extends GraphQLSocketMessage {
+  PongMessage([this.payload]) : super(MessageTypes.pong);
+
+  final Map<String, dynamic>? payload;
+
+  @override
+  toJson() => {
+        "type": type,
+        "payload": payload,
       };
 }
 
@@ -207,6 +260,28 @@ class SubscriptionData extends GraphQLSocketMessage {
   @override
   bool operator ==(dynamic other) =>
       other is SubscriptionData && jsonEncode(other) == jsonEncode(this);
+}
+
+class SubscriptionNext extends GraphQLSocketMessage {
+  SubscriptionNext(this.id, this.data, this.errors) : super(MessageTypes.next);
+
+  final String id;
+  final dynamic data;
+  final dynamic errors;
+
+  @override
+  toJson() => {
+        "type": type,
+        "data": data,
+        "errors": errors,
+      };
+
+  @override
+  int get hashCode => toJson().hashCode;
+
+  @override
+  bool operator ==(dynamic other) =>
+      other is SubscriptionNext && jsonEncode(other) == jsonEncode(this);
 }
 
 /// Errors sent from the server to the client if the subscription operation was
