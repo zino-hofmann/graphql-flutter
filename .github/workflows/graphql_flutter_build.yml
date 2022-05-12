@@ -10,5 +10,6 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
+          flutter-version: '2.10.5'
       - run: make dep
       - run: make ci_fmt_flutter
