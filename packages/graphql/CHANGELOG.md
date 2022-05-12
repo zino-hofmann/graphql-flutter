@@ -1,3 +1,9 @@
+# v5.1.2-beta.2
+
+## New Feature
+- add support for `graphql-transport-ws` ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/b73bb3653c652d747161a541dc984fa293a8605c)). @maximilianmaihoefner 08-05-2022
+
+
 # v5.1.2-beta.1
 
 ## New Feature
