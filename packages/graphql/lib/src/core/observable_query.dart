@@ -189,9 +189,9 @@ class ObservableQuery<TParsed> {
   ///
   /// Will [startPolling] if [options.pollInterval] is set
   MultiSourceResult<TParsed> fetchResults({FetchPolicy? fetchPolicy}) {
-    final fetchOptions = fetchPolicy == null 
-      ? options 
-      : options.copyWithFetchPolicy(fetchPolicy);
+    final fetchOptions = fetchPolicy == null
+        ? options
+        : options.copyWithFetchPolicy(fetchPolicy);
     final MultiSourceResult<TParsed> allResults =
         queryManager.fetchQueryAsMultiSourceResult(queryId, fetchOptions);
     latestResult ??= allResults.eagerResult;
@@ -207,7 +207,8 @@ class ObservableQuery<TParsed> {
           : QueryLifecycle.pending;
     }
 
-    if (fetchOptions.pollInterval != null && fetchOptions.pollInterval! > Duration.zero) {
+    if (fetchOptions.pollInterval != null &&
+        fetchOptions.pollInterval! > Duration.zero) {
       startPolling(fetchOptions.pollInterval);
     }
 
