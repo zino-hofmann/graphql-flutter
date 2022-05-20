@@ -1,3 +1,9 @@
+# v5.1.1-beta.3
+
+## New Feature
+- support flutter 3.0 and 2.x ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/ee25cfdf50b0b85bd019a35bc4f65c7178e103cb)). @vincenzopalazzo 20-05-2022
+
+
 # v5.1.1-beta.2
 
 ## Fixes
