@@ -12,15 +12,14 @@ import './helpers.dart';
 import './mock_server/ws_echo_server.dart';
 import 'mock_server/ws_echo_server.dart';
 
-SocketClient getTestClient(
-        {required String wsUrl,
-        StreamController<dynamic>? controller,
-        bool autoReconnect = true,
-        Map<String, dynamic>? customHeaders,
-        Duration delayBetweenReconnectionAttempts =
-            const Duration(milliseconds: 1),
-        String protocol = SocketSubProtocol.graphqlWs,
-        }) =>
+SocketClient getTestClient({
+  required String wsUrl,
+  StreamController<dynamic>? controller,
+  bool autoReconnect = true,
+  Map<String, dynamic>? customHeaders,
+  Duration delayBetweenReconnectionAttempts = const Duration(milliseconds: 1),
+  String protocol = SocketSubProtocol.graphqlWs,
+}) =>
     SocketClient(
       wsUrl,
       protocol: protocol,
@@ -340,9 +339,9 @@ Future<void> main() async {
     setUp(overridePrint((log) {
       controller = StreamController(sync: true);
       socketClient = getTestClient(
-          controller: controller,
-          protocol: SocketSubProtocol.graphqlTransportWs,
-          wsUrl: wsUrl,
+        controller: controller,
+        protocol: SocketSubProtocol.graphqlTransportWs,
+        wsUrl: wsUrl,
       );
     }));
     tearDown(overridePrint(
