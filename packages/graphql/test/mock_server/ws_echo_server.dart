@@ -2,6 +2,7 @@
 /// to run the test and cover the web socket test
 ///
 /// author: https://github.com/vincenzopalazzo
+import 'dart:convert';
 import 'dart:io';
 
 const String forceDisconnectCommand = '___force_disconnect___';
@@ -17,10 +18,19 @@ Future<String> runWebSocketServer(
 /// Handle event received on server.
 void onWebSocketData(WebSocket client) {
   client.listen((data) async {
-    if (data != null && data.toString().contains(forceDisconnectCommand)) {
+    if (data == forceDisconnectCommand) {
       client.close(WebSocketStatus.normalClosure, 'shutting down');
     } else {
-      client.add(data);
+      final message = json.decode(data.toString());
+      if (message['type'] == 'connection_init' &&
+          message['payload']?['protocol'] == 'graphql-transport-ws') {
+        client.add(json.encode({
+          'type': 'connection_ack',
+          'payload': null,
+        }));
+      } else {
+        client.add(data);
+      }
     }
   });
 }
