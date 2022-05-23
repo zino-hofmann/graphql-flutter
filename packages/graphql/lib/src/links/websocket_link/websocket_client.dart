@@ -370,13 +370,18 @@ class SocketClient {
   }
 
   void _write(final GraphQLSocketMessage message) {
-    if (_connectionStateController.value == SocketConnectionState.connected) {
-      socketChannel!.sink.add(
-        json.encode(
-          message,
-          toEncodable: (dynamic m) => m.toJson(),
-        ),
-      );
+    switch (_connectionStateController.value) {
+      case SocketConnectionState.connected:
+      case SocketConnectionState.handshake:
+        socketChannel!.sink.add(
+          json.encode(
+            message,
+            toEncodable: (dynamic m) => m.toJson(),
+          ),
+        );
+        break;
+      default:
+        break;
     }
   }
 

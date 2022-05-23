@@ -65,7 +65,7 @@ scripts:
 
   client_test_coverage:
     description: Run tests in a specific package.
-    run: melos exec --concurrency=2 -- "dart run test --coverage="coverage" && dart run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.packages --report-on=lib"
+    run: melos exec --concurrency=2 -- "dart run test --coverage="coverage" && dart run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.dart_tool/package_config.json --report-on=lib"
     select-package:
       scope: "graphql"
       dir-exists:
