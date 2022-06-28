@@ -4,7 +4,7 @@ on:
   release:
     types: [created]
     tags:
-      - v-*
+      - v-packages-*
 jobs:
   publishing_client:
     runs-on: ubuntu-latest
