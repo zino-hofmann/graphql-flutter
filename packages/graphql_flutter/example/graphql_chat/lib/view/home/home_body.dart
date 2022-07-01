@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import 'dart:convert';
+
+>>>>>>> feat(graphql_flutter): add graphql flutter example
 import 'package:flutter/cupertino.dart';
 import 'package:graphql_chat/api/query.dart';
 import 'package:graphql_chat/model/chat.dart';
@@ -37,9 +42,13 @@ class HomeViewBody extends StatelessWidget {
       }
       _logger.d(result.data ?? "Data is undefined");
       var chats = result.parsedData as List<Chat>;
+<<<<<<< HEAD
       return ListView(
         children: chats.map((chatData) => Text(chatData.message)).toList(),
       );
+=======
+      return Text("Somethings is returned : ${jsonEncode(chats)}");
+>>>>>>> feat(graphql_flutter): add graphql flutter example
     });
   }
 
