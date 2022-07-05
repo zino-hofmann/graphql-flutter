@@ -907,6 +907,20 @@ final HttpLink _httpLink = HttpLink(
 final Link _link = _apqLink.concat(_httpLink);
 ```
 
+## Q&A
+### CSRF Error while uploading MultipartFile
+If you are receiving csrf error from your apollo graphql server while uploading file,
+your need to add some additional headers to the `HttpLink`:
+<br>
+Also ensure that you're add `contentType` to `MultipartFile` as `MediaType`
+
+```dart
+HttpLink httpLink = HttpLink('https://api.url/graphql', defaultHeaders: {
+  'Content-Type': 'application/json; charset=utf-8',
+  'X-Apollo-Operation-Name': 'post'
+})
+```
+
 [build-status-badge]: https://img.shields.io/github/workflow/status/zino-hofmann/graphql-flutter/graphql-flutter%20Tests%20case?style=flat-square
 [build-status-link]: https://github.com/zino-hofmann/graphql-flutter/actions
 [coverage-badge]: https://img.shields.io/codecov/c/github/zino-hofmann/graphql-flutter/beta?style=flat-square
