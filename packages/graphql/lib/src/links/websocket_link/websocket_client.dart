@@ -141,8 +141,20 @@ class SocketClientConfig {
   }
 }
 
+/// All the protocol supported by the library
+@Deprecated("`SocketSubProtocol`is deprecated and will be removed in the version 5.2.0, consider to use `GraphQLProtocol`")
 class SocketSubProtocol {
   SocketSubProtocol._();
+  /// graphql-ws: The new  (not to be confused with the graphql-ws library).
+  /// NB. This protocol is it no longer maintained, please consider
+  /// to use `SocketSubProtocol.graphqlTransportWs`.
+  static const String graphqlWs = GraphQLProtocol.graphqlWs;
+  /// graphql-transport-ws: New ws protocol used by most Apollo Server instances 
+  /// with subscriptions enabled use this library.
+  /// N.B: not to be confused with the graphql-ws library that implement the 
+  /// old ws protocol.
+  static const String graphqlTransportWs = GraphQLProtocol.graphqlWs;
+}
 
   static const String graphqlWs = "graphql-ws";
   static const String graphqlTransportWs = "graphql-transport-ws";
