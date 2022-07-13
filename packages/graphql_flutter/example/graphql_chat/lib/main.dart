@@ -12,10 +12,10 @@ Future<void> main() async {
       "Accept": "application/json",
       "Access-Control_Allow_Origin": "*",
     },
-    'http://127.0.0.1:9000/graphql',
+    'https://api.chat.graphql-flutter.dev/graphql',
   );
   var wsLink = WebSocketLink(
-    'ws://127.0.0.1:9000/graphql',
+    'ws://api.chat.graphql-flutter.dev/graphql',
     config: const SocketClientConfig(
       inactivityTimeout: Duration(seconds: 40),
     ),
