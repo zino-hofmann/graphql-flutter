@@ -14,6 +14,18 @@ Future<void> main() async {
     },
     'http://127.0.0.1:9000/graphql',
   );
+  var wsLink = WebSocketLink(
+    'ws://127.0.0.1:9000/graphql',
+    config: const SocketClientConfig(
+      inactivityTimeout: Duration(seconds: 40),
+    ),
+    subProtocol: SocketSubProtocol.graphqlTransportWs,
+  );
+  final Link link = httpLink.split(
+    (request) => request.isSubscription,
+    wsLink,
+    httpLink,
+  );
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
       link: httpLink,

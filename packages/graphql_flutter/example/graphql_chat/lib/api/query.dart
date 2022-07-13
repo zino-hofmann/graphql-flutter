@@ -5,22 +5,35 @@ class Queries {
         getChats {
           __typename
           id
-          message
+          description
           name
         }
       }
     """;
   }
 
-  static String createChatMutation({required String name, required String message}) {
+  static String createChatMutation(
+      {required String name, required String description}) {
     return """
       mutation {
-        createChat(name: $name, message: $message) {
+        createChat(name: $name, description: $description) {
           id
           name
-          message
+          description
         }
       }
+    """;
+  }
+
+  static String subscribeToNewChat() {
+    return """ 
+    subscription {
+      chatCreated {
+        id
+        name
+        description
+      }
+    }
     """;
   }
 }
