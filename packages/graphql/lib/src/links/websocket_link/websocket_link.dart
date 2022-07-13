@@ -16,7 +16,7 @@ class WebSocketLink extends Link {
   WebSocketLink(
     this.url, {
     this.config = const SocketClientConfig(),
-    this.subProtocol = SocketSubProtocol.graphqlWs,
+    this.subProtocol = GraphQLProtocol.graphqlWs,
   });
 
   final String url;

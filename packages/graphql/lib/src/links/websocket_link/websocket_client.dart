@@ -142,21 +142,36 @@ class SocketClientConfig {
 }
 
 /// All the protocol supported by the library
-@Deprecated("`SocketSubProtocol`is deprecated and will be removed in the version 5.2.0, consider to use `GraphQLProtocol`")
+@Deprecated(
+    "`SocketSubProtocol`is deprecated and will be removed in the version 5.2.0, consider to use `GraphQLProtocol`")
 class SocketSubProtocol {
   SocketSubProtocol._();
+
   /// graphql-ws: The new  (not to be confused with the graphql-ws library).
   /// NB. This protocol is it no longer maintained, please consider
   /// to use `SocketSubProtocol.graphqlTransportWs`.
   static const String graphqlWs = GraphQLProtocol.graphqlWs;
-  /// graphql-transport-ws: New ws protocol used by most Apollo Server instances 
+
+  /// graphql-transport-ws: New ws protocol used by most Apollo Server instances
   /// with subscriptions enabled use this library.
-  /// N.B: not to be confused with the graphql-ws library that implement the 
+  /// N.B: not to be confused with the graphql-ws library that implement the
   /// old ws protocol.
   static const String graphqlTransportWs = GraphQLProtocol.graphqlWs;
 }
 
+/// ALL protocol supported by the library
+class GraphQLProtocol {
+  GraphQLProtocol._();
+
+  /// graphql-ws: The new  (not to be confused with the graphql-ws library).
+  /// NB. This protocol is it no longer maintained, please consider
+  /// to use `SocketSubProtocol.graphqlTransportWs`.
   static const String graphqlWs = "graphql-ws";
+
+  /// graphql-transport-ws: New ws protocol used by most Apollo Server instances
+  /// with subscriptions enabled use this library.
+  /// N.B: not to be confused with the graphql-ws library that implement the
+  /// old ws protocol.
   static const String graphqlTransportWs = "graphql-transport-ws";
 }
 
@@ -171,7 +186,7 @@ class SocketSubProtocol {
 class SocketClient {
   SocketClient(
     this.url, {
-    this.protocol = SocketSubProtocol.graphqlWs,
+    this.protocol = GraphQLProtocol.graphqlWs,
     this.config = const SocketClientConfig(),
     @visibleForTesting this.randomBytesForUuid,
     @visibleForTesting this.onMessage,
@@ -259,14 +274,14 @@ class SocketClient {
           await config.connect(uri: Uri.parse(url), protocols: [protocol]);
       socketChannel = connection.forGraphQL();
 
-      if (protocol == SocketSubProtocol.graphqlTransportWs) {
+      if (protocol == GraphQLProtocol.graphqlTransportWs) {
         _connectionStateController.add(SocketConnectionState.handshake);
       } else {
         _connectionStateController.add(SocketConnectionState.connected);
       }
       print('Initialising connection');
       _write(initOperation);
-      if (protocol == SocketSubProtocol.graphqlTransportWs) {
+      if (protocol == GraphQLProtocol.graphqlTransportWs) {
         // wait for ack
         // this blocks to prevent ping from being called before ack is recieved
         await _messages.firstWhere(
@@ -275,10 +290,10 @@ class SocketClient {
       }
 
       if (config.inactivityTimeout != null) {
-        if (protocol == SocketSubProtocol.graphqlWs) {
+        if (protocol == GraphQLProtocol.graphqlWs) {
           _disconnectOnKeepAliveTimeout(_messages);
         }
-        if (protocol == SocketSubProtocol.graphqlTransportWs) {
+        if (protocol == GraphQLProtocol.graphqlTransportWs) {
           _enqueuePing();
         }
       }
@@ -289,7 +304,7 @@ class SocketClient {
             onMessage!(message);
           }
 
-          if (protocol == SocketSubProtocol.graphqlTransportWs) {
+          if (protocol == GraphQLProtocol.graphqlTransportWs) {
             if (message.type == 'ping') {
               _write(PongMessage());
             } else if (message.type == 'pong') {
@@ -506,7 +521,7 @@ class SocketClient {
             id,
             serialize(payload),
           );
-          if (protocol == SocketSubProtocol.graphqlTransportWs) {
+          if (protocol == GraphQLProtocol.graphqlTransportWs) {
             operation = SubscribeOperation(
               id,
               serialize(payload),
@@ -524,7 +539,7 @@ class SocketClient {
       _subscriptionInitializers.remove(id);
 
       sub?.cancel();
-      if (protocol == SocketSubProtocol.graphqlWs &&
+      if (protocol == GraphQLProtocol.graphqlWs &&
           _connectionStateController.value == SocketConnectionState.connected &&
           socketChannel != null) {
         _write(StopOperation(id));
