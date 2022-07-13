@@ -18,7 +18,7 @@ SocketClient getTestClient({
   bool autoReconnect = true,
   Map<String, dynamic>? customHeaders,
   Duration delayBetweenReconnectionAttempts = const Duration(milliseconds: 1),
-  String protocol = SocketSubProtocol.graphqlWs,
+  String protocol = GraphQLProtocol.graphqlWs,
 }) =>
     SocketClient(
       wsUrl,
@@ -340,7 +340,7 @@ Future<void> main() async {
       controller = StreamController(sync: true);
       socketClient = getTestClient(
         controller: controller,
-        protocol: SocketSubProtocol.graphqlTransportWs,
+        protocol: GraphQLProtocol.graphqlTransportWs,
         wsUrl: wsUrl,
       );
     }));
