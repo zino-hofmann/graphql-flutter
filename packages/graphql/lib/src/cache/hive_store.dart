@@ -5,6 +5,29 @@ import 'package:hive/hive.dart';
 
 import './store.dart';
 
+Map<String, dynamic> _transformMap(Map<dynamic, dynamic> map) =>
+    Map<String, dynamic>.from(
+      {
+        for (var entry in map.entries) entry.key: _transformAny(entry.value),
+      },
+    );
+
+dynamic _transformAny(dynamic object) {
+  if (object is Map) {
+    return _transformMap(object);
+  }
+  if (object is List) {
+    return _transformList(object);
+  }
+  return object;
+}
+
+List<dynamic> _transformList(List<dynamic> list) => List<dynamic>.from(
+      [
+        for (var element in list) _transformAny(element),
+      ],
+    );
+
 @immutable
 class HiveStore extends Store {
   /// Default box name for the `graphql/client.dart` cache store (`graphqlClientStore`)
@@ -50,7 +73,7 @@ class HiveStore extends Store {
   Map<String, dynamic>? get(String dataId) {
     final result = box.get(dataId);
     if (result == null) return null;
-    return Map<String, dynamic>.from(result);
+    return _transformMap(result);
   }
 
   @override
