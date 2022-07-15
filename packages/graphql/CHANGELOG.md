@@ -1,3 +1,10 @@
+# v5.1.2-beta.3
+
+## Fixes
+- Transform nested objects ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/92e495dacc5f7c23a648a4053ee1bd73fb9b924e)). @budde377 27-06-2022
+- send connection_init message during handshake ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1b7f821d4727f70e64dd334e45f6c65a063adfd)). @othorin 20-05-2022
+
+
 # v5.1.2-beta.2
 
 ## New Feature
