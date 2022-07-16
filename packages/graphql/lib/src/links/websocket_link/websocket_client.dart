@@ -156,7 +156,7 @@ class SocketSubProtocol {
   /// with subscriptions enabled use this library.
   /// N.B: not to be confused with the graphql-ws library that implement the
   /// old ws protocol.
-  static const String graphqlTransportWs = GraphQLProtocol.graphqlWs;
+  static const String graphqlTransportWs = GraphQLProtocol.graphqlTransportWs;
 }
 
   /// graphql-ws: The new  (not to be confused with the graphql-ws library).
