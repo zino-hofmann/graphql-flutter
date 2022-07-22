@@ -85,6 +85,7 @@ class HomeViewBody extends StatelessWidget {
     return Column(
       children: [
         Expanded(child: _buildScrollView(context: context)),
+        Expanded(child: _buildUpdateScrollView(context: context)),
       ],
     );
   }

@@ -19,7 +19,7 @@ Future<void> main() async {
     config: const SocketClientConfig(
       inactivityTimeout: Duration(seconds: 40),
     ),
-    subProtocol: SocketSubProtocol.graphqlTransportWs,
+    subProtocol: SocketSubProtocol.graphqlWs,
   );
   final Link link = httpLink.split(
     (request) => request.isSubscription,
@@ -28,7 +28,7 @@ Future<void> main() async {
   );
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
-      link: httpLink,
+      link: link,
       // The default store is the InMemoryStore, which does NOT persist to disk
       cache: GraphQLCache(store: HiveStore()),
     ),
