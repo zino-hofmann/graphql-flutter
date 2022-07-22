@@ -30,10 +30,10 @@ Sometimes the right way is unclear, so it’s best not to spend time on it. It�
 ### Use of `FIXME`
 
 There are two cases in which you should use a `/* FIXME: */`
-comment: one is where an optimization is possible, but it’s not clear that it’s yet worthwhile, 
+comment: one is where an optimization is possible, but it’s not clear that it’s yet worthwhile,
 and the second one is to note an ugly corner case which could be improved (and may be in a following patch).
 
-There are always compromises in code: eventually it needs to ship. `FIXME` is grep-fodder for yourself and others, 
+There are always compromises in code: eventually it needs to ship. `FIXME` is grep-fodder for yourself and others,
 as well as useful warning signs if we later encounter an issue in some part of the code.
 
 ### Write For Today: Unused Code Is Buggy Code
@@ -87,6 +87,8 @@ The version in our package.json gets copied to the one we publish, and users nee
 
 - **feat**: A new feature
 - **fix**: A bug fix
+- **deprecate**: Deprecate a feature and start to the removing process (3 official release or 1 major release)
+- **remove**: End of life for the feature.
 
 ### Scopes
 
@@ -117,7 +119,7 @@ The stacktrace is the following one
 
 } expected `Foo` not `Foo` - both operands must be the same type for operator overloading
    11 | }
-   12 | 
+   12 |
    13 | fn (_ Foo) == (_ Foo) bool {
       |                  ~~~
    14 |     return true
@@ -142,8 +144,8 @@ To prepare the release the following steps are required:
   - `make {changelog_client|changelog_flutter|changelog}`, where
       - `changelog_client`: generate the changelog for graphql;
       - `changelog_flutter`: generate the changelog for graphql_flutter;
-      - `changelog`: generate both changelos.   
-- Make the Github release: To release a single package we need to create a release with the following tag `{package_name}-v{version_number}`, and 
+      - `changelog`: generate both changelos.
+- Make the Github release: To release a single package we need to create a release with the following tag `{package_name}-v{version_number}`, and
 if we make a release with the tag `v{version_number}` this will release all the packages (useful for a major release of the package).
 
 
