@@ -613,7 +613,8 @@ Future<void> main() async {
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      socketClient.subscribe(payload, waitForConnection);
+      var subscription = socketClient.subscribe(payload, waitForConnection);
+      var isEmpty = subscription.isEmpty;
 
       await expectLater(
         socketClient.connectionState,
@@ -638,6 +639,8 @@ Future<void> main() async {
 
       expect(
           socketClient.socketChannel!.closeCode, WebSocketStatus.normalClosure);
+
+      expect(await isEmpty.timeout(const Duration(seconds: 1)), true);
     });
   }, tags: "integration");
 
