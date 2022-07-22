@@ -1,13 +1,13 @@
 {
     "package_name": "graphql",
-    "version": "v5.1.2-beta.3",
+    "version": "v5.1.2-beta.4",
     "api": {
         "name": "github",
         "repository": "zino-hofmann/graphql-flutter",
         "branch": "main"
     },
     "generation_method": {
-        "name": "header",
+        "name": "semver-v2",
         "header_filter": true
     },
     "serialization_method": {

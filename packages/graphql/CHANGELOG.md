@@ -1,3 +1,15 @@
+# v5.1.2-beta.4
+
+## Fixed
+- fix `SocketClient` to close subscription on socket close ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/45f88f6886e5175162caaa6944e69a11ef7fe346)). @qbx2 22-07-2022
+
+## Added
+- Introduce a new class `GraphQLProtocol` with better naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e59d40693125c8502d7fd7dcdb4817ece4645052)). @vincenzopalazzo 22-07-2022
+
+## Deprecated
+- deprecate the `SocketSubProtocol` to improve naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2afd58362b2b107197004a14a61152ec8985fa1f)). @vincenzopalazzo 22-07-2022
+
+
 # v5.1.2-beta.3
 
 ## Fixes

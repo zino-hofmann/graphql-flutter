@@ -1,3 +1,9 @@
+# v5.1.1-beta.4
+
+## Fixed
+- fix wrong default policy merging in useWatchQue… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e4b864b0467a3558dcbbb0b40d63e67aa76f30f8)). @dehypnosis 22-07-2022
+
+
 # v5.1.1-beta.3
 
 ## New Feature
