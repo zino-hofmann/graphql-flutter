@@ -1,7 +1,8 @@
 CC=flutter
 FMT=format
 PATH=
-default: get fmt check fmt
+
+default: get fmt check
 
 get:
 	$(CC) pub get

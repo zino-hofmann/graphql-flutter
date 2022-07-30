@@ -13,12 +13,15 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   trash_themes: ^0.0.1
-  graphql_flutter: ^5.1.0
+  graphql_flutter:
+    path: ../../
   material_floating_search_bar: ^0.3.7
   logger: ^1.1.0
 
 dev_dependencies:
   flutter_test:
+    sdk: flutter
+  integration_test:
     sdk: flutter
   flutter_lints: ^2.0.0
 
