@@ -5,7 +5,7 @@ import "package:collection/collection.dart";
 import "package:gql/ast.dart";
 import 'package:gql/language.dart';
 import "package:gql_exec/gql_exec.dart";
-import 'package:normalize/utils.dart';
+import 'package:graphql_normalize/utils.dart';
 
 /// A fragment in a [document], optionally defined by [fragmentName]
 @immutable

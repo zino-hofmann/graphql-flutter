@@ -1,0 +1,16 @@
+{
+    "package_name": "graphql_normalize",
+    "version": "v0.0.1",
+    "api": {
+        "name": "github",
+        "repository": "zino-hofmann/graphql-flutter",
+        "branch": "main"
+    },
+    "generation_method": {
+        "name": "semver-v2",
+        "header_filter": true
+    },
+    "serialization_method": {
+        "name": "md"
+    }
+}

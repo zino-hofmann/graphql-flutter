@@ -3,7 +3,7 @@ import 'package:graphql/src/exceptions/exceptions_next.dart';
 import "package:meta/meta.dart";
 
 import 'package:gql_exec/gql_exec.dart' show Request;
-import 'package:normalize/normalize.dart';
+import 'package:graphql_normalize/normalize.dart';
 
 import './data_proxy.dart';
 import '../utilities/helpers.dart';

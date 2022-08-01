@@ -1,0 +1,41 @@
+name: Release (packages)
+
+on:
+  release:
+    types: [created]
+    tags:
+      - v-packages-*
+jobs:
+  publishing_client:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+      - name: 'graphql publish to to Pub.dev'
+        uses: k-paxian/dart-package-publisher@master
+        with:
+          credentialJson: ${{ secrets.CREDENTIAL_JSON }}
+          flutter: false
+          skipTests: true
+          force: true
+          dryRunOnly: ${{ github.event_name != 'release' }}
+          relativePath: './packages/graphql/'
+  publishing_flutter:
+    runs-on: ubuntu-latest
+    needs:
+      - publishing_client
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2
+        # FIXME: when we bump a new release, we can have problem
+        # in dry mode because the new release is not on the pub.dev
+        # yet
+        # TODO: we need to have some bump function for dart in the changelog.dat tool.
+      - name: 'graphql_flutter publish to to Pub.dev'
+        uses: k-paxian/dart-package-publisher@master
+        with:
+          credentialJson: ${{ secrets.CREDENTIAL_JSON }}
+          flutter: false
+          skipTests: true
+          dryRunOnly: ${{ github.event_name != 'release' }}
+          relativePath: './packages/graphql_flutter/'

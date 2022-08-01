@@ -5,7 +5,7 @@ import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
-export 'package:normalize/normalize.dart' show PartialDataException;
+export 'package:graphql_normalize/normalize.dart' show PartialDataException;
 
 /// A failure to find a response from the cache.
 ///

@@ -1,0 +1,1 @@
+const kDefaultReferenceKey = '\$ref';

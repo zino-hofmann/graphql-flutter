@@ -1,0 +1,13 @@
+name: graphql_normalize
+version: 0.0.1
+homepage: https://github.com/zino-app/graphql-flutter/tree/master/packages/graphql_normalize
+description: Normalization and denormalization of GraphQL responses in Dart
+repository: https://github.com/zino-hofmann/graphql-flutter/ferry
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+dependencies:
+  gql: ^0.13.0
+  collection: ^1.15.0
+dev_dependencies:
+  test: ^1.16.4
+  pedantic: ^1.10.0

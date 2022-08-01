@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:gql/ast.dart';
 import 'package:gql/language.dart';
 import 'package:http/http.dart' show MultipartFile;
-import 'package:normalize/utils.dart';
+import 'package:graphql_normalize/utils.dart';
 
 bool notNull(Object? any) {
   return any != null;

@@ -1,0 +1,32 @@
+name: Release (dart)
+
+on:
+  release:
+    types: [created]
+    tags:
+      - graphql-v*
+  push:
+  workflow_run:
+    workflows:
+      - "Test"
+      - "Build"
+    branches: [ main ]
+    types:
+      - completed
+
+jobs:
+  publishing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout'
+        uses: actions/checkout@v2 # required!
+
+      - name: 'publish graphql to to Pub.dev'
+        uses: k-paxian/dart-package-publisher@master
+        with:
+          credentialJson: ${{ secrets.CREDENTIAL_JSON }}
+          flutter: false
+          skipTests: true
+          force: true
+          dryRunOnly: ${{ github.event_name != 'release' }}
+          relativePath: './packages/graphql/'

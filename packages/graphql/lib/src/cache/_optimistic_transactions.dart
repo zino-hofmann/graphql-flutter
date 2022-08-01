@@ -9,7 +9,7 @@ import 'package:graphql/src/cache/data_proxy.dart';
 
 import 'package:graphql/src/cache/cache.dart'
     show GraphQLCache, PartialDataCachePolicy;
-import 'package:normalize/policies.dart';
+import 'package:graphql_normalize/policies.dart';
 
 /// API for users to provide cache updates through
 typedef CacheTransaction = GraphQLDataProxy Function(GraphQLDataProxy proxy);
