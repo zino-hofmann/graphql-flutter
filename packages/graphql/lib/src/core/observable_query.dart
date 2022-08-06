@@ -250,9 +250,8 @@ class ObservableQuery<TParsed> {
   /// Called internally by the [QueryManager]
   void addResult(QueryResult<TParsed> result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
-    if (latestResult != null &&
-        latestResult!.source == QueryResultSource.network &&
-        latestResult!.timestamp.isAfter(result.timestamp)) {
+    if (latestResult?.source == QueryResultSource.network &&
+        latestResult?.timestamp.isAfter(result.timestamp) == true) {
       return;
     }
 
