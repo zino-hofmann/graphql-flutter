@@ -5,10 +5,11 @@ import 'package:gql_link/gql_link.dart' show LinkException;
 /// Exception occurring when there is a network-level error
 class NetworkException extends LinkException {
   NetworkException({
-    dynamic originalException,
+    required Object originalException,
+    StackTrace originalStackTrace = StackTrace.empty,
     this.message,
     required this.uri,
-  }) : super(originalException);
+  }) : super(originalException, originalStackTrace);
 
   final String? message;
   final Uri? uri;
@@ -22,10 +23,11 @@ class NetworkException extends LinkException {
 /// Once `gql_link` has robust http and socket exception handling,
 /// this and `./network.dart` can be removed and `./exceptions_next.dart`
 /// will be all that is necessary
-NetworkException? translateFailure(dynamic failure) {
+NetworkException? translateFailure(Object failure, StackTrace stackTrace) {
   if (failure is http.ClientException) {
     return NetworkException(
       originalException: failure,
+      originalStackTrace: stackTrace,
       message: failure.message,
       uri: failure.uri,
     );

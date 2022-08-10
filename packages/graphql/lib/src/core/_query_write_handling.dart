@@ -6,7 +6,7 @@ typedef _IntWriteQuery = void Function(
 
 /// Internal [PartialDataException] handling callback
 typedef _IntPartialDataHandler = MismatchedDataStructureException Function(
-    PartialDataException failure);
+    PartialDataException failure, StackTrace stackTrace);
 
 extension InternalQueryWriteHandling on QueryManager {
   /// Merges exceptions into `queryResult` and
@@ -29,10 +29,10 @@ extension InternalQueryWriteHandling on QueryManager {
         exception: queryResult.exception,
         linkException: failure,
       );
-    } on PartialDataException catch (failure) {
+    } on PartialDataException catch (failure, stackTrace) {
       queryResult!.exception = coalesceErrors(
         exception: queryResult.exception,
-        linkException: onPartial(failure),
+        linkException: onPartial(failure, stackTrace),
       );
     }
     return false;
@@ -61,8 +61,10 @@ extension InternalQueryWriteHandling on QueryManager {
                 response.data,
                 queryResult,
                 writeQuery: (req, data) => cache.writeQuery(req, data: data!),
-                onPartial: (failure) => UnexpectedResponseStructureException(
+                onPartial: (failure, stackTrace) =>
+                    UnexpectedResponseStructureException(
                   failure,
+                  stackTrace,
                   request: request,
                   parsedResponse: response,
                 ),
@@ -84,8 +86,9 @@ extension InternalQueryWriteHandling on QueryManager {
         data,
         queryResult,
         writeQuery: writeQuery,
-        onPartial: (failure) => MismatchedDataStructureException(
+        onPartial: (failure, stackTrace) => MismatchedDataStructureException(
           failure,
+          stackTrace,
           request: request,
           data: data,
         ),
