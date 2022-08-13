@@ -9,7 +9,6 @@ import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 
 import './helpers.dart';
-import './mock_server/ws_echo_server.dart';
 import 'mock_server/ws_echo_server.dart';
 
 SocketClient getTestClient({
