@@ -65,7 +65,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   /// The key differentiating factor for an implementing `cache` or `proxy`
   /// is usually how they handle [optimistic] reads.
   @protected
-  Map<String, dynamic>? readNormalized(String rootId, {bool? optimistic});
+  Map<String, dynamic>? readNormalized(String rootId, {bool optimistic});
 
   /// Write normalized data into the cache.
   ///
@@ -80,7 +80,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   Map<String, dynamic>? readQuery(
     Request request, {
-    bool? optimistic = true,
+    bool optimistic = true,
   }) =>
       denormalizeOperation(
         // provided from cache
@@ -100,7 +100,7 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
 
   Map<String, dynamic>? readFragment(
     FragmentRequest fragmentRequest, {
-    bool? optimistic = true,
+    bool optimistic = true,
   }) =>
       denormalizeFragment(
         // provided from cache
