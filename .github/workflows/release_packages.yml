@@ -1,4 +1,4 @@
-name: publish packages to pub.dev
+name: Release (packages)
 
 on:
   release:

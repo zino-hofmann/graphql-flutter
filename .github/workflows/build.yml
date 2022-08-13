@@ -1,4 +1,4 @@
-name: Packages sanity check
+name: Build
 
 on:
   push:
@@ -8,13 +8,21 @@ on:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        channel: 
+          - beta
+          - stable
+          - dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
         with:
-          sdk: stable
+          channel: ${{matrix.channel}}
       - name: Install dependencies
         run: make dep
       - name: Code formatting check
-        run: make ci
+        run: make ci_fmt_client
+      - name: Code formatting check (flutter)
+        run: make ci_fmt_flutter

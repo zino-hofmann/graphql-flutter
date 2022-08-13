@@ -1,4 +1,4 @@
-name: graphql Dart Code sanity check
+name: Test
 
 on:
   push:
@@ -16,5 +16,7 @@ jobs:
           channel: 'stable'
       - name: Install dependencies
         run: make dep
-      - name: Code formatting check
-        run: make ci_fmt_client
+      - name: Tests (dart)
+        run: make ci_check_client
+      - name: Tests (flutter)
+        run: make ci_check_flutter
