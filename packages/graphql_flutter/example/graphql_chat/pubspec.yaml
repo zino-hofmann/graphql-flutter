@@ -1,0 +1,32 @@
+name: graphql_chat
+description: GraphQL flutter community chat app, an example of usage of the library
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.5 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  trash_themes: ^0.0.1
+  graphql_flutter: ^5.1.0
+  material_floating_search_bar: ^0.3.7
+  logger: ^1.1.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+dependency_overrides:
+  graphql_flutter:
+    path: ../../
+  graphql:
+    path: ../../../graphql
+
+flutter:
+  uses-material-design: true    
