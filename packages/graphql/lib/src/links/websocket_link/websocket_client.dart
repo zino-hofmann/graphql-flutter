@@ -7,6 +7,7 @@ import 'package:gql_exec/gql_exec.dart';
 import 'package:graphql/src/core/query_options.dart' show WithType;
 import 'package:graphql/src/links/gql_links.dart';
 import 'package:graphql/src/utilities/platform.dart';
+import 'package:graphql_common/graphql_common.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -48,7 +49,12 @@ class SocketClientConfig {
     this.initialPayload,
     this.headers,
     this.connectFn,
+    this.tracer,
   });
+
+  /// Custom Tracer specified by the user to trace the library
+  /// if the user need it.
+  final Tracer? tracer;
 
   /// Serializer used to serialize request
   final RequestSerializer serializer;
