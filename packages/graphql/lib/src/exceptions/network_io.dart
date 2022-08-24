@@ -10,7 +10,7 @@ export './network.dart' show NetworkException;
 /// will be all that is necessary
 base.NetworkException? translateFailure(Object failure, StackTrace stackTrace) {
   if (failure is io.SocketException) {
-    return base.NetworkException(
+    return base.NetworkException.fromException(
       originalException: failure,
       originalStackTrace: stackTrace,
       message: failure.message,
