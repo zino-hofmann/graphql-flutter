@@ -23,7 +23,7 @@ void main() {
       'name': 'initialQueryName',
     },
   };
-  const pollDuration = Duration(milliseconds: 50);
+  const pollDuration = Duration(milliseconds: 20);
 
   final queryResponseMatcher = isA<QueryResult>().having(
     (result) => result.data!['single']['name'],
@@ -61,10 +61,7 @@ void main() {
       expect(
         observable.stream,
         emitsInOrder(
-          [
-            queryResponseMatcher,
-            queryResponseMatcher,
-          ],
+          [queryResponseMatcher, queryResponseMatcher, emitsDone],
         ),
       );
       observable.startPolling(pollDuration);
@@ -101,10 +98,7 @@ void main() {
       expect(
         observable.stream,
         emitsInOrder(
-          [
-            queryResponseMatcher,
-            queryResponseMatcher,
-          ],
+          [queryResponseMatcher, queryResponseMatcher, emitsDone],
         ),
       );
       observable.startPolling(pollDuration);
@@ -127,6 +121,7 @@ void main() {
             queryResponseMatcher,
             queryResponseMatcher,
             queryResponseMatcher,
+            emitsDone
           ],
         ),
       );
@@ -150,6 +145,7 @@ void main() {
             queryResponseMatcher,
             queryResponseMatcher,
             queryResponseMatcher,
+            emitsDone
           ],
         ),
       );
