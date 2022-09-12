@@ -144,10 +144,11 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       if (broadcast ?? true) {
         broadcastRequested = true;
       }
-    } on PartialDataException catch (e) {
+    } on PartialDataException catch (e, stackTrace) {
       if (request.validatesStructureOf(data)) {
         throw CacheMisconfigurationException(
           e,
+          stackTrace,
           request: request,
           data: data,
         );
@@ -182,10 +183,11 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
       if (broadcast ?? true) {
         broadcastRequested = true;
       }
-    } on PartialDataException catch (e) {
+    } on PartialDataException catch (e, stackTrace) {
       if (request.validatesStructureOf(data)) {
         throw CacheMisconfigurationException(
           e,
+          stackTrace,
           fragmentRequest: request,
           data: data,
         );

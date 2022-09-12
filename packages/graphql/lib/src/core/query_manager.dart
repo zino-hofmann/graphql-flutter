@@ -519,7 +519,7 @@ class QueryManager {
 
 QueryResult<TParsed> _wrapFailure<TParsed>(
   BaseOptions<TParsed> options,
-  dynamic ex,
+  Object ex,
   StackTrace trace,
 ) =>
     QueryResult(
