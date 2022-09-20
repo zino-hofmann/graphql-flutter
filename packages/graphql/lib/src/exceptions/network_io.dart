@@ -8,10 +8,11 @@ export './network.dart' show NetworkException;
 /// Once `gql_link` has robust http and socket exception handling,
 /// this and `./unhandled.dart` can be removed and `./exceptions_next.dart`
 /// will be all that is necessary
-base.NetworkException? translateFailure(dynamic failure) {
+base.NetworkException? translateFailure(Object failure, StackTrace stackTrace) {
   if (failure is io.SocketException) {
-    return base.NetworkException(
+    return base.NetworkException.fromException(
       originalException: failure,
+      originalStackTrace: stackTrace,
       message: failure.message,
       uri: Uri(
         scheme: 'http',
@@ -20,5 +21,5 @@ base.NetworkException? translateFailure(dynamic failure) {
       ),
     );
   }
-  return base.translateFailure(failure);
+  return base.translateFailure(failure, stackTrace);
 }

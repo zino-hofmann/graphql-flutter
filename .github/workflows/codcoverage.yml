@@ -1,21 +1,26 @@
-name: graphql-flutter Code coverage
+name: Codecoverage
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
-      - run: |
-          cd packages/graphql_flutter
-          flutter pub get
-          flutter test --coverage
-      - name: Upload coverage file
+      - name: Run tests with coverage
         run: |
+          make dep
           curl -Os https://uploader.codecov.io/latest/linux/codecov
           chmod +x codecov
+          make ci_coverage_client
+          ./codecov
+          make ci_coverage_flutter
           ./codecov

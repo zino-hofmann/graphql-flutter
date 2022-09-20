@@ -1,3 +1,73 @@
+# v5.1.2-beta.4
+
+## Fixed
+- fix `SocketClient` to close subscription on socket close ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/45f88f6886e5175162caaa6944e69a11ef7fe346)). @qbx2 22-07-2022
+
+## Added
+- Introduce a new class `GraphQLProtocol` with better naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e59d40693125c8502d7fd7dcdb4817ece4645052)). @vincenzopalazzo 22-07-2022
+
+## Deprecated
+- deprecate the `SocketSubProtocol` to improve naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2afd58362b2b107197004a14a61152ec8985fa1f)). @vincenzopalazzo 22-07-2022
+
+
+# v5.1.2-beta.3
+
+## Fixes
+- Transform nested objects ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/92e495dacc5f7c23a648a4053ee1bd73fb9b924e)). @budde377 27-06-2022
+- send connection_init message during handshake ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1b7f821d4727f70e64dd334e45f6c65a063adfd)). @othorin 20-05-2022
+
+
+# v5.1.2-beta.2
+
+## New Feature
+- add support for `graphql-transport-ws` ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/b73bb3653c652d747161a541dc984fa293a8605c)). @maximilianmaihoefner 08-05-2022
+
+
+# v5.1.2-beta.1
+
+## New Feature
+- added query onError & onComplete callbacks ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8342d245ececc6007744d963c9a5d7ff8ed83f13)). @fabis94 22-04-2022
+
+## Fixes
+- Minor formatting issues ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/ff71f5dcadc7e41f2366c6401dffc58d7f7325b8)). @budde377 23-04-2022
+
+
+# v5.1.1
+
+## New Feature
+- Tighten the OnMutationCompleted function ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/59ebaa94d44a531416687904788b823ef5c17b5d)). @budde377 09-04-2022
+
+
+# v5.1.0
+
+## New Feature
+- Hive integration ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a8726cb41e1b98e9aaeb8ac3bf7192368de68981)). @budde377 03-04-2022
+
+## Fixes
+- subscription hook return an uninitialized stream (https://github.com/zino-hofmann/graphql-flutter/commit/ebc4abd86b72b75ffe4e26a2f412411ab7dd2993). @PainteR 25-03-2022
+- Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). @budde377 19-03-2022
+
+# v5.0.2-beta.8
+
+## Fixes
+- Hive integration ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a8726cb41e1b98e9aaeb8ac3bf7192368de68981)). @budde377 03-04-2022
+
+## New Feature
+- add possibility to update the client components ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1c37a09b33b4203550e611cf13b235bd7dce1855)). @vincenzopalazzo 01-04-2022
+
+
+# v5.0.2-beta.7
+
+## New Feature
+- Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). @budde377 19-03-2022
+## Fixes
+- subscription hook return an uninitialized stream (https://github.com/zino-hofmann/graphql-flutter/commit/ebc4abd86b72b75ffe4e26a2f412411ab7dd2993). @PainteR 25-03-2022
+
+
+# v5.0.2-beta.6
+
+- due a bug we miss all the changelog until the version # v5.0.2-beta.6, we need to fix it soon
+
 ## [5.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v5.0.0...v5.0.1-beta.1) (2021-12-09)
 
 

@@ -14,5 +14,6 @@ export 'package:graphql_flutter/src/widgets/hooks/mutation.dart';
 export 'package:graphql_flutter/src/widgets/hooks/query.dart';
 export 'package:graphql_flutter/src/widgets/hooks/subscription.dart';
 export 'package:graphql_flutter/src/widgets/hooks/watch_query.dart';
+export 'package:graphql_flutter/src/widgets/hooks/graphql_client.dart';
 
 export 'package:graphql_flutter/src/hive_init.dart';

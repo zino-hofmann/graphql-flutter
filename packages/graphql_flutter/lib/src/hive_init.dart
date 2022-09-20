@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' show WidgetsFlutterBinding;
 
-import 'package:hive/hive.dart' show Hive;
 import 'package:path_provider/path_provider.dart'
     show getApplicationDocumentsDirectory;
 import 'package:path/path.dart' show join;
@@ -25,9 +24,9 @@ Future<void> initHiveForFlutter(
     if (subDir != null) {
       path = join(path, subDir);
     }
-    Hive.init(path);
+    HiveStore.init(onPath: path);
   }
 
-  final futures = boxes.map(Hive.openBox);
+  final futures = boxes.map((String name) => HiveStore.open(boxName: name));
   await Future.wait(futures);
 }

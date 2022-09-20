@@ -1,4 +1,5 @@
-import 'package:gql/language.dart';
+import 'dart:async';
+
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/result_parser.dart';
 import 'package:graphql/src/utilities/helpers.dart';
@@ -8,9 +9,13 @@ import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
+typedef OnQueryComplete = FutureOr<void> Function(Map<String, dynamic> data);
+
+typedef OnQueryError = FutureOr<void> Function(OperationException? error);
+
 /// Query options.
 @immutable
-class QueryOptions<TParsed> extends BaseOptions<TParsed> {
+class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
   QueryOptions({
     required DocumentNode document,
     String? operationName,
@@ -22,6 +27,8 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
     this.pollInterval,
     Context? context,
     ResultParserFn<TParsed>? parserFn,
+    this.onComplete,
+    this.onError,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -34,6 +41,9 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
           parserFn: parserFn,
         );
 
+  final OnQueryComplete? onComplete;
+  final OnQueryError? onError;
+
   /// The time interval on which this query should be re-fetched from the server.
   final Duration? pollInterval;
 
@@ -41,6 +51,8 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
   List<Object?> get properties => [
         ...super.properties,
         pollInterval,
+        onComplete,
+        onError,
       ];
 
   QueryOptions<TParsed> withFetchMoreOptions(
@@ -89,7 +101,8 @@ class QueryOptions<TParsed> extends BaseOptions<TParsed> {
 }
 
 @immutable
-class SubscriptionOptions<TParsed> extends BaseOptions<TParsed> {
+class SubscriptionOptions<TParsed extends Object?>
+    extends BaseOptions<TParsed> {
   SubscriptionOptions({
     required DocumentNode document,
     String? operationName,
@@ -126,7 +139,7 @@ class SubscriptionOptions<TParsed> extends BaseOptions<TParsed> {
 }
 
 @immutable
-class WatchQueryOptions<TParsed> extends QueryOptions<TParsed> {
+class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
   WatchQueryOptions({
     required DocumentNode document,
     String? operationName,
@@ -311,7 +324,7 @@ class FetchMoreOptions {
 }
 
 /// merge fetchMore result data with earlier result data
-typedef Map<String, dynamic>? UpdateQuery(
+typedef UpdateQuery = Map<String, dynamic>? Function(
   Map<String, dynamic>? previousResultData,
   Map<String, dynamic>? fetchMoreResultData,
 );
@@ -334,4 +347,40 @@ extension WithType on Request {
   bool get isQuery => type == OperationType.query;
   bool get isMutation => type == OperationType.mutation;
   bool get isSubscription => type == OperationType.subscription;
+}
+
+/// Handles execution of query callbacks
+class QueryCallbackHandler<TParsed> {
+  final QueryOptions<TParsed> options;
+
+  QueryCallbackHandler({required this.options});
+
+  Iterable<OnData<TParsed>> get callbacks {
+    var callbacks = List<OnData<TParsed>?>.empty(growable: true);
+    callbacks.addAll([onCompleted, onError]);
+    // FIXME: can we remove the type in whereType?
+    return callbacks.whereType<OnData<TParsed>>();
+  }
+
+  OnData<TParsed>? get onCompleted {
+    if (options.onComplete != null) {
+      return (QueryResult? result) {
+        if (!result!.isLoading && !result.isOptimistic) {
+          return options.onComplete!(result.data ?? {});
+        }
+      };
+    }
+    return null;
+  }
+
+  OnData<TParsed>? get onError {
+    if (options.onError != null && options.errorPolicy != ErrorPolicy.ignore) {
+      return (QueryResult? result) {
+        if (!result!.isLoading && result.hasException) {
+          return options.onError!(result.exception);
+        }
+      };
+    }
+    return null;
+  }
 }

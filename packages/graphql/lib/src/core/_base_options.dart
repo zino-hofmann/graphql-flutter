@@ -12,7 +12,7 @@ TParsed unprovidedParserFn<TParsed>(_d) => throw UnimplementedError(
 /// TODO refactor into [Request] container
 /// Base options.
 @immutable
-abstract class BaseOptions<TParsed> {
+abstract class BaseOptions<TParsed extends Object?> {
   BaseOptions({
     required this.document,
     this.variables = const {},
@@ -115,4 +115,18 @@ abstract class BaseOptions<TParsed> {
   int get hashCode => const ListEquality<Object?>(
         DeepCollectionEquality(),
       ).hash(properties);
+
+  QueryResult<TParsed> createResult({
+    Map<String, dynamic>? data,
+    OperationException? exception,
+    Context context = const Context(),
+    required QueryResultSource source,
+  }) =>
+      QueryResult.internal(
+        parserFn: parserFn,
+        data: data,
+        exception: exception,
+        context: context,
+        source: source,
+      );
 }

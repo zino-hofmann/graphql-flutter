@@ -6,7 +6,7 @@ labels: 'bug'
 assignees: ''
 
 ---
-
+<!--  
 **Describe the issue**
 A clear and concise description of what the problem is.
 
@@ -56,3 +56,4 @@ Did you struggle to understand the docs or examples, or dislike the current api?
 
 
 If you want to troubleshoot or discuss in real time, consider coming to the `support` channel in the [discord](https://discord.gg/tXTtBfC)
+-->

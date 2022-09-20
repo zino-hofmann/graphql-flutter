@@ -51,7 +51,7 @@ void main() {
         () => cache.writeQuery(basicTest.request, data: <String, dynamic>{
           ...basicTest.data,
           'a': <String, dynamic>{
-            ...basicTest.data['a'],
+            ...(basicTest.data['a'] as Map<String, dynamic>),
             'b': <String, dynamic>{
               'id': 5,
             }

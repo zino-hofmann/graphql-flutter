@@ -1,3 +1,45 @@
+# v5.1.1-beta.4
+
+## Fixed
+- fix wrong default policy merging in useWatchQue… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e4b864b0467a3558dcbbb0b40d63e67aa76f30f8)). @dehypnosis 22-07-2022
+
+
+# v5.1.1-beta.3
+
+## New Feature
+- support flutter 3.0 and 2.x ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/ee25cfdf50b0b85bd019a35bc4f65c7178e103cb)). @vincenzopalazzo 20-05-2022
+
+
+# v5.1.1-beta.2
+
+## Fixes
+- Upgrade graphql version ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/59e711e97beffa4559f64fa3249fe969e9e84c62)). @budde377 23-04-2022
+
+
+# v5.1.1-beta.1
+
+## New Feature
+- added query onError & onComplete callbacks ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8342d245ececc6007744d963c9a5d7ff8ed83f13)). @fabis94 22-04-2022
+- Decouple GraphQLClient Provider ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/750ca051f25a89df0b2a69176feab1499426f9b9)). @budde377 19-04-2022
+
+## Fixes
+- Correctly add web as supported platform ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9f45d441fe9e2933a4530647cefabd109393f09d)). @budde377 23-04-2022
+
+
+# v5.1.0
+
+## New Feature
+- Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). @budde377 19-03-2022
+
+# v5.0.2-beta.7
+
+## New Feature
+- Stricter analysis (https://github.com/zino-hofmann/graphql-flutter/commit/131ea1f78b55554f730269f94aad11fb1d07cc44). @budde377 19-03-2022
+
+# v5.0.2-beta.6
+
+- due a bug we miss all the changelog until the version # v5.0.2-beta.6, we need to fix it soon
+
 ## [5.0.1-beta.1](https://github.com/zino-app/graphql-flutter/compare/v5.0.0...v5.0.1-beta.1) (2021-12-09)
 
 

@@ -14,7 +14,7 @@ export 'package:normalize/normalize.dart' show PartialDataException;
 @immutable
 class CacheMissException extends LinkException {
   CacheMissException(this.message, this.request, {this.expectedData})
-      : super(null);
+      : super(null, null);
 
   final String message;
   final Request request;
@@ -37,18 +37,25 @@ class CacheMissException extends LinkException {
 /// [CacheMisconfigurationException].
 class MismatchedDataStructureException extends LinkException {
   const MismatchedDataStructureException(
-    this.originalException, {
+    this.originalException,
+    this.originalStackTrace, {
     this.request,
     required this.data,
-  }) : super(originalException);
+  }) : super(originalException, originalStackTrace);
 
   final Map<String, dynamic>? data;
   final Request? request;
+
+  @override
   final PartialDataException originalException;
+
+  @override
+  final StackTrace originalStackTrace;
 
   @override
   String toString() => 'MismatchedDataStructureException('
       '$originalException, '
+      '$originalStackTrace, '
       'request: ${request}, '
       'data: ${data}, '
       ')';
@@ -62,11 +69,12 @@ class MismatchedDataStructureException extends LinkException {
 class CacheMisconfigurationException extends LinkException
     implements MismatchedDataStructureException {
   const CacheMisconfigurationException(
-    this.originalException, {
+    this.originalException,
+    this.originalStackTrace, {
     this.request,
     this.fragmentRequest,
     required this.data,
-  }) : super(originalException);
+  }) : super(originalException, originalStackTrace);
 
   final Request? request;
   final FragmentRequest? fragmentRequest;
@@ -76,9 +84,13 @@ class CacheMisconfigurationException extends LinkException
   final PartialDataException originalException;
 
   @override
+  final StackTrace originalStackTrace;
+
+  @override
   String toString() => [
         'CacheMisconfigurationException(',
         '$originalException, ',
+        '$originalStackTrace, ',
         if (request != null) 'request: ${request}',
         if (fragmentRequest != null) 'fragmentRequest : ${fragmentRequest}',
         'data: ${data}, ',
@@ -94,25 +106,32 @@ class CacheMisconfigurationException extends LinkException
 class UnexpectedResponseStructureException extends ServerException
     implements MismatchedDataStructureException {
   const UnexpectedResponseStructureException(
-    this.originalException, {
+    this.originalException,
+    this.originalStackTrace, {
     required this.request,
     required Response parsedResponse,
   }) : super(
-            parsedResponse: parsedResponse,
-            originalException: originalException);
+          parsedResponse: parsedResponse,
+          originalException: originalException,
+          originalStackTrace: originalStackTrace,
+        );
 
   @override
   final Request request;
 
   @override
-  get data => parsedResponse!.data;
+  Map<String, dynamic>? get data => parsedResponse!.data;
 
   @override
   final PartialDataException originalException;
 
   @override
+  final StackTrace originalStackTrace;
+
+  @override
   String toString() => 'UnexpectedResponseStructureException('
       '$originalException, '
+      '$originalStackTrace, '
       'request: ${request}, '
       'parsedResponse: ${parsedResponse}, '
       ')';
@@ -124,13 +143,10 @@ class UnexpectedResponseStructureException extends ServerException
 class UnknownException extends LinkException {
   String get message => 'Unhandled Client-Side Exception: $originalException';
 
-  /// stacktrace of the [originalException].
-  final StackTrace originalStackTrace;
-
   const UnknownException(
-    dynamic originalException,
-    this.originalStackTrace,
-  ) : super(originalException);
+    Object originalException,
+    StackTrace originalStackTrace,
+  ) : super(originalException, originalStackTrace);
 
   @override
   String toString() =>
@@ -147,8 +163,11 @@ class OperationException implements Exception {
   /// Errors encountered during execution such as network or cache errors
   LinkException? linkException;
 
+  StackTrace? originalStackTrace;
+
   OperationException({
     this.linkException,
+    this.originalStackTrace,
     Iterable<GraphQLError> graphqlErrors = const [],
   }) : this.graphqlErrors = graphqlErrors.toList();
 

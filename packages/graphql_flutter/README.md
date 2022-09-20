@@ -1,16 +1,33 @@
-[![MIT License][license-badge]][license-link]
-[![All Contributors](https://img.shields.io/badge/all_contributors-31-orange.svg?style=flat-square)](#contributors)
-[![PRs Welcome][prs-badge]][prs-link]
+<div align="center">
+  <h1>GraphQL Flutter</h1>
 
-[![Star on GitHub][github-star-badge]][github-star-link]
-[![Watch on GitHub][github-watch-badge]][github-watch-link]
-[![Discord][discord-badge]][discord-link]
+  <div align="center">
+      <img src="https://miro.medium.com/max/1400/1*bU9k3XzmNAQ9F9J0uCiFsQ.png" width="800"/>
+  </div>
 
-[![Build Status][build-status-badge]][build-status-link]
-[![Coverage][coverage-badge]][coverage-link]
-[![version][version-badge]][package-link]
+  <p>
+    <strong>Flutter Widgets wrapper around graphql API</strong>
+  </p>
 
-# GraphQL Flutter
+  <h4>
+    <a href="https://github.com/zino-hofmann/graphql-flutter">Project Homepage</a>
+  </h4>
+
+  <a href="https://github.com/laanwj/rust-clightning-rpc/actions">
+    <img alt="GitHub Workflow Status (branch)" src="https://img.shields.io/github/workflow/status/laanwj/rust-clightning-rpc/Integration%20testing/master?style=flat-square"/>
+  </a>
+
+  <a href="https://pub.dev/packages/graphql">
+    <img alt="Pub Popularity" src="https://img.shields.io/pub/popularity/graphql?style=flat-square"/>
+  </a>
+
+  <a href="https://discord.gg/YBFCTXNbwY">
+    <img alt="Discord" src="https://img.shields.io/discord/559455668810153989?style=flat-square"/>
+  </a>
+
+</div>
+
+## Introduction
 
 `graphql_flutter` provides an idiomatic flutter API and widgets for [`graphql/client.dart`](https://pub.dev/packages/graphql). They are co-developed [on github](https://github.com/zino-app/graphql-flutter), where you can find more in-depth examples. We also have a lively community on [discord][discord-link].
 

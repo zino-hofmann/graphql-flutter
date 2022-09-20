@@ -93,7 +93,7 @@ void starRepository(String? repositoryID) async {
 
   final GraphQLClient _client = getGithubGraphQLClient();
 
-  final MutationOptions options = MutationOptions(
+  final options = MutationOptions(
     document: gql(
       r'''
         mutation AddStar($starrableId: ID!) {

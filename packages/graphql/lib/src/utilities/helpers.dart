@@ -89,4 +89,4 @@ SanitizeVariables variableSanitizer(
                 variables,
                 toEncodable: sanitizeVariables,
               ),
-            );
+            ) as Map<String, dynamic>;

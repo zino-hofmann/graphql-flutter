@@ -35,15 +35,15 @@ class _WatchQueryHookState<TParsed>
     super.dispose();
   }
 
-  _connect() {
+  void _connect() {
     _observableQuery = hook.client.queryManager.watchQuery(hook.options);
   }
 
-  _close() {
+  void _close() {
     _observableQuery.close();
   }
 
-  _reconnect() {
+  void _reconnect() {
     _close();
     _connect();
   }
@@ -66,9 +66,16 @@ ObservableQuery<TParsed> useWatchQuery<TParsed>(
   WatchQueryOptions<TParsed> options,
 ) {
   final client = useGraphQLClient();
+  return useWatchQueryOnClient(client, options);
+}
+
+ObservableQuery<TParsed> useWatchQueryOnClient<TParsed>(
+  GraphQLClient client,
+  WatchQueryOptions<TParsed> options,
+) {
   final overwrittenOptions = useMemoized(() {
     final policies =
-        client.defaultPolicies.query.withOverrides(options.policies);
+        client.defaultPolicies.watchQuery.withOverrides(options.policies);
     return options.copyWithPolicies(policies);
   }, [options]);
 
@@ -79,11 +86,19 @@ ObservableQuery<TParsed> useWatchQuery<TParsed>(
 }
 
 ObservableQuery<TParsed> useWatchMutation<TParsed>(
-    WatchQueryOptions<TParsed> options) {
+  WatchQueryOptions<TParsed> options,
+) {
   final client = useGraphQLClient();
+  return useWatchMutationOnClient(client, options);
+}
+
+ObservableQuery<TParsed> useWatchMutationOnClient<TParsed>(
+  GraphQLClient client,
+  WatchQueryOptions<TParsed> options,
+) {
   final overwrittenOptions = useMemoized(() {
     final policies =
-        client.defaultPolicies.mutate.withOverrides(options.policies);
+        client.defaultPolicies.watchMutation.withOverrides(options.policies);
     return options.copyWithPolicies(policies);
   }, [options]);
   return use(

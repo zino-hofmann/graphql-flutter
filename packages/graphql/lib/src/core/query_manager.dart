@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:graphql/src/core/result_parser.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
@@ -45,7 +44,8 @@ class QueryManager {
   int idCounter = 1;
 
   /// [ObservableQuery] registry
-  Map<String, ObservableQuery> queries = <String, ObservableQuery>{};
+  Map<String, ObservableQuery<Object?>> queries =
+      <String, ObservableQuery<Object?>>{};
 
   /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
   bool rebroadcastLocked = false;
@@ -75,7 +75,7 @@ class QueryManager {
       // TODO optimisticResults for streams just skip the cache for now
       yield QueryResult.optimistic(
         data: options.optimisticResult as Map<String, dynamic>?,
-        parserFn: options.parserFn,
+        options: options,
       );
     } else if (shouldRespondEagerlyFromCache(options.fetchPolicy)) {
       final cacheResult = cache.readQuery(
@@ -84,9 +84,9 @@ class QueryManager {
       );
       if (cacheResult != null) {
         yield QueryResult(
+          options: options,
           source: QueryResultSource.cache,
           data: cacheResult,
-          parserFn: options.parserFn,
         );
       }
     }
@@ -113,8 +113,8 @@ class QueryManager {
             } catch (failure, trace) {
               // we set the source to indicate where the source of failure
               queryResult ??= QueryResult(
+                options: options,
                 source: QueryResultSource.network,
-                parserFn: options.parserFn,
               );
 
               queryResult.exception = coalesceErrors(
@@ -132,9 +132,9 @@ class QueryManager {
           })
           .transform<QueryResult<TParsed>>(StreamTransformer.fromHandlers(
             handleError: (err, trace, sink) => sink.add(_wrapFailure(
+              options,
               err,
               trace,
-              options.parserFn,
             )),
           ))
           .map((QueryResult<TParsed> queryResult) {
@@ -144,9 +144,9 @@ class QueryManager {
     } catch (ex, trace) {
       yield* Stream.fromIterable([
         _wrapFailure(
+          options,
           ex,
           trace,
-          options.parserFn,
         )
       ]);
     }
@@ -176,7 +176,7 @@ class QueryManager {
     final result = await fetchQuery(_oneOffOpId, options);
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
-    final mutationCallbacks = MutationCallbackHandler(
+    final mutationCallbacks = MutationCallbackHandler<TParsed>(
       cache: cache,
       options: options,
       queryId: _oneOffOpId,
@@ -221,7 +221,7 @@ class QueryManager {
     // _resolveQueryEagerly handles cacheOnly,
     // so if we're loading + cacheFirst we continue to network
     return MultiSourceResult(
-      parserFn: options.parserFn,
+      options: options,
       eagerResult: eagerResult,
       networkResult:
           (shouldStopAtCache(options.fetchPolicy) && !eagerResult.isLoading)
@@ -261,8 +261,8 @@ class QueryManager {
     } catch (failure, trace) {
       // we set the source to indicate where the source of failure
       queryResult ??= QueryResult(
+        options: options,
         source: QueryResultSource.network,
-        parserFn: options.parserFn,
       );
 
       queryResult.exception = coalesceErrors(
@@ -294,9 +294,7 @@ class QueryManager {
     String queryId,
     BaseOptions<TParsed> options,
   ) {
-    QueryResult<TParsed> queryResult = QueryResult.loading(
-      parserFn: options.parserFn,
-    );
+    QueryResult<TParsed> queryResult = QueryResult.loading(options: options);
 
     try {
       if (options.optimisticResult != null) {
@@ -312,21 +310,21 @@ class QueryManager {
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
           !queryResult.isOptimistic) {
-        final dynamic data = cache.readQuery(request, optimistic: false);
+        final data = cache.readQuery(request, optimistic: false);
         // we only push an eager query with data
         if (data != null) {
           queryResult = QueryResult(
+            options: options,
             data: data,
             source: QueryResultSource.cache,
-            parserFn: options.parserFn,
           );
         }
 
         if (options.fetchPolicy == FetchPolicy.cacheOnly &&
             queryResult.isLoading) {
           queryResult = QueryResult(
+            options: options,
             source: QueryResultSource.cache,
-            parserFn: options.parserFn,
             exception: OperationException(
               linkException: CacheMissException(
                 'Could not resolve the given request against the cache. (FetchPolicy.cacheOnly)',
@@ -362,8 +360,7 @@ class QueryManager {
   /// Refetch the [ObservableQuery] referenced by [queryId],
   /// overriding any present non-network-only [FetchPolicy].
   Future<QueryResult<TParsed>?> refetchQuery<TParsed>(String queryId) {
-    WatchQueryOptions<TParsed> options =
-        queries[queryId]!.options as WatchQueryOptions<TParsed>;
+    var options = getQuery<TParsed>(queryId)!.options;
     if (!willAlwaysExecuteOnNetwork(options.fetchPolicy)) {
       options = options.copyWithFetchPolicy(FetchPolicy.networkOnly);
     }
@@ -375,7 +372,7 @@ class QueryManager {
   }
 
   @experimental
-  Future<List<QueryResult?>> refetchSafeQueries() async {
+  Future<List<QueryResult<Object?>?>> refetchSafeQueries() async {
     rebroadcastLocked = true;
     final results = await Future.wait(
       queries.values.where((q) => q.isRefetchSafe).map((q) => q.refetch()),
@@ -385,11 +382,14 @@ class QueryManager {
     return results;
   }
 
-  ObservableQuery? getQuery(String? queryId) {
-    if (queries.containsKey(queryId)) {
-      return queries[queryId!];
+  ObservableQuery<TParsed>? getQuery<TParsed>(String? queryId) {
+    if (!queries.containsKey(queryId)) {
+      return null;
     }
-
+    final query = queries[queryId!];
+    if (query is ObservableQuery<TParsed>) {
+      return query;
+    }
     return null;
   }
 
@@ -403,8 +403,7 @@ class QueryManager {
     String? queryId,
     QueryResult<TParsed> queryResult,
   ) {
-    final ObservableQuery<TParsed>? observableQuery =
-        getQuery(queryId) as ObservableQuery<TParsed>?;
+    final observableQuery = getQuery<TParsed>(queryId);
 
     if (observableQuery != null && !observableQuery.controller.isClosed) {
       observableQuery.addResult(queryResult);
@@ -419,8 +418,8 @@ class QueryManager {
     required BaseOptions<TParsed> options,
   }) {
     QueryResult<TParsed> queryResult = QueryResult(
+      options: options,
       source: QueryResultSource.optimisticResult,
-      parserFn: options.parserFn,
     );
 
     attemptCacheWriteFromClient(
@@ -455,7 +454,10 @@ class QueryManager {
   /// **Note on internal implementation details**:
   /// There is sometimes confusion on when this is called, but rebroadcasts are requested
   /// from every [addQueryResult] where `result.isNotLoading` as an [OnData] callback from [ObservableQuery].
-  bool maybeRebroadcastQueries({ObservableQuery? exclude, bool force = false}) {
+  bool maybeRebroadcastQueries({
+    ObservableQuery<Object?>? exclude,
+    bool force = false,
+  }) {
     if (rebroadcastLocked && !force) {
       return false;
     }
@@ -473,9 +475,12 @@ class QueryManager {
           optimistic: query.options.policies.mergeOptimisticData,
         );
         if (_cachedDataHasChangedFor(query, cachedData)) {
-          query.addFetchResult(
-            Response(data: cachedData),
-            QueryResultSource.cache,
+          query.addResult(
+            mapFetchResultToQueryResult(
+              Response(data: cachedData, response: {}),
+              query.options,
+              source: QueryResultSource.cache,
+            ),
             fromRebroadcast: true,
           );
         }
@@ -485,17 +490,18 @@ class QueryManager {
   }
 
   bool _cachedDataHasChangedFor(
-    ObservableQuery query,
+    ObservableQuery<Object?> query,
     Map<String, dynamic>? cachedData,
   ) =>
       cachedData != null &&
       (alwaysRebroadcast || !_deepEquals(query.latestResult!.data, cachedData));
 
-  void setQuery(ObservableQuery observableQuery) {
+  void setQuery(ObservableQuery<Object?> observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
   }
 
-  void closeQuery(ObservableQuery observableQuery, {bool fromQuery = false}) {
+  void closeQuery(ObservableQuery<Object?> observableQuery,
+      {bool fromQuery = false}) {
     if (!fromQuery) {
       observableQuery.close(fromManager: true);
     }
@@ -512,13 +518,13 @@ class QueryManager {
 }
 
 QueryResult<TParsed> _wrapFailure<TParsed>(
-  dynamic ex,
-  trace,
-  ResultParserFn<TParsed> parserFn,
+  BaseOptions<TParsed> options,
+  Object ex,
+  StackTrace trace,
 ) =>
     QueryResult(
+      options: options,
       // we set the source to indicate where the source of failure
       source: QueryResultSource.network,
       exception: coalesceErrors(linkException: translateFailure(ex, trace)),
-      parserFn: parserFn,
     );

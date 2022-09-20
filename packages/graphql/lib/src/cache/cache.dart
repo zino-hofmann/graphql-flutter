@@ -107,8 +107,11 @@ class GraphQLCache extends NormalizingDataProxy {
 
   /// Reads dereferences an entity from the first valid optimistic layer,
   /// defaulting to the base internal HashMap.
-  Object? readNormalized(String rootId, {bool? optimistic = true}) {
-    Object? value = store.get(rootId);
+  Map<String, dynamic>? readNormalized(
+    String rootId, {
+    bool? optimistic = true,
+  }) {
+    var value = store.get(rootId);
 
     if (!optimistic!) {
       return value;
@@ -116,7 +119,7 @@ class GraphQLCache extends NormalizingDataProxy {
 
     for (final patch in optimisticPatches) {
       if (patch.data.containsKey(rootId)) {
-        final Object? patchData = patch.data[rootId];
+        final patchData = patch.data[rootId];
         if (value is Map<String, Object> && patchData is Map<String, Object>) {
           value = deeplyMergeLeft([
             value,
@@ -136,7 +139,7 @@ class GraphQLCache extends NormalizingDataProxy {
   /// deeply merging maps with existing values
   ///
   /// Called from [writeQuery] and [writeFragment].
-  void writeNormalized(String dataId, dynamic value) {
+  void writeNormalized(String dataId, Map<String, dynamic>? value) {
     if (value is Map<String, Object>) {
       final existing = store.get(dataId);
       store.put(

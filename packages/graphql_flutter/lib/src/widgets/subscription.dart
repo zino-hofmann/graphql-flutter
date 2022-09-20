@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:graphql/client.dart';
+import 'package:graphql_flutter/src/widgets/hooks/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/hooks/subscription.dart';
 
 /// Creats a subscription with [GraphQLClient.subscribe].
@@ -67,7 +68,35 @@ class Subscription<TParsed> extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final result = useSubscription<TParsed>(
+    final client = useGraphQLClient();
+    return SubscriptionOnClient(
+      client: client,
+      options: options,
+      builder: builder,
+    );
+  }
+}
+
+/// Creats a subscription widget like [Subscription] but
+/// with an external client.
+class SubscriptionOnClient<TParsed> extends HookWidget {
+  const SubscriptionOnClient({
+    required this.client,
+    required this.options,
+    required this.builder,
+    this.onSubscriptionResult,
+    Key? key,
+  }) : super(key: key);
+
+  final GraphQLClient client;
+  final SubscriptionOptions<TParsed> options;
+  final SubscriptionBuilder<TParsed> builder;
+  final OnSubscriptionResult<TParsed>? onSubscriptionResult;
+
+  @override
+  Widget build(BuildContext context) {
+    final result = useSubscriptionOnClient<TParsed>(
+      client,
       options,
       onSubscriptionResult: onSubscriptionResult,
     );

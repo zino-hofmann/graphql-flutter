@@ -21,7 +21,7 @@ void main() {
       }
     }
   ''';
-  readRepositoryData({withTypenames = true, withIds = true}) {
+  readRepositoryData({bool withTypenames = true, bool withIds = true}) {
     return {
       'viewer': {
         'repositories': {
@@ -83,7 +83,7 @@ void main() {
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
-            Response(data: repoData),
+            Response(data: repoData, response: {}),
           ]),
         );
 
@@ -131,7 +131,7 @@ void main() {
           link.request(any),
         ).thenAnswer(
           (_) => Stream.fromIterable([
-            Response(data: repoData),
+            Response(data: repoData, response: {}),
           ]),
         );
 

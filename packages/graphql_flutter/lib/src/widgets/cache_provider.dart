@@ -20,11 +20,19 @@ class _CacheProviderState extends State<CacheProvider>
     with WidgetsBindingObserver {
   GraphQLClient? client;
 
+  /// This allows a value of type T or T?
+  /// to be treated as a value of type T?.
+  ///
+  /// We use this so that APIs that have become
+  /// non-nullable can still be used with `!` and `?`
+  /// to support older versions of the API as well.
+  T? _ambiguate<T>(T? value) => value;
+
   @override
   void initState() {
     super.initState();
 
-    WidgetsBinding.instance!.addObserver(this);
+    _ambiguate(WidgetsBinding.instance)!.addObserver(this);
   }
 
   @override
@@ -42,7 +50,7 @@ class _CacheProviderState extends State<CacheProvider>
   void dispose() {
     super.dispose();
 
-    WidgetsBinding.instance!.removeObserver(this);
+    _ambiguate(WidgetsBinding.instance)!.removeObserver(this);
   }
 
 /*

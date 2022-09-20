@@ -17,7 +17,7 @@ class MockLink extends Mock implements Link {
 
 const debuggingUnexpectedTestFailures = false;
 
-overridePrint(testFn(List<String> log)) => () {
+dynamic Function() overridePrint(dynamic testFn(List<String> log)) => () {
       final log = <String>[];
       final spec = ZoneSpecification(print: (_, __, ___, String msg) {
         log.add(msg);
@@ -28,7 +28,7 @@ overridePrint(testFn(List<String> log)) => () {
 class TestCache extends GraphQLCache {
   bool get returnPartialData => debuggingUnexpectedTestFailures;
 
-  get partialDataPolicy => PartialDataCachePolicy.reject;
+  PartialDataCachePolicy get partialDataPolicy => PartialDataCachePolicy.reject;
 }
 
 GraphQLCache getTestCache() => TestCache();

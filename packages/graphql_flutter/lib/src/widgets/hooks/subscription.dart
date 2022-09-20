@@ -20,6 +20,18 @@ QueryResult<TParsed> useSubscription<TParsed>(
   OnSubscriptionResult<TParsed>? onSubscriptionResult,
 }) {
   final client = useGraphQLClient();
+  return useSubscriptionOnClient(
+    client,
+    options,
+    onSubscriptionResult: onSubscriptionResult,
+  );
+}
+
+QueryResult<TParsed> useSubscriptionOnClient<TParsed>(
+  GraphQLClient client,
+  SubscriptionOptions<TParsed> options, {
+  OnSubscriptionResult<TParsed>? onSubscriptionResult,
+}) {
   final stream = use(_SubscriptionHook(
     client: client,
     onSubscriptionResult: onSubscriptionResult,
@@ -30,9 +42,9 @@ QueryResult<TParsed> useSubscription<TParsed>(
     initialData: options.optimisticResult != null
         ? QueryResult.optimistic(
             data: options.optimisticResult as Map<String, dynamic>?,
-            parserFn: options.parserFn,
+            options: options,
           )
-        : QueryResult.loading(parserFn: options.parserFn),
+        : QueryResult.loading(options: options),
   );
   return snapshot.data!;
 }
@@ -56,13 +68,13 @@ class _SubscriptionHook<TParsed> extends Hook<Stream<QueryResult<TParsed>>> {
 class _SubscriptionHookState<TParsed> extends HookState<
     Stream<QueryResult<TParsed>>, _SubscriptionHook<TParsed>> {
   late Stream<QueryResult<TParsed>> stream;
-  GraphQLClient? client;
 
   ConnectivityResult? _currentConnectivityResult;
   StreamSubscription<ConnectivityResult>? _networkSubscription;
 
   void _initSubscription() {
-    stream = client!.subscribe(hook.options);
+    final client = hook.client;
+    stream = client.subscribe(hook.options);
     final onSubscriptionResult = hook.onSubscriptionResult;
     if (onSubscriptionResult != null) {
       stream = stream.map((result) {
@@ -75,6 +87,7 @@ class _SubscriptionHookState<TParsed> extends HookState<
   @override
   void initHook() {
     super.initHook();
+    _initSubscription();
     _networkSubscription =
         Connectivity().onConnectivityChanged.listen(_onNetworkChange);
   }
@@ -94,7 +107,7 @@ class _SubscriptionHookState<TParsed> extends HookState<
     super.dispose();
   }
 
-  Future _onNetworkChange(ConnectivityResult result) async {
+  Future<void> _onNetworkChange(ConnectivityResult result) async {
     //if from offline to online
     if (_currentConnectivityResult == ConnectivityResult.none &&
         (result == ConnectivityResult.mobile ||
