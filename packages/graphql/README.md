@@ -205,7 +205,7 @@ const String addStar = r'''
 ''';
 ```
 
-Then instead of the `QueryOptions`, for mutations we will `MutationOptions`, which is where we pass our mutation and id of the repository we are starring.
+Then instead of the `QueryOptions`, for mutations we will use `MutationOptions`, which is where we pass our mutation and id of the repository we are starring.
 
 ```dart
 // ...
