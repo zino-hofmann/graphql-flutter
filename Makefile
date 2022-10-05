@@ -1,12 +1,13 @@
 CC=dart pub global run melos
-CC_TEST=spec
+#CC_TEST=spec
+CC_TEST=for d in ./packages/*/ ; do (echo $$d && cd $$d && dart test); done
 CC_CHANGELOG=dart pub global run changelog_cmd
 
 default: analyze check
 
 dep:
 	dart pub global activate melos;
-	dart pub global activate spec_cli;
+	#dart pub global activate spec_cli;
 	dart pub global activate changelog_cmd;
 	$(CC) bootstrap
 
