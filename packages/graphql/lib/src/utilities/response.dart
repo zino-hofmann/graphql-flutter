@@ -9,6 +9,7 @@ QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
 }) {
   List<GraphQLError>? errors;
   Map<String, dynamic>? data;
+  Map<String, dynamic>? raw;
 
   // check if there are errors and apply the error policy if so
   // in a nutshell: `ignore` swallows errors, `none` swallows data
@@ -34,11 +35,16 @@ QueryResult<TParsed> mapFetchResultToQueryResult<TParsed>(
     data = response.data;
   }
 
+  raw = response.response;
+
   return QueryResult(
     options: options,
     data: data,
     context: response.context,
     source: source,
-    exception: coalesceErrors(graphqlErrors: errors),
+    exception: coalesceErrors(
+      graphqlErrors: errors,
+      raw: raw['errors'] as List<dynamic>?,
+    ),
   );
 }
