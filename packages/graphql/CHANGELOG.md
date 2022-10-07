@@ -1,3 +1,14 @@
+# v5.1.2-beta.5
+
+## Fixed
+- Allow list of errors as payloads for graphql-transport-… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1845f4000c0ab7f30e16fa16e97a1084fa968b9f)). @juancastillo0 05-10-2022
+- Adapt code to breaking change of 'gql' dependencies ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/5d16ebfccff9f831dca13a66511c5a336290ed69)). @ueman 21-08-2022
+- Normalization signature ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/dc5207a9dc03e9f87d220d0cdf9b3654af5aa8ef)). @budde377 13-08-2022
+
+## Added
+- Refactor GH actions ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/315d85c63f50d42e33c5f9935066fb84d70fb9ad)). @budde377 13-08-2022
+
+
 # v5.1.2-beta.4
 
 ## Fixed
