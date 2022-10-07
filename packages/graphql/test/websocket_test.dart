@@ -70,6 +70,47 @@ Future<void> main() async {
     });
   });
 
+  group('GraphQLSocketMessage.parse', () {
+    test('graphql-transport-ws subprotocol with errors', () {
+      const payload = [
+        {
+          'message': 'Cannot query field "wrongQuery" on type "Query".',
+          'locations': [
+            {'line': 1, 'column': 2}
+          ],
+          'extensions': {
+            'validationError': {
+              'spec': 'https://spec.graphql.org/draft/#sec-Field-Selections',
+            }
+          }
+        }
+      ];
+
+      const message = {'id': 'message-id', 'type': 'error', 'payload': payload};
+      final parsed = GraphQLSocketMessage.parse(jsonEncode(message));
+      expect(parsed, isA<SubscriptionError>());
+      expect(parsed.toJson(), message);
+    });
+
+    test('graphql-ws apollo subprotocol with errors', () {
+      const payload = {
+        'message': 'Cannot query field "wrongQuery" on type "Query".',
+        'locations': [
+          {'line': 1, 'column': 2}
+        ],
+        'extensions': {
+          'validationError': {
+            'spec': 'https://spec.graphql.org/draft/#sec-Field-Selections',
+          }
+        }
+      };
+      const message = {'id': 'message-id', 'type': 'error', 'payload': payload};
+      final parsed = GraphQLSocketMessage.parse(jsonEncode(message));
+      expect(parsed, isA<SubscriptionError>());
+      expect(parsed.toJson(), message);
+    });
+  });
+
   group('SocketClient without payload', () {
     late SocketClient socketClient;
     StreamController<dynamic> controller;
