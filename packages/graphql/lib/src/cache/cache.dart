@@ -138,7 +138,7 @@ class GraphQLCache extends NormalizingDataProxy {
   /// Write normalized data into the cache,
   /// deeply merging maps with existing values
   ///
-  /// Called from [witeQuery] and [writeFragment].
+  /// Called from [writeQuery] and [writeFragment].
   void writeNormalized(String dataId, Map<String, dynamic>? value) {
     if (value is Map<String, Object>) {
       final existing = store.get(dataId);
