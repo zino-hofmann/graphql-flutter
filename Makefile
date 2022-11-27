@@ -1,6 +1,5 @@
 CC=dart pub global run melos
 #CC_TEST=spec
-CC_TEST=for d in ./packages/*/ ; do (echo $$d && cd $$d && dart test); done
 CC_CHANGELOG=dart pub global run changelog_cmd
 
 default: analyze check
@@ -10,14 +9,14 @@ dep:
 	dart pub global activate changelog_cmd;
 	$(CC) bootstrap
 
-check:
-	$(CC_TEST)
+check: ci_check_client ci_check_flutter
 
 fmt:
 	$(CC) run format --no-select
 
 analyze: fmt
-	$(CC) run analyze --no-select
+	$(CC) run client_analyze --no-select
+	$(CC) run flutter_analyze --no-select
 
 client: ci_check_client ci_fmt_client
 
