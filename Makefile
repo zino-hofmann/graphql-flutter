@@ -7,7 +7,6 @@ default: analyze check
 
 dep:
 	dart pub global activate melos;
-	#dart pub global activate spec_cli;
 	dart pub global activate changelog_cmd;
 	$(CC) bootstrap
 
@@ -19,6 +18,10 @@ fmt:
 
 analyze: fmt
 	$(CC) run analyze --no-select
+
+client: ci_check_client ci_fmt_client
+
+flutter: ci_check_flutter ci_fmt_flutter
 
 ci_check_flutter:
 	$(CC) run flutter_test --no-select
