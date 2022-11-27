@@ -494,6 +494,7 @@ class QueryManager {
     Map<String, dynamic>? cachedData,
   ) =>
       cachedData != null &&
+      query.latestResult != null &&
       (alwaysRebroadcast || !_deepEquals(query.latestResult!.data, cachedData));
 
   void setQuery(ObservableQuery<Object?> observableQuery) {
