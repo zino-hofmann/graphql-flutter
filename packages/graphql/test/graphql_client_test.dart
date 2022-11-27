@@ -150,7 +150,7 @@ void main() {
           equals(200),
         );
         expect(
-          r.context.entry<HttpLinkResponseContext>()!.headers['foo'],
+          r.context.entry<HttpLinkResponseContext>()!.headers!['foo'],
           equals('bar'),
         );
       });
@@ -548,7 +548,7 @@ query WalletGetContent($input: WalletGetContentInput!) {
           equals(200),
         );
         expect(
-          r.context.entry<HttpLinkResponseContext>()!.headers['foo'],
+          r.context.entry<HttpLinkResponseContext>()!.headers!['foo'],
           equals('bar'),
         );
       });
@@ -1443,7 +1443,7 @@ query WalletGetContent($input: WalletGetContentInput!) {
         equals(200),
       );
       expect(
-        r.context.entry<HttpLinkResponseContext>()!.headers['foo'],
+        r.context.entry<HttpLinkResponseContext>()!.headers!['foo'],
         equals('bar'),
       );
     });
