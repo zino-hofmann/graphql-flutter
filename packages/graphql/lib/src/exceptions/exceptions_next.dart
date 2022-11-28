@@ -165,9 +165,12 @@ class OperationException implements Exception {
 
   StackTrace? originalStackTrace;
 
+  List<dynamic>? raw;
+
   OperationException({
     this.linkException,
     this.originalStackTrace,
+    this.raw,
     Iterable<GraphQLError> graphqlErrors = const [],
   }) : this.graphqlErrors = graphqlErrors.toList();
 
@@ -188,6 +191,7 @@ class OperationException implements Exception {
 OperationException? coalesceErrors({
   List<GraphQLError>? graphqlErrors,
   LinkException? linkException,
+  List<dynamic>? raw,
   OperationException? exception,
 }) {
   if (exception != null ||
@@ -195,6 +199,7 @@ OperationException? coalesceErrors({
       (graphqlErrors != null && graphqlErrors.isNotEmpty)) {
     return OperationException(
       linkException: linkException ?? exception?.linkException,
+      raw: raw,
       graphqlErrors: [
         if (graphqlErrors != null) ...graphqlErrors,
         if (exception?.graphqlErrors != null) ...exception!.graphqlErrors
