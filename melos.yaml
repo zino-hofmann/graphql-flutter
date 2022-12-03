@@ -7,12 +7,6 @@ packages:
   - packages/**
 
 scripts:
-  analyze:
-    run: melos exec -c 1 -- "dart format --set-exit-if-changed . && dart analyze . --fatal-infos"
-    description: Run dart analyzer in a specific package.
-    select-package:
-      flutter: false
-
   flutter_analyze:
     run: melos exec --depends-on="graphql" -c 1 -- "flutter format --set-exit-if-changed . && flutter analyze . --fatal-infos"
     description: Run dart analyzer in a specific package.
@@ -24,16 +18,6 @@ scripts:
     description: Run dart analyzer in a specific package.
     select-package:
       flutter: false
-
-  test:
-    description: Run tests in a specific package.
-    run: melos exec -- "dart pub get && dart pub run test"
-    select-package:
-      flutter: false
-      dir-exists:
-        - "test/"
-    env:
-      MELOS_TEST: true
 
   flutter_test:
     description: Run tests in a specific package.
