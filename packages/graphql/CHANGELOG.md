@@ -1,3 +1,12 @@
+# v5.1.2-beta.6
+
+## Fixed
+- fixing the dart analyzer error ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/344e6112d7e6f59dee18aa3a40da51068ba6c49e)). @vincenzopalazzo 27-11-2022
+
+## Added
+- add raw to exceptions on QueryResult ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1e9581eff0d6edd05e60bb176a772e5db8049b51)). @maironLucasSlz 28-11-2022
+
+
 # v5.1.2-beta.5
 
 ## Fixed

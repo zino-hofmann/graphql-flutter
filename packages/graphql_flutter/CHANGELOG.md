@@ -1,3 +1,9 @@
+# v5.1.1-beta.5
+
+## Fixed
+- increase connectivity_plus version to v3 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a92a3e2ca21eea9d661bd864f349bd3de2cca03c)). @vincenzopalazzo 03-12-2022
+
+
 # v5.1.1-beta.4
 
 ## Fixed
