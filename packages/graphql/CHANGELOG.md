@@ -1,3 +1,9 @@
+# v5.1.3
+
+## Fixed
+- fix ws dependencies version to 2.2.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/f702ff12040834997d7fdbb844e618ec85756589)). @vincenzopalazzo 12-01-2023
+
+
 # v5.1.2
 
 ## Added
