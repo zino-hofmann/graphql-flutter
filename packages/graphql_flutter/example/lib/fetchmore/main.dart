@@ -150,7 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           ],
                         ),
                       Text('note: this example has no mutations',
-                          style: Theme.of(context).textTheme.caption),
+                          style: Theme.of(context).textTheme.bodySmall),
                       ElevatedButton(
                         onPressed: () {
                           fetchMore!(opts);
