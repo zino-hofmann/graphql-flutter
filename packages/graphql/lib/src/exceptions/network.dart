@@ -6,7 +6,6 @@ import 'package:gql_link/gql_link.dart' show LinkException;
 /// This constructor is deprecated, use
 /// [NetworkException.fromException] instead.
 class NetworkException extends LinkException {
-  @deprecated
   NetworkException({
     required Object originalException,
     StackTrace originalStackTrace = StackTrace.empty,
