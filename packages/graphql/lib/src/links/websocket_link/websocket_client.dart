@@ -594,6 +594,8 @@ class GraphQLWebSocketChannel extends StreamChannelMixin<dynamic>
 
   String? get closeReason => _webSocket.closeReason;
 
+  Future<void> get ready => _webSocket.ready;
+
   @override
   WebSocketSink get sink => _webSocket.sink;
 }

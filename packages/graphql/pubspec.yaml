@@ -15,10 +15,10 @@ dependencies:
   gql_error_link: ^0.2.3
   gql_dedupe_link: ^2.0.3
   hive: ^2.1.0
-  normalize: ^0.7.1
+  normalize: ^0.8.0
   http: ^0.13.0
   collection: ^1.15.0
-  web_socket_channel: 2.2.0
+  web_socket_channel: ^2.3.0
   stream_channel: ^2.1.0
   rxdart: ^0.27.1
   uuid: ^3.0.1

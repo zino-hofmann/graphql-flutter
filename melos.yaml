@@ -8,7 +8,7 @@ packages:
 
 scripts:
   flutter_analyze:
-    run: melos exec --depends-on="graphql" -c 1 -- "flutter format --set-exit-if-changed . && flutter analyze . --fatal-infos"
+    run: melos exec --depends-on="graphql" -c 1 -- "dart format --set-exit-if-changed . && flutter analyze . --fatal-infos"
     description: Run dart analyzer in a specific package.
     select-package:
       flutter: true
