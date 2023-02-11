@@ -57,8 +57,7 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
     final Map<String, dynamic> map =
         json.decode(message as String) as Map<String, dynamic>;
     final String type = (map['type'] ?? 'unknown') as String;
-    final payload =
-        (map['payload'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+    final payload = map['payload'] ?? <String, dynamic>{};
     final String id = (map['id'] ?? 'none') as String;
 
     switch (type) {
@@ -77,15 +76,15 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
 
       // for completeness
       case MessageTypes.subscribe:
-        return SubscribeOperation(id, payload);
+        return SubscribeOperation(id, payload as Map<String, dynamic>);
       case MessageTypes.start:
-        return StartOperation(id, payload);
+        return StartOperation(id, payload as Map<String, dynamic>);
       case MessageTypes.stop:
         return StopOperation(id);
       case MessageTypes.ping:
-        return PingMessage(payload);
+        return PingMessage(payload as Map<String, dynamic>);
       case MessageTypes.pong:
-        return PongMessage(payload);
+        return PongMessage(payload as Map<String, dynamic>);
 
       case MessageTypes.data:
         return SubscriptionData(id, payload['data'], payload['errors']);

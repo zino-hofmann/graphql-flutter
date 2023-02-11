@@ -1,3 +1,70 @@
+# v5.1.3
+
+## Fixed
+- fix ws dependencies version to 2.2.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/f702ff12040834997d7fdbb844e618ec85756589)). @vincenzopalazzo 12-01-2023
+
+
+# v5.1.2
+
+## Added
+- Refactor GH actions ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/315d85c63f50d42e33c5f9935066fb84d70fb9ad)). @budde377 13-08-2022
+- Introduce a new class `GraphQLProtocol` with better naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e59d40693125c8502d7fd7dcdb4817ece4645052)). @vincenzopalazzo 22-07-2022
+- add raw to exceptions on QueryResult ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1e9581eff0d6edd05e60bb176a772e5db8049b51)). @maironLucasSlz 28-11-2022
+- add support for `graphql-transport-ws` ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/b73bb3653c652d747161a541dc984fa293a8605c)). @maximilianmaihoefner 08-05-2022
+- added query onError & onComplete callbacks ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8342d245ececc6007744d963c9a5d7ff8ed83f13)). @fabis94 22-04-2022
+
+## Deprecated
+- deprecate the `SocketSubProtocol` to improve naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2afd58362b2b107197004a14a61152ec8985fa1f)). @vincenzopalazzo 22-07-2022
+
+## Fixes
+- Minor formatting issues ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/ff71f5dcadc7e41f2366c6401dffc58d7f7325b8)). @budde377 23-04-2022
+- Transform nested objects ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/92e495dacc5f7c23a648a4053ee1bd73fb9b924e)). @budde377 27-06-2022
+- send connection_init message during handshake ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1b7f821d4727f70e64dd334e45f6c65a063adfd)). @othorin 20-05-2022
+- fix `SocketClient` to close subscription on socket close ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/45f88f6886e5175162caaa6944e69a11ef7fe346)). @qbx2 22-07-2022
+- Allow list of errors as payloads for graphql-transport-… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1845f4000c0ab7f30e16fa16e97a1084fa968b9f)). @juancastillo0 05-10-2022
+- Adapt code to breaking change of 'gql' dependencies ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/5d16ebfccff9f831dca13a66511c5a336290ed69)). @ueman 21-08-2022
+- Normalization signature ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/dc5207a9dc03e9f87d220d0cdf9b3654af5aa8ef)). @budde377 13-08-2022
+- fixing the dart analyzer error ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/344e6112d7e6f59dee18aa3a40da51068ba6c49e)). @vincenzopalazzo 27-11-2022
+
+# v5.1.2-beta.6
+
+## Fixed
+- fixing the dart analyzer error ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/344e6112d7e6f59dee18aa3a40da51068ba6c49e)). @vincenzopalazzo 27-11-2022
+
+## Added
+- add raw to exceptions on QueryResult ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1e9581eff0d6edd05e60bb176a772e5db8049b51)). @maironLucasSlz 28-11-2022
+
+
+# v5.1.2-beta.5
+
+## Fixed
+- Allow list of errors as payloads for graphql-transport-… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1845f4000c0ab7f30e16fa16e97a1084fa968b9f)). @juancastillo0 05-10-2022
+- Adapt code to breaking change of 'gql' dependencies ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/5d16ebfccff9f831dca13a66511c5a336290ed69)). @ueman 21-08-2022
+- Normalization signature ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/dc5207a9dc03e9f87d220d0cdf9b3654af5aa8ef)). @budde377 13-08-2022
+
+## Added
+- Refactor GH actions ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/315d85c63f50d42e33c5f9935066fb84d70fb9ad)). @budde377 13-08-2022
+
+
+# v5.1.2-beta.4
+
+## Fixed
+- fix `SocketClient` to close subscription on socket close ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/45f88f6886e5175162caaa6944e69a11ef7fe346)). @qbx2 22-07-2022
+
+## Added
+- Introduce a new class `GraphQLProtocol` with better naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e59d40693125c8502d7fd7dcdb4817ece4645052)). @vincenzopalazzo 22-07-2022
+
+## Deprecated
+- deprecate the `SocketSubProtocol` to improve naming ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2afd58362b2b107197004a14a61152ec8985fa1f)). @vincenzopalazzo 22-07-2022
+
+
+# v5.1.2-beta.3
+
+## Fixes
+- Transform nested objects ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/92e495dacc5f7c23a648a4053ee1bd73fb9b924e)). @budde377 27-06-2022
+- send connection_init message during handshake ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1b7f821d4727f70e64dd334e45f6c65a063adfd)). @othorin 20-05-2022
+
+
 # v5.1.2-beta.2
 
 ## New Feature

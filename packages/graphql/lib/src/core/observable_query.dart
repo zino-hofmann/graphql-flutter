@@ -182,12 +182,18 @@ class ObservableQuery<TParsed> {
     }
   }
 
-  /// Fetch results based on [options.fetchPolicy]
+  /// Fetch results based on [options.fetchPolicy] by default.
+  ///
+  /// Optionally provide a [fetchPolicy] which will override the
+  /// default [options.fetchPolicy], just for this request.
   ///
   /// Will [startPolling] if [options.pollInterval] is set
-  MultiSourceResult<TParsed> fetchResults() {
+  MultiSourceResult<TParsed> fetchResults({FetchPolicy? fetchPolicy}) {
+    final fetchOptions = fetchPolicy == null
+        ? options
+        : options.copyWithFetchPolicy(fetchPolicy);
     final MultiSourceResult<TParsed> allResults =
-        queryManager.fetchQueryAsMultiSourceResult(queryId, options);
+        queryManager.fetchQueryAsMultiSourceResult(queryId, fetchOptions);
     latestResult ??= allResults.eagerResult;
 
     if (allResults.networkResult == null) {
@@ -201,8 +207,9 @@ class ObservableQuery<TParsed> {
           : QueryLifecycle.pending;
     }
 
-    if (options.pollInterval != null && options.pollInterval! > Duration.zero) {
-      startPolling(options.pollInterval);
+    if (fetchOptions.pollInterval != null &&
+        fetchOptions.pollInterval! > Duration.zero) {
+      startPolling(fetchOptions.pollInterval);
     }
 
     return allResults;

@@ -1,10 +1,10 @@
-name: publish packages to pub.dev
+name: Release (packages)
 
 on:
   release:
     types: [created]
     tags:
-      - v-*
+      - v-packages-*
 jobs:
   publishing_client:
     runs-on: ubuntu-latest

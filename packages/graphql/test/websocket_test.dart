@@ -9,7 +9,6 @@ import 'package:gql/language.dart';
 import 'package:graphql/client.dart';
 
 import './helpers.dart';
-import './mock_server/ws_echo_server.dart';
 import 'mock_server/ws_echo_server.dart';
 
 SocketClient getTestClient({
@@ -18,7 +17,7 @@ SocketClient getTestClient({
   bool autoReconnect = true,
   Map<String, dynamic>? customHeaders,
   Duration delayBetweenReconnectionAttempts = const Duration(milliseconds: 1),
-  String protocol = SocketSubProtocol.graphqlWs,
+  String protocol = GraphQLProtocol.graphqlWs,
 }) =>
     SocketClient(
       wsUrl,
@@ -68,6 +67,47 @@ Future<void> main() async {
           }
         }
       });
+    });
+  });
+
+  group('GraphQLSocketMessage.parse', () {
+    test('graphql-transport-ws subprotocol with errors', () {
+      const payload = [
+        {
+          'message': 'Cannot query field "wrongQuery" on type "Query".',
+          'locations': [
+            {'line': 1, 'column': 2}
+          ],
+          'extensions': {
+            'validationError': {
+              'spec': 'https://spec.graphql.org/draft/#sec-Field-Selections',
+            }
+          }
+        }
+      ];
+
+      const message = {'id': 'message-id', 'type': 'error', 'payload': payload};
+      final parsed = GraphQLSocketMessage.parse(jsonEncode(message));
+      expect(parsed, isA<SubscriptionError>());
+      expect(parsed.toJson(), message);
+    });
+
+    test('graphql-ws apollo subprotocol with errors', () {
+      const payload = {
+        'message': 'Cannot query field "wrongQuery" on type "Query".',
+        'locations': [
+          {'line': 1, 'column': 2}
+        ],
+        'extensions': {
+          'validationError': {
+            'spec': 'https://spec.graphql.org/draft/#sec-Field-Selections',
+          }
+        }
+      };
+      const message = {'id': 'message-id', 'type': 'error', 'payload': payload};
+      final parsed = GraphQLSocketMessage.parse(jsonEncode(message));
+      expect(parsed, isA<SubscriptionError>());
+      expect(parsed.toJson(), message);
     });
   });
 
@@ -340,7 +380,7 @@ Future<void> main() async {
       controller = StreamController(sync: true);
       socketClient = getTestClient(
         controller: controller,
-        protocol: SocketSubProtocol.graphqlTransportWs,
+        protocol: GraphQLProtocol.graphqlTransportWs,
         wsUrl: wsUrl,
       );
     }));
@@ -613,7 +653,8 @@ Future<void> main() async {
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      socketClient.subscribe(payload, waitForConnection);
+      var subscription = socketClient.subscribe(payload, waitForConnection);
+      var isEmpty = subscription.isEmpty;
 
       await expectLater(
         socketClient.connectionState,
@@ -638,6 +679,8 @@ Future<void> main() async {
 
       expect(
           socketClient.socketChannel!.closeCode, WebSocketStatus.normalClosure);
+
+      expect(await isEmpty.timeout(const Duration(seconds: 1)), true);
     });
   }, tags: "integration");
 

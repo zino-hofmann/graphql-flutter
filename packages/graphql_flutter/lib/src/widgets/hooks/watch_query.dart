@@ -75,7 +75,7 @@ ObservableQuery<TParsed> useWatchQueryOnClient<TParsed>(
 ) {
   final overwrittenOptions = useMemoized(() {
     final policies =
-        client.defaultPolicies.query.withOverrides(options.policies);
+        client.defaultPolicies.watchQuery.withOverrides(options.policies);
     return options.copyWithPolicies(policies);
   }, [options]);
 
@@ -98,7 +98,7 @@ ObservableQuery<TParsed> useWatchMutationOnClient<TParsed>(
 ) {
   final overwrittenOptions = useMemoized(() {
     final policies =
-        client.defaultPolicies.mutate.withOverrides(options.policies);
+        client.defaultPolicies.watchMutation.withOverrides(options.policies);
     return options.copyWithPolicies(policies);
   }, [options]);
   return use(

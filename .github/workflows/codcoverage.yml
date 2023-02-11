@@ -1,6 +1,10 @@
-name: graphql Code coverage
+name: Codecoverage
 
-on: [ push, pull_request ]
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
   build:
@@ -14,9 +18,9 @@ jobs:
       - name: Run tests with coverage
         run: |
           make dep
-          make ci_coverage_client
-      - name: Upload coverage file
-        run: |
           curl -Os https://uploader.codecov.io/latest/linux/codecov
           chmod +x codecov
+          make ci_coverage_client
+          ./codecov
+          make ci_coverage_flutter
           ./codecov

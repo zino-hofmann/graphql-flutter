@@ -7,37 +7,23 @@ packages:
   - packages/**
 
 scripts:
-  analyze:
-    run: melos exec -c 1 -- "dart format --set-exit-if-changed . && dart analyze . --fatal-infos"
-    description: Run dart analyzer in a specific package.
-    select-package:
-
   flutter_analyze:
-    run: melos exec --depends-on="graphql" -c 1 -- "flutter format --set-exit-if-changed . && flutter analyze . --fatal-infos"
+    run: melos exec --depends-on="graphql" -c 1 -- "dart format --set-exit-if-changed . && flutter analyze . --fatal-infos"
     description: Run dart analyzer in a specific package.
     select-package:
-      scope: "graphql_flutter"
+      flutter: true
 
   client_analyze:
     run: melos exec -c 1 -- "dart format --set-exit-if-changed . && dart analyze . --fatal-infos"
     description: Run dart analyzer in a specific package.
     select-package:
-      scope: "graphql"
-
-  test:
-    description: Run tests in a specific package.
-    run: melos exec --concurrency=2 -- "dart pub get && dart pub run test"
-    select-package:
-      dir-exists:
-        - "test/"
-    env:
-      MELOS_TEST: true
+      flutter: false
 
   flutter_test:
     description: Run tests in a specific package.
-    run: melos exec --depends-on="graphql" --concurrency=2 -- "flutter test"
+    run: melos exec --depends-on="graphql" -- "flutter test"
     select-package:
-      scope: "graphql_flutter"
+      flutter: true
       dir-exists:
         - "test/"
     env:
@@ -45,9 +31,9 @@ scripts:
 
   client_test:
     description: Run tests in a specific package.
-    run: melos exec --concurrency=2 -- "dart pub get && dart pub run test"
+    run: melos exec -- "dart pub get && dart pub run test"
     select-package:
-      scope: "graphql"
+      flutter: false
       dir-exists:
         - "test/"
     env:
@@ -55,9 +41,9 @@ scripts:
 
   flutter_test_coverage:
     description: Run tests in a specific package.
-    run: melos exec --depends-on="graphql" --concurrency=2 -- "flutter test --coverage"
+    run: melos exec --depends-on="graphql" -- "flutter test --coverage"
     select-package:
-      scope: "graphql_flutter"
+      flutter: true
       dir-exists:
         - "test/"
     env:
@@ -65,12 +51,16 @@ scripts:
 
   client_test_coverage:
     description: Run tests in a specific package.
-    run: melos exec --concurrency=2 -- "dart run test --coverage="coverage" && dart run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.dart_tool/package_config.json --report-on=lib"
+    run: melos exec -- "dart run test --coverage="coverage" && dart run coverage:format_coverage --lcov --in=coverage --out=coverage.lcov --packages=.dart_tool/package_config.json --report-on=lib"
     select-package:
-      scope: "graphql"
+      flutter: false
       dir-exists:
         - "test/"
     env:
       MELOS_TEST: true
 
   format: dart format -o write .
+
+command:
+  bootstrap:
+    usePubspecOverrides: true

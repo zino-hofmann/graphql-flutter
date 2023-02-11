@@ -2,5 +2,4 @@ include: package:pedantic/analysis_options.yaml
 
 linter:
   rules:
-    avoid_as: false
     flutter_style_todos: false

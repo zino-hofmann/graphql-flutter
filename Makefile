@@ -1,23 +1,26 @@
 CC=dart pub global run melos
-CC_TEST=spec
+#CC_TEST=spec
 CC_CHANGELOG=dart pub global run changelog_cmd
 
 default: analyze check
 
 dep:
 	dart pub global activate melos;
-	dart pub global activate spec_cli;
-	dart pub global activate changelog_cmd;
+	# dart pub global activate changelog_cmd;
 	$(CC) bootstrap
 
-check:
-	$(CC_TEST)
+check: ci_check_client ci_check_flutter
 
 fmt:
 	$(CC) run format --no-select
 
 analyze: fmt
-	$(CC) run analyze --no-select
+	$(CC) run client_analyze --no-select
+	$(CC) run flutter_analyze --no-select
+
+client: ci_check_client ci_fmt_client
+
+flutter: ci_check_flutter ci_fmt_flutter
 
 ci_check_flutter:
 	$(CC) run flutter_test --no-select

@@ -1,18 +1,35 @@
-[![MIT License][license-badge]][license-link]
-[![All Contributors](https://img.shields.io/badge/all_contributors-31-orange.svg?style=flat-square)](#contributors)
-[![PRs Welcome][prs-badge]][prs-link]
+<div align="center">
+  <h1>GraphQL <Client></Client></h1>
 
-[![Star on GitHub][github-star-badge]][github-star-link]
-[![Watch on GitHub][github-watch-badge]][github-watch-link]
-[![Discord][discord-badge]][discord-link]
+  <div align="center">
+      <img src="https://miro.medium.com/max/1400/1*bU9k3XzmNAQ9F9J0uCiFsQ.png" width="800"/>
+  </div>
 
-[![Build Status][build-status-badge]][build-status-link]
-[![Coverage][coverage-badge]][coverage-link]
-[![version][version-badge]][package-link]
+  <p>
+    <strong>Client implementation to interact with any graphql server</strong>
+  </p>
 
-# GraphQL Client
+  <h4>
+    <a href="https://github.com/zino-hofmann/graphql-flutter">Project Homepage</a>
+  </h4>
 
-[`graphql/client.dart`](https://pub.dev/packages/graphql) is a GraphQL client for dart modeled on the [apollo client], and is currently the most popular GraphQL client for dart. It is co-developed alongside [`graphql_flutter`](https://pub.dev/packages/graphql_flutter) [on github](https://github.com/zino-app/graphql-flutter), where you can find more in-depth examples. We also have a lively community alongside the rest of the GraphQL Dart community on [discord][discord-link].
+  <a href="https://github.com/laanwj/rust-clightning-rpc/actions">
+    <img alt="GitHub Workflow Status (branch)" src="https://img.shields.io/github/workflow/status/laanwj/rust-clightning-rpc/Integration%20testing/master?style=flat-square"/>
+  </a>
+
+  <a href="https://pub.dev/packages/graphql">
+    <img alt="Pub Popularity" src="https://img.shields.io/pub/popularity/graphql?style=flat-square"/>
+  </a>
+
+  <a href="https://discord.gg/YBFCTXNbwY">
+    <img alt="Discord" src="https://img.shields.io/discord/559455668810153989?style=flat-square"/>
+  </a>
+
+</div>
+
+## Introduction
+
+[graphql/client.dart](https://pub.dev/packages/graphql) is a GraphQL client for dart modeled on the [apollo client], and is currently the most popular GraphQL client for dart. It is co-developed alongside [`graphql_flutter`](https://pub.dev/packages/graphql_flutter) [on github](https://github.com/zino-app/graphql-flutter), where you can find more in-depth examples. We also have a lively community alongside the rest of the GraphQL Dart community on [discord][discord-link].
 
 As of `v4`, it is built on foundational libraries from the [gql-dart project], including [`gql`], [`gql_link`], and [`normalize`]. We also depend on [hive](https://docs.hivedb.dev/#/) for persistence via `HiveStore`.
 
@@ -905,6 +922,20 @@ final HttpLink _httpLink = HttpLink(
 );
 
 final Link _link = _apqLink.concat(_httpLink);
+```
+
+## Q&A
+### CSRF Error while uploading MultipartFile
+If you are receiving csrf error from your apollo graphql server while uploading file,
+your need to add some additional headers to the `HttpLink`:
+<br>
+Also ensure that you're add `contentType` to `MultipartFile` as `MediaType`
+
+```dart
+HttpLink httpLink = HttpLink('https://api.url/graphql', defaultHeaders: {
+  'Content-Type': 'application/json; charset=utf-8',
+  'X-Apollo-Operation-Name': 'post'
+})
 ```
 
 [build-status-badge]: https://img.shields.io/github/workflow/status/zino-hofmann/graphql-flutter/graphql-flutter%20Tests%20case?style=flat-square

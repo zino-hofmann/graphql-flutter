@@ -352,7 +352,7 @@ void main() {
         'does not issues new network request when policies are effectively unchanged',
         (WidgetTester tester) async {
       final page = Page(
-        fetchPolicy: client!.value.defaultPolicies.query.fetch,
+        fetchPolicy: client!.value.defaultPolicies.watchQuery.fetch,
         errorPolicy: null,
       );
 

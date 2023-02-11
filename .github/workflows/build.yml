@@ -1,0 +1,26 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        channel: 
+          - stable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{matrix.channel}}
+      - name: Install dependencies
+        run: make dep
+      - name: Code formatting check
+        run: make ci_fmt_client
+      - name: Code formatting check (flutter)
+        run: make ci_fmt_flutter
