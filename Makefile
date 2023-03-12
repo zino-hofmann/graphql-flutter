@@ -5,7 +5,7 @@ CC_CHANGELOG=dart pub global run changelog_cmd
 default: analyze check
 
 dep:
-	dart pub global activate melos;
+	dart pub global activate melos 2.9.0;
 	# dart pub global activate changelog_cmd;
 	$(CC) bootstrap
 
