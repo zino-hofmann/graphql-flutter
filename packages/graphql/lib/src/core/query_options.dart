@@ -9,7 +9,7 @@ import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
 import 'package:meta/meta.dart';
 
-typedef OnQueryComplete = FutureOr<void> Function(Map<String, dynamic> data);
+typedef OnQueryComplete = FutureOr<void> Function(Map<String, dynamic>? data);
 
 typedef OnQueryError = FutureOr<void> Function(OperationException? error);
 
@@ -366,7 +366,7 @@ class QueryCallbackHandler<TParsed> {
     if (options.onComplete != null) {
       return (QueryResult? result) {
         if (!result!.isLoading && !result.isOptimistic) {
-          return options.onComplete!(result.data ?? {});
+          return options.onComplete!(result.data);
         }
       };
     }
