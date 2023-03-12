@@ -1,3 +1,12 @@
+# v5.2.0-beta.1
+
+## Fixed
+- onComplete callback should send null ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aceff150bf8c676207f16aa07f9622dfc7e56e9d)). @budde377 12-03-2023
+- upgrade the ws packege to v2.3.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e736f5bf1b1226c5607b2c07e2f3e83b6cb18945)). @vincenzopalazzo 15-01-2023
+- remove unecessary deprecation code ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6deede934fb85c735b14c28b737319581bda6f16)). @vincenzopalazzo 15-01-2023
+- support @include and @skip with new normalize major ver ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/c31b82ab7b516fd1d1e1ed735fa17a605caea441)). @vincenzopalazzo 15-01-2023
+
+
 # v5.1.3
 
 ## Fixed
