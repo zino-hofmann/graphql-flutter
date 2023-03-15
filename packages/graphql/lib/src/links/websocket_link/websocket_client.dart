@@ -278,6 +278,7 @@ class SocketClient {
         _connectionStateController.add(SocketConnectionState.handshake);
       } else {
         _connectionStateController.add(SocketConnectionState.connected);
+        print('Connected to websocket.');
       }
       print('Initialising connection');
       _write(initOperation);
