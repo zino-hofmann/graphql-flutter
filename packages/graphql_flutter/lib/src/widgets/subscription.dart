@@ -73,6 +73,7 @@ class Subscription<TParsed> extends HookWidget {
       client: client,
       options: options,
       builder: builder,
+      onSubscriptionResult: onSubscriptionResult,
     );
   }
 }
