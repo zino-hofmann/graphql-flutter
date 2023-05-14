@@ -1,3 +1,12 @@
+# v5.2.0-beta.2
+
+## Fixed
+- added missing onSubscriptionResult argument ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1b17d7709410c2a106d0c0a5d9da3c926001a49c)). @PhilippS93 03-04-2023
+
+## Added
+- bump gql version to 1.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6c991d8e8dc952f9cf0774746ce3d59f48f1ea32)). @ndelanou 03-05-2023
+
+
 # v5.2.0-beta.1
 
 
