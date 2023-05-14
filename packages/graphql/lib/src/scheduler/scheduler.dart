@@ -57,7 +57,7 @@ class QueryScheduler {
     }
 
     // fetch each query on the interval
-    intervalQueries[interval]!.forEach(queryManager!.refetchQuery);
+    intervalQueries[interval]!.forEach(queryManager!.refetchQuery<dynamic>);
   }
 
   void startPollingQuery(
