@@ -1,3 +1,10 @@
+# v5.2.0-beta.2
+
+## Added
+- bump gql version to 1.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6c991d8e8dc952f9cf0774746ce3d59f48f1ea32)). @ndelanou 03-05-2023
+- print the connection status with ws ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a9aefc41909eb6911c4c4de1d0477bb620d1098d)). @vytautas-pranskunas- 15-03-2023
+
+
 # v5.2.0-beta.1
 
 ## Fixed
