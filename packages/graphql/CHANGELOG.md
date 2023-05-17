@@ -1,3 +1,9 @@
+# v5.2.0-beta.3
+
+## Added
+- bump sdk version upper bound to <4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8bb9ba355e53dccf5e291b1f05171459bf8867ed)). @ndelanou 17-05-2023
+
+
 # v5.2.0-beta.2
 
 ## Added
