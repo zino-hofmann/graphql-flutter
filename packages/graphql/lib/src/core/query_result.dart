@@ -43,12 +43,14 @@ final _eagerSources = {
 class QueryResult<TParsed extends Object?> {
   @protected
   QueryResult.internal({
-    this.data,
+    Map<String, dynamic>? data,
     this.exception,
     this.context = const Context(),
     required this.parserFn,
     required this.source,
-  }) : timestamp = DateTime.now();
+  }) : timestamp = DateTime.now() {
+    _data = data;
+  }
 
   factory QueryResult({
     required BaseOptions<TParsed> options,
@@ -99,7 +101,17 @@ class QueryResult<TParsed extends Object?> {
   QueryResultSource? source;
 
   /// Response data
-  Map<String, dynamic>? data;
+  Map<String, dynamic>? get data {
+    return _data;
+  }
+
+  set data(Map<String, dynamic>? data) {
+    _data = data;
+    _cachedParsedData = null;
+  }
+
+  Map<String, dynamic>? _data;
+  TParsed? _cachedParsedData;
 
   /// Response context. Defaults to an empty `Context()`
   Context context;
@@ -137,11 +149,15 @@ class QueryResult<TParsed extends Object?> {
   TParsed? get parsedData {
     final data = this.data;
     final parserFn = this.parserFn;
+    final cachedParsedData = _cachedParsedData;
 
     if (data == null) {
       return null;
     }
-    return parserFn(data);
+    if (cachedParsedData != null) {
+      return cachedParsedData;
+    }
+    return _cachedParsedData = parserFn(data);
   }
 
   @override
