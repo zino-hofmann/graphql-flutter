@@ -1,3 +1,9 @@
+# v5.2.0-beta.4
+
+## Added
+- Cache parsed data ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aa81251f71f7a5f566eae4a9575eb6547050c2d9)). @budde377 03-06-2023
+
+
 # v5.2.0-beta.3
 
 ## Added
