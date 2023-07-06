@@ -8,7 +8,7 @@ issue_tracker: https://github.com/zino-hofmann/graphql-flutter/issues
 # publish_to: 'none'
 
 dependencies:
-  graphql: 5.2.0-beta.5
+  graphql: ^5.2.0-beta.4
   gql_exec: ^1.0.0
   flutter:
     sdk: flutter
