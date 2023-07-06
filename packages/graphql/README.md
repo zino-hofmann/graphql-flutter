@@ -327,6 +327,64 @@ subscription = client.subscribe(
 subscription.listen(reactToAddedReview)
 ```
 
+#### Adding headers (including auth) to WebSocket
+
+In order to add auth header or any other header to websocket connection use `initialPayload` property
+
+```dart
+initialPayload: () {
+    var headers = <String, String>{};
+    headers.putIfAbsent(HttpHeaders.authorizationHeader, () => token);
+
+    return headers;
+},
+```
+
+#### Refreshing headers (including auth)
+
+In order to refresh auth header you need to setup `onConnectionLost` function
+
+```dart
+onConnectionLost: (int? code, String? reason) async {
+    if (code == 4001) {
+        await authTokenService.issueToken(refresh: true);
+        return Duration.zero;
+    }
+
+    return null;
+    }
+```
+
+Where `code` and `reason` are values returned from the server on connection close. There is no such code like 401 in WebSockets so you can use your custom and server code could look similar:
+
+```typescript
+subscriptions: {
+    'graphql-ws': {
+        onConnect: async (context: any) => {
+            const { connectionParams } = context;
+
+            if (!connectionParams) {
+                throw new Error('Connection params are missing');
+            }
+
+            const authToken = connectionParams.authorization;
+
+            if (authToken) {
+                const isValid await authService.isTokenValid(authToken);
+
+                if (!isValid) {
+                    context.extra.socket.close(4001, 'Unauthorized');
+                }
+
+                return;
+            }
+        },
+    },
+},
+```
+
+`onConnectionLost` function returns `Duration` which is basically `delayBetweenReconnectionAttempts` for current reconnect attempt. If duration is `null` then default `delayBetweenReconnectionAttempts` will be used. Otherwise returned value. For example upon expired auth token there is not much sense to wait after token is refreshed.
+
 #### Customizing WebSocket Connections
 
 `WebSocketLink` now has an experimental `connect` parameter that can be
@@ -427,7 +485,7 @@ class _Connection {
 
 ```
 
-2- if you need to update your socket just cancel your subscription and resubscribe again using usual way 
+2- if you need to update your socket just cancel your subscription and resubscribe again using usual way
 and if the token changed it will be reconnect with the new token otherwise it will use the same client
 
 
@@ -435,7 +493,7 @@ and if the token changed it will be reconnect with the new token otherwise it wi
 ### `client.watchQuery` and `ObservableQuery`
 
 [`client.watchQuery`](https://pub.dev/documentation/graphql/latest/graphql/GraphQLClient/watchQuery.html)
-can be used to execute both queries and mutations, then reactively listen to changes to the underlying data in the cache. 
+can be used to execute both queries and mutations, then reactively listen to changes to the underlying data in the cache.
 
 ```dart
 final observableQuery = client.watchQuery(
@@ -506,7 +564,7 @@ To disable cache normalization entirely, you could pass `(data) => null`.
 If you only cared about `nodeId`, you could pass `(data) => data['nodeId']`.
 
 Here's a more detailed example where the system involved contains versioned entities you don't want to clobber:
-```dart 
+```dart
 String customDataIdFromObject(Map<String, Object> data) {
     final typeName = data['__typename'];
     final entityId = data['entityId'];
@@ -589,7 +647,7 @@ query {
 
 ```
 
-if you're not providing the possible type map and introspecting the typename, the cache can't be updated. 
+if you're not providing the possible type map and introspecting the typename, the cache can't be updated.
 
 ## Direct Cache Access API
 
@@ -597,9 +655,9 @@ The [`GraphQLCache`](https://pub.dev/documentation/graphql/latest/graphql/GraphQ
 leverages [`normalize`] to give us a fairly apollo-ish [direct cache access] API, which is also available on `GraphQLClient`.
 This means we can do [local state management] in a similar fashion as well.
 
-The cache access methods are available on any cache proxy, which includes the `GraphQLCache` the `OptimisticProxy` passed to `update` in the `graphql_flutter` `Mutation` widget, and the `client` itself.  
+The cache access methods are available on any cache proxy, which includes the `GraphQLCache` the `OptimisticProxy` passed to `update` in the `graphql_flutter` `Mutation` widget, and the `client` itself.
 > **NB** counter-intuitively, you likely never want to use use direct cache access methods directly on the `cache`,
-> as they will not be rebroadcast automatically.  
+> as they will not be rebroadcast automatically.
 > **Prefer `client.writeQuery` and `client.writeFragment` to those on the `client.cache` for automatic rebroadcasting**
 
 In addition to this overview, a complete and well-commented rundown of can be found in the
@@ -641,10 +699,10 @@ final data = client.readQuery(queryRequest);
 client.writeQuery(queryRequest, data);
 ```
 
-The cache access methods are available on any cache proxy, which includes the `GraphQLCache` the `OptimisticProxy` passed to `update` in the `graphql_flutter` `Mutation` widget, and the `client` itself.  
-> **NB** counter-intuitively, you likely never want to use use direct cache access methods on the cache 
+The cache access methods are available on any cache proxy, which includes the `GraphQLCache` the `OptimisticProxy` passed to `update` in the `graphql_flutter` `Mutation` widget, and the `client` itself.
+> **NB** counter-intuitively, you likely never want to use use direct cache access methods on the cache
 cache.readQuery(queryRequest);
-client.readQuery(queryRequest); // 
+client.readQuery(queryRequest); //
 
 ### `FragmentRequest`, `readFragment`, and `writeFragment`
 `FragmentRequest` has almost the same api as `Request`, but is provided directly from `graphql` for consistency.
@@ -710,7 +768,7 @@ client.query(QueryOptions(
   errorPolicy: ErrorPolicy.ignore,
   // ignore cache data.
   cacheRereadPolicy: CacheRereadPolicy.ignore,
-  // ... 
+  // ...
 ));
 ```
 Defaults can also be overridden via `defaultPolices` on the client itself:
@@ -724,11 +782,11 @@ GraphQLClient(
       CacheRereadPolicy.mergeOptimistic,
     ),
   ),
-  // ... 
+  // ...
 )
 ```
 
-**[`FetchPolicy`](https://pub.dev/documentation/graphql/latest/graphql/FetchPolicy-class.html):** determines where the client may return a result from, and whether that result will be saved to the cache.  
+**[`FetchPolicy`](https://pub.dev/documentation/graphql/latest/graphql/FetchPolicy-class.html):** determines where the client may return a result from, and whether that result will be saved to the cache.
 Possible options:
 
 - cacheFirst: return result from cache. Only fetch from network if cached result is not available.
@@ -737,7 +795,7 @@ Possible options:
 - noCache: return result from network, fail if network call doesn't succeed, don't save to cache.
 - networkOnly: return result from network, fail if network call doesn't succeed, save to cache.
 
-**[`ErrorPolicy`](https://pub.dev/documentation/graphql/latest/graphql/ErrorPolicy-class.html):** determines the level of events for errors in the execution result.  
+**[`ErrorPolicy`](https://pub.dev/documentation/graphql/latest/graphql/ErrorPolicy-class.html):** determines the level of events for errors in the execution result.
 Possible options:
 
 - none (default): Any GraphQL Errors are treated the same as network errors and any data is ignored from the response.
@@ -869,7 +927,7 @@ API key, IAM, and Federated provider authorization could be accomplished through
 
 This package does not support code-generation out of the box, but [graphql_codegen](https://pub.dev/packages/graphql_codegen) does!
 
-This package extensions on the client which takes away the struggle of serialization and gives you confidence through type-safety. 
+This package extensions on the client which takes away the struggle of serialization and gives you confidence through type-safety.
 It is also more performant than parsing GraphQL queries at runtime.
 
 For example, by creating the `.graphql` file

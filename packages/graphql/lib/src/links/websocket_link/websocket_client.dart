@@ -48,6 +48,7 @@ class SocketClientConfig {
     this.initialPayload,
     this.headers,
     this.connectFn,
+    this.onConnectionLost,
   });
 
   /// Serializer used to serialize request
@@ -97,6 +98,9 @@ class SocketClientConfig {
 
   /// Custom header to add inside the client
   final Map<String, dynamic>? headers;
+
+  final Future<Duration?>? Function(int? code, String? reason)?
+      onConnectionLost;
 
   /// Function to define another connection without call directly
   /// the connection function
@@ -334,6 +338,9 @@ class SocketClient {
   }
 
   void onConnectionLost([Object? e]) async {
+    var code = socketChannel!.closeCode;
+    var reason = socketChannel!.closeReason;
+
     await _closeSocketChannel();
     if (e != null) {
       print('There was an error causing connection lost: $e');
@@ -351,20 +358,23 @@ class SocketClient {
     _connectionWasLost = true;
     _subscriptionInitializers.values.forEach((s) => s.hasBeenTriggered = false);
 
-    if (config.autoReconnect &&
-        !_connectionStateController.isClosed &&
-        !_wasDisposed) {
-      if (config.delayBetweenReconnectionAttempts != null) {
-        _reconnectTimer = Timer(
-          config.delayBetweenReconnectionAttempts!,
-          () {
-            _connect();
-          },
-        );
-      } else {
-        Timer.run(() => _connect());
-      }
+    if (!config.autoReconnect ||
+        _connectionStateController.isClosed ||
+        _wasDisposed) {
+      return;
     }
+
+    var duration = config.delayBetweenReconnectionAttempts ?? Duration.zero;
+    if (config.onConnectionLost != null) {
+      duration = (await config.onConnectionLost!(code, reason)) ?? duration;
+    }
+
+    _reconnectTimer = Timer(
+      duration,
+      () async {
+        _connect();
+      },
+    );
   }
 
   void _enqueuePing() {

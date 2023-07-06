@@ -765,4 +765,79 @@ Future<void> main() async {
     });
     */
   });
+
+  group('SocketClient with dynamic payload', () {
+    late SocketClient socketClient;
+
+    var _token = 'mytoken';
+    var getToken = () => _token;
+
+    setUp(overridePrint((log) {
+      socketClient = SocketClient(
+        wsUrl,
+        protocol: GraphQLProtocol.graphqlWs,
+        config: SocketClientConfig(
+            delayBetweenReconnectionAttempts: const Duration(milliseconds: 1),
+            initialPayload: () =>
+                {'token': getToken(), 'protocol': GraphQLProtocol.graphqlWs},
+            onConnectionLost: (code, reason) async {
+              if (code == 4001) {
+                _token = 'mytoken2';
+              }
+
+              return Duration.zero;
+            }),
+      );
+    }));
+
+    tearDown(overridePrint(
+      (log) => socketClient.dispose(),
+    ));
+
+    test('resubscribe with new auth token', () async {
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      await expectLater(
+          socketClient.socketChannel!.stream.map((s) {
+            return jsonDecode(s as String)['payload']['token'];
+          }),
+          emits('mytoken'));
+
+      // We need to begin waiting on the connectionState
+      // before we issue the command to disconnect; otherwise
+      // it can reconnect so fast that it will be reconnected
+      // by the time that the expectLater check is initiated.
+      Timer(const Duration(milliseconds: 20), () async {
+        socketClient.socketChannel!.sink.add(forceAuthDisconnectCommand);
+      });
+      // The connectionState BehaviorController emits the current state
+      // to any new listener, so we expect it to start in the connected
+      // state, transition to notConnected, and then reconnect after that.
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connected,
+          SocketConnectionState.notConnected,
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
+
+      await expectLater(
+          socketClient.socketChannel!.stream.map((s) {
+            return jsonDecode(s as String)['payload']['token'];
+          }),
+          emits('mytoken2'));
+    });
+  });
 }
