@@ -1,6 +1,6 @@
 {
     "package_name": "graphql",
-    "version": "v5.2.0-beta.4",
+    "version": "v5.2.0-beta.5",
     "api": {
         "name": "github",
         "repository": "zino-hofmann/graphql-flutter",

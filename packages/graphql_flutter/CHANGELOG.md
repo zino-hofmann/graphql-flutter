@@ -1,3 +1,9 @@
+# v5.2.0-beta.5
+
+## Fixed
+- bumps http to v1 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/396c3b3f6986b6d3174e548982a93188b49ee5bc)). @moisessantos 06-07-2023
+
+
 # v5.2.0-beta.4
 
 ## Added
