@@ -1,10 +1,9 @@
 import 'package:meta/meta.dart';
 import 'dart:async';
-
 import 'package:graphql/src/core/core.dart';
 import 'package:graphql/src/cache/cache.dart';
-
 import 'package:graphql/src/core/fetch_more.dart';
+import 'package:graphql_common/graphql_common.dart';
 
 /// Universal GraphQL Client with configurable caching and [link][] system.
 /// modelled after the [`apollo-client`][ac].
@@ -24,12 +23,14 @@ class GraphQLClient implements GraphQLDataProxy {
   GraphQLClient({
     required this.link,
     required this.cache,
+    this.tracer,
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
         queryManager = QueryManager(
           link: link,
           cache: cache,
+          tracer: tracer,
           alwaysRebroadcast: alwaysRebroadcast,
         );
 
@@ -44,11 +45,16 @@ class GraphQLClient implements GraphQLDataProxy {
 
   late final QueryManager queryManager;
 
+  /// Custom Tracer specified by the user to trace the library
+  /// if the user need it.
+  final Tracer? tracer;
+
   /// Create a copy of the client with the provided information.
   GraphQLClient copyWith(
       {Link? link,
       GraphQLCache? cache,
       DefaultPolicies? defaultPolicies,
+      Tracer? tracer,
       bool? alwaysRebroadcast}) {
     return GraphQLClient(
         link: link ?? this.link,

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:graphql/src/utilities/response.dart';
+import 'package:graphql_common/graphql_common.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
 
@@ -26,6 +27,7 @@ class QueryManager {
   QueryManager({
     required this.link,
     required this.cache,
+    this.tracer,
     this.alwaysRebroadcast = false,
   }) {
     scheduler = QueryScheduler(
@@ -49,6 +51,10 @@ class QueryManager {
 
   /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
   bool rebroadcastLocked = false;
+
+  /// Custom Tracer specified by the user to trace the library
+  /// if the user need it.
+  final Tracer? tracer;
 
   ObservableQuery<TParsed> watchQuery<TParsed>(
       WatchQueryOptions<TParsed> options) {

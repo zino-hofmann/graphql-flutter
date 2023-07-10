@@ -1,5 +1,6 @@
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_link/gql_link.dart';
+import 'package:graphql_common/graphql_common.dart';
 
 import './websocket_client.dart';
 
@@ -17,6 +18,7 @@ class WebSocketLink extends Link {
     this.url, {
     this.config = const SocketClientConfig(),
     this.subProtocol = GraphQLProtocol.graphqlWs,
+    this.tracer,
   });
 
   final String url;
@@ -25,6 +27,10 @@ class WebSocketLink extends Link {
 
   // cannot be final because we're changing the instance upon a header change.
   SocketClient? _socketClient;
+
+  /// Custom Tracer specified by the user to trace the library
+  /// if the user need it.
+  final Tracer? tracer;
 
   @override
   Stream<Response> request(Request request, [forward]) async* {
