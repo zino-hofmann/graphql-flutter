@@ -37,6 +37,8 @@ class SubscriptionListener {
 
 enum SocketConnectionState { notConnected, handshake, connecting, connected }
 
+enum ToggleConnectionState { disconnect, connect }
+
 class SocketClientConfig {
   const SocketClientConfig({
     this.serializer = const RequestSerializer(),
@@ -48,6 +50,8 @@ class SocketClientConfig {
     this.initialPayload,
     this.headers,
     this.connectFn,
+    this.onConnectionLost,
+    this.toggleConnection,
   });
 
   /// Serializer used to serialize request
@@ -97,6 +101,11 @@ class SocketClientConfig {
 
   /// Custom header to add inside the client
   final Map<String, dynamic>? headers;
+
+  final Future<Duration?>? Function(int? code, String? reason)?
+      onConnectionLost;
+
+  final Stream<ToggleConnectionState>? toggleConnection;
 
   /// Function to define another connection without call directly
   /// the connection function
@@ -192,6 +201,7 @@ class SocketClient {
     @visibleForTesting this.onMessage,
     @visibleForTesting this.onStreamError = _defaultOnStreamError,
   }) {
+    _listenToToggleConnection();
     _connect();
   }
 
@@ -231,6 +241,30 @@ class SocketClient {
 
   Response Function(Map<String, dynamic>) get parse =>
       config.parser.parseResponse;
+
+  bool _isReconnectionPaused = false;
+  final _unsubscriber = PublishSubject<void>();
+
+  void _listenToToggleConnection() {
+    if (config.toggleConnection != null) {
+      config.toggleConnection!
+          .where((_) => !_connectionStateController.isClosed)
+          .takeUntil(_unsubscriber)
+          .listen((event) {
+        if (event == ToggleConnectionState.disconnect &&
+            _connectionStateController.value ==
+                SocketConnectionState.connected) {
+          _isReconnectionPaused = true;
+          onConnectionLost();
+        } else if (event == ToggleConnectionState.connect &&
+            _connectionStateController.value ==
+                SocketConnectionState.notConnected) {
+          _isReconnectionPaused = false;
+          _connect();
+        }
+      });
+    }
+  }
 
   void _disconnectOnKeepAliveTimeout(Stream<GraphQLSocketMessage> messages) {
     _keepAliveSubscription = messages.whereType<ConnectionKeepAlive>().timeout(
@@ -334,6 +368,9 @@ class SocketClient {
   }
 
   void onConnectionLost([Object? e]) async {
+    var code = socketChannel!.closeCode;
+    var reason = socketChannel!.closeReason;
+
     await _closeSocketChannel();
     if (e != null) {
       print('There was an error causing connection lost: $e');
@@ -344,6 +381,7 @@ class SocketClient {
     _keepAliveSubscription?.cancel();
     _messageSubscription?.cancel();
 
+    //TODO: do we really need this check here because few lines bellow there is another check
     if (_connectionStateController.isClosed || _wasDisposed) {
       return;
     }
@@ -351,20 +389,24 @@ class SocketClient {
     _connectionWasLost = true;
     _subscriptionInitializers.values.forEach((s) => s.hasBeenTriggered = false);
 
-    if (config.autoReconnect &&
-        !_connectionStateController.isClosed &&
-        !_wasDisposed) {
-      if (config.delayBetweenReconnectionAttempts != null) {
-        _reconnectTimer = Timer(
-          config.delayBetweenReconnectionAttempts!,
-          () {
-            _connect();
-          },
-        );
-      } else {
-        Timer.run(() => _connect());
-      }
+    if (_isReconnectionPaused ||
+        !config.autoReconnect ||
+        _connectionStateController.isClosed ||
+        _wasDisposed) {
+      return;
     }
+
+    var duration = config.delayBetweenReconnectionAttempts ?? Duration.zero;
+    if (config.onConnectionLost != null) {
+      duration = (await config.onConnectionLost!(code, reason)) ?? duration;
+    }
+
+    _reconnectTimer = Timer(
+      duration,
+      () async {
+        _connect();
+      },
+    );
   }
 
   void _enqueuePing() {
@@ -389,6 +431,7 @@ class SocketClient {
     _reconnectTimer?.cancel();
     _pingTimer?.cancel();
     _keepAliveSubscription?.cancel();
+    _unsubscriber.close();
 
     await Future.wait([
       _closeSocketChannel(),
