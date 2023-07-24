@@ -385,6 +385,29 @@ subscriptions: {
 
 `onConnectionLost` function returns `Duration` which is basically `delayBetweenReconnectionAttempts` for current reconnect attempt. If duration is `null` then default `delayBetweenReconnectionAttempts` will be used. Otherwise returned value. For example upon expired auth token there is not much sense to wait after token is refreshed.
 
+#### Handling connection manually
+
+`toggleConnection` stream was introduced to allow connect or disconnect manually.
+
+```dart
+var toggleConnection = PublishSubject<ToggleConnectionState>;
+
+SocketClientConfig(
+    toggleConnection: toggleConnection,
+),
+```
+
+later from your code call
+
+```dart
+toggleConnection.add(ToggleConnectionState.disconnect);
+//OR
+toggleConnection.add(ToggleConnectionState.connect);
+```
+
+When `disconnect` event is called `autoReconnect` stops. When `connect` is called `autoReconnect` resumes.
+this is useful when for some reason you want to stop reconnection. For example when user logouts from the system and reconnection would cause auth error from server causing infinite loop.
+
 #### Customizing WebSocket Connections
 
 `WebSocketLink` now has an experimental `connect` parameter that can be
