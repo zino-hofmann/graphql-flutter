@@ -599,6 +599,10 @@ class SocketClient {
           _connectionStateController.value == SocketConnectionState.connected &&
           socketChannel != null) {
         _write(StopOperation(id));
+      } else if (protocol == GraphQLProtocol.graphqlTransportWs &&
+          _connectionStateController.value == SocketConnectionState.connected &&
+          socketChannel != null) {
+        _write(SubscriptionComplete(id));
       }
     };
 
