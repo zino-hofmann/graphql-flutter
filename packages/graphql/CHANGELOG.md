@@ -1,3 +1,13 @@
+# v5.2.0-beta.6
+
+## Fixed
+- Send SubscriptionComplete message when using graphqlTra… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6e73d62ba2b8a58a35b3b18e372003462a73e192)). @ 30-08-2023
+
+## Added
+- Send custom payload in PingMessage ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/19d5c86b98e889b333996da43126f9404a9a4556)). @Rochak69 31-08-2023
+- added WebSocket token refresh and autoReconnect toggling ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1c6d5404be2ff54f916bceab6bb52a04bae5d01)). @vytautas-pranskunas- 24-07-2023
+
+
 # v5.2.0-beta.5
 
 ## Fixed
