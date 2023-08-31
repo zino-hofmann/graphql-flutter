@@ -40,19 +40,19 @@ enum SocketConnectionState { notConnected, handshake, connecting, connected }
 enum ToggleConnectionState { disconnect, connect }
 
 class SocketClientConfig {
-  const SocketClientConfig({
-    this.serializer = const RequestSerializer(),
-    this.parser = const ResponseParser(),
-    this.autoReconnect = true,
-    this.queryAndMutationTimeout = const Duration(seconds: 10),
-    this.inactivityTimeout = const Duration(seconds: 30),
-    this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
-    this.initialPayload,
-    this.headers,
-    this.connectFn,
-    this.onConnectionLost,
-    this.toggleConnection,
-  });
+  const SocketClientConfig(
+      {this.serializer = const RequestSerializer(),
+      this.parser = const ResponseParser(),
+      this.autoReconnect = true,
+      this.queryAndMutationTimeout = const Duration(seconds: 10),
+      this.inactivityTimeout = const Duration(seconds: 30),
+      this.delayBetweenReconnectionAttempts = const Duration(seconds: 5),
+      this.initialPayload,
+      this.headers,
+      this.connectFn,
+      this.onConnectionLost,
+      this.toggleConnection,
+      this.pingMessage = const <String, dynamic>{}});
 
   /// Serializer used to serialize request
   final RequestSerializer serializer;
@@ -75,6 +75,9 @@ class SocketClientConfig {
   ///
   /// If null, the reconnection will occur immediately, although not recommended.
   final Duration? delayBetweenReconnectionAttempts;
+
+  // The payload to send the send while pinging. If null payload while ping the server will be empty.
+  final Map<String, dynamic> pingMessage;
 
   /// The duration after which a query or mutation should time out.
   /// If null, no timeout is applied, although not recommended.
@@ -413,7 +416,7 @@ class SocketClient {
     _pingTimer?.cancel();
     _pingTimer = new Timer(
       config.inactivityTimeout!,
-      () => _write(PingMessage()),
+      () => _write(PingMessage(config.pingMessage)),
     );
   }
 
