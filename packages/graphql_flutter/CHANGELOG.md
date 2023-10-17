@@ -1,3 +1,9 @@
+# v5.2.0-beta.6
+
+## Added
+- bump connectivity_plus to 5.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/dd53e61f8c1410ced70e4cdc665bb8e89e5fbeb4)). @erknvl 10-10-2023
+
+
 # v5.2.0-beta.5
 
 ## Fixed
