@@ -42,10 +42,12 @@ Future<void> mockApplicationDocumentsDirectory() async {
     return null;
   };
   // Mock out the MethodChannel for the path_provider plugin.
-  const MethodChannel('plugins.flutter.io/path_provider')
-      .setMockMethodCallHandler(handler);
-  const MethodChannel('plugins.flutter.io/path_provider_macos')
-      .setMockMethodCallHandler(handler);
+  final channel = MethodChannel('plugins.flutter.io/path_provider');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel, handler);
+  final channel_osx = MethodChannel('plugins.flutter.io/path_provider_macos');
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(channel_osx, handler);
 }
 
 class Page extends StatefulWidget {

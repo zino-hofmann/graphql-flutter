@@ -1,3 +1,47 @@
+# v5.2.0-beta.6
+
+## Fixed
+- Send SubscriptionComplete message when using graphqlTra… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6e73d62ba2b8a58a35b3b18e372003462a73e192)). @ 30-08-2023
+
+## Added
+- Send custom payload in PingMessage ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/19d5c86b98e889b333996da43126f9404a9a4556)). @Rochak69 31-08-2023
+- added WebSocket token refresh and autoReconnect toggling ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1c6d5404be2ff54f916bceab6bb52a04bae5d01)). @vytautas-pranskunas- 24-07-2023
+
+
+# v5.2.0-beta.5
+
+## Fixed
+- bumps http to v1 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/396c3b3f6986b6d3174e548982a93188b49ee5bc)). @moisessantos 06-07-2023
+
+
+# v5.2.0-beta.4
+
+## Added
+- Cache parsed data ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aa81251f71f7a5f566eae4a9575eb6547050c2d9)). @budde377 03-06-2023
+
+
+# v5.2.0-beta.3
+
+## Added
+- bump sdk version upper bound to <4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8bb9ba355e53dccf5e291b1f05171459bf8867ed)). @ndelanou 17-05-2023
+
+
+# v5.2.0-beta.2
+
+## Added
+- bump gql version to 1.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6c991d8e8dc952f9cf0774746ce3d59f48f1ea32)). @ndelanou 03-05-2023
+- print the connection status with ws ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a9aefc41909eb6911c4c4de1d0477bb620d1098d)). @vytautas-pranskunas- 15-03-2023
+
+
+# v5.2.0-beta.1
+
+## Fixed
+- onComplete callback should send null ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aceff150bf8c676207f16aa07f9622dfc7e56e9d)). @budde377 12-03-2023
+- upgrade the ws packege to v2.3.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e736f5bf1b1226c5607b2c07e2f3e83b6cb18945)). @vincenzopalazzo 15-01-2023
+- remove unecessary deprecation code ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6deede934fb85c735b14c28b737319581bda6f16)). @vincenzopalazzo 15-01-2023
+- support @include and @skip with new normalize major ver ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/c31b82ab7b516fd1d1e1ed735fa17a605caea441)). @vincenzopalazzo 15-01-2023
+
+
 # v5.1.3
 
 ## Fixed

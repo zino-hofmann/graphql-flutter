@@ -3,7 +3,7 @@ name: starwars_server
 publish_to: none
 
 environment:
-  sdk: ">=2.10.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
 
 dependencies:
   graphql_starwars_test_server: ^0.1.0

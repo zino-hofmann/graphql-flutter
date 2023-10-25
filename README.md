@@ -50,8 +50,10 @@ Around `graphql_flutter` are builds awesome tools like:
 
 1. [graphql_flutter_bloc](https://github.com/artflutter/graphql_flutter_bloc)
 2. [graphql_codegen](https://github.com/heftapp/graphql_codegen)
+3. [graphql-cache-inspector](https://pub.dev/packages/graphql_cache_inspector)
 
 ## Features
+
 ✅ &nbsp; Queries, Mutations, and Subscriptions  
 ✅ &nbsp; [Query polling and rebroadcasting](./packages/graphql/README.md#clientwatchquery-and-observablequery)  
 ✅ &nbsp; [In memory and persistent caching](./packages/graphql/README.md#persistence)  

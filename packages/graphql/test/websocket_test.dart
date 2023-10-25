@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:rxdart/rxdart.dart';
 import 'package:test/test.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -18,6 +19,7 @@ SocketClient getTestClient({
   Map<String, dynamic>? customHeaders,
   Duration delayBetweenReconnectionAttempts = const Duration(milliseconds: 1),
   String protocol = GraphQLProtocol.graphqlWs,
+  Stream<ToggleConnectionState>? toggleConnection,
 }) =>
     SocketClient(
       wsUrl,
@@ -29,6 +31,7 @@ SocketClient getTestClient({
         initialPayload: {
           'protocol': protocol,
         },
+        toggleConnection: toggleConnection,
       ),
       randomBytesForUuid: Uint8List.fromList(
         [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16],
@@ -376,12 +379,17 @@ Future<void> main() async {
         r'"type":"subscribe","id":"01020304-0506-4708-890a-0b0c0d0e0f10",'
         r'"payload":{"operationName":null,"variables":{},"query":"subscription {\n  \n}"}'
         r'}';
+    late PublishSubject<ToggleConnectionState> toggleConnection;
+
     setUp(overridePrint((log) {
+      toggleConnection = new PublishSubject<ToggleConnectionState>();
+
       controller = StreamController(sync: true);
       socketClient = getTestClient(
         controller: controller,
         protocol: GraphQLProtocol.graphqlTransportWs,
         wsUrl: wsUrl,
+        toggleConnection: toggleConnection,
       );
     }));
     tearDown(overridePrint(
@@ -635,6 +643,92 @@ Future<void> main() async {
         ),
       );
     });
+
+    test('resubscribe after server disconnect and resubscription not paused',
+        () async {
+      final payload = Request(
+        operation: Operation(document: gql('subscription {}')),
+      );
+      final waitForConnection = true;
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
+
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connecting,
+          SocketConnectionState.handshake,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      Timer(const Duration(milliseconds: 10), () async {
+        toggleConnection.add(ToggleConnectionState.disconnect);
+      });
+
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connected,
+          SocketConnectionState.notConnected,
+        ]),
+      );
+
+      Timer(const Duration(milliseconds: 10), () async {
+        toggleConnection.add(ToggleConnectionState.connect);
+      });
+
+      // The connectionState BehaviorController emits the current state
+      // to any new listener, so we expect it to start in the connected
+      // state, transition to notConnected, and then reconnect after that.
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.notConnected,
+          SocketConnectionState.connecting,
+          SocketConnectionState.handshake,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      // ignore: unawaited_futures
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
+        socketClient.socketChannel!.sink.add(jsonEncode({
+          'type': 'next',
+          'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
+          'payload': {
+            'data': {'foo': 'bar'},
+            'errors': [
+              {'message': 'error and data can coexist'}
+            ]
+          }
+        }));
+      });
+
+      await expectLater(
+        subscriptionDataStream,
+        emits(
+          // todo should ids be included in response context? probably '01020304-0506-4708-890a-0b0c0d0e0f10'
+          Response(
+            data: {'foo': 'bar'},
+            errors: [
+              GraphQLError(message: 'error and data can coexist'),
+            ],
+            context: Context().withEntry(ResponseExtensions(null)),
+            response: {
+              "type": "next",
+              "data": {"foo": "bar"},
+              "errors": [
+                {"message": "error and data can coexist"}
+              ]
+            },
+          ),
+        ),
+      );
+    });
   }, tags: "integration");
 
   group('SocketClient without autoReconnect', () {
@@ -764,5 +858,81 @@ Future<void> main() async {
       });
     });
     */
+  });
+
+  group('SocketClient with dynamic payload', () {
+    late SocketClient socketClient;
+
+    var _token = 'mytoken';
+    var getToken = () => _token;
+
+    setUp(overridePrint((log) {
+      socketClient = SocketClient(
+        wsUrl,
+        protocol: GraphQLProtocol.graphqlWs,
+        config: SocketClientConfig(
+          delayBetweenReconnectionAttempts: const Duration(milliseconds: 1),
+          initialPayload: () =>
+              {'token': getToken(), 'protocol': GraphQLProtocol.graphqlWs},
+          onConnectionLost: (code, reason) async {
+            if (code == 4001) {
+              _token = 'mytoken2';
+            }
+
+            return Duration.zero;
+          },
+        ),
+      );
+    }));
+
+    tearDown(overridePrint(
+      (log) => socketClient.dispose(),
+    ));
+
+    test('resubscribe with new auth token', () async {
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      await expectLater(
+          socketClient.socketChannel!.stream.map((s) {
+            return jsonDecode(s as String)['payload']['token'];
+          }),
+          emits('mytoken'));
+
+      // We need to begin waiting on the connectionState
+      // before we issue the command to disconnect; otherwise
+      // it can reconnect so fast that it will be reconnected
+      // by the time that the expectLater check is initiated.
+      Timer(const Duration(milliseconds: 20), () async {
+        socketClient.socketChannel!.sink.add(forceAuthDisconnectCommand);
+      });
+      // The connectionState BehaviorController emits the current state
+      // to any new listener, so we expect it to start in the connected
+      // state, transition to notConnected, and then reconnect after that.
+      await expectLater(
+        socketClient.connectionState,
+        emitsInOrder([
+          SocketConnectionState.connected,
+          SocketConnectionState.notConnected,
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
+
+      await expectLater(
+          socketClient.socketChannel!.stream.map((s) {
+            return jsonDecode(s as String)['payload']['token'];
+          }),
+          emits('mytoken2'));
+    });
   });
 }

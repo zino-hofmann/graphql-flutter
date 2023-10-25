@@ -78,7 +78,7 @@ void readRepositories() async {
       result.data!['viewer']['repositories']['nodes'] as List<dynamic>;
 
   repositories.forEach(
-    (dynamic f) => {stdout.writeln('Id: ${f['id']} Name: ${f['name']}')},
+    (dynamic f) => stdout.writeln('Id: ${f['id']} Name: ${f['name']}'),
   );
 
   exit(0);
