@@ -576,12 +576,14 @@ class SocketClient {
             .listen((message) => response.addError(message));
 
         if (!_subscriptionInitializers[id]!.hasBeenTriggered) {
-          GraphQLSocketMessage operation = StartOperation(
-            id,
-            serialize(payload),
-          );
+          GraphQLSocketMessage operation;
           if (protocol == GraphQLProtocol.graphqlTransportWs) {
             operation = SubscribeOperation(
+              id,
+              serialize(payload),
+            );
+          } else {
+            operation = StartOperation(
               id,
               serialize(payload),
             );
