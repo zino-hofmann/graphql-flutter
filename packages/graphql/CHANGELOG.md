@@ -1,3 +1,9 @@
+# v5.2.0-beta.7
+
+## Fixed
+- bump uuid dependency to ^4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/4fa6dd61c7fb9aad806df70a318cfd1086e35e68)). @francescoberardi 23-11-2023
+
+
 # v5.2.0-beta.6
 
 ## Fixed
