@@ -128,7 +128,7 @@ which requires a few changes to the above:
 > **NB**: This is different in `graphql_flutter`, which provides `await initHiveForFlutter()` for initialization in `main`
 
 ```dart
-GraphQL getClient() async {
+GraphQLClient getClient() async {
   ...
   /// initialize Hive and wrap the default box in a HiveStore
   final store = await HiveStore.open(path: 'my/cache/path');
