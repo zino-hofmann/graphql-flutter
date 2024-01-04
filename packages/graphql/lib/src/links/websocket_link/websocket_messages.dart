@@ -87,9 +87,19 @@ abstract class GraphQLSocketMessage extends JsonSerializable {
         return PongMessage(payload as Map<String, dynamic>);
 
       case MessageTypes.data:
-        return SubscriptionData(id, payload['data'], payload['errors']);
+        return SubscriptionData(
+          id,
+          payload['data'],
+          payload['errors'],
+          payload['extensions'],
+        );
       case MessageTypes.next:
-        return SubscriptionNext(id, payload['data'], payload['errors']);
+        return SubscriptionNext(
+          id,
+          payload['data'],
+          payload['errors'],
+          payload['extensions'],
+        );
       case MessageTypes.error:
         return SubscriptionError(id, payload);
       case MessageTypes.complete:
@@ -240,17 +250,20 @@ class ConnectionKeepAlive extends GraphQLSocketMessage {
 /// payload. The user should check the errors result before processing the
 /// data value. These error are from the query resolvers.
 class SubscriptionData extends GraphQLSocketMessage {
-  SubscriptionData(this.id, this.data, this.errors) : super(MessageTypes.data);
+  SubscriptionData(this.id, this.data, this.errors, this.extensions)
+      : super(MessageTypes.data);
 
   final String id;
   final dynamic data;
   final dynamic errors;
+  final dynamic extensions;
 
   @override
   toJson() => {
         "type": type,
         "data": data,
         "errors": errors,
+        "extensions": extensions,
       };
 
   @override
@@ -262,17 +275,20 @@ class SubscriptionData extends GraphQLSocketMessage {
 }
 
 class SubscriptionNext extends GraphQLSocketMessage {
-  SubscriptionNext(this.id, this.data, this.errors) : super(MessageTypes.next);
+  SubscriptionNext(this.id, this.data, this.errors, this.extensions)
+      : super(MessageTypes.next);
 
   final String id;
   final dynamic data;
   final dynamic errors;
+  final dynamic extensions;
 
   @override
   toJson() => {
         "type": type,
         "data": data,
         "errors": errors,
+        "extensions": extensions,
       };
 
   @override
