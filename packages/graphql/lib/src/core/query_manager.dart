@@ -1,8 +1,8 @@
 import 'dart:async';
 
+import 'package:graphql/src/utilities/deep_equal.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
-import 'package:collection/collection.dart';
 
 import 'package:gql_exec/gql_exec.dart';
 import 'package:gql_link/gql_link.dart' show Link;
@@ -19,8 +19,7 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 
 import 'package:graphql/src/core/_query_write_handling.dart';
 
-bool Function(dynamic a, dynamic b) _deepEquals =
-    const DeepCollectionEquality().equals;
+bool Function(dynamic a, dynamic b) _deepEquals = jsonMapEquals;
 
 class QueryManager {
   QueryManager({
