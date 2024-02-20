@@ -372,8 +372,8 @@ class SocketClient {
   }
 
   void onConnectionLost([Object? e]) async {
-    var code = socketChannel!.closeCode;
-    var reason = socketChannel!.closeReason;
+    var code = socketChannel?.closeCode;
+    var reason = socketChannel?.closeReason;
 
     await _closeSocketChannel();
     if (e != null) {
