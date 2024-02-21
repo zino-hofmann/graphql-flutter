@@ -502,6 +502,7 @@ class SocketClient {
             )
           : waitForConnectedStateWithoutTimeout;
 
+      sub?.cancel();
       sub = waitForConnectedState.listen((_) {
         final Stream<GraphQLSocketMessage> dataErrorComplete = _messages.where(
           (GraphQLSocketMessage message) {
