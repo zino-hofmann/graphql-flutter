@@ -34,11 +34,11 @@ Future<QueryResult<TParsed>> fetchMoreImplementation<TParsed>(
     final data = fetchMoreOptions.updateQuery(
       previousResult.data,
       fetchMoreResult.data,
-    )!;
+    );
 
     fetchMoreResult.data = data;
 
-    if (originalOptions.fetchPolicy != FetchPolicy.noCache) {
+    if (originalOptions.fetchPolicy != FetchPolicy.noCache && data != null) {
       queryManager.attemptCacheWriteFromClient(
         request,
         data,
