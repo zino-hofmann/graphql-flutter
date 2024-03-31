@@ -637,8 +637,14 @@ class GraphQLWebSocketChannel extends StreamChannelMixin<dynamic>
   Stream<GraphQLSocketMessage>? _messages;
 
   /// Stream of messages from the endpoint parsed as GraphQLSocketMessages
-  Stream<GraphQLSocketMessage> get messages => _messages ??=
-      stream.map<GraphQLSocketMessage>(GraphQLSocketMessage.parse);
+  Stream<GraphQLSocketMessage> get messages {
+    if (_messages == null)
+      _messages = stream.map((event) {
+        return GraphQLSocketMessage.parse(event);
+      }).asBroadcastStream();
+
+    return _messages!;
+  }
 
   String? get protocol => _webSocket.protocol;
 
