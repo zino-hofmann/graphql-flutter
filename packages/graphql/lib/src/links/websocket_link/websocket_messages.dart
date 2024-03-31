@@ -263,7 +263,7 @@ class SubscriptionData extends GraphQLSocketMessage {
         "type": type,
         "data": data,
         "errors": errors,
-        "extensions": extensions,
+        if (extensions != null) "extensions": extensions,
       };
 
   @override
@@ -288,7 +288,7 @@ class SubscriptionNext extends GraphQLSocketMessage {
         "type": type,
         "data": data,
         "errors": errors,
-        "extensions": extensions,
+        if (extensions != null) "extensions": extensions,
       };
 
   @override
