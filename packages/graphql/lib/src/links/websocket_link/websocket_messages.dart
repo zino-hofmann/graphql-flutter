@@ -263,14 +263,14 @@ class SubscriptionData extends GraphQLSocketMessage {
         "type": type,
         "data": data,
         "errors": errors,
-        "extensions": extensions,
+        if (extensions != null) "extensions": extensions,
       };
 
   @override
   int get hashCode => toJson().hashCode;
 
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       other is SubscriptionData && jsonEncode(other) == jsonEncode(this);
 }
 
@@ -288,14 +288,14 @@ class SubscriptionNext extends GraphQLSocketMessage {
         "type": type,
         "data": data,
         "errors": errors,
-        "extensions": extensions,
+        if (extensions != null) "extensions": extensions,
       };
 
   @override
   int get hashCode => toJson().hashCode;
 
   @override
-  bool operator ==(dynamic other) =>
+  bool operator ==(Object other) =>
       other is SubscriptionNext && jsonEncode(other) == jsonEncode(this);
 }
 
