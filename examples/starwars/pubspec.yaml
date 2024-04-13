@@ -4,7 +4,7 @@ description: An example graphql_flutter application utilizing graphql_starwars_t
 publish_to: none
 
 environment:
-  sdk: ">=2.13.0 <=3.0.0"
+  sdk: ">=2.13.0 <4.0.0"
 
 dependencies:
   flutter:

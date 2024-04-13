@@ -1,3 +1,28 @@
+# v5.2.0-beta.6
+
+## Added
+- bump connectivity_plus to 5.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/dd53e61f8c1410ced70e4cdc665bb8e89e5fbeb4)). @erknvl 10-10-2023
+
+
+# v5.2.0-beta.5
+
+## Fixed
+- bumps http to v1 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/396c3b3f6986b6d3174e548982a93188b49ee5bc)). @moisessantos 06-07-2023
+
+
+# v5.2.0-beta.4
+
+## Added
+- Cache parsed data ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aa81251f71f7a5f566eae4a9575eb6547050c2d9)). @budde377 03-06-2023
+- bump connectivity_plus dependency to ^4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/776d07063a4f8160daa4b6baa0af4be8517a62a0)). @ndelanou 24-05-2023
+
+
+# v5.2.0-beta.3
+
+## Added
+- bump sdk version upper bound to <4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8bb9ba355e53dccf5e291b1f05171459bf8867ed)). @ndelanou 17-05-2023
+
+
 # v5.2.0-beta.2
 
 ## Fixed

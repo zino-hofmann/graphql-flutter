@@ -1,3 +1,37 @@
+# v5.2.0-beta.7
+
+## Fixed
+- bump uuid dependency to ^4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/4fa6dd61c7fb9aad806df70a318cfd1086e35e68)). @francescoberardi 23-11-2023
+
+
+# v5.2.0-beta.6
+
+## Fixed
+- Send SubscriptionComplete message when using graphqlTra… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6e73d62ba2b8a58a35b3b18e372003462a73e192)). @ 30-08-2023
+
+## Added
+- Send custom payload in PingMessage ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/19d5c86b98e889b333996da43126f9404a9a4556)). @Rochak69 31-08-2023
+- added WebSocket token refresh and autoReconnect toggling ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1c6d5404be2ff54f916bceab6bb52a04bae5d01)). @vytautas-pranskunas- 24-07-2023
+
+
+# v5.2.0-beta.5
+
+## Fixed
+- bumps http to v1 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/396c3b3f6986b6d3174e548982a93188b49ee5bc)). @moisessantos 06-07-2023
+
+
+# v5.2.0-beta.4
+
+## Added
+- Cache parsed data ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aa81251f71f7a5f566eae4a9575eb6547050c2d9)). @budde377 03-06-2023
+
+
+# v5.2.0-beta.3
+
+## Added
+- bump sdk version upper bound to <4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8bb9ba355e53dccf5e291b1f05171459bf8867ed)). @ndelanou 17-05-2023
+
+
 # v5.2.0-beta.2
 
 ## Added

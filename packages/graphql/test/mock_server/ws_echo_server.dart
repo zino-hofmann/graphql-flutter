@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 const String forceDisconnectCommand = '___force_disconnect___';
+const String forceAuthDisconnectCommand = '___force_auth_disconnect___';
 
 /// Main function to create and run the echo server over the web socket.
 Future<String> runWebSocketServer(
@@ -20,6 +21,8 @@ void onWebSocketData(WebSocket client) {
   client.listen((data) async {
     if (data == forceDisconnectCommand) {
       client.close(WebSocketStatus.normalClosure, 'shutting down');
+    } else if (data == forceAuthDisconnectCommand) {
+      client.close(4001, 'Unauthorized');
     } else {
       final message = json.decode(data.toString());
       if (message['type'] == 'connection_init' &&
