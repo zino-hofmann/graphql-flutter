@@ -15,7 +15,7 @@ dependencies:
   meta: ^1.7.0
   path_provider: ^2.0.1
   path: ^1.8.0
-  connectivity_plus: ^5.0.0
+  connectivity_plus: ^6.0.1
   hive: ^2.0.0
   plugin_platform_interface: ^2.0.0
   flutter_hooks: '>=0.18.2 <0.21.0'
