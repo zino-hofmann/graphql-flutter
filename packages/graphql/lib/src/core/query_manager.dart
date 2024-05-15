@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
@@ -19,20 +20,29 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 
 import 'package:graphql/src/core/_query_write_handling.dart';
 
-bool Function(dynamic a, dynamic b) _deepEquals =
-    const DeepCollectionEquality().equals;
+typedef DeepEqualsFn = bool Function(dynamic a, dynamic b);
+
+/// The equality function used for comparing cached and new data.
+///
+/// You can alternatively provide [optimizedDeepEquals] for a faster
+/// equality check. Or provide your own via [GqlClient] constructor.
+DeepEqualsFn gqlDeepEquals = const DeepCollectionEquality().equals;
 
 class QueryManager {
   QueryManager({
     required this.link,
     required this.cache,
     this.alwaysRebroadcast = false,
+    DeepEqualsFn? deepEquals,
     bool deduplicatePollers = false,
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
       deduplicatePollers: deduplicatePollers,
     );
+    if (deepEquals != null) {
+      gqlDeepEquals = deepEquals;
+    }
   }
 
   final Link link;
@@ -551,7 +561,8 @@ class QueryManager {
   ) =>
       cachedData != null &&
       query.latestResult != null &&
-      (alwaysRebroadcast || !_deepEquals(query.latestResult!.data, cachedData));
+      (alwaysRebroadcast ||
+          !gqlDeepEquals(query.latestResult!.data, cachedData));
 
   void setQuery(ObservableQuery<Object?> observableQuery) {
     queries[observableQuery.queryId] = observableQuery;
