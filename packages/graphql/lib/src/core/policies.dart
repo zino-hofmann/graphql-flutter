@@ -307,9 +307,7 @@ class DefaultPolicies {
   bool operator ==(Object o) =>
       identical(this, o) ||
       (o is DefaultPolicies &&
-          const ListEquality<Object?>(
-            DeepCollectionEquality(),
-          ).equals(
+          gqlDeepEquals(
             o._getChildren(),
             _getChildren(),
           ));

@@ -104,9 +104,7 @@ abstract class BaseOptions<TParsed extends Object?> {
       identical(this, other) ||
       (other is BaseOptions &&
           runtimeType == other.runtimeType &&
-          const ListEquality<Object?>(
-            DeepCollectionEquality(),
-          ).equals(
+          gqlDeepEquals(
             other.properties,
             properties,
           ));

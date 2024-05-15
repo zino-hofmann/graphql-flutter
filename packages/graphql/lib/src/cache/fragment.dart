@@ -1,4 +1,5 @@
 import 'dart:convert';
+import "package:graphql/client.dart";
 import "package:meta/meta.dart";
 import "package:collection/collection.dart";
 
@@ -32,9 +33,7 @@ class Fragment {
   bool operator ==(Object o) =>
       identical(this, o) ||
       (o is Fragment &&
-          const ListEquality<Object?>(
-            DeepCollectionEquality(),
-          ).equals(
+          gqlDeepEquals(
             o._getChildren(),
             _getChildren(),
           ));
@@ -89,9 +88,7 @@ class FragmentRequest {
   bool operator ==(Object o) =>
       identical(this, o) ||
       (o is FragmentRequest &&
-          const ListEquality<Object?>(
-            DeepCollectionEquality(),
-          ).equals(
+          gqlDeepEquals(
             o._getChildren(),
             _getChildren(),
           ));
