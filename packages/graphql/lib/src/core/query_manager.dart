@@ -24,10 +24,9 @@ typedef DeepEqualsFn = bool Function(dynamic a, dynamic b);
 
 /// The equality function used for comparing cached and new data.
 ///
-/// You can alternatively provided [optimizedDeepEquals] for a faster
+/// You can alternatively provide [optimizedDeepEquals] for a faster
 /// equality check. Or provide your own via [GqlClient] constructor.
 DeepEqualsFn gqlDeepEquals = const DeepCollectionEquality().equals;
-// DeepEqualsFn gqlDeepEquals = optimizedDeepEquals;
 
 class QueryManager {
   QueryManager({
