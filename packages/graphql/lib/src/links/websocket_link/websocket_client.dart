@@ -215,7 +215,8 @@ class SocketClient {
   final SocketClientConfig config;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
-      BehaviorSubject<SocketConnectionState>();
+      BehaviorSubject<SocketConnectionState>.seeded(
+          SocketConnectionState.notConnected);
 
   final HashMap<String, SubscriptionListener> _subscriptionInitializers =
       HashMap();

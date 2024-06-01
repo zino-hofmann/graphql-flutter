@@ -1,3 +1,15 @@
+# v5.2.0-beta.8
+
+## Fixed
+- make == override parameters non-nullable ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/7e9c34b08cefcf7abc36172d358440049e25f58f)). @kamilkarp 01-04-2024
+- response extensions should be optional ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d174b51a55d40745a5dcd3a0621e77a4d435c9cd)). @kamilkarp 31-03-2024
+- fix error is throwed when toggleConnection != null ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/def3290c485856b5477a7fc3d6334adcbf489285)). @hantrungkien 27-05-2024
+- transform nested object from box ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/3ac14ccd27e295e88ce51b187cd5e7159407a446)). @ronnnnn 09-04-2024
+- check for null data returned from fetchMore.updateQuery… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/acdaabc955b9200b35e4f6b16ab208c85873a0e4)). @aarsham 08-04-2024
+- resolve duplicate events on socket reconnect ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/be11b4cd1210e4d898a1a381a56c59bbcdeee6c5)). @aarsham 08-04-2024
+- remove unnecessary null checks in SocketClient ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1003c4b61d37912a45dbc2fdbf3c88ad2353659f)). @aarsham 08-04-2024
+
+
 # v5.2.0-beta.7
 
 ## Fixed
