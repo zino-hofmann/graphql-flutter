@@ -176,15 +176,13 @@ class SocketSubProtocol {
 class GraphQLProtocol {
   GraphQLProtocol._();
 
-  /// graphql-ws: The new  (not to be confused with the graphql-ws library).
+  /// graphql-ws: Old protocol (not to be confused with the graphql-ws library).
   /// NB. This protocol is it no longer maintained, please consider
   /// to use `SocketSubProtocol.graphqlTransportWs`.
   static const String graphqlWs = "graphql-ws";
 
-  /// graphql-transport-ws: New ws protocol used by most Apollo Server instances
-  /// with subscriptions enabled use this library.
-  /// N.B: not to be confused with the graphql-ws library that implement the
-  /// old ws protocol.
+  /// graphql-transport-ws: New protocol used by most Apollo Server instances
+  /// with subscriptions enabled. Implemented by the graphql-ws library.
   static const String graphqlTransportWs = "graphql-transport-ws";
 }
 
