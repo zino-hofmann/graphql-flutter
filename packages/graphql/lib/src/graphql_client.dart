@@ -26,11 +26,13 @@ class GraphQLClient implements GraphQLDataProxy {
     required this.cache,
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
+    Duration queryRequestTimeout = const Duration(seconds: 5),
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
         queryManager = QueryManager(
           link: link,
           cache: cache,
           alwaysRebroadcast: alwaysRebroadcast,
+          requestTimeout: queryRequestTimeout,
         );
 
   /// The default [Policies] to set for each client action
