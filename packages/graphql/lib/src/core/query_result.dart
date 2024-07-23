@@ -48,7 +48,9 @@ class QueryResult<TParsed extends Object?> {
     this.context = const Context(),
     required this.parserFn,
     required this.source,
-  }) : timestamp = DateTime.now() {
+    TParsed? cachedParsedData,
+  })  : timestamp = DateTime.now(),
+        _cachedParsedData = cachedParsedData {
     _data = data;
   }
 
@@ -158,6 +160,23 @@ class QueryResult<TParsed extends Object?> {
       return cachedParsedData;
     }
     return _cachedParsedData = parserFn(data);
+  }
+
+  QueryResult<TParsed> copyWith({
+    Map<String, dynamic>? data,
+    OperationException? exception,
+    Context? context,
+    QueryResultSource? source,
+    TParsed? cachedParsedData,
+  }) {
+    return QueryResult.internal(
+      data: data ?? this.data,
+      exception: exception ?? this.exception,
+      context: context ?? this.context,
+      parserFn: parserFn,
+      source: source ?? this.source,
+      cachedParsedData: cachedParsedData ?? _cachedParsedData,
+    );
   }
 
   @override

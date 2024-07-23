@@ -168,10 +168,13 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
           parserFn: parserFn,
         );
 
-  /// Whether or not to fetch results
+  /// Whether or not to fetch results every time a new listener is added.
+  /// If [eagerlyFetchResults] is `true`, fetch is triggered during instantiation.
   final bool fetchResults;
 
-  /// Whether to [fetchResults] immediately on instantiation.
+  /// Whether to [fetchResults] immediately on instantiation of [ObservableQuery].
+  /// The first
+  /// If available, cache results are emitted when the first listener is added.
   /// Defaults to [fetchResults].
   final bool eagerlyFetchResults;
 

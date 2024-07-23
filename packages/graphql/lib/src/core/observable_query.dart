@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
+import 'package:graphql/src/core/_base_options.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
@@ -242,12 +244,13 @@ class ObservableQuery<TParsed> {
   }
 
   /// Add a [result] to the [stream] unless it was created
-  /// before [lasestResult].
+  /// before [latestResult].
   ///
   /// Copies the [QueryResult.source] from the [latestResult]
   /// if it is set to `null`.
   ///
-  /// Called internally by the [QueryManager]
+  /// Called internally by the [QueryManager]. Do not call this directly except
+  /// for [QueryResult.loading]
   void addResult(QueryResult<TParsed> result, {bool fromRebroadcast = false}) {
     // don't overwrite results due to some async/optimism issue
     if (latestResult != null &&
