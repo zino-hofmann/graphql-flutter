@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'package:meta/meta.dart';
 
 import 'package:hive/hive.dart';
+import 'package:meta/meta.dart';
 
 import './store.dart';
 
@@ -92,7 +92,15 @@ class HiveStore extends Store {
   }
 
   @override
-  Map<String, Map<String, dynamic>?> toMap() => Map.unmodifiable(box.toMap());
+  Map<String, Map<String, dynamic>?> toMap() {
+    final map = <String, Map<String, dynamic>?>{};
+    for (final key in box.keys) {
+      if (key is String) {
+        map[key] = get(key);
+      }
+    }
+    return Map.unmodifiable(map);
+  }
 
   Future<void> reset() => box.clear();
 }
