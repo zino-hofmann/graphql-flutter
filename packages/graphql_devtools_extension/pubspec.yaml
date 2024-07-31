@@ -1,0 +1,18 @@
+name: graphql_devtools_extension
+version: 0.0.1
+repository: https://github.com/zino-app/graphql-flutter/tree/main/packages/graphql_devtools_extension
+issue_tracker: https://github.com/zino-hofmann/graphql-flutter/issues
+
+environment:
+  sdk: '>=2.12.0 <4.0.0'
+  flutter: ">=2.11.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  devtools_extensions: 0.0.14
+  devtools_app_shared: 0.0.10
+
+flutter:
+  uses-material-design: true

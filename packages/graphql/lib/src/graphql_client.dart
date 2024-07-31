@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:meta/meta.dart';
 import 'dart:async';
 
@@ -31,7 +34,16 @@ class GraphQLClient implements GraphQLDataProxy {
           link: link,
           cache: cache,
           alwaysRebroadcast: alwaysRebroadcast,
-        );
+        ) {
+    // Register the extension to expose the cache to the devtools
+    registerExtension(
+      'ext.graphql.getCache',
+      (method, parameters) async {
+        return ServiceExtensionResponse.result(
+            jsonEncode({'value': this.cache.store.toMap()}));
+      },
+    );
+  }
 
   /// The default [Policies] to set for each client action
   late final DefaultPolicies defaultPolicies;
