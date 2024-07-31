@@ -1,13 +1,3 @@
-# v5.2.0-beta.7
-
-## Fixed
-- make == override parameters non-nullable ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/7e9c34b08cefcf7abc36172d358440049e25f58f)). @kamilkarp 01-04-2024
-- response extensions should be optional ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d174b51a55d40745a5dcd3a0621e77a4d435c9cd)). @kamilkarp 31-03-2024
-- upgrade connectivity_plus ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/cd6c507cb6d2fa77b5b233285898be5362ce4898)). @hantrungkien 27-05-2024
-- upgrade dependency `connectivity_plus` ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/fb0f708a540f545e7a329305a3311541011079fc)). @johnmartel 25-04-2024
-- uses the last graphql package ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d2fe3a0c2bec82496e02cc4a6dfa801aa67b4d2e)). @vincenzopalazzo 28-05-2024
-
-
 # v5.2.0-beta.6
 
 ## Added

@@ -243,8 +243,7 @@ class QueryManager {
 
     try {
       // execute the request through the provided link(s)
-      response =
-          await link.request(request).timeout(Duration(seconds: 5)).first;
+      response = await link.request(request).first;
 
       queryResult = mapFetchResultToQueryResult(
         response,
