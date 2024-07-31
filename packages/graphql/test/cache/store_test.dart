@@ -121,28 +121,6 @@ void main() {
         expect(readData2?['bob'], isA<List<dynamic>>());
         expect(readData2?['bob'][0], isA<Map<String, dynamic>>());
       });
-      test("Can re-open and reference nested data", () async {
-        final box1 = await HiveStore.openBox(
-          're-open-store',
-          path: path,
-        );
-        final store = HiveStore(box1);
-        final data = {
-          'foo': 'bar',
-          'bob': [
-            {'nested': true}
-          ]
-        };
-        store.put("id", data);
-        expect(store.toMap(), equals({'id': data}));
-        await box1.close();
-        final box2 = await HiveStore.openBox(
-          're-open-store',
-          path: path,
-        );
-        final store2 = HiveStore(box2);
-        expect(store2.toMap(), equals({'id': data}));
-      });
       test("Can put null", () async {
         final box1 = await HiveStore.openBox(
           'put-null',

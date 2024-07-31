@@ -176,13 +176,15 @@ class SocketSubProtocol {
 class GraphQLProtocol {
   GraphQLProtocol._();
 
-  /// graphql-ws: Old protocol (not to be confused with the graphql-ws library).
+  /// graphql-ws: The new  (not to be confused with the graphql-ws library).
   /// NB. This protocol is it no longer maintained, please consider
   /// to use `SocketSubProtocol.graphqlTransportWs`.
   static const String graphqlWs = "graphql-ws";
 
-  /// graphql-transport-ws: New protocol used by most Apollo Server instances
-  /// with subscriptions enabled. Implemented by the graphql-ws library.
+  /// graphql-transport-ws: New ws protocol used by most Apollo Server instances
+  /// with subscriptions enabled use this library.
+  /// N.B: not to be confused with the graphql-ws library that implement the
+  /// old ws protocol.
   static const String graphqlTransportWs = "graphql-transport-ws";
 }
 
@@ -213,8 +215,7 @@ class SocketClient {
   final SocketClientConfig config;
 
   final BehaviorSubject<SocketConnectionState> _connectionStateController =
-      BehaviorSubject<SocketConnectionState>.seeded(
-          SocketConnectionState.notConnected);
+      BehaviorSubject<SocketConnectionState>();
 
   final HashMap<String, SubscriptionListener> _subscriptionInitializers =
       HashMap();
@@ -501,7 +502,6 @@ class SocketClient {
             )
           : waitForConnectedStateWithoutTimeout;
 
-      sub?.cancel();
       sub = waitForConnectedState.listen((_) {
         final Stream<GraphQLSocketMessage> dataErrorComplete = _messages.where(
           (GraphQLSocketMessage message) {
@@ -637,14 +637,8 @@ class GraphQLWebSocketChannel extends StreamChannelMixin<dynamic>
   Stream<GraphQLSocketMessage>? _messages;
 
   /// Stream of messages from the endpoint parsed as GraphQLSocketMessages
-  Stream<GraphQLSocketMessage> get messages {
-    if (_messages == null)
-      _messages = stream.map((event) {
-        return GraphQLSocketMessage.parse(event);
-      }).asBroadcastStream();
-
-    return _messages!;
-  }
+  Stream<GraphQLSocketMessage> get messages => _messages ??=
+      stream.map<GraphQLSocketMessage>(GraphQLSocketMessage.parse);
 
   String? get protocol => _webSocket.protocol;
 

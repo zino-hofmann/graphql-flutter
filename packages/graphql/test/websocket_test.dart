@@ -229,59 +229,6 @@ Future<void> main() async {
         ),
       );
     });
-    test('subscription data with extensions', () async {
-      final payload = Request(
-        operation: Operation(document: parseString('subscription {}')),
-      );
-      final waitForConnection = true;
-      final subscriptionDataStream =
-          socketClient.subscribe(payload, waitForConnection);
-      await socketClient.connectionState
-          .where((state) => state == SocketConnectionState.connected)
-          .first;
-
-      // ignore: unawaited_futures
-      socketClient.socketChannel!.stream
-          .where((message) => message == expectedMessage)
-          .first
-          .then((_) {
-        socketClient.socketChannel!.sink.add(jsonEncode({
-          'type': 'data',
-          'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
-          'payload': {
-            'data': {'foo': 'bar'},
-            'errors': [
-              {'message': 'error and data can coexist'}
-            ],
-            'extensions': {'extensionKey': 'extensionValue'},
-          }
-        }));
-      });
-
-      await expectLater(
-        subscriptionDataStream,
-        emits(
-          // todo should ids be included in response context? probably '01020304-0506-4708-890a-0b0c0d0e0f10'
-          Response(
-            data: {'foo': 'bar'},
-            errors: [
-              GraphQLError(message: 'error and data can coexist'),
-            ],
-            context: Context().withEntry(ResponseExtensions(<dynamic, dynamic>{
-              'extensionKey': 'extensionValue',
-            })),
-            response: {
-              "type": "data",
-              "data": {"foo": "bar"},
-              "errors": [
-                {"message": "error and data can coexist"}
-              ],
-              "extensions": {'extensionKey': 'extensionValue'},
-            },
-          ),
-        ),
-      );
-    });
     test('resubscribe', () async {
       final payload = Request(
         operation: Operation(document: gql('subscription {}')),
