@@ -173,8 +173,8 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
   final bool fetchResults;
 
   /// Whether to [fetchResults] immediately on instantiation of [ObservableQuery].
-  /// The first
   /// If available, cache results are emitted when the first listener is added.
+  /// Network results are then emitted when they return to any attached listeners.
   /// Defaults to [fetchResults].
   final bool eagerlyFetchResults;
 
