@@ -95,8 +95,19 @@ class ObservableQuery<TParsed> {
   /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
   ///
   /// Automatically appended as an [OnData]
-  FutureOr<void> _maybeRebroadcast(QueryResult? result) =>
-      queryManager.maybeRebroadcastQueries(exclude: this);
+  FutureOr<void> _maybeRebroadcast(QueryResult? result) {
+    if (_onDataCallbacks.isEmpty &&
+        result?.hasException == true &&
+        result?.data == null) {
+      // We don't need to rebroadcast if there was an exception and there was no
+      // data. It's valid GQL to have data _and_ exception. If options.carryForwardDataOnException
+      // are true, this condition may never get hit.
+      // If there are onDataCallbacks, it's possible they modify cache and are
+      // depending on maybeRebroadcastQueries being called.
+      return false;
+    }
+    return queryManager.maybeRebroadcastQueries(exclude: this);
+  }
 
   /// The most recently seen result from this operation's stream
   QueryResult<TParsed>? latestResult;
