@@ -31,6 +31,7 @@ class QueryManager {
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
+      deduplicatePollers: deduplicatePollers,
     );
   }
 

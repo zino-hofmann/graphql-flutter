@@ -32,6 +32,7 @@ class GraphQLClient implements GraphQLDataProxy {
           link: link,
           cache: cache,
           alwaysRebroadcast: alwaysRebroadcast,
+          deduplicatePollers: deduplicatePollers,
         );
 
   /// The default [Policies] to set for each client action

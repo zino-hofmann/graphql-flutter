@@ -105,7 +105,7 @@ class QueryScheduler {
     final removedQuery = registeredQueries.remove(queryId);
 
     if (removedQuery == null ||
-        removedQuery.pollInterval != null ||
+        removedQuery.pollInterval == null ||
         !_deduplicatePollers) {
       return;
     }
