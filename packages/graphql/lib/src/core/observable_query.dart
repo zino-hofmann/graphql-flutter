@@ -1,7 +1,5 @@
 import 'dart:async';
-import 'package:gql/ast.dart';
 import 'package:graphql/client.dart';
-import 'package:graphql/src/core/_base_options.dart';
 import 'package:meta/meta.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
