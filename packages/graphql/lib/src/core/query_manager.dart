@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:gql/ast.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
 import 'package:collection/collection.dart';
