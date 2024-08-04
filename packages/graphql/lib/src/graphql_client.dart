@@ -26,6 +26,7 @@ class GraphQLClient implements GraphQLDataProxy {
     required this.cache,
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
+    bool deduplicatePollers = false,
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
         queryManager = QueryManager(
           link: link,
