@@ -55,6 +55,37 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         onError,
       ];
 
+  /// Generic copyWith for all fields. There are other, more specific options:
+  /// - [copyWithPolicies] and [withFetchMoreOptions]
+  QueryOptions<TParsed> copyWithOptions({
+    DocumentNode? document,
+    String? operationName,
+    Map<String, dynamic>? variables,
+    FetchPolicy? fetchPolicy,
+    ErrorPolicy? errorPolicy,
+    CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Duration? pollInterval,
+    Context? context,
+    ResultParserFn<TParsed>? parserFn,
+    OnQueryComplete? onComplete,
+    OnQueryError? onError,
+  }) =>
+      QueryOptions<TParsed>(
+        document: document ?? this.document,
+        operationName: operationName ?? this.operationName,
+        variables: variables ?? this.variables,
+        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
+        errorPolicy: errorPolicy ?? this.errorPolicy,
+        cacheRereadPolicy: cacheRereadPolicy ?? this.cacheRereadPolicy,
+        optimisticResult: optimisticResult ?? this.optimisticResult,
+        pollInterval: pollInterval ?? this.pollInterval,
+        context: context ?? this.context,
+        parserFn: parserFn ?? this.parserFn,
+        onComplete: onComplete ?? this.onComplete,
+        onError: onError ?? this.onError,
+      );
+
   QueryOptions<TParsed> withFetchMoreOptions(
     FetchMoreOptions fetchMoreOptions,
   ) =>
@@ -168,10 +199,13 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
           parserFn: parserFn,
         );
 
-  /// Whether or not to fetch results
+  /// Whether or not to fetch results every time a new listener is added.
+  /// If [eagerlyFetchResults] is `true`, fetch is triggered during instantiation.
   final bool fetchResults;
 
-  /// Whether to [fetchResults] immediately on instantiation.
+  /// Whether to [fetchResults] immediately on instantiation of [ObservableQuery].
+  /// If available, cache results are emitted when the first listener is added.
+  /// Network results are then emitted when they return to any attached listeners.
   /// Defaults to [fetchResults].
   final bool eagerlyFetchResults;
 
@@ -186,6 +220,40 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         eagerlyFetchResults,
         carryForwardDataOnException,
       ];
+
+  /// Generic copyWith for all fields. There are other, more specific options:
+  /// - [copyWithFetchPolicy], [copyWithVariables], etc
+  WatchQueryOptions<TParsed> copyWith({
+    DocumentNode? document,
+    String? operationName,
+    Map<String, dynamic>? variables,
+    FetchPolicy? fetchPolicy,
+    ErrorPolicy? errorPolicy,
+    CacheRereadPolicy? cacheRereadPolicy,
+    Object? optimisticResult,
+    Duration? pollInterval,
+    bool? fetchResults,
+    bool? carryForwardDataOnException,
+    bool? eagerlyFetchResults,
+    Context? context,
+    ResultParserFn<TParsed>? parserFn,
+  }) =>
+      WatchQueryOptions<TParsed>(
+        document: document ?? this.document,
+        operationName: operationName ?? this.operationName,
+        variables: variables ?? this.variables,
+        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
+        errorPolicy: errorPolicy ?? this.errorPolicy,
+        cacheRereadPolicy: cacheRereadPolicy ?? this.cacheRereadPolicy,
+        optimisticResult: optimisticResult ?? this.optimisticResult,
+        pollInterval: pollInterval ?? this.pollInterval,
+        fetchResults: fetchResults ?? this.fetchResults,
+        eagerlyFetchResults: eagerlyFetchResults ?? this.eagerlyFetchResults,
+        carryForwardDataOnException:
+            carryForwardDataOnException ?? this.carryForwardDataOnException,
+        context: context ?? this.context,
+        parserFn: parserFn ?? this.parserFn,
+      );
 
   WatchQueryOptions<TParsed> copyWithFetchPolicy(
     FetchPolicy? fetchPolicy,
