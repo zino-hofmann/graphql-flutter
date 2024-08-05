@@ -15,7 +15,7 @@ dependencies:
   gql_error_link: ^1.0.0
   gql_dedupe_link: ^2.0.3
   hive: ^2.1.0
-  normalize: ^0.8.2
+  normalize: '>=0.8.2 <0.10.0'
   http: ^1.0.0
   collection: ^1.15.0
   web_socket_channel: '>=2.3.0 <=2.4.0'
