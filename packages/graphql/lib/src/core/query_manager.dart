@@ -27,9 +27,11 @@ class QueryManager {
     required this.link,
     required this.cache,
     this.alwaysRebroadcast = false,
+    bool deduplicatePollers = false,
   }) {
     scheduler = QueryScheduler(
       queryManager: this,
+      deduplicatePollers: deduplicatePollers,
     );
   }
 
