@@ -204,9 +204,23 @@ class GraphQLCache extends NormalizingDataProxy {
   ///
   /// This allows for hierarchical optimism that is automatically cleaned up
   /// without having to tightly couple optimistic changes
+  ///
+  /// This is called on every network result as cleanup
   void removeOptimisticPatch(String removeId) {
+    final patchesToRemove = optimisticPatches
+        .where(
+          (patch) =>
+              patch.id == removeId || _parentPatchId(patch.id) == removeId,
+        )
+        .toList();
+
+    if (patchesToRemove.isEmpty) {
+      return;
+    }
+    // Only remove + mark broadcast requested if something was actually removed.
+    // This is to prevent unnecessary rebroadcasts
     optimisticPatches.removeWhere(
-      (patch) => patch.id == removeId || _parentPatchId(patch.id) == removeId,
+      (patch) => patchesToRemove.contains(patch),
     );
     broadcastRequested = true;
   }

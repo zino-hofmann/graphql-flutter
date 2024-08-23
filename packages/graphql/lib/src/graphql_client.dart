@@ -32,11 +32,15 @@ class GraphQLClient implements GraphQLDataProxy {
     required this.cache,
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
+    DeepEqualsFn? deepEquals,
+    bool deduplicatePollers = false,
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
         queryManager = QueryManager(
           link: link,
           cache: cache,
           alwaysRebroadcast: alwaysRebroadcast,
+          deepEquals: deepEquals,
+          deduplicatePollers: deduplicatePollers,
         ) {
     const releaseMode = bool.fromEnvironment('dart.vm.product');
     // Register extension for not in release mode and not already registered
