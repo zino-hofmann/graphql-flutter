@@ -1,3 +1,14 @@
+# v5.2.0-beta.9
+
+## Fixed
+- upgrade rxdart 0.28.0 (#1454) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1b851eaa9c64ce4bbf6f0962cd64a74209d95ce5)). @ronnnnn 30-08-2024
+- add query timeout argument when create client. ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6180841e9b703d9c312ea29e575dece973c691bc)). @ykuc7 29-08-2024
+- add timeout to _resolveQueryOnNetwork ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9f961e33e40f0b81d13a6e12e4dd318afa7e72ca)). @ykuc7 18-07-2024
+
+## Added
+- Support custom equality function for cache comparison ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a6909d47d70f3c6fb25117419620f300d1006432)). @kvenn 05-08-2024
+
+
 # v5.2.0-beta.8
 
 ## Fixed
