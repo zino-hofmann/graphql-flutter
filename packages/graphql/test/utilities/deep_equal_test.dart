@@ -4,13 +4,13 @@ import 'package:graphql/src/utilities/deep_equal.dart';
 import 'package:test/test.dart';
 
 void main() {
-  Element o(Comparable id) => Element(id);
+  Element o(int id) => Element(id);
 
-  // Lists that are point-wise equal, but not identical.
-  var list1 = [o(1), o(2), o(3), o(4), o(5)];
-  var list2 = [o(1), o(2), o(3), o(4), o(5)];
-  // Similar length list with equal elements in different order.
-  var list3 = [o(1), o(3), o(5), o(4), o(2)];
+  // // Lists that are point-wise equal, but not identical.
+  // var list1 = [o(1), o(2), o(3), o(4), o(5)];
+  // var list2 = [o(1), o(2), o(3), o(4), o(5)];
+  // // Similar length list with equal elements in different order.
+  // var list3 = [o(1), o(3), o(5), o(4), o(2)];
 
   var map1a = {
     'x': [o(1), o(2), o(3)],
@@ -56,7 +56,7 @@ void main() {
 /// Compares the `id` value by equality and for comparison.
 /// Allows creating simple objects that are equal without being identical.
 class Element implements Comparable<Element> {
-  final Comparable id;
+  final int id;
   const Element(this.id);
   @override
   int get hashCode => id.hashCode;
