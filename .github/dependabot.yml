@@ -6,6 +6,10 @@
 version: 2
 updates:
   - package-ecosystem: "pub" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    directory: "/packages/graphql" # Location of package manifests
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "pub" # See documentation for possible values
+    directory: "/packages/graphql_flutter" # Location of package manifests
     schedule:
       interval: "weekly"
