@@ -596,6 +596,9 @@ class GraphQLWebSocketChannel extends StreamChannelMixin<dynamic>
 
   @override
   WebSocketSink get sink => _webSocket.sink;
+
+  @override
+  Future<void> get ready => _webSocket.ready;
 }
 
 extension GraphQLGetter on WebSocketChannel {

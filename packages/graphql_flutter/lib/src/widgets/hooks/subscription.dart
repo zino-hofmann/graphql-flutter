@@ -70,7 +70,7 @@ class _SubscriptionHookState<TParsed> extends HookState<
   late Stream<QueryResult<TParsed>> stream;
 
   ConnectivityResult? _currentConnectivityResult;
-  StreamSubscription<ConnectivityResult>? _networkSubscription;
+  StreamSubscription<List<ConnectivityResult>>? _networkSubscription;
 
   void _initSubscription() {
     final client = hook.client;
@@ -88,8 +88,11 @@ class _SubscriptionHookState<TParsed> extends HookState<
   void initHook() {
     super.initHook();
     _initSubscription();
-    _networkSubscription =
-        Connectivity().onConnectivityChanged.listen(_onNetworkChange);
+    _networkSubscription = Connectivity()
+        .onConnectivityChanged
+        .listen((List<ConnectivityResult> results) {
+      _onNetworkChange(results.first);
+    });
   }
 
   @override
