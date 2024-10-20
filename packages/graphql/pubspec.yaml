@@ -18,7 +18,7 @@ dependencies:
   normalize: '>=0.8.2 <0.10.0'
   http: ^1.0.0
   collection: ^1.15.0
-  web_socket_channel: '>=2.3.0 <=2.4.0'
+  web_socket_channel: '>=3.0.1 <4.0.0'
   stream_channel: ^2.1.0
   rxdart: '>=0.27.1 <0.29.0'
   uuid: ^4.0.0
@@ -32,4 +32,4 @@ dev_dependencies:
   lints: ^1.0.1
 
 environment:
-  sdk: '>=2.15.0 <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
