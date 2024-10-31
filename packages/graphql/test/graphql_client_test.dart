@@ -1447,5 +1447,105 @@ query WalletGetContent($input: WalletGetContentInput!) {
         equals('bar'),
       );
     });
+
+    group('GraphQLClient copyWith', () {
+      late GraphQLClient client;
+      late Link link;
+      late GraphQLCache cache;
+      late DefaultPolicies defaultPolicies;
+      late Duration queryRequestTimeout;
+
+      setUp(() {
+        link = MockLink();
+        cache = GraphQLCache();
+        defaultPolicies = DefaultPolicies();
+        queryRequestTimeout = const Duration(seconds: 5);
+        client = GraphQLClient(
+          link: link,
+          cache: cache,
+          defaultPolicies: defaultPolicies,
+          queryRequestTimeout: queryRequestTimeout,
+        );
+      });
+
+      test('copyWith updates link', () {
+        final newLink = MockLink();
+        final newClient = client.copyWith(link: newLink);
+
+        expect(newClient.link, equals(newLink));
+        expect(newClient.cache, equals(client.cache));
+        expect(newClient.defaultPolicies, equals(client.defaultPolicies));
+        expect(
+          newClient.queryManager.requestTimeout,
+          equals(client.queryManager.requestTimeout),
+        );
+      });
+
+      test('copyWith updates cache', () {
+        final newCache = GraphQLCache();
+        final newClient = client.copyWith(cache: newCache);
+
+        expect(newClient.cache, equals(newCache));
+        expect(newClient.link, equals(client.link));
+        expect(newClient.defaultPolicies, equals(client.defaultPolicies));
+        expect(
+          newClient.queryManager.requestTimeout,
+          equals(client.queryManager.requestTimeout),
+        );
+      });
+
+      test('copyWith updates defaultPolicies', () {
+        final newDefaultPolicies = DefaultPolicies();
+        final newClient = client.copyWith(defaultPolicies: newDefaultPolicies);
+
+        expect(newClient.defaultPolicies, equals(newDefaultPolicies));
+        expect(newClient.link, equals(client.link));
+        expect(newClient.cache, equals(client.cache));
+        expect(
+          newClient.queryManager.requestTimeout,
+          equals(client.queryManager.requestTimeout),
+        );
+      });
+
+      test('copyWith updates alwaysRebroadcast', () {
+        final newClient = client.copyWith(alwaysRebroadcast: true);
+
+        expect(newClient.queryManager.alwaysRebroadcast, isTrue);
+        expect(newClient.link, equals(client.link));
+        expect(newClient.cache, equals(client.cache));
+        expect(newClient.defaultPolicies, equals(client.defaultPolicies));
+        expect(
+          newClient.queryManager.requestTimeout,
+          equals(client.queryManager.requestTimeout),
+        );
+      });
+
+      test('copyWith updates queryRequestTimeout', () {
+        final newTimeout = const Duration(seconds: 10);
+        final newClient = client.copyWith(queryRequestTimeout: newTimeout);
+
+        expect(newClient.queryManager.requestTimeout, equals(newTimeout));
+        expect(newClient.link, equals(client.link));
+        expect(newClient.cache, equals(client.cache));
+        expect(newClient.defaultPolicies, equals(client.defaultPolicies));
+      });
+
+      test('copyWith does not override any properties if none are provided',
+          () {
+        final newClient = client.copyWith();
+
+        expect(newClient.link, equals(client.link));
+        expect(newClient.cache, equals(client.cache));
+        expect(newClient.defaultPolicies, equals(client.defaultPolicies));
+        expect(
+          newClient.queryManager.alwaysRebroadcast,
+          equals(client.queryManager.alwaysRebroadcast),
+        );
+        expect(
+          newClient.queryManager.requestTimeout,
+          equals(client.queryManager.requestTimeout),
+        );
+      });
+    });
   });
 }
