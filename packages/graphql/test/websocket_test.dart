@@ -187,11 +187,17 @@ Future<void> main() async {
         operation: Operation(document: parseString('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
-      await socketClient.connectionState.where((state) => state == SocketConnectionState.connected).first;
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -230,11 +236,17 @@ Future<void> main() async {
         operation: Operation(document: parseString('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
-      await socketClient.connectionState.where((state) => state == SocketConnectionState.connected).first;
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -277,7 +289,8 @@ Future<void> main() async {
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
 
       await expectLater(
         socketClient.connectionState,
@@ -301,7 +314,10 @@ Future<void> main() async {
       );
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -340,7 +356,8 @@ Future<void> main() async {
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
 
       await expectLater(
         socketClient.connectionState,
@@ -371,7 +388,10 @@ Future<void> main() async {
       );
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'data',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -491,11 +511,17 @@ Future<void> main() async {
         operation: Operation(document: parseString('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
-      await socketClient.connectionState.where((state) => state == SocketConnectionState.connected).first;
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'next',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -534,7 +560,8 @@ Future<void> main() async {
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
 
       await expectLater(
         socketClient.connectionState,
@@ -560,7 +587,10 @@ Future<void> main() async {
       );
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'next',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -599,7 +629,8 @@ Future<void> main() async {
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
 
       await expectLater(
         socketClient.connectionState,
@@ -632,7 +663,10 @@ Future<void> main() async {
       );
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'next',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -667,12 +701,14 @@ Future<void> main() async {
       );
     });
 
-    test('resubscribe after server disconnect and resubscription not paused', () async {
+    test('resubscribe after server disconnect and resubscription not paused',
+        () async {
       final payload = Request(
         operation: Operation(document: gql('subscription {}')),
       );
       final waitForConnection = true;
-      final subscriptionDataStream = socketClient.subscribe(payload, waitForConnection);
+      final subscriptionDataStream =
+          socketClient.subscribe(payload, waitForConnection);
 
       await expectLater(
         socketClient.connectionState,
@@ -713,7 +749,10 @@ Future<void> main() async {
       );
 
       // ignore: unawaited_futures
-      socketClient.socketChannel!.stream.where((message) => message == expectedMessage).first.then((_) {
+      socketClient.socketChannel!.stream
+          .where((message) => message == expectedMessage)
+          .first
+          .then((_) {
         socketClient.socketChannel!.sink.add(jsonEncode({
           'type': 'next',
           'id': '01020304-0506-4708-890a-0b0c0d0e0f10',
@@ -754,7 +793,8 @@ Future<void> main() async {
     StreamController<dynamic> controller;
     setUp(overridePrint((log) {
       controller = StreamController(sync: true);
-      socketClient = getTestClient(controller: controller, wsUrl: wsUrl, autoReconnect: false);
+      socketClient = getTestClient(
+          controller: controller, wsUrl: wsUrl, autoReconnect: false);
     }));
     tearDown(overridePrint(
       (log) => socketClient.dispose(),
@@ -788,7 +828,8 @@ Future<void> main() async {
         ]),
       );
 
-      expect(socketClient.socketChannel!.closeCode, WebSocketStatus.normalClosure);
+      expect(
+          socketClient.socketChannel!.closeCode, WebSocketStatus.normalClosure);
 
       expect(await isEmpty.timeout(const Duration(seconds: 1)), true);
     });
@@ -813,7 +854,9 @@ Future<void> main() async {
     ));
 
     test('connection', () async {
-      await socketClient.connectionState.where((state) => state == SocketConnectionState.connected).first;
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
 
       await expectLater(
           socketClient.socketChannel!.stream.map((s) {
@@ -844,7 +887,9 @@ Future<void> main() async {
     }));
 
     test('connection', () async {
-      await socketClient.connectionState.where((state) => state == SocketConnectionState.connected).first;
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
 
       await expectLater(
         socketClient.socketChannel!.stream.map((s) {
@@ -884,7 +929,8 @@ Future<void> main() async {
         protocol: GraphQLProtocol.graphqlWs,
         config: SocketClientConfig(
           delayBetweenReconnectionAttempts: const Duration(milliseconds: 1),
-          initialPayload: () => {'token': getToken(), 'protocol': GraphQLProtocol.graphqlWs},
+          initialPayload: () =>
+              {'token': getToken(), 'protocol': GraphQLProtocol.graphqlWs},
           onConnectionLost: (code, reason) async {
             if (code == 4001) {
               _token = 'mytoken2';
@@ -935,7 +981,9 @@ Future<void> main() async {
         ]),
       );
 
-      await socketClient.connectionState.where((state) => state == SocketConnectionState.connected).first;
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
 
       await expectLater(
           socketClient.socketChannel!.stream.map((s) {
