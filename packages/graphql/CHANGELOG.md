@@ -1,3 +1,9 @@
+# v5.2.0-beta.10
+
+## Fixed
+- update normalize dependency to version 0.9.1 (#1448) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9e21fd5c0d951f2a24d9646f548202c7f47807f7)). @nrbnlulu 11-09-2024
+- upgrade web_socket_channel, dart sdk dependencies. Update tests to ignore missing closeCode ([commit](651d75cc46082f30c91760fac25def88e6baa12a))
+
 # v5.2.0-beta.9
 
 ## Fixed
