@@ -51,16 +51,24 @@ class GraphQLClient implements GraphQLDataProxy {
   late final QueryManager queryManager;
 
   /// Create a copy of the client with the provided information.
-  GraphQLClient copyWith(
-      {Link? link,
-      GraphQLCache? cache,
-      DefaultPolicies? defaultPolicies,
-      bool? alwaysRebroadcast}) {
+  GraphQLClient copyWith({
+    Link? link,
+    GraphQLCache? cache,
+    DefaultPolicies? defaultPolicies,
+    bool? alwaysRebroadcast,
+    DeepEqualsFn? deepEquals,
+    bool deduplicatePollers = false,
+    Duration? queryRequestTimeout,
+  }) {
     return GraphQLClient(
-        link: link ?? this.link,
-        cache: cache ?? this.cache,
-        defaultPolicies: defaultPolicies ?? this.defaultPolicies,
-        alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast);
+      link: link ?? this.link,
+      cache: cache ?? this.cache,
+      defaultPolicies: defaultPolicies ?? this.defaultPolicies,
+      alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast,
+      deepEquals: deepEquals,
+      deduplicatePollers: deduplicatePollers,
+      queryRequestTimeout: queryRequestTimeout ?? queryManager.requestTimeout,
+    );
   }
 
   /// This registers a query in the [QueryManager] and returns an [ObservableQuery]
