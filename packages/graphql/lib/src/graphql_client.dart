@@ -28,7 +28,7 @@ class GraphQLClient implements GraphQLDataProxy {
     bool alwaysRebroadcast = false,
     DeepEqualsFn? deepEquals,
     bool deduplicatePollers = false,
-    Duration queryRequestTimeout = const Duration(seconds: 5),
+    Duration? queryRequestTimeout = const Duration(seconds: 5),
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
         queryManager = QueryManager(
           link: link,
