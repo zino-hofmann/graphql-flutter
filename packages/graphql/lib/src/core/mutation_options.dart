@@ -30,6 +30,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     this.update,
     this.onError,
     ResultParserFn<TParsed>? parserFn,
+    Duration? queryRequestTimeout,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -40,6 +41,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
           context: context,
           optimisticResult: optimisticResult,
           parserFn: parserFn,
+          queryRequestTimeout: queryRequestTimeout,
         );
 
   final OnMutationCompleted? onCompleted;
@@ -68,6 +70,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         update: update,
         onError: onError,
         parserFn: parserFn,
+        queryRequestTimeout: queryRequestTimeout,
       );
 
   WatchQueryOptions<TParsed> asWatchQueryOptions() =>
@@ -81,6 +84,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         fetchResults: false,
         context: context,
         parserFn: parserFn,
+        queryRequestTimeout: queryRequestTimeout,
       );
 }
 
