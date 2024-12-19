@@ -53,7 +53,7 @@ class QueryManager {
   final bool alwaysRebroadcast;
 
   /// The timeout for resolving a query
-  final Duration requestTimeout;
+  final Duration? requestTimeout;
 
   QueryScheduler? scheduler;
   static final _oneOffOpId = '0';
@@ -260,7 +260,16 @@ class QueryManager {
 
     try {
       // execute the request through the provided link(s)
-      response = await link.request(request).timeout(this.requestTimeout).first;
+      Stream<Response> responseStream = link.request(request);
+
+      // Resolve the request timeout by first checking the options of this specific request,
+      // then the manager level requestTimeout.
+      // Only apply the timeout if it is non-null.
+      final timeout = options.queryRequestTimeout ?? this.requestTimeout;
+      if (timeout case final Duration timeout) {
+        responseStream = responseStream.timeout(timeout);
+      }
+      response = await responseStream.first;
 
       queryResult = mapFetchResultToQueryResult(
         response,
