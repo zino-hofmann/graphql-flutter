@@ -23,6 +23,7 @@ abstract class BaseOptions<TParsed extends Object?> {
     ErrorPolicy? errorPolicy,
     CacheRereadPolicy? cacheRereadPolicy,
     this.optimisticResult,
+    this.queryRequestTimeout,
   })  : policies = Policies(
           fetch: fetchPolicy,
           error: errorPolicy,
@@ -60,6 +61,9 @@ abstract class BaseOptions<TParsed extends Object?> {
 
   final ResultParserFn<TParsed> parserFn;
 
+  /// Override default query timeout
+  final Duration? queryRequestTimeout;
+
   // TODO consider inverting this relationship
   /// Resolve these options into a request
   Request get asRequest => Request(
@@ -80,6 +84,7 @@ abstract class BaseOptions<TParsed extends Object?> {
         policies,
         context,
         parserFn,
+        queryRequestTimeout,
       ];
 
   OperationType get type {
