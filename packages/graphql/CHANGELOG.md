@@ -1,3 +1,13 @@
+# v5.2.0-beta.11
+
+## Fixed
+- add queryRequestTimeout parameter to copyWith method ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2f61d658f1b29d42c47c0ca3190da0d01aa1f306)). @nestorsgarzonc 07-02-2025
+- ensure readNormalized correctly merges Map<String, dyna… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e9fbc8b2d6063d251d8a25fe5be5315acd54ae7c)). @nozomemein 07-02-2025
+
+## Added
+- make timeout configurable in query options (#1475) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/b88fa9f888828e8683e46709c2505dab5c6a2073)). @ndelanou 28-12-2024
+
+
 # v5.2.0-beta.10
 
 ## Fixed
