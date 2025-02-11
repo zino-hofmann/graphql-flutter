@@ -34,6 +34,7 @@ class GraphQLClient implements GraphQLDataProxy {
     bool alwaysRebroadcast = false,
     DeepEqualsFn? deepEquals,
     bool deduplicatePollers = false,
+    Duration? queryRequestTimeout = const Duration(seconds: 5),
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
         queryManager = QueryManager(
           link: link,
@@ -41,6 +42,7 @@ class GraphQLClient implements GraphQLDataProxy {
           alwaysRebroadcast: alwaysRebroadcast,
           deepEquals: deepEquals,
           deduplicatePollers: deduplicatePollers,
+          requestTimeout: queryRequestTimeout,
         ) {
     const releaseMode = bool.fromEnvironment('dart.vm.product');
     // Register extension for not in release mode and not already registered
@@ -69,16 +71,20 @@ class GraphQLClient implements GraphQLDataProxy {
   late final QueryManager queryManager;
 
   /// Create a copy of the client with the provided information.
-  GraphQLClient copyWith(
-      {Link? link,
-      GraphQLCache? cache,
-      DefaultPolicies? defaultPolicies,
-      bool? alwaysRebroadcast}) {
+  GraphQLClient copyWith({
+    Link? link,
+    GraphQLCache? cache,
+    DefaultPolicies? defaultPolicies,
+    bool? alwaysRebroadcast,
+    Duration? queryRequestTimeout,
+  }) {
     return GraphQLClient(
-        link: link ?? this.link,
-        cache: cache ?? this.cache,
-        defaultPolicies: defaultPolicies ?? this.defaultPolicies,
-        alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast);
+      link: link ?? this.link,
+      cache: cache ?? this.cache,
+      defaultPolicies: defaultPolicies ?? this.defaultPolicies,
+      alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast,
+      queryRequestTimeout: queryRequestTimeout ?? queryManager.requestTimeout,
+    );
   }
 
   /// This registers a query in the [QueryManager] and returns an [ObservableQuery]

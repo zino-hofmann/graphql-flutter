@@ -1,3 +1,8 @@
+# v5.2.0-beta.8
+
+## Fixed
+- upgrade meta,path,dart dependencies ([commit](651d75cc46082f30c91760fac25def88e6baa12a))
+
 # v5.2.0-beta.7
 
 ## Fixed

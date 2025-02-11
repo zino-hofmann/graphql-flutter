@@ -120,7 +120,8 @@ class GraphQLCache extends NormalizingDataProxy {
     for (final patch in optimisticPatches) {
       if (patch.data.containsKey(rootId)) {
         final patchData = patch.data[rootId];
-        if (value is Map<String, Object> && patchData is Map<String, Object>) {
+        if (value is Map<String, dynamic> &&
+            patchData is Map<String, dynamic>) {
           value = deeplyMergeLeft([
             value,
             patchData,

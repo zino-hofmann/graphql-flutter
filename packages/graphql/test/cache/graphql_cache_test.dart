@@ -198,6 +198,41 @@ void main() {
         },
       );
 
+      test(
+        'readNormalized returns correctly merged optimistic data',
+        () {
+          cache.recordOptimisticTransaction(
+            (proxy) => proxy
+              ..writeQuery(
+                basicTest.request,
+                data: basicTest.data,
+              ),
+            '1',
+          );
+
+          expect(cache.optimisticPatches.length, 1);
+          expect(cache.readNormalized("C:6"),
+              equals({'cField': 'value', '__typename': 'C', 'id': 6}));
+
+          cache.writeNormalized('C:6', {
+            '__typename': 'C',
+            'id': 6,
+            "score": null,
+          });
+
+          expect(cache.readNormalized("C:6", optimistic: false),
+              equals({'__typename': 'C', 'id': 6, 'score': null}));
+          expect(
+              cache.readNormalized("C:6", optimistic: true),
+              equals({
+                '__typename': 'C',
+                'id': 6,
+                'cField': 'value',
+                'score': null
+              }));
+        },
+      );
+
       recordCFragmentUpdate(GraphQLCache cache) =>
           cache.recordOptimisticTransaction(
             (proxy) => proxy

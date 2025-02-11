@@ -1,3 +1,30 @@
+# v5.2.0-beta.11
+
+## Fixed
+- add queryRequestTimeout parameter to copyWith method ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2f61d658f1b29d42c47c0ca3190da0d01aa1f306)). @nestorsgarzonc 07-02-2025
+- ensure readNormalized correctly merges Map<String, dyna… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e9fbc8b2d6063d251d8a25fe5be5315acd54ae7c)). @nozomemein 07-02-2025
+
+## Added
+- make timeout configurable in query options (#1475) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/b88fa9f888828e8683e46709c2505dab5c6a2073)). @ndelanou 28-12-2024
+
+
+# v5.2.0-beta.10
+
+## Fixed
+- update normalize dependency to version 0.9.1 (#1448) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9e21fd5c0d951f2a24d9646f548202c7f47807f7)). @nrbnlulu 11-09-2024
+- upgrade web_socket_channel, dart sdk dependencies. Update tests to ignore missing closeCode ([commit](651d75cc46082f30c91760fac25def88e6baa12a))
+
+# v5.2.0-beta.9
+
+## Fixed
+- upgrade rxdart 0.28.0 (#1454) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1b851eaa9c64ce4bbf6f0962cd64a74209d95ce5)). @ronnnnn 30-08-2024
+- add query timeout argument when create client. ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6180841e9b703d9c312ea29e575dece973c691bc)). @ykuc7 29-08-2024
+- add timeout to _resolveQueryOnNetwork ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9f961e33e40f0b81d13a6e12e4dd318afa7e72ca)). @ykuc7 18-07-2024
+
+## Added
+- Support custom equality function for cache comparison ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a6909d47d70f3c6fb25117419620f300d1006432)). @kvenn 05-08-2024
+
+
 # v5.2.0-beta.8
 
 ## Fixed
