@@ -78,6 +78,48 @@ And then import it inside your dart code:
 import 'package:graphql_flutter/graphql_flutter.dart';
 ```
 
+## Android Build Requirements
+
+To ensure compatibility with the latest Android configurations, this project now requires **Java 17**. Please verify your development environment is set up accordingly:
+
+### 1️⃣ Check Your Java Version
+
+Run the following command to check your Java version:
+
+```sh
+java -version
+```
+
+Ensure the output indicates **Java 17**. If not, update your Java Development Kit (JDK) to version **17**.
+
+### 2️⃣ Update Gradle Settings
+
+Modify your `android/gradle/wrapper/gradle-wrapper.properties` file to use **Gradle 8.4**:
+
+```properties
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.4-bin.zip
+```
+
+### 3️⃣ Configure Build Settings
+
+In your `android/app/build.gradle` file, update the `compileOptions` and `kotlinOptions` to **target Java 17**:
+
+```gradle
+android {
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+```
+
+By ensuring your environment matches these requirements, you can prevent potential build issues related to Java version incompatibilities.
+
+
 ## Migration Guide
 Find the migration from version 3 to version 4 [here](./../../changelog-v3-v4.md).
 
