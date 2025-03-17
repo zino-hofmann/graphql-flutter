@@ -56,6 +56,8 @@ class GraphQLClient implements GraphQLDataProxy {
     GraphQLCache? cache,
     DefaultPolicies? defaultPolicies,
     bool? alwaysRebroadcast,
+    DeepEqualsFn? deepEquals,
+    bool deduplicatePollers = false,
     Duration? queryRequestTimeout,
   }) {
     return GraphQLClient(
@@ -63,6 +65,8 @@ class GraphQLClient implements GraphQLDataProxy {
       cache: cache ?? this.cache,
       defaultPolicies: defaultPolicies ?? this.defaultPolicies,
       alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast,
+      deepEquals: deepEquals,
+      deduplicatePollers: deduplicatePollers,
       queryRequestTimeout: queryRequestTimeout ?? queryManager.requestTimeout,
     );
   }
