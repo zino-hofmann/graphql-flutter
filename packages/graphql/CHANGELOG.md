@@ -1,3 +1,40 @@
+# v5.2.0
+
+
+## Fixed
+- add queryRequestTimeout parameter to copyWith method ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/2f61d658f1b29d42c47c0ca3190da0d01aa1f306)). @nestorsgarzonc 07-02-2025
+- ensure readNormalized correctly merges Map<String, dyna… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e9fbc8b2d6063d251d8a25fe5be5315acd54ae7c)). @nozomemein 07-02-2025
+- update normalize dependency to version 0.9.1 (#1448) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9e21fd5c0d951f2a24d9646f548202c7f47807f7)). @nrbnlulu 11-09-2024
+- upgrade web_socket_channel, dart sdk dependencies. Update tests to ignore missing closeCode ([commit](651d75cc46082f30c91760fac25def88e6baa12a))
+- upgrade rxdart 0.28.0 (#1454) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1b851eaa9c64ce4bbf6f0962cd64a74209d95ce5)). @ronnnnn 30-08-2024
+- add query timeout argument when create client. ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6180841e9b703d9c312ea29e575dece973c691bc)). @ykuc7 29-08-2024
+- add timeout to _resolveQueryOnNetwork ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/9f961e33e40f0b81d13a6e12e4dd318afa7e72ca)). @ykuc7 18-07-2024
+- make == override parameters non-nullable ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/7e9c34b08cefcf7abc36172d358440049e25f58f)). @kamilkarp 01-04-2024
+- response extensions should be optional ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d174b51a55d40745a5dcd3a0621e77a4d435c9cd)). @kamilkarp 31-03-2024
+- fix error is throwed when toggleConnection != null ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/def3290c485856b5477a7fc3d6334adcbf489285)). @hantrungkien 27-05-2024
+- transform nested object from box ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/3ac14ccd27e295e88ce51b187cd5e7159407a446)). @ronnnnn 09-04-2024
+- check for null data returned from fetchMore.updateQuery… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/acdaabc955b9200b35e4f6b16ab208c85873a0e4)). @aarsham 08-04-2024
+- resolve duplicate events on socket reconnect ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/be11b4cd1210e4d898a1a381a56c59bbcdeee6c5)). @aarsham 08-04-2024
+- remove unnecessary null checks in SocketClient ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1003c4b61d37912a45dbc2fdbf3c88ad2353659f)). @aarsham 08-04-2024
+- bump uuid dependency to ^4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/4fa6dd61c7fb9aad806df70a318cfd1086e35e68)). @francescoberardi 23-11-2023
+- Send SubscriptionComplete message when using graphqlTra… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6e73d62ba2b8a58a35b3b18e372003462a73e192)). @ 30-08-2023
+- bumps http to v1 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/396c3b3f6986b6d3174e548982a93188b49ee5bc)). @moisessantos 06-07-2023
+- Cache parsed data ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aa81251f71f7a5f566eae4a9575eb6547050c2d9)). @budde377 03-06-2023
+- onComplete callback should send null ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aceff150bf8c676207f16aa07f9622dfc7e56e9d)). @budde377 12-03-2023
+- upgrade the ws packege to v2.3.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e736f5bf1b1226c5607b2c07e2f3e83b6cb18945)). @vincenzopalazzo 15-01-2023
+- remove unecessary deprecation code ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6deede934fb85c735b14c28b737319581bda6f16)). @vincenzopalazzo 15-01-2023
+- support @include and @skip with new normalize major ver ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/c31b82ab7b516fd1d1e1ed735fa17a605caea441)). @vincenzopalazzo 15-01-2023
+
+
+## Added
+- make timeout configurable in query options (#1475) ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/b88fa9f888828e8683e46709c2505dab5c6a2073)). @ndelanou 28-12-2024
+- Support custom equality function for cache comparison ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a6909d47d70f3c6fb25117419620f300d1006432)). @kvenn 05-08-2024
+- Send custom payload in PingMessage ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/19d5c86b98e889b333996da43126f9404a9a4556)). @Rochak69 31-08-2023
+- added WebSocket token refresh and autoReconnect toggling ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/e1c6d5404be2ff54f916bceab6bb52a04bae5d01)). @vytautas-pranskunas- 24-07-2023
+- bump sdk version upper bound to <4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8bb9ba355e53dccf5e291b1f05171459bf8867ed)). @ndelanou 17-05-2023
+- bump gql version to 1.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6c991d8e8dc952f9cf0774746ce3d59f48f1ea32)). @ndelanou 03-05-2023
+- print the connection status with ws ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a9aefc41909eb6911c4c4de1d0477bb620d1098d)). @vytautas-pranskunas- 15-03-2023
+
 # v5.2.0-beta.11
 
 ## Fixed

@@ -1,3 +1,31 @@
+# v5.2.0
+
+## Fixed
+- update connectivity_plus version to fix Android… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a2192151ad74405c325e0979917bfdf5db8997a6)). @khanderz 26-02-2025
+- update connectivity_plus version to fix Android… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a2192151ad74405c325e0979917bfdf5db8997a6)). @khanderz 26-02-2025
+- upgrade meta,path,dart dependencies ([commit](651d75cc46082f30c91760fac25def88e6baa12a))
+- make == override parameters non-nullable ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/7e9c34b08cefcf7abc36172d358440049e25f58f)). @kamilkarp 01-04-2024
+- response extensions should be optional ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d174b51a55d40745a5dcd3a0621e77a4d435c9cd)). @kamilkarp 31-03-2024
+- upgrade connectivity_plus ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/cd6c507cb6d2fa77b5b233285898be5362ce4898)). @hantrungkien 27-05-2024
+- upgrade dependency `connectivity_plus` ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/fb0f708a540f545e7a329305a3311541011079fc)). @johnmartel 25-04-2024
+- uses the last graphql package ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d2fe3a0c2bec82496e02cc4a6dfa801aa67b4d2e)). @vincenzopalazzo 28-05-2024
+- bumps http to v1 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/396c3b3f6986b6d3174e548982a93188b49ee5bc)). @moisessantos 06-07-2023
+- added missing onSubscriptionResult argument ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/1b17d7709410c2a106d0c0a5d9da3c926001a49c)). @PhilippS93 03-04-2023
+
+
+## Added
+- bump connectivity_plus to 5.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/dd53e61f8c1410ced70e4cdc665bb8e89e5fbeb4)). @erknvl 10-10-2023
+- Cache parsed data ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/aa81251f71f7a5f566eae4a9575eb6547050c2d9)). @budde377 03-06-2023
+- bump connectivity_plus dependency to ^4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/776d07063a4f8160daa4b6baa0af4be8517a62a0)). @ndelanou 24-05-2023
+- bump sdk version upper bound to <4.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/8bb9ba355e53dccf5e291b1f05171459bf8867ed)). @ndelanou 17-05-2023
+- bump gql version to 1.0.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/6c991d8e8dc952f9cf0774746ce3d59f48f1ea32)). @ndelanou 03-05-2023
+
+# v5.2.0-beta.8
+
+## Fixed
+- update connectivity_plus version to fix Android… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/a2192151ad74405c325e0979917bfdf5db8997a6)). @khanderz 26-02-2025
+
+
 # v5.2.0-beta.8
 
 ## Fixed
