@@ -1,3 +1,9 @@
+# v5.2.1
+
+## Added
+- add queryRequestTimeout parameter to GraphQLClient class ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/38becefc8b1768f63686c1b093edaf9e11554af5)). @hamed-rezaee 30-04-2025
+
+
 # v5.2.0
 
 
