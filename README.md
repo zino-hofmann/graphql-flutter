@@ -35,6 +35,12 @@ This project combines the benefits of GraphQL with the benefits of `Streams` in 
 
 The project took inspiration from the [Apollo GraphQL client](https://github.com/apollographql/apollo-client), great work guys!
 
+## We're Hiring! 🚀
+
+We're looking for a Flutter engineer to lead mobile development at [Expatfile.tax](https://expatfile.tax?utm_source=github&utm_medium=readme&utm_campaign=mobile_developer_role) 🇺🇸✈️🌍  
+→ [Check out the full job description here](https://hire.toggl.com/c/kj88m/overview)
+
+
 ## Packages
 
 This is a Monorepo which contains the following packages:
