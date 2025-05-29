@@ -27,6 +27,7 @@ class GraphQLClient implements GraphQLDataProxy {
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
     DeepEqualsFn? deepEquals,
+    AsyncDeepEqualsFn? asyncDeepEquals,
     bool deduplicatePollers = false,
     Duration? queryRequestTimeout = const Duration(seconds: 5),
   })  : defaultPolicies = defaultPolicies ?? DefaultPolicies(),
@@ -35,6 +36,7 @@ class GraphQLClient implements GraphQLDataProxy {
           cache: cache,
           alwaysRebroadcast: alwaysRebroadcast,
           deepEquals: deepEquals,
+          asyncDeepEquals: asyncDeepEquals,
           deduplicatePollers: deduplicatePollers,
           requestTimeout: queryRequestTimeout,
         );
@@ -57,6 +59,7 @@ class GraphQLClient implements GraphQLDataProxy {
     DefaultPolicies? defaultPolicies,
     bool? alwaysRebroadcast,
     DeepEqualsFn? deepEquals,
+    AsyncDeepEqualsFn? asyncDeepEquals,
     bool deduplicatePollers = false,
     Duration? queryRequestTimeout,
   }) {
@@ -66,6 +69,7 @@ class GraphQLClient implements GraphQLDataProxy {
       defaultPolicies: defaultPolicies ?? this.defaultPolicies,
       alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast,
       deepEquals: deepEquals,
+      asyncDeepEquals: asyncDeepEquals,
       deduplicatePollers: deduplicatePollers,
       queryRequestTimeout: queryRequestTimeout ?? queryManager.requestTimeout,
     );
@@ -269,7 +273,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// pass through to [cache.writeQuery] and then rebroadcast any changes.
   void writeQuery(request, {required data, broadcast = true}) {
     cache.writeQuery(request, data: data, broadcast: broadcast);
-    queryManager.maybeRebroadcastQueries();
+    queryManager.maybeRebroadcastQueriesAsync().ignore();
   }
 
   /// pass through to [cache.writeFragment] and then rebroadcast any changes.
@@ -283,7 +287,7 @@ class GraphQLClient implements GraphQLDataProxy {
       broadcast: broadcast,
       data: data,
     );
-    queryManager.maybeRebroadcastQueries();
+    queryManager.maybeRebroadcastQueriesAsync();
   }
 
   /// Resets the contents of the store with [cache.store.reset()]
