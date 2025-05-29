@@ -94,6 +94,7 @@ The version in our package.json gets copied to the one we publish, and users nee
 
 - **graphql**: Changes related to the graphql client
 - **graphql_flutter**: Changes related to the graphql_flutter package
+- **graphql_devtools_extension**: Changes related to the devtools extension
 
 
 ### Subject
