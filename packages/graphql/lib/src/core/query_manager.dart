@@ -21,12 +21,21 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 import 'package:graphql/src/core/_query_write_handling.dart';
 
 typedef DeepEqualsFn = bool Function(dynamic a, dynamic b);
+typedef AsyncDeepEqualsFn = Future<bool> Function(dynamic a, dynamic b);
 
-/// The equality function used for comparing cached and new data.
+/// The equality function used for comparing cached and new data
+/// in synchronous contexts like operator overrides or custom logic.
 ///
 /// You can alternatively provide [optimizedDeepEquals] for a faster
-/// equality check. Or provide your own via [GqlClient] constructor.
+/// equality check, or provide your own via the [GqlClient] constructor.
 DeepEqualsFn gqlDeepEquals = const DeepCollectionEquality().equals;
+
+/// The async equality function used for comparing cached and new data
+/// during asynchronous operations like rebroadcast checks.
+///
+/// Can be provided via the constructor for custom or isolate-based comparison logic.
+AsyncDeepEqualsFn gqlAsyncDeepEquals =
+    (dynamic a, dynamic b) async => gqlDeepEquals(a, b);
 
 class QueryManager {
   QueryManager({
@@ -34,6 +43,7 @@ class QueryManager {
     required this.cache,
     this.alwaysRebroadcast = false,
     DeepEqualsFn? deepEquals,
+    AsyncDeepEqualsFn? asyncDeepEquals,
     bool deduplicatePollers = false,
     this.requestTimeout = const Duration(seconds: 5),
   }) {
@@ -44,12 +54,15 @@ class QueryManager {
     if (deepEquals != null) {
       gqlDeepEquals = deepEquals;
     }
+    if (asyncDeepEquals != null) {
+      gqlAsyncDeepEquals = asyncDeepEquals;
+    }
   }
 
   final Link link;
   final GraphQLCache cache;
 
-  /// Whether to skip deep equality checks in [maybeRebroadcastQueries]
+  /// Whether to skip deep equality checks in [maybeRebroadcastQueriesAsync]
   final bool alwaysRebroadcast;
 
   /// The timeout for resolving a query
@@ -154,7 +167,7 @@ class QueryManager {
             )),
           ))
           .map((QueryResult<TParsed> queryResult) {
-            maybeRebroadcastQueries();
+            maybeRebroadcastQueriesAsync();
             return queryResult;
           });
     } catch (ex, trace) {
@@ -170,19 +183,19 @@ class QueryManager {
 
   Future<QueryResult<TParsed>> query<TParsed>(
       QueryOptions<TParsed> options) async {
-    final results = fetchQueryAsMultiSourceResult(_oneOffOpId, options);
+    final results = await fetchQueryAsMultiSourceResult(_oneOffOpId, options);
     final eagerResult = results.eagerResult;
     final networkResult = results.networkResult;
     if (options.fetchPolicy != FetchPolicy.cacheAndNetwork ||
         eagerResult.isLoading) {
       final result = networkResult ?? eagerResult;
       await result;
-      maybeRebroadcastQueries();
+      maybeRebroadcastQueriesAsync();
       return result;
     }
-    maybeRebroadcastQueries();
+    maybeRebroadcastQueriesAsync();
     if (networkResult is Future<QueryResult<TParsed>>) {
-      networkResult.then((value) => maybeRebroadcastQueries());
+      networkResult.then((value) => maybeRebroadcastQueriesAsync());
     }
     return eagerResult;
   }
@@ -205,7 +218,7 @@ class QueryManager {
     }
 
     /// wait until callbacks complete to rebroadcast
-    maybeRebroadcastQueries();
+    maybeRebroadcastQueriesAsync();
 
     return result;
   }
@@ -423,11 +436,12 @@ class QueryManager {
   @experimental
   Future<List<QueryResult<Object?>?>> refetchSafeQueries() async {
     rebroadcastLocked = true;
+    final queriesSnapshot = List.of(queries.values);
     final results = await Future.wait(
-      queries.values.where((q) => q.isRefetchSafe).map((q) => q.refetch()),
+      queriesSnapshot.where((q) => q.isRefetchSafe).map((q) => q.refetch()),
     );
     rebroadcastLocked = false;
-    maybeRebroadcastQueries();
+    maybeRebroadcastQueriesAsync();
     return results;
   }
 
@@ -444,7 +458,7 @@ class QueryManager {
 
   /// Add a result to the [ObservableQuery] specified by `queryId`, if it exists.
   ///
-  /// Will [maybeRebroadcastQueries] from [ObservableQuery.addResult] if the [cache] has flagged the need to.
+  /// Will [maybeRebroadcastQueriesAsync] from [ObservableQuery.addResult] if the [cache] has flagged the need to.
   ///
   /// Queries are registered via [setQuery] and [watchQuery]
   void addQueryResult<TParsed>(
@@ -504,10 +518,10 @@ class QueryManager {
   /// **Note on internal implementation details**:
   /// There is sometimes confusion on when this is called, but rebroadcasts are requested
   /// from every [addQueryResult] where `result.isNotLoading` as an [OnData] callback from [ObservableQuery].
-  bool maybeRebroadcastQueries({
+  Future<bool> maybeRebroadcastQueriesAsync({
     ObservableQuery<Object?>? exclude,
     bool force = false,
-  }) {
+  }) async {
     if (rebroadcastLocked && !force) {
       return false;
     }
@@ -522,7 +536,11 @@ class QueryManager {
     // to [readQuery] for it once.
     final Map<Request, QueryResult<Object?>> diffQueryResultCache = {};
     final Map<Request, bool> ignoreQueryResults = {};
-    for (final query in queries.values) {
+
+    final List<ObservableQuery<Object?>> queriesSnapshot =
+        List.of(queries.values);
+
+    for (final query in queriesSnapshot) {
       final Request request = query.options.asRequest;
       final cachedQueryResult = diffQueryResultCache[request];
       if (query == exclude || !query.isRebroadcastSafe) {
@@ -545,7 +563,7 @@ class QueryManager {
           query.options.asRequest,
           optimistic: query.options.policies.mergeOptimisticData,
         );
-        if (_cachedDataHasChangedFor(query, cachedData)) {
+        if (await _cachedDataHasChangedForAsync(query, cachedData)) {
           // The data has changed
           final queryResult = QueryResult(
             data: cachedData,
@@ -567,14 +585,19 @@ class QueryManager {
     return true;
   }
 
-  bool _cachedDataHasChangedFor(
+  Future<bool> _cachedDataHasChangedForAsync(
     ObservableQuery<Object?> query,
     Map<String, dynamic>? cachedData,
-  ) =>
-      cachedData != null &&
-      query.latestResult != null &&
-      (alwaysRebroadcast ||
-          !gqlDeepEquals(query.latestResult!.data, cachedData));
+  ) async {
+    if (cachedData == null || query.latestResult == null) return false;
+    if (alwaysRebroadcast) return true;
+
+    final isEqual = await gqlAsyncDeepEquals(
+      query.latestResult!.data,
+      cachedData,
+    );
+    return !isEqual;
+  }
 
   void setQuery(ObservableQuery<Object?> observableQuery) {
     queries[observableQuery.queryId] = observableQuery;

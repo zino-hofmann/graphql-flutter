@@ -90,7 +90,7 @@ class ObservableQuery<TParsed> {
   /// same as [_onDataCallbacks], but not removed after invocation
   Set<OnData<TParsed>> _notRemovableOnDataCallbacks = Set();
 
-  /// call [queryManager.maybeRebroadcastQueries] after all other [_onDataCallbacks]
+  /// call [queryManager.maybeRebroadcastQueriesAsync] after all other [_onDataCallbacks]
   ///
   /// Automatically appended as an [OnData]
   FutureOr<void> _maybeRebroadcast(QueryResult? result) {
@@ -101,10 +101,10 @@ class ObservableQuery<TParsed> {
       // data. It's valid GQL to have data _and_ exception. If options.carryForwardDataOnException
       // are true, this condition may never get hit.
       // If there are onDataCallbacks, it's possible they modify cache and are
-      // depending on maybeRebroadcastQueries being called.
+      // depending on maybeRebroadcastQueriesAsync being called.
       return false;
     }
-    return queryManager.maybeRebroadcastQueries(exclude: this);
+    return queryManager.maybeRebroadcastQueriesAsync(exclude: this);
   }
 
   /// The most recently seen result from this operation's stream
