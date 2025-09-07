@@ -1,3 +1,9 @@
+# v5.2.2
+
+## Added
+- add asyncDeepEquals to the graphqlClient ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/c6c60aea9480e3b645e1ff489050021b88bdd7a1)). @Neelansh-ns 07-08-2025
+
+
 # v5.2.1
 
 ## Added
