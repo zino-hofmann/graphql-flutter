@@ -1,3 +1,9 @@
+# v5.2.1
+
+## Fixed
+- update flutter_hooks <0.22.0 ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/4d97e1b77ff6f9f76b18406b27f6cc8938aebe94)). @FujiKinaga 25-07-2025
+
+
 # v5.2.0
 
 ## Fixed
