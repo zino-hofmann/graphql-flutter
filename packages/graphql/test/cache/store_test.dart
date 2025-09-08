@@ -67,7 +67,7 @@ void main() {
       final store = await HiveStore.open(path: path);
       store.putAll(data);
 
-      expect(HiveStore().toMap(), equals(data));
+      expect(store.toMap(), equals(data));
 
       await store.box.deleteFromDisk();
     });
