@@ -36,9 +36,8 @@ class HiveStore extends Store {
   /// Opens a box. Convenience pass through to [Hive.openBox].
   ///
   /// If the box is already open, the instance is returned and all provided parameters are being ignored.
-  static Future<Box<Map<dynamic, dynamic>?>> openBox(String boxName,
-      {String? path}) async {
-    return await Hive.openBox<Map<dynamic, dynamic>?>(boxName, path: path);
+  static Future<Box<dynamic>> openBox(String boxName, {String? path}) async {
+    return await Hive.openBox<dynamic>(boxName, path: path);
   }
 
   /// Convenience factory for `HiveStore(await openBox(boxName ?? 'graphqlClientStore', path: path))`
@@ -58,7 +57,7 @@ class HiveStore extends Store {
   ///
   /// **WARNING**: Directly editing the contents of the store will not automatically
   /// rebroadcast operations.
-  final Box<Map<dynamic, dynamic>?> box;
+  final Box<dynamic> box;
 
   /// Creates a HiveStore initialized with the given [box], defaulting to `Hive.box(defaultBoxName)`
   ///
@@ -66,13 +65,14 @@ class HiveStore extends Store {
   /// This lets us decouple the async initialization logic, making store usage elsewhere much more straightforward.
   ///
   /// [opened]: https://docs.hivedb.dev/#/README?id=open-a-box
-  HiveStore([Box<Map<dynamic, dynamic>?>? box])
-      : this.box = box ?? Hive.box<Map<dynamic, dynamic>?>(defaultBoxName);
+  HiveStore([Box<dynamic>? box])
+      : this.box = box ?? Hive.box<dynamic>(defaultBoxName);
 
   @override
   Map<String, dynamic>? get(String dataId) {
     final result = box.get(dataId);
     if (result == null) return null;
+    if (result is! Map) return null;
     return _transformMap(result);
   }
 
@@ -96,7 +96,12 @@ class HiveStore extends Store {
     final map = <String, Map<String, dynamic>?>{};
     for (final key in box.keys) {
       if (key is String) {
-        map[key] = get(key);
+        final value = box.get(key);
+        if (value == null) {
+          map[key] = null;
+        } else if (value is Map) {
+          map[key] = _transformMap(value.cast<dynamic, dynamic>());
+        }
       }
     }
     return Map.unmodifiable(map);
