@@ -8,20 +8,20 @@ issue_tracker: https://github.com/zino-hofmann/graphql-flutter/issues
 # publish_to: 'none'
 
 dependencies:
-  graphql: ^5.2.0
-  gql_exec: ^1.0.0
+  graphql: ^5.2.2
+  gql_exec: ^1.0.0+1
   flutter:
     sdk: flutter
   meta: ^1.15.0
-  path_provider: ^2.0.1
-  path: ^1.9.0
-  connectivity_plus: ^6.1.3
-  hive_ce: ^2.11.0
-  plugin_platform_interface: ^2.0.0
+  path_provider: ^2.1.5
+  path: ^1.9.1
+  connectivity_plus: ^7.0.0
+  hive_ce: ^2.13.2
+  plugin_platform_interface: ^2.1.8
   flutter_hooks: '>=0.18.2 <0.22.0'
 
 dev_dependencies:
-  pedantic: ^1.11.0
+  pedantic: ^1.11.1
   mockito: ^5.0.0
   flutter_test:
     sdk: flutter
