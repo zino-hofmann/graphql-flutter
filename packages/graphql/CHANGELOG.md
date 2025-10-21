@@ -1,3 +1,12 @@
+# v5.2.3
+
+## Fixed
+- use existing HiveStore instance instead of creating new… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/d533f705ff7c7aaee6ab016ca12f066dfdd037b3)). @korca0220 17-09-2025
+
+## Added
+- migrate HiveStore from hive to hive_ce with type refac… ([commit](https://github.com/zino-hofmann/graphql-flutter/commit/f9f1b253336bd22ccfed9d4f03a16184dc4b8c66)). @korca0220 17-09-2025
+
+
 # v5.2.2
 
 ## Added
