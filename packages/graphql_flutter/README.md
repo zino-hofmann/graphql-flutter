@@ -54,6 +54,7 @@ This guide is mostly focused on setup, widgets, and flutter-specific considerati
 - [Cache Write Strictness](../graphql/README.md#write-strictness-and-partialdatapolicy)
 - [Policies](../graphql/README.md#exceptions)
 - [Exceptions](../graphql/README.md#exceptions)
+- [Operation Cancellation](../graphql/README.md#cancellation)
 - [AWS AppSync Support](../graphql/README.md#aws-appsync-support)
 - [GraphQL Upload](../graphql/README.md#graphql-upload)
 - [Parsing ASTs at build-time](../graphql/README.md#parsing-asts-at-build-time)

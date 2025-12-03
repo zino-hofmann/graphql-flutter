@@ -43,6 +43,7 @@ As of `v4`, it is built on foundational libraries from the [gql-dart project], i
     - [Mutations](#mutations)
       - [GraphQL Upload](#graphql-upload)
     - [Subscriptions](#subscriptions)
+    - [Cancellation](#cancellation)
     - [`client.watchQuery` and `ObservableQuery`](#clientwatchquery-and-observablequery)
     - [`client.watchMutation`](#clientwatchmutation)
     - [Normalization](#normalization)
@@ -512,6 +513,137 @@ class _Connection {
 and if the token changed it will be reconnect with the new token otherwise it will use the same client
 
 
+
+### Cancellation
+
+GraphQL operations can be cancelled before they complete, allowing you to abort network requests that are no longer needed. This is useful when navigating away from a screen, implementing search-as-you-type with debouncing, or managing resource-intensive operations.
+
+#### Using CancellationToken Directly
+
+Create a `CancellationToken` and pass it to your operation options:
+
+```dart
+import 'package:graphql/client.dart';
+
+final cancellationToken = CancellationToken();
+
+// Start a query
+final resultFuture = client.query(
+  QueryOptions(
+    document: gql(readRepositories),
+    variables: {'nRepositories': 50},
+    cancellationToken: cancellationToken,
+  ),
+);
+
+// Cancel it before completion
+cancellationToken.cancel();
+
+// The result will contain a CancelledException
+final result = await resultFuture;
+if (result.hasException) {
+  if (result.exception!.linkException is CancelledException) {
+    print('Operation was cancelled');
+  }
+}
+
+// Clean up when done
+cancellationToken.dispose();
+```
+
+#### Using Convenience Methods
+
+The `queryCancellable` and `mutateCancellable` methods automatically create and manage the `CancellationToken`:
+
+```dart
+// Query with automatic token management
+final operation = client.queryCancellable(
+  QueryOptions(
+    document: gql(readRepositories),
+    variables: {'nRepositories': 50},
+  ),
+);
+
+// Cancel anytime
+operation.cancel();
+
+// Get the result
+final result = await operation.result;
+```
+
+```dart
+// Mutation with automatic token management
+final operation = client.mutateCancellable(
+  MutationOptions(
+    document: gql(addStar),
+    variables: {'starrableId': repositoryID},
+  ),
+);
+
+// Cancel if needed
+operation.cancel();
+
+final result = await operation.result;
+```
+
+#### Practical Use Cases
+
+**Search-as-you-type with debouncing:**
+```dart
+CancellableOperation<QueryResult>? currentSearch;
+
+void onSearchTextChanged(String query) {
+  // Cancel previous search
+  currentSearch?.cancel();
+  
+  // Start new search
+  currentSearch = client.queryCancellable(
+    QueryOptions(
+      document: gql(searchQuery),
+      variables: {'query': query},
+    ),
+  );
+  
+  currentSearch!.result.then((result) {
+    if (!result.hasException) {
+      updateSearchResults(result.data);
+    }
+  });
+}
+```
+
+**Navigation cleanup:**
+```dart
+class MyWidget extends StatefulWidget {
+  @override
+  _MyWidgetState createState() => _MyWidgetState();
+}
+
+class _MyWidgetState extends State<MyWidget> {
+  CancellableOperation<QueryResult>? operation;
+
+  @override
+  void initState() {
+    super.initState();
+    operation = client.queryCancellable(
+      QueryOptions(document: gql(myQuery)),
+    );
+  }
+
+  @override
+  void dispose() {
+    operation?.cancel(); // Cancel when leaving screen
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Your widget tree
+  }
+}
+```
+
+For more details, see [CANCELLATION_USAGE.md](./CANCELLATION_USAGE.md).
 
 ### `client.watchQuery` and `ObservableQuery`
 
