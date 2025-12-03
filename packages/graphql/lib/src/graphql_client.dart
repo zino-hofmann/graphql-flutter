@@ -118,8 +118,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// observableQuery.close();
   /// ```
   /// {@end-tool}
-  ObservableQuery<TParsed> watchQuery<TParsed>(
-      WatchQueryOptions<TParsed> options) {
+  ObservableQuery<TParsed> watchQuery<TParsed>(WatchQueryOptions<TParsed> options) {
     final policies = defaultPolicies.watchQuery.withOverrides(options.policies);
     return queryManager.watchQuery(options.copyWithPolicies(policies));
   }
@@ -129,10 +128,8 @@ class GraphQLClient implements GraphQLDataProxy {
   /// This is a stop-gap solution to the problems created by the reliance of `graphql_flutter` on [ObservableQuery] for mutations.
   ///
   /// For more details, see https://github.com/zino-app/graphql-flutter/issues/774
-  ObservableQuery<TParsed> watchMutation<TParsed>(
-      WatchQueryOptions<TParsed> options) {
-    final policies =
-        defaultPolicies.watchMutation.withOverrides(options.policies);
+  ObservableQuery<TParsed> watchMutation<TParsed>(WatchQueryOptions<TParsed> options) {
+    final policies = defaultPolicies.watchMutation.withOverrides(options.policies);
     return queryManager.watchQuery(options.copyWithPolicies(policies));
   }
 
@@ -185,10 +182,105 @@ class GraphQLClient implements GraphQLDataProxy {
 
   /// This resolves a single mutation according to the [MutationOptions] specified and
   /// returns a [Future] which resolves with the [QueryResult] or throws an [Exception].
-  Future<QueryResult<TParsed>> mutate<TParsed>(
-      MutationOptions<TParsed> options) async {
+  Future<QueryResult<TParsed>> mutate<TParsed>(MutationOptions<TParsed> options) async {
     final policies = defaultPolicies.mutate.withOverrides(options.policies);
     return await queryManager.mutate(options.copyWithPolicies(policies));
+  }
+
+  /// Executes a query that can be cancelled via the returned [CancellableOperation].
+  ///
+  /// This is a convenience method that creates a [CancellationToken] for you and
+  /// returns both the result future and the token wrapped in a [CancellableOperation].
+  ///
+  /// {@tool snippet}
+  /// Basic usage
+  ///
+  /// ```dart
+  /// final operation = client.queryCancellable(
+  ///   QueryOptions(
+  ///     document: gql('query { ... }'),
+  ///   ),
+  /// );
+  ///
+  /// // Later, if you need to cancel:
+  /// operation.cancel();
+  ///
+  /// // The result future will complete with a CancelledException
+  /// try {
+  ///   final result = await operation.result;
+  /// } catch (e) {
+  ///   if (e is CancelledException) {
+  ///     // Handle cancellation
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  CancellableOperation<QueryResult<TParsed>> queryCancellable<TParsed>(
+    QueryOptions<TParsed> options,
+  ) {
+    final cancellationToken = CancellationToken();
+    final modifiedOptions = options.copyWithOptions(
+      cancellationToken: cancellationToken,
+    );
+    return CancellableOperation(
+      result: query(modifiedOptions),
+      cancellationToken: cancellationToken,
+    );
+  }
+
+  /// Executes a mutation that can be cancelled via the returned [CancellableOperation].
+  ///
+  /// This is a convenience method that creates a [CancellationToken] for you and
+  /// returns both the result future and the token wrapped in a [CancellableOperation].
+  ///
+  /// {@tool snippet}
+  /// Basic usage
+  ///
+  /// ```dart
+  /// final operation = client.mutateCancellable(
+  ///   MutationOptions(
+  ///     document: gql('mutation { ... }'),
+  ///   ),
+  /// );
+  ///
+  /// // Later, if you need to cancel:
+  /// operation.cancel();
+  ///
+  /// // The result future will complete with a CancelledException
+  /// try {
+  ///   final result = await operation.result;
+  /// } catch (e) {
+  ///   if (e is CancelledException) {
+  ///     // Handle cancellation
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  CancellableOperation<QueryResult<TParsed>> mutateCancellable<TParsed>(
+    MutationOptions<TParsed> options,
+  ) {
+    final cancellationToken = CancellationToken();
+    final policies = defaultPolicies.mutate.withOverrides(options.policies);
+    final modifiedOptions = MutationOptions<TParsed>(
+      document: options.document,
+      operationName: options.operationName,
+      variables: options.variables,
+      fetchPolicy: policies.fetch,
+      errorPolicy: policies.error,
+      cacheRereadPolicy: policies.cacheReread,
+      context: options.context,
+      optimisticResult: options.optimisticResult,
+      onCompleted: options.onCompleted,
+      update: options.update,
+      onError: options.onError,
+      parserFn: options.parserFn,
+      queryRequestTimeout: options.queryRequestTimeout,
+      cancellationToken: cancellationToken,
+    );
+    return CancellableOperation(
+      result: queryManager.mutate(modifiedOptions),
+      cancellationToken: cancellationToken,
+    );
   }
 
   /// This subscribes to a GraphQL subscription according to the options specified and returns a
@@ -227,8 +319,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// });
   /// ```
   /// {@end-tool}
-  Stream<QueryResult<TParsed>> subscribe<TParsed>(
-      SubscriptionOptions<TParsed> options) {
+  Stream<QueryResult<TParsed>> subscribe<TParsed>(SubscriptionOptions<TParsed> options) {
     final policies = defaultPolicies.subscribe.withOverrides(
       options.policies,
     );
@@ -257,8 +348,7 @@ class GraphQLClient implements GraphQLDataProxy {
   }
 
   /// pass through to [cache.readQuery]
-  readQuery(request, {optimistic = true}) =>
-      cache.readQuery(request, optimistic: optimistic);
+  readQuery(request, {optimistic = true}) => cache.readQuery(request, optimistic: optimistic);
 
   /// pass through to [cache.readFragment]
   readFragment(
