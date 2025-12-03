@@ -34,8 +34,7 @@ DeepEqualsFn gqlDeepEquals = const DeepCollectionEquality().equals;
 /// during asynchronous operations like rebroadcast checks.
 ///
 /// Can be provided via the constructor for custom or isolate-based comparison logic.
-AsyncDeepEqualsFn gqlAsyncDeepEquals =
-    (dynamic a, dynamic b) async => gqlDeepEquals(a, b);
+AsyncDeepEqualsFn gqlAsyncDeepEquals = (dynamic a, dynamic b) async => gqlDeepEquals(a, b);
 
 class QueryManager {
   QueryManager({
@@ -73,14 +72,12 @@ class QueryManager {
   int idCounter = 1;
 
   /// [ObservableQuery] registry
-  Map<String, ObservableQuery<Object?>> queries =
-      <String, ObservableQuery<Object?>>{};
+  Map<String, ObservableQuery<Object?>> queries = <String, ObservableQuery<Object?>>{};
 
   /// prevents rebroadcasting for some intensive bulk operation like [refetchSafeQueries]
   bool rebroadcastLocked = false;
 
-  ObservableQuery<TParsed> watchQuery<TParsed>(
-      WatchQueryOptions<TParsed> options) {
+  ObservableQuery<TParsed> watchQuery<TParsed>(WatchQueryOptions<TParsed> options) {
     final ObservableQuery<TParsed> observableQuery = ObservableQuery<TParsed>(
       queryManager: this,
       options: options,
@@ -91,8 +88,7 @@ class QueryManager {
     return observableQuery;
   }
 
-  Stream<QueryResult<TParsed>> subscribe<TParsed>(
-      SubscriptionOptions<TParsed> options) async* {
+  Stream<QueryResult<TParsed>> subscribe<TParsed>(SubscriptionOptions<TParsed> options) async* {
     assert(
       options.fetchPolicy != FetchPolicy.cacheOnly,
       "Cannot subscribe with FetchPolicy.cacheOnly: $options",
@@ -181,13 +177,11 @@ class QueryManager {
     }
   }
 
-  Future<QueryResult<TParsed>> query<TParsed>(
-      QueryOptions<TParsed> options) async {
+  Future<QueryResult<TParsed>> query<TParsed>(QueryOptions<TParsed> options) async {
     final results = await fetchQueryAsMultiSourceResult(_oneOffOpId, options);
     final eagerResult = results.eagerResult;
     final networkResult = results.networkResult;
-    if (options.fetchPolicy != FetchPolicy.cacheAndNetwork ||
-        eagerResult.isLoading) {
+    if (options.fetchPolicy != FetchPolicy.cacheAndNetwork || eagerResult.isLoading) {
       final result = networkResult ?? eagerResult;
       await result;
       maybeRebroadcastQueriesAsync();
@@ -200,8 +194,7 @@ class QueryManager {
     return eagerResult;
   }
 
-  Future<QueryResult<TParsed>> mutate<TParsed>(
-      MutationOptions<TParsed> options) async {
+  Future<QueryResult<TParsed>> mutate<TParsed>(MutationOptions<TParsed> options) async {
     final result = await fetchQuery(_oneOffOpId, options);
     // once the mutation has been process successfully, execute callbacks
     // before returning the results
@@ -227,8 +220,7 @@ class QueryManager {
     String queryId,
     BaseOptions<TParsed> options,
   ) async {
-    final MultiSourceResult<TParsed> allResults =
-        fetchQueryAsMultiSourceResult(queryId, options);
+    final MultiSourceResult<TParsed> allResults = fetchQueryAsMultiSourceResult(queryId, options);
     return allResults.networkResult ?? allResults.eagerResult;
   }
 
@@ -252,10 +244,9 @@ class QueryManager {
     return MultiSourceResult(
       options: options,
       eagerResult: eagerResult,
-      networkResult:
-          (shouldStopAtCache(options.fetchPolicy) && !eagerResult.isLoading)
-              ? null
-              : _resolveQueryOnNetwork(request, queryId, options),
+      networkResult: (shouldStopAtCache(options.fetchPolicy) && !eagerResult.isLoading)
+          ? null
+          : _resolveQueryOnNetwork(request, queryId, options),
     );
   }
 
@@ -282,7 +273,51 @@ class QueryManager {
       if (timeout case final Duration timeout) {
         responseStream = responseStream.timeout(timeout);
       }
-      response = await responseStream.first;
+
+      // Handle cancellation if a token is provided
+      final cancellationToken = options.cancellationToken;
+      if (cancellationToken != null) {
+        // Check if already cancelled
+        if (cancellationToken.isCancelled) {
+          throw CancelledException('Operation was cancelled');
+        }
+
+        final completer = Completer<Response>();
+        StreamSubscription<Response>? subscription;
+        StreamSubscription<void>? cancellationSubscription;
+
+        cancellationSubscription = cancellationToken.onCancel.listen((_) {
+          subscription?.cancel();
+          if (!completer.isCompleted) {
+            completer.completeError(
+              CancelledException('Operation was cancelled'),
+              StackTrace.current,
+            );
+          }
+        });
+
+        subscription = responseStream.listen(
+          (response) {
+            if (!completer.isCompleted) {
+              completer.complete(response);
+            }
+          },
+          onError: (error, stackTrace) {
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
+          },
+          onDone: () {
+            cancellationSubscription?.cancel();
+          },
+          cancelOnError: true,
+        );
+
+        response = await completer.future;
+        await cancellationSubscription.cancel();
+      } else {
+        response = await responseStream.first;
+      }
 
       queryResult = mapFetchResultToQueryResult(
         response,
@@ -346,8 +381,7 @@ class QueryManager {
 
       // if we haven't already resolved results optimistically,
       // we attempt to resolve the from the cache
-      if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
-          !queryResult.isOptimistic) {
+      if (shouldRespondEagerlyFromCache(options.fetchPolicy) && !queryResult.isOptimistic) {
         final latestResult = _getQueryResultByRequest<TParsed>(request);
         if (latestResult != null && latestResult.data != null) {
           // we have a result already cached + deserialized for this request
@@ -370,8 +404,7 @@ class QueryManager {
           }
         }
 
-        if (options.fetchPolicy == FetchPolicy.cacheOnly &&
-            queryResult.isLoading) {
+        if (options.fetchPolicy == FetchPolicy.cacheOnly && queryResult.isLoading) {
           queryResult = QueryResult(
             options: options,
             source: QueryResultSource.cache,
@@ -537,8 +570,7 @@ class QueryManager {
     final Map<Request, QueryResult<Object?>> diffQueryResultCache = {};
     final Map<Request, bool> ignoreQueryResults = {};
 
-    final List<ObservableQuery<Object?>> queriesSnapshot =
-        List.of(queries.values);
+    final List<ObservableQuery<Object?>> queriesSnapshot = List.of(queries.values);
 
     for (final query in queriesSnapshot) {
       final Request request = query.options.asRequest;
@@ -603,8 +635,7 @@ class QueryManager {
     queries[observableQuery.queryId] = observableQuery;
   }
 
-  void closeQuery(ObservableQuery<Object?> observableQuery,
-      {bool fromQuery = false}) {
+  void closeQuery(ObservableQuery<Object?> observableQuery, {bool fromQuery = false}) {
     if (!fromQuery) {
       observableQuery.close(fromManager: true);
     }
