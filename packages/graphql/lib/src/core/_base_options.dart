@@ -3,6 +3,7 @@ import 'package:gql/ast.dart';
 
 import 'package:graphql/client.dart';
 import 'package:graphql/src/core/result_parser.dart';
+import 'package:graphql/src/core/cancellation_token.dart';
 import 'package:meta/meta.dart';
 
 TParsed unprovidedParserFn<TParsed>(_d) => throw UnimplementedError(
@@ -24,6 +25,7 @@ abstract class BaseOptions<TParsed extends Object?> {
     CacheRereadPolicy? cacheRereadPolicy,
     this.optimisticResult,
     this.queryRequestTimeout,
+    this.cancellationToken,
   })  : policies = Policies(
           fetch: fetchPolicy,
           error: errorPolicy,
@@ -64,6 +66,12 @@ abstract class BaseOptions<TParsed extends Object?> {
   /// Override default query timeout
   final Duration? queryRequestTimeout;
 
+  /// Token that can be used to cancel the operation.
+  ///
+  /// When the token is cancelled, the operation will be terminated and complete
+  /// with a [CancelledException].
+  final CancellationToken? cancellationToken;
+
   // TODO consider inverting this relationship
   /// Resolve these options into a request
   Request get asRequest => Request(
@@ -85,11 +93,11 @@ abstract class BaseOptions<TParsed extends Object?> {
         context,
         parserFn,
         queryRequestTimeout,
+        cancellationToken,
       ];
 
   OperationType get type {
-    final definitions =
-        document.definitions.whereType<OperationDefinitionNode>().toList();
+    final definitions = document.definitions.whereType<OperationDefinitionNode>().toList();
     if (operationName != null) {
       definitions.removeWhere(
         (node) => node.name!.value != operationName,
