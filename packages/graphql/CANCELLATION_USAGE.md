@@ -1,6 +1,8 @@
 # Cancellation Support
 
-The graphql package now supports cancellation of `query` and `mutate` operations. This allows you to cancel in-flight operations when they're no longer needed (e.g., when a user navigates away or cancels an action).
+The graphql package now supports cancellation of `query` and `mutate`
+operations. This allows you to cancel in-flight operations when they're no
+longer needed (e.g., when a user navigates away or cancels an action).
 
 ## Basic Usage
 
@@ -50,7 +52,8 @@ cancellationToken.dispose();
 
 ### Option 2: Using the convenience methods
 
-The package provides `queryCancellable` and `mutateCancellable` convenience methods that automatically create a `CancellationToken` for you:
+The package provides `queryCancellable` and `mutateCancellable` convenience
+methods that automatically create a `CancellationToken` for you:
 
 ```dart
 import 'package:graphql/client.dart';
@@ -129,6 +132,7 @@ try {
 ## Use Cases
 
 ### 1. User Navigation
+
 Cancel pending requests when a user navigates away from a page:
 
 ```dart
@@ -168,6 +172,7 @@ class _MyWidgetState extends State<MyWidget> {
 ```
 
 ### 2. Search Debouncing
+
 Cancel previous search requests when a new one is initiated:
 
 ```dart
@@ -206,6 +211,7 @@ void search(String query) {
 ```
 
 ### 3. Timeout with Custom Message
+
 Combine with timeouts for better control:
 
 ```dart
@@ -226,12 +232,24 @@ final result = await client.query(
 
 ## Important Notes
 
-1. **Disposing CancellationTokens**: When using `CancellationToken` directly, remember to call `dispose()` when you're done with it to clean up resources.
+1. **Disposing CancellationTokens**: When using `CancellationToken` directly,
+   remember to call `dispose()` when you're done with it to clean up resources.
 
-2. **Convenience Methods**: The `queryCancellable` and `mutateCancellable` methods automatically create and manage `CancellationToken` instances for you.
+2. **Convenience Methods**: The `queryCancellable` and `mutateCancellable`
+   methods automatically create and manage `CancellationToken` instances for
+   you.
 
-3. **Error Handling**: Cancelled operations will complete with an `OperationException` containing a `CancelledException` as the `linkException`.
+3. **Error Handling**: Cancelled operations will complete with an
+   `OperationException` containing a `CancelledException` as the
+   `linkException`.
 
-4. **Network Cleanup**: Cancelling an operation will attempt to cancel the underlying network request, but depending on the transport layer and server, the request may still complete on the server side.
+4. **Network Cleanup**: Cancelling an operation will abort the underlying HTTP
+   request. The `HttpLink` provided by this package supports true network
+   cancellation on both IO (using `dart:io` `HttpClient.abort()`) and Web
+   platforms (using `XMLHttpRequest.abort()`). In Chrome DevTools, you will see
+   cancelled requests show as "(canceled)" in the Network tab. Note: If you
+   provide a custom `http.Client` to `HttpLink`, cancellation may not work
+   unless your client supports it.
 
-5. **Cache Updates**: Cancelled operations will not update the cache with any results they may have received before cancellation.
+5. **Cache Updates**: Cancelled operations will not update the cache with any
+   results they may have received before cancellation.
