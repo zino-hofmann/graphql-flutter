@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:gql_exec/gql_exec.dart';
 
 /// A token that can be used to cancel an in-flight GraphQL operation.
 ///
@@ -78,4 +79,14 @@ class CancellableOperation<T> {
   void cancel() {
     cancellationToken.cancel();
   }
+}
+
+/// Context entry that holds a [CancellationToken].
+class CancellationContextEntry extends ContextEntry {
+  final CancellationToken token;
+
+  const CancellationContextEntry(this.token);
+
+  @override
+  List<Object?> get fieldsForEquality => [token];
 }
