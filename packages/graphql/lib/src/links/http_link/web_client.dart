@@ -43,7 +43,8 @@ class CancellableHttpClientImpl implements CancellableHttpClient {
     }).toJS;
 
     request.onerror = ((web.Event e) {
-      completer.completeError(http.ClientException('XMLHttpRequest error', uri));
+      completer
+          .completeError(http.ClientException('XMLHttpRequest error', uri));
     }).toJS;
 
     request.onabort = ((web.Event e) {

@@ -111,7 +111,8 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         },
       );
 
-  WatchQueryOptions<TParsed> asWatchQueryOptions({bool fetchResults = true}) => WatchQueryOptions(
+  WatchQueryOptions<TParsed> asWatchQueryOptions({bool fetchResults = true}) =>
+      WatchQueryOptions(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -144,7 +145,8 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
 }
 
 @immutable
-class SubscriptionOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
+class SubscriptionOptions<TParsed extends Object?>
+    extends BaseOptions<TParsed> {
   SubscriptionOptions({
     required DocumentNode document,
     String? operationName,
@@ -170,7 +172,8 @@ class SubscriptionOptions<TParsed extends Object?> extends BaseOptions<TParsed> 
           queryRequestTimeout: queryRequestTimeout,
           cancellationToken: cancellationToken,
         );
-  SubscriptionOptions<TParsed> copyWithPolicies(Policies policies) => SubscriptionOptions(
+  SubscriptionOptions<TParsed> copyWithPolicies(Policies policies) =>
+      SubscriptionOptions(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -271,7 +274,8 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         pollInterval: pollInterval ?? this.pollInterval,
         fetchResults: fetchResults ?? this.fetchResults,
         eagerlyFetchResults: eagerlyFetchResults ?? this.eagerlyFetchResults,
-        carryForwardDataOnException: carryForwardDataOnException ?? this.carryForwardDataOnException,
+        carryForwardDataOnException:
+            carryForwardDataOnException ?? this.carryForwardDataOnException,
         context: context ?? this.context,
         parserFn: parserFn ?? this.parserFn,
         queryRequestTimeout: queryRequestTimeout ?? this.queryRequestTimeout,
@@ -319,7 +323,8 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         cancellationToken: cancellationToken,
       );
 
-  WatchQueryOptions<TParsed> copyWithPollInterval(Duration? pollInterval) => WatchQueryOptions<TParsed>(
+  WatchQueryOptions<TParsed> copyWithPollInterval(Duration? pollInterval) =>
+      WatchQueryOptions<TParsed>(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -337,7 +342,9 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         cancellationToken: cancellationToken,
       );
 
-  WatchQueryOptions<TParsed> copyWithVariables(Map<String, dynamic> variables) => WatchQueryOptions<TParsed>(
+  WatchQueryOptions<TParsed> copyWithVariables(
+          Map<String, dynamic> variables) =>
+      WatchQueryOptions<TParsed>(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -355,7 +362,9 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         cancellationToken: cancellationToken,
       );
 
-  WatchQueryOptions<TParsed> copyWithOptimisticResult(Object? optimisticResult) => WatchQueryOptions<TParsed>(
+  WatchQueryOptions<TParsed> copyWithOptimisticResult(
+          Object? optimisticResult) =>
+      WatchQueryOptions<TParsed>(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -416,9 +425,10 @@ class FetchMoreOptions {
   final UpdateQuery updateQuery;
 
   /// Wrap an [UpdateQuery] in a [deeplyMergeLeft] of the `previousResultData`.
-  static UpdateQuery partialUpdater(UpdateQuery update) => (previous, fetched) => deeplyMergeLeft(
-        [previous, update(previous, fetched)],
-      );
+  static UpdateQuery partialUpdater(UpdateQuery update) =>
+      (previous, fetched) => deeplyMergeLeft(
+            [previous, update(previous, fetched)],
+          );
 }
 
 /// merge fetchMore result data with earlier result data
@@ -429,7 +439,9 @@ typedef UpdateQuery = Map<String, dynamic>? Function(
 
 extension WithType on Request {
   OperationType get type {
-    final definitions = operation.document.definitions.whereType<OperationDefinitionNode>().toList();
+    final definitions = operation.document.definitions
+        .whereType<OperationDefinitionNode>()
+        .toList();
     if (operation.operationName != null) {
       definitions.removeWhere(
         (node) => node.name!.value != operation.operationName,

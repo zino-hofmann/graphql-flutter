@@ -97,7 +97,8 @@ abstract class BaseOptions<TParsed extends Object?> {
       ];
 
   OperationType get type {
-    final definitions = document.definitions.whereType<OperationDefinitionNode>().toList();
+    final definitions =
+        document.definitions.whereType<OperationDefinitionNode>().toList();
     if (operationName != null) {
       definitions.removeWhere(
         (node) => node.name!.value != operationName,
