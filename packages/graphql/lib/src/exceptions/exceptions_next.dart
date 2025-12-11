@@ -24,7 +24,8 @@ class CancelledException extends LinkException {
 /// to the cache with [expectedData]
 @immutable
 class CacheMissException extends LinkException {
-  CacheMissException(this.message, this.request, {this.expectedData}) : super(null, null);
+  CacheMissException(this.message, this.request, {this.expectedData})
+      : super(null, null);
 
   final String message;
   final Request request;
@@ -33,8 +34,11 @@ class CacheMissException extends LinkException {
   final Map<String, dynamic>? expectedData;
 
   @override
-  String toString() =>
-      ['CacheMissException($message', '$request', if (expectedData != null) 'expectedData: $expectedData)'].join(', ');
+  String toString() => [
+        'CacheMissException($message',
+        '$request',
+        if (expectedData != null) 'expectedData: $expectedData)'
+      ].join(', ');
 }
 
 /// A failure due to a data structure mismatch between the data and the expected
@@ -73,7 +77,8 @@ class MismatchedDataStructureException extends LinkException {
 ///
 /// This is checked by leveraging `normalize`
 @immutable
-class CacheMisconfigurationException extends LinkException implements MismatchedDataStructureException {
+class CacheMisconfigurationException extends LinkException
+    implements MismatchedDataStructureException {
   const CacheMisconfigurationException(
     this.originalException,
     this.originalStackTrace, {
@@ -109,7 +114,8 @@ class CacheMisconfigurationException extends LinkException implements Mismatched
 ///
 /// This is checked by leveraging `normalize`
 @immutable
-class UnexpectedResponseStructureException extends ServerException implements MismatchedDataStructureException {
+class UnexpectedResponseStructureException extends ServerException
+    implements MismatchedDataStructureException {
   const UnexpectedResponseStructureException(
     this.originalException,
     this.originalStackTrace, {
@@ -154,7 +160,8 @@ class UnknownException extends LinkException {
   ) : super(originalException, originalStackTrace);
 
   @override
-  String toString() => "UnknownException($originalException, stack:\n$originalStackTrace\n)";
+  String toString() =>
+      "UnknownException($originalException, stack:\n$originalStackTrace\n)";
 }
 
 /// Container for both [graphqlErrors] returned from the server
@@ -198,7 +205,9 @@ OperationException? coalesceErrors({
   List<dynamic>? raw,
   OperationException? exception,
 }) {
-  if (exception != null || linkException != null || (graphqlErrors != null && graphqlErrors.isNotEmpty)) {
+  if (exception != null ||
+      linkException != null ||
+      (graphqlErrors != null && graphqlErrors.isNotEmpty)) {
     return OperationException(
       linkException: linkException ?? exception?.linkException,
       raw: raw,

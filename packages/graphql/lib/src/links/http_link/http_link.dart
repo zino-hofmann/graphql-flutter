@@ -60,7 +60,8 @@ class HttpLink extends Link {
         );
       }
 
-      if (response.statusCode >= 300 || (response.statusCode < 200 && response.statusCode != 0)) {
+      if (response.statusCode >= 300 ||
+          (response.statusCode < 200 && response.statusCode != 0)) {
         throw HttpLinkServerException(
           response: response,
           parsedResponse: Response(
@@ -114,7 +115,9 @@ class HttpLink extends Link {
         return; // Don't throw, just end the stream
       }
       // Check if the error message indicates cancellation
-      if (e.message.contains('abort') || e.message.contains('cancel') || e.message.contains('cancelled')) {
+      if (e.message.contains('abort') ||
+          e.message.contains('cancel') ||
+          e.message.contains('cancelled')) {
         return; // Don't throw, just end the stream
       }
       throw ServerException(
@@ -146,7 +149,8 @@ class HttpLink extends Link {
     httpRequest.headers.addAll(defaultHeaders);
 
     // Apply headers from context
-    final HttpLinkHeaders? contextHeaders = request.context.entry<HttpLinkHeaders>();
+    final HttpLinkHeaders? contextHeaders =
+        request.context.entry<HttpLinkHeaders>();
     if (contextHeaders != null) {
       httpRequest.headers.addAll(contextHeaders.headers);
     }

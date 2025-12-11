@@ -7,7 +7,8 @@ import 'package:graphql/src/core/result_parser.dart';
 
 import 'package:meta/meta.dart';
 
-typedef OnMutationCompleted = FutureOr<void> Function(Map<String, dynamic>? data);
+typedef OnMutationCompleted = FutureOr<void> Function(
+    Map<String, dynamic>? data);
 typedef OnMutationUpdate<TParsed> = FutureOr<void> Function(
   GraphQLDataProxy cache,
   QueryResult<TParsed>? result,
@@ -57,7 +58,8 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         onError,
       ];
 
-  MutationOptions<TParsed> copyWithPolicies(Policies policies) => MutationOptions(
+  MutationOptions<TParsed> copyWithPolicies(Policies policies) =>
+      MutationOptions(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -74,7 +76,8 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         cancellationToken: cancellationToken,
       );
 
-  WatchQueryOptions<TParsed> asWatchQueryOptions() => WatchQueryOptions<TParsed>(
+  WatchQueryOptions<TParsed> asWatchQueryOptions() =>
+      WatchQueryOptions<TParsed>(
         document: document,
         operationName: operationName,
         variables: variables,
@@ -103,8 +106,11 @@ class MutationCallbackHandler<TParsed> {
 
   // callbacks will be called against each result in the stream,
   // which should then rebroadcast queries with the appropriate optimism
-  Iterable<OnData<TParsed>> get callbacks =>
-      <OnData<TParsed>?>[onCompleted, update, onError].whereType<OnData<TParsed>>();
+  Iterable<OnData<TParsed>> get callbacks => <OnData<TParsed>?>[
+        onCompleted,
+        update,
+        onError
+      ].whereType<OnData<TParsed>>();
 
   // Todo: probably move this to its own class
   OnData<TParsed>? get onCompleted {
@@ -121,7 +127,9 @@ class MutationCallbackHandler<TParsed> {
   OnData<TParsed>? get onError {
     if (options.onError != null) {
       return (QueryResult? result) {
-        if (!result!.isLoading && result.hasException && options.errorPolicy != ErrorPolicy.ignore) {
+        if (!result!.isLoading &&
+            result.hasException &&
+            options.errorPolicy != ErrorPolicy.ignore) {
           return options.onError!(result.exception);
         }
       };
