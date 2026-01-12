@@ -11,6 +11,7 @@ import 'package:gql_link/gql_link.dart' show Link;
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/_base_options.dart';
+import 'package:graphql/src/core/cancellation_token.dart';
 import 'package:graphql/src/core/mutation_options.dart';
 import 'package:graphql/src/core/query_options.dart';
 import 'package:graphql/src/core/query_result.dart';
@@ -271,6 +272,13 @@ class QueryManager {
 
     bool rereadFromCache = false;
 
+    // Add cancellation token to context if present
+    if (options.cancellationToken != null) {
+      request = request.updateContextEntry<CancellationContextEntry>(
+        (entry) => CancellationContextEntry(options.cancellationToken!),
+      );
+    }
+
     try {
       // execute the request through the provided link(s)
       Stream<Response> responseStream = link.request(request);
@@ -282,7 +290,57 @@ class QueryManager {
       if (timeout case final Duration timeout) {
         responseStream = responseStream.timeout(timeout);
       }
-      response = await responseStream.first;
+
+      // Handle cancellation if a token is provided
+      final cancellationToken = options.cancellationToken;
+      if (cancellationToken != null) {
+        // Check if already cancelled
+        if (cancellationToken.isCancelled) {
+          throw CancelledException('Operation was cancelled');
+        }
+
+        final completer = Completer<Response>();
+        StreamSubscription<Response>? subscription;
+        StreamSubscription<void>? cancellationSubscription;
+
+        cancellationSubscription = cancellationToken.onCancel.listen((_) {
+          // Complete the completer with an error first
+          // The HttpLink will detect cancellation and abort the underlying request
+          if (!completer.isCompleted) {
+            completer.completeError(
+              CancelledException('Operation was cancelled'),
+              StackTrace.current,
+            );
+          }
+        });
+
+        subscription = responseStream.listen(
+          (response) {
+            if (!completer.isCompleted) {
+              completer.complete(response);
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
+          },
+          onDone: () {
+            cancellationSubscription?.cancel();
+          },
+          cancelOnError: true,
+        );
+
+        try {
+          response = await completer.future;
+        } finally {
+          // Clean up subscriptions
+          await cancellationSubscription.cancel();
+          await subscription.cancel();
+        }
+      } else {
+        response = await responseStream.first;
+      }
 
       queryResult = mapFetchResultToQueryResult(
         response,

@@ -7,6 +7,17 @@ import 'package:meta/meta.dart';
 export 'package:gql_exec/gql_exec.dart' show GraphQLError;
 export 'package:normalize/normalize.dart' show PartialDataException;
 
+/// Exception thrown when an operation is cancelled via a [CancellationToken].
+@immutable
+class CancelledException extends LinkException {
+  CancelledException(this.message) : super(null, null);
+
+  final String message;
+
+  @override
+  String toString() => 'CancelledException($message)';
+}
+
 /// A failure to find a response from the cache.
 ///
 /// Can occur when `cacheOnly=true`, or when the [request] was just written
