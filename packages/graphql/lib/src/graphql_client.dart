@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:meta/meta.dart';
 import 'dart:async';
 
@@ -5,6 +8,9 @@ import 'package:graphql/src/core/core.dart';
 import 'package:graphql/src/cache/cache.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
+
+/// Flag to register extension only once
+bool _isExtensionRegistered = false;
 
 /// Universal GraphQL Client with configurable caching and [link][] system.
 /// modelled after the [`apollo-client`][ac].
@@ -39,7 +45,21 @@ class GraphQLClient implements GraphQLDataProxy {
           asyncDeepEquals: asyncDeepEquals,
           deduplicatePollers: deduplicatePollers,
           requestTimeout: queryRequestTimeout,
-        );
+        ) {
+    const releaseMode = bool.fromEnvironment('dart.vm.product');
+    // Register extension for not in release mode and not already registered
+    if (!releaseMode && !_isExtensionRegistered) {
+      // Register the extension to expose the cache to the devtools
+      registerExtension(
+        'ext.graphql.getCache',
+        (method, parameters) async {
+          return ServiceExtensionResponse.result(
+              jsonEncode({'value': this.cache.store.toMap()}));
+        },
+      );
+      _isExtensionRegistered = true;
+    }
+  }
 
   /// The default [Policies] to set for each client action
   late final DefaultPolicies defaultPolicies;
