@@ -302,6 +302,177 @@ Map<String, dynamic> get cyclicalObjOperationData {
   return {'a': a};
 }
 
+/// Reproduces https://github.com/zino-hofmann/graphql-flutter/issues/1516
+///
+/// When a list of objects contains nested objects that share the same
+/// `__typename` and `id`, the cache normalizes them to the same cache key.
+/// The last write wins, so all entries end up with the last item's field values.
+final issue1516SameIdTest = TestCase(
+  operation: r'''
+    query Bracket($id: ID!, $poolId: String!) {
+      bracket(id: $id, poolId: $poolId) {
+        __typename
+        display_name
+        matches {
+          __typename
+          id
+          team1_name
+          team2_name
+          source {
+            __typename
+            ref {
+              __typename
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  ''',
+  variables: {'id': 'test123', 'poolId': 'pool456'},
+  data: {
+    'bracket': {
+      '__typename': 'Bracket',
+      'display_name': 'Test Bracket',
+      'matches': [
+        {
+          '__typename': 'Match',
+          'id': 'match1',
+          'team1_name': 'Team A',
+          'team2_name': 'Team B',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'ref1',
+              'name': 'Winner of Match 10',
+            },
+          },
+        },
+        {
+          '__typename': 'Match',
+          'id': 'match2',
+          'team1_name': 'Team C',
+          'team2_name': 'Team D',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'ref2',
+              'name': 'Winner of Match 11',
+            },
+          },
+        },
+        {
+          '__typename': 'Match',
+          'id': 'match3',
+          'team1_name': 'Team E',
+          'team2_name': 'Team F',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'ref3',
+              'name': 'Winner of Match 12',
+            },
+          },
+        },
+        {
+          '__typename': 'Match',
+          'id': 'match4',
+          'team1_name': 'Team G',
+          'team2_name': 'Team H',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'ref1',
+              'name': 'Winner of Match 10',
+            },
+          },
+        },
+      ],
+    },
+  },
+);
+
+/// Same as issue1516SameIdTest but ref objects share the same id with
+/// different name values - this is the actual scenario that triggers the bug.
+/// When different ref objects have the same __typename + id but different
+/// field values, cache normalization causes data corruption.
+final issue1516ConflictingRefsTest = TestCase(
+  operation: r'''
+    query Bracket($id: ID!, $poolId: String!) {
+      bracket(id: $id, poolId: $poolId) {
+        __typename
+        display_name
+        matches {
+          __typename
+          id
+          team1_name
+          source {
+            __typename
+            ref {
+              __typename
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  ''',
+  variables: {'id': 'test123', 'poolId': 'pool456'},
+  data: {
+    'bracket': {
+      '__typename': 'Bracket',
+      'display_name': 'Test Bracket',
+      'matches': [
+        {
+          '__typename': 'Match',
+          'id': 'match1',
+          'team1_name': 'Team A',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'shared-ref-1',
+              'name': 'First Ref Name',
+            },
+          },
+        },
+        {
+          '__typename': 'Match',
+          'id': 'match2',
+          'team1_name': 'Team B',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'shared-ref-1',
+              'name': 'Second Ref Name',
+            },
+          },
+        },
+        {
+          '__typename': 'Match',
+          'id': 'match3',
+          'team1_name': 'Team C',
+          'source': {
+            '__typename': 'Source',
+            'ref': {
+              '__typename': 'MatchRef',
+              'id': 'shared-ref-1',
+              'name': 'Third Ref Name',
+            },
+          },
+        },
+      ],
+    },
+  },
+);
+
 final typelessTest = TestCase(
   operation: r'''{
     a {
