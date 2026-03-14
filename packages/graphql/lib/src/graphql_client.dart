@@ -191,6 +191,80 @@ class GraphQLClient implements GraphQLDataProxy {
     return await queryManager.mutate(options.copyWithPolicies(policies));
   }
 
+  /// Executes a query that can be cancelled via the returned
+  /// [CancellableOperation].
+  ///
+  /// This is a convenience method that creates a [CancellationToken]
+  /// and returns both the result future and the token wrapped in a
+  /// [CancellableOperation].
+  ///
+  /// Example:
+  /// ```dart
+  /// final operation = client.queryCancellable(
+  ///   QueryOptions(document: gql('query { ... }')),
+  /// );
+  /// // Cancel if needed
+  /// operation.cancel();
+  /// final result = await operation.result;
+  /// ```
+  CancellableOperation<QueryResult<TParsed>> queryCancellable<TParsed>(
+    QueryOptions<TParsed> options,
+  ) {
+    final cancellationToken = CancellationToken();
+    final modifiedOptions = options.copyWithOptions(
+      cancellationToken: cancellationToken,
+    );
+    return CancellableOperation(
+      result: query(modifiedOptions),
+      cancellationToken: cancellationToken,
+    );
+  }
+
+  /// Executes a mutation that can be cancelled via the returned
+  /// [CancellableOperation].
+  ///
+  /// This is a convenience method that creates a [CancellationToken]
+  /// and returns both the result future and the token wrapped in a
+  /// [CancellableOperation].
+  ///
+  /// Example:
+  /// ```dart
+  /// final operation = client.mutateCancellable(
+  ///   MutationOptions(document: gql('mutation { ... }')),
+  /// );
+  /// // Cancel if needed
+  /// operation.cancel();
+  /// final result = await operation.result;
+  /// ```
+  CancellableOperation<QueryResult<TParsed>> mutateCancellable<TParsed>(
+    MutationOptions<TParsed> options,
+  ) {
+    final cancellationToken = CancellationToken();
+    final policies = defaultPolicies.mutate.withOverrides(options.policies);
+    final modifiedOptions = options.copyWithPolicies(policies);
+    // Create new options with the cancellation token
+    final cancellableOptions = MutationOptions<TParsed>(
+      document: modifiedOptions.document,
+      operationName: modifiedOptions.operationName,
+      variables: modifiedOptions.variables,
+      fetchPolicy: modifiedOptions.fetchPolicy,
+      errorPolicy: modifiedOptions.errorPolicy,
+      cacheRereadPolicy: modifiedOptions.cacheRereadPolicy,
+      context: modifiedOptions.context,
+      optimisticResult: modifiedOptions.optimisticResult,
+      onCompleted: modifiedOptions.onCompleted,
+      update: modifiedOptions.update,
+      onError: modifiedOptions.onError,
+      parserFn: modifiedOptions.parserFn,
+      queryRequestTimeout: modifiedOptions.queryRequestTimeout,
+      cancellationToken: cancellationToken,
+    );
+    return CancellableOperation(
+      result: queryManager.mutate(cancellableOptions),
+      cancellationToken: cancellationToken,
+    );
+  }
+
   /// This subscribes to a GraphQL subscription according to the options specified and returns a
   /// [Stream] which either emits received data or an error.
   ///
