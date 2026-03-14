@@ -6,6 +6,7 @@ import 'package:gql_link/gql_link.dart' show Link;
 import 'package:graphql/src/cache/cache.dart';
 import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/_query_write_handling.dart';
+import 'package:graphql/src/core/cancellation_token.dart';
 import 'package:graphql/src/core/mutation_options.dart';
 import 'package:graphql/src/core/observable_query.dart';
 import 'package:graphql/src/core/policies.dart';
@@ -269,7 +270,12 @@ class QueryManager {
     bool rereadFromCache = false;
 
     try {
-      final completer = Completer<Response>();
+      // Check for pre-cancellation before executing the request
+      final cancellationToken = options.cancellationToken;
+      if (cancellationToken != null && cancellationToken.isCancelled) {
+        throw CancelledException('Operation was cancelled');
+      }
+
       // execute the request through the provided link(s)
       Stream<Response> responseStream = link.request(request);
 
@@ -281,17 +287,26 @@ class QueryManager {
         responseStream = responseStream.timeout(timeout);
       }
 
-      // Listen for the first response or error
-      responseStream.listen(completer.complete,
-          onError: (Object error, StackTrace stackTrace) {
-        if (!completer.isCompleted) {
-          // We return the first error encountered
-          completer.completeError(error, stackTrace);
-        }
-      });
+      // Race the response stream against the cancellation token,
+      // or use a completer to handle timeouts properly
+      if (cancellationToken != null) {
+        response = await _awaitWithCancellation(
+          responseStream,
+          cancellationToken,
+        );
+      } else {
+        final completer = Completer<Response>();
 
-      // Await the response or error
-      response = await completer.future;
+        // Listen for the first response or error
+        responseStream.listen(completer.complete,
+            onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) {
+            completer.completeError(error, stackTrace);
+          }
+        });
+
+        response = await completer.future;
+      }
 
       queryResult = mapFetchResultToQueryResult(
         response,
@@ -332,6 +347,54 @@ class QueryManager {
     }
 
     return queryResult;
+  }
+
+  /// Await the first response from [stream], but cancel if
+  /// [cancellationToken] fires first.
+  Future<Response> _awaitWithCancellation(
+    Stream<Response> stream,
+    CancellationToken cancellationToken,
+  ) {
+    final completer = Completer<Response>();
+    StreamSubscription<Response>? subscription;
+    StreamSubscription<void>? cancelSubscription;
+
+    cancelSubscription = cancellationToken.onCancel.listen((_) {
+      if (!completer.isCompleted) {
+        subscription?.cancel();
+        completer.completeError(
+          CancelledException('Operation was cancelled'),
+          StackTrace.current,
+        );
+      }
+    });
+
+    subscription = stream.listen(
+      (response) {
+        if (!completer.isCompleted) {
+          completer.complete(response);
+        }
+        subscription?.cancel();
+        cancelSubscription?.cancel();
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        if (!completer.isCompleted) {
+          completer.completeError(error, stackTrace);
+        }
+        cancelSubscription?.cancel();
+      },
+      onDone: () {
+        cancelSubscription?.cancel();
+        if (!completer.isCompleted) {
+          completer.completeError(
+            StateError('Response stream completed without emitting a value'),
+            StackTrace.current,
+          );
+        }
+      },
+    );
+
+    return completer.future;
   }
 
   /// Add an eager cache response to the stream if possible,

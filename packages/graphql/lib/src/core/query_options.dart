@@ -30,6 +30,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     Duration? queryRequestTimeout,
     this.onComplete,
     this.onError,
+    CancellationToken? cancellationToken,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -41,6 +42,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
           optimisticResult: optimisticResult,
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
+          cancellationToken: cancellationToken,
         );
 
   final OnQueryComplete? onComplete;
@@ -73,6 +75,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     Duration? queryRequestTimeout,
     OnQueryComplete? onComplete,
     OnQueryError? onError,
+    CancellationToken? cancellationToken,
   }) =>
       QueryOptions<TParsed>(
         document: document ?? this.document,
@@ -88,6 +91,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         queryRequestTimeout: queryRequestTimeout ?? this.queryRequestTimeout,
         onComplete: onComplete ?? this.onComplete,
         onError: onError ?? this.onError,
+        cancellationToken: cancellationToken ?? this.cancellationToken,
       );
 
   QueryOptions<TParsed> withFetchMoreOptions(
@@ -121,6 +125,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         optimisticResult: optimisticResult,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 
   QueryOptions<TParsed> copyWithPolicies(Policies policies) => QueryOptions(
@@ -135,6 +140,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 }
 
@@ -152,6 +158,7 @@ class SubscriptionOptions<TParsed extends Object?>
     Context? context,
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
+    CancellationToken? cancellationToken,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -163,6 +170,7 @@ class SubscriptionOptions<TParsed extends Object?>
           optimisticResult: optimisticResult,
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
+          cancellationToken: cancellationToken,
         );
   SubscriptionOptions<TParsed> copyWithPolicies(Policies policies) =>
       SubscriptionOptions(
@@ -176,6 +184,7 @@ class SubscriptionOptions<TParsed extends Object?>
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 }
 
@@ -196,6 +205,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
     Context? context,
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
+    CancellationToken? cancellationToken,
   })  : eagerlyFetchResults = eagerlyFetchResults ?? fetchResults,
         super(
           document: document,
@@ -209,6 +219,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
           optimisticResult: optimisticResult,
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
+          cancellationToken: cancellationToken,
         );
 
   /// Whether or not to fetch results every time a new listener is added.
@@ -250,6 +261,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
     Context? context,
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
+    CancellationToken? cancellationToken,
   }) =>
       WatchQueryOptions<TParsed>(
         document: document ?? this.document,
@@ -267,6 +279,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         context: context ?? this.context,
         parserFn: parserFn ?? this.parserFn,
         queryRequestTimeout: queryRequestTimeout ?? this.queryRequestTimeout,
+        cancellationToken: cancellationToken ?? this.cancellationToken,
       );
 
   WatchQueryOptions<TParsed> copyWithFetchPolicy(
@@ -287,6 +300,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
   WatchQueryOptions<TParsed> copyWithPolicies(
     Policies policies,
@@ -306,6 +320,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 
   WatchQueryOptions<TParsed> copyWithPollInterval(Duration? pollInterval) =>
@@ -324,6 +339,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 
   WatchQueryOptions<TParsed> copyWithVariables(
@@ -343,6 +359,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 
   WatchQueryOptions<TParsed> copyWithOptimisticResult(
@@ -362,6 +379,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 }
 
