@@ -1,3 +1,6 @@
+import 'dart:collection';
+import 'dart:convert';
+
 import 'package:graphql/src/cache/fragment.dart';
 import 'package:graphql/src/exceptions/exceptions_next.dart';
 import "package:meta/meta.dart";
@@ -9,6 +12,41 @@ import './data_proxy.dart';
 import '../utilities/helpers.dart';
 
 typedef DataIdResolver = String? Function(Map<String, Object?> object);
+typedef _NormalizeDataIdResolver = String? Function(
+    Map<String, dynamic> object);
+
+class _MissingKeyFieldException implements Exception {
+  const _MissingKeyFieldException();
+}
+
+class _VisitedPair {
+  const _VisitedPair(this.left, this.right);
+
+  final Object left;
+  final Object right;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _VisitedPair &&
+      identical(left, other.left) &&
+      identical(right, other.right);
+
+  @override
+  int get hashCode => Object.hash(
+        identityHashCode(left),
+        identityHashCode(right),
+      );
+}
+
+class _WriteNormalizationConfig {
+  const _WriteNormalizationConfig({
+    required this.typePolicies,
+    required this.dataIdFromObject,
+  });
+
+  final Map<String, TypePolicy> typePolicies;
+  final _NormalizeDataIdResolver dataIdFromObject;
+}
 
 /// Implements the core (de)normalization api leveraged by the cache and proxy,
 ///
@@ -78,6 +116,269 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
   @protected
   late SanitizeVariables sanitizeVariables;
 
+  _WriteNormalizationConfig _writeNormalizationConfig() {
+    final seenByDataId = <String, Map<String, Object?>>{};
+
+    return _WriteNormalizationConfig(
+      typePolicies: _typePoliciesWithoutKeyFields,
+      dataIdFromObject: (object) {
+        final dataId =
+            _resolveDataIdForWrite(Map<String, Object?>.from(object));
+        if (dataId == null) {
+          return null;
+        }
+
+        final previousObject = seenByDataId[dataId];
+        if (previousObject == null) {
+          seenByDataId[dataId] = Map<String, Object?>.from(object);
+          return dataId;
+        }
+
+        if (_hasConflictingValues(previousObject, object)) {
+          return null;
+        }
+
+        seenByDataId[dataId] =
+            _mergeSeenObject(previousObject, Map<String, Object?>.from(object));
+        return dataId;
+      },
+    );
+  }
+
+  Map<String, TypePolicy> get _typePoliciesWithoutKeyFields {
+    var hasKeyFields = false;
+    final strippedTypePolicies = <String, TypePolicy>{};
+
+    for (final entry in typePolicies.entries) {
+      final typePolicy = entry.value;
+      if (typePolicy.keyFields != null) {
+        hasKeyFields = true;
+        strippedTypePolicies[entry.key] = TypePolicy(
+          queryType: typePolicy.queryType,
+          mutationType: typePolicy.mutationType,
+          subscriptionType: typePolicy.subscriptionType,
+          fields: typePolicy.fields,
+        );
+      } else {
+        strippedTypePolicies[entry.key] = typePolicy;
+      }
+    }
+
+    return hasKeyFields ? strippedTypePolicies : typePolicies;
+  }
+
+  String? _resolveDataIdForWrite(Map<String, Object?> object) {
+    final typename = object['__typename'];
+    if (typename is! String) {
+      return null;
+    }
+
+    final typePolicy = typePolicies[typename];
+    final keyFields = typePolicy?.keyFields;
+    if (keyFields != null) {
+      if (keyFields.isEmpty) {
+        return null;
+      }
+
+      try {
+        return '$typename:${json.encode(_keyFieldsWithArgs(keyFields, object))}';
+      } on _MissingKeyFieldException {
+        return null;
+      }
+    }
+
+    final customDataId = dataIdFromObject?.call(object);
+    if (customDataId != null) {
+      return customDataId;
+    }
+
+    if (_allRootTypenames.contains(typename)) {
+      return typename;
+    }
+
+    final id = object['id'] ?? object['_id'];
+    return id == null ? null : '$typename:$id';
+  }
+
+  Set<String> get _allRootTypenames => {
+        _typenameForRoot(
+          (typePolicy) => typePolicy.queryType,
+          'Query',
+        ),
+        _typenameForRoot(
+          (typePolicy) => typePolicy.mutationType,
+          'Mutation',
+        ),
+        _typenameForRoot(
+          (typePolicy) => typePolicy.subscriptionType,
+          'Subscription',
+        ),
+      };
+
+  String _typenameForRoot(
+    bool Function(TypePolicy typePolicy) matches,
+    String fallback,
+  ) {
+    for (final entry in typePolicies.entries) {
+      if (matches(entry.value)) {
+        return entry.key;
+      }
+    }
+    return fallback;
+  }
+
+  SplayTreeMap<String, dynamic> _keyFieldsWithArgs(
+    Map<String, dynamic> keyFields,
+    Map<String, Object?> data,
+  ) {
+    final fields = SplayTreeMap<String, dynamic>();
+
+    for (final entry in keyFields.entries) {
+      if (entry.value is Map<String, dynamic>) {
+        final nestedData = data[entry.key];
+        fields[entry.key] = _keyFieldsWithArgs(
+          entry.value as Map<String, dynamic>,
+          nestedData is Map
+              ? Map<String, Object?>.from(nestedData.cast<String, Object?>())
+              : const {},
+        );
+      } else if (entry.value == true) {
+        if (!data.containsKey(entry.key)) {
+          throw const _MissingKeyFieldException();
+        }
+        fields[entry.key] = data[entry.key];
+      }
+    }
+
+    return fields;
+  }
+
+  bool _hasConflictingValues(
+    Object? previousValue,
+    Object? currentValue, [
+    Set<_VisitedPair>? visited,
+  ]) {
+    if (identical(previousValue, currentValue) ||
+        previousValue == currentValue) {
+      return false;
+    }
+
+    visited ??= <_VisitedPair>{};
+
+    if (previousValue is Map && currentValue is Map) {
+      final pair = _VisitedPair(previousValue, currentValue);
+      if (!visited.add(pair)) {
+        return false;
+      }
+
+      for (final entry in currentValue.entries) {
+        if (!previousValue.containsKey(entry.key)) {
+          continue;
+        }
+        if (_hasConflictingValues(
+          previousValue[entry.key],
+          entry.value,
+          visited,
+        )) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    if (previousValue is List && currentValue is List) {
+      final pair = _VisitedPair(previousValue, currentValue);
+      if (!visited.add(pair)) {
+        return false;
+      }
+
+      if (previousValue.length != currentValue.length) {
+        return true;
+      }
+
+      for (var index = 0; index < currentValue.length; index++) {
+        if (_hasConflictingValues(
+          previousValue[index],
+          currentValue[index],
+          visited,
+        )) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    return previousValue is Map ||
+        currentValue is Map ||
+        previousValue is List ||
+        currentValue is List ||
+        previousValue != currentValue;
+  }
+
+  Map<String, Object?> _mergeSeenObject(
+    Map<String, Object?> previousObject,
+    Map<String, Object?> currentObject, [
+    Set<_VisitedPair>? visited,
+  ]) {
+    visited ??= <_VisitedPair>{};
+
+    final pair = _VisitedPair(previousObject, currentObject);
+    if (!visited.add(pair)) {
+      return previousObject;
+    }
+
+    final mergedObject = Map<String, Object?>.from(previousObject);
+    for (final entry in currentObject.entries) {
+      mergedObject[entry.key] = _mergeSeenValue(
+        mergedObject[entry.key],
+        entry.value,
+        visited,
+      );
+    }
+
+    return mergedObject;
+  }
+
+  Object? _mergeSeenValue(
+    Object? previousValue,
+    Object? currentValue, [
+    Set<_VisitedPair>? visited,
+  ]) {
+    visited ??= <_VisitedPair>{};
+
+    if (previousValue is Map && currentValue is Map) {
+      return _mergeSeenObject(
+        Map<String, Object?>.from(previousValue.cast<String, Object?>()),
+        Map<String, Object?>.from(currentValue.cast<String, Object?>()),
+        visited,
+      );
+    }
+
+    if (previousValue is List && currentValue is List) {
+      final pair = _VisitedPair(previousValue, currentValue);
+      if (!visited.add(pair)) {
+        return previousValue;
+      }
+
+      if (previousValue.length != currentValue.length) {
+        return currentValue;
+      }
+
+      return List<Object?>.generate(
+        currentValue.length,
+        (index) => _mergeSeenValue(
+          previousValue[index],
+          currentValue[index],
+          visited,
+        ),
+      );
+    }
+
+    return currentValue;
+  }
+
   Map<String, dynamic>? readQuery(
     Request request, {
     bool optimistic = true,
@@ -125,12 +426,13 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     bool? broadcast = true,
   }) {
     try {
+      final config = _writeNormalizationConfig();
       normalizeOperation(
         // provided from cache
         write: (dataId, value) => writeNormalized(dataId, value),
         read: (dataId) => readNormalized(dataId),
-        typePolicies: typePolicies,
-        dataIdFromObject: dataIdFromObject,
+        typePolicies: config.typePolicies,
+        dataIdFromObject: config.dataIdFromObject,
         acceptPartialData: acceptPartialData,
         addTypename: addTypename,
         // provided from request
@@ -163,12 +465,13 @@ abstract class NormalizingDataProxy extends GraphQLDataProxy {
     bool? broadcast = true,
   }) {
     try {
+      final config = _writeNormalizationConfig();
       normalizeFragment(
         // provided from cache
         write: (dataId, value) => writeNormalized(dataId, value),
         read: (dataId) => readNormalized(dataId),
-        typePolicies: typePolicies,
-        dataIdFromObject: dataIdFromObject,
+        typePolicies: config.typePolicies,
+        dataIdFromObject: config.dataIdFromObject,
         acceptPartialData: acceptPartialData,
         addTypename: addTypename,
         // provided from request
