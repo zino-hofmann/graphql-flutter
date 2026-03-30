@@ -31,7 +31,7 @@ void main() {
       token.dispose();
     });
 
-    test('calling cancel() multiple times has no effect', () {
+    test('calling cancel() multiple times has no effect', () async {
       final token = CancellationToken();
       int cancelCount = 0;
       token.onCancel.listen((_) => cancelCount++);
@@ -41,10 +41,9 @@ void main() {
 
       expect(token.isCancelled, isTrue);
       // Give the stream time to deliver
-      Future<void>.delayed(Duration(milliseconds: 10)).then((_) {
-        expect(cancelCount, equals(1));
-        token.dispose();
-      });
+      await Future<void>.delayed(Duration(milliseconds: 10));
+      expect(cancelCount, equals(1));
+      token.dispose();
     });
 
     test('onCancel stream emits when cancelled', () async {
