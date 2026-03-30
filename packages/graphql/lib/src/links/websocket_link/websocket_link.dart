@@ -47,6 +47,23 @@ class WebSocketLink extends Link {
 
   SocketClient? get getSocketClient => _socketClient;
 
+  /// Stream of [SocketConnectionState] changes for the underlying WebSocket connection.
+  ///
+  /// Useful for detecting when a subscription connection is lost or restored.
+  /// Returns `null` if the socket client has not been initialized yet.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// final wsLink = WebSocketLink('ws://example.com/graphql');
+  /// wsLink.connectionState?.listen((state) {
+  ///   if (state == SocketConnectionState.notConnected) {
+  ///     // connection lost, refetch data
+  ///   }
+  /// });
+  /// ```
+  Stream<SocketConnectionState>? get connectionState =>
+      _socketClient?.connectionState;
+
   /// Disposes the underlying socket client explicitly. Only use this, if you want to disconnect from
   /// the current server in favour of another one. If that's the case, create a new [WebSocketLink] instance.
   Future<void> dispose() async {
