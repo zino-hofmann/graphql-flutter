@@ -60,22 +60,35 @@ class CancellableHttpClientImpl implements CancellableHttpClient {
         return completer.future;
       }
 
-      // Set headers
-      request.headers.forEach((name, value) {
-        httpClientRequest!.headers.add(name, value);
-      });
-
       // Handle different request types
       if (request is http.Request) {
+        // Set headers
+        request.headers.forEach((name, value) {
+          httpClientRequest!.headers.add(name, value);
+        });
         httpClientRequest.contentLength = request.bodyBytes.length;
         httpClientRequest.add(request.bodyBytes);
       } else if (request is http.MultipartRequest) {
-        // For multipart requests, we need to finalize and stream the body
+        // For multipart requests, finalize() sets up the Content-Type header
+        // with the boundary, so we need to finalize first, then copy headers
         final stream = request.finalize();
+        // Now headers includes Content-Type with boundary
+        request.headers.forEach((name, value) {
+          httpClientRequest!.headers.set(name, value);
+        });
         httpClientRequest.contentLength = request.contentLength;
         await httpClientRequest.addStream(stream);
       } else if (request is http.StreamedRequest) {
+        // Set headers
+        request.headers.forEach((name, value) {
+          httpClientRequest!.headers.add(name, value);
+        });
         await httpClientRequest.addStream(request.finalize());
+      } else {
+        // Generic BaseRequest - set headers
+        request.headers.forEach((name, value) {
+          httpClientRequest!.headers.add(name, value);
+        });
       }
 
       // Check cancellation before sending
