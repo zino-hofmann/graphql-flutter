@@ -243,13 +243,70 @@ final result = await client.query(
    `OperationException` containing a `CancelledException` as the
    `linkException`.
 
-4. **Network Cleanup**: Cancelling an operation will abort the underlying HTTP
-   request. The `HttpLink` provided by this package supports true network
-   cancellation on both IO (using `dart:io` `HttpClient.abort()`) and Web
-   platforms (using `XMLHttpRequest.abort()`). In Chrome DevTools, you will see
-   cancelled requests show as "(canceled)" in the Network tab. Note: If you
-   provide a custom `http.Client` to `HttpLink`, cancellation may not work
-   unless your client supports it.
+4. **Network Behavior**: By default (with the standard `HttpLink` from
+   `gql_http_link`), cancellation happens at the QueryManager level - the HTTP
+   request still completes but the response is ignored. If you need true
+   HTTP-level cancellation (where the request actually aborts and shows as
+   "(canceled)" in browser DevTools), use `CancellableHttpLink` instead.
 
 5. **Cache Updates**: Cancelled operations will not update the cache with any
    results they may have received before cancellation.
+
+## HTTP-Level Cancellation with CancellableHttpLink
+
+For true HTTP-level cancellation where the underlying network request is
+actually aborted, use `CancellableHttpLink` instead of the standard `HttpLink`:
+
+```dart
+import 'package:graphql/client.dart';
+
+// Use CancellableHttpLink instead of HttpLink
+final link = CancellableHttpLink('https://api.example.com/graphql');
+
+final client = GraphQLClient(
+  cache: GraphQLCache(),
+  link: link,
+);
+
+// Now cancellations will actually abort the HTTP request
+final operation = client.queryCancellable(
+  QueryOptions(
+    document: gql('query { ... }'),
+    fetchPolicy: FetchPolicy.networkOnly,
+  ),
+);
+
+operation.cancel(); // Actually cancels the HTTP request!
+```
+
+### CancellableHttpLink Features
+
+- **True HTTP Cancellation**: On web, uses `XMLHttpRequest.abort()`. On IO,
+  uses `HttpClientRequest.abort()`.
+- **Full Feature Parity**: Supports all the same features as `HttpLink`
+  including file uploads (multipart requests), GET queries, custom headers.
+- **Connection Pooling**: Uses a shared `HttpClient` on IO for efficient
+  connection reuse.
+- **DevTools Visibility**: Cancelled requests show as "(canceled)" in browser
+  DevTools Network tab.
+
+### When to Use CancellableHttpLink
+
+Use `CancellableHttpLink` when:
+- You want cancelled requests to free up network resources immediately
+- You need to see cancellation status in browser DevTools
+- You're making many requests that may be cancelled (e.g., search-as-you-type)
+
+Use the standard `HttpLink` when:
+- Cancellation is rare and network overhead isn't a concern
+- You need features that require a custom `http.Client`
+- You want to use an existing `HttpLink` configuration
+
+### Known Limitations
+
+- **Cancellation Detection**: CancellableHttpLink detects cancellation by
+  checking if `http.ClientException.message` contains 'cancelled' or 'abort'.
+  In the extremely rare case that a legitimate network error contains these
+  words, it would be incorrectly reported as a `CancelledException`. This is
+  necessary because the HTTP package doesn't provide a specific exception type
+  for aborted requests.
