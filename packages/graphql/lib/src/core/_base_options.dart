@@ -3,7 +3,6 @@ import 'package:gql/ast.dart';
 
 import 'package:graphql/client.dart';
 import 'package:graphql/src/core/result_parser.dart';
-import 'package:graphql/src/core/cancellation_token.dart';
 import 'package:meta/meta.dart';
 
 TParsed unprovidedParserFn<TParsed>(_d) => throw UnimplementedError(

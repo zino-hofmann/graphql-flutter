@@ -265,22 +265,9 @@ class GraphQLClient implements GraphQLDataProxy {
   ) {
     final cancellationToken = CancellationToken();
     final policies = defaultPolicies.mutate.withOverrides(options.policies);
-    final modifiedOptions = MutationOptions<TParsed>(
-      document: options.document,
-      operationName: options.operationName,
-      variables: options.variables,
-      fetchPolicy: policies.fetch,
-      errorPolicy: policies.error,
-      cacheRereadPolicy: policies.cacheReread,
-      context: options.context,
-      optimisticResult: options.optimisticResult,
-      onCompleted: options.onCompleted,
-      update: options.update,
-      onError: options.onError,
-      parserFn: options.parserFn,
-      queryRequestTimeout: options.queryRequestTimeout,
-      cancellationToken: cancellationToken,
-    );
+    final modifiedOptions = options
+        .copyWithPolicies(policies)
+        .copyWith(cancellationToken: cancellationToken);
     return CancellableOperation(
       result: queryManager.mutate(modifiedOptions),
       cancellationToken: cancellationToken,
