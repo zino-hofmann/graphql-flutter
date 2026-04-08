@@ -1,6 +1,7 @@
 export 'package:gql_exec/gql_exec.dart';
 export 'package:gql_link/gql_link.dart';
 
+export 'package:graphql/src/core/cancellation_token.dart';
 export 'package:graphql/src/core/observable_query.dart';
 export 'package:graphql/src/core/query_manager.dart';
 export 'package:graphql/src/core/query_options.dart';

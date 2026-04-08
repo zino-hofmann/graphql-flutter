@@ -22,6 +22,7 @@ dependencies:
   stream_channel: ^2.1.0
   rxdart: '>=0.27.1 <0.29.0'
   uuid: ^4.0.0
+  web: ^1.1.1
 
 dev_dependencies:
   async: ^2.5.0

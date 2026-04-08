@@ -16,6 +16,7 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
+import 'package:graphql/src/core/cancellation_token.dart';
 
 typedef DeepEqualsFn = bool Function(dynamic a, dynamic b);
 typedef AsyncDeepEqualsFn = Future<bool> Function(dynamic a, dynamic b);
@@ -268,8 +269,14 @@ class QueryManager {
 
     bool rereadFromCache = false;
 
+    // Add cancellation token to context if present
+    if (options.cancellationToken != null) {
+      request = request.updateContextEntry<CancellationContextEntry>(
+        (entry) => CancellationContextEntry(options.cancellationToken!),
+      );
+    }
+
     try {
-      final completer = Completer<Response>();
       // execute the request through the provided link(s)
       Stream<Response> responseStream = link.request(request);
 
@@ -281,17 +288,68 @@ class QueryManager {
         responseStream = responseStream.timeout(timeout);
       }
 
-      // Listen for the first response or error
-      responseStream.listen(completer.complete,
-          onError: (Object error, StackTrace stackTrace) {
-        if (!completer.isCompleted) {
-          // We return the first error encountered
-          completer.completeError(error, stackTrace);
+      // Handle cancellation if a token is provided
+      final cancellationToken = options.cancellationToken;
+      if (cancellationToken != null) {
+        // Check if already cancelled
+        if (cancellationToken.isCancelled) {
+          throw CancelledException('Operation was cancelled');
         }
-      });
 
-      // Await the response or error
-      response = await completer.future;
+        final completer = Completer<Response>();
+        StreamSubscription<Response>? subscription;
+        StreamSubscription<void>? cancellationSubscription;
+
+        cancellationSubscription = cancellationToken.onCancel.listen((_) {
+          // Complete the completer with an error first
+          // The HttpLink will detect cancellation and abort the underlying request
+          if (!completer.isCompleted) {
+            completer.completeError(
+              CancelledException('Operation was cancelled'),
+              StackTrace.current,
+            );
+          }
+        });
+
+        subscription = responseStream.listen(
+          (response) {
+            if (!completer.isCompleted) {
+              completer.complete(response);
+            }
+          },
+          onError: (Object error, StackTrace stackTrace) {
+            if (!completer.isCompleted) {
+              completer.completeError(error, stackTrace);
+            }
+          },
+          onDone: () {
+            cancellationSubscription?.cancel();
+          },
+          cancelOnError: true,
+        );
+
+        try {
+          response = await completer.future;
+        } finally {
+          // Clean up subscriptions
+          await cancellationSubscription.cancel();
+          await subscription.cancel();
+        }
+      } else {
+        final completer = Completer<Response>();
+
+        // Listen for the first response or error
+        responseStream.listen(completer.complete,
+            onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) {
+            // We return the first error encountered
+            completer.completeError(error, stackTrace);
+          }
+        });
+
+        // Await the response or error
+        response = await completer.future;
+      }
 
       queryResult = mapFetchResultToQueryResult(
         response,
