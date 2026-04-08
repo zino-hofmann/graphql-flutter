@@ -1,25 +1,22 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
+import 'package:gql_exec/gql_exec.dart';
+import 'package:gql_link/gql_link.dart' show Link;
+import 'package:graphql/src/cache/cache.dart';
+import 'package:graphql/src/core/_base_options.dart';
+import 'package:graphql/src/core/_query_write_handling.dart';
+import 'package:graphql/src/core/mutation_options.dart';
+import 'package:graphql/src/core/observable_query.dart';
+import 'package:graphql/src/core/policies.dart';
+import 'package:graphql/src/core/query_options.dart';
+import 'package:graphql/src/core/query_result.dart';
+import 'package:graphql/src/exceptions.dart';
+import 'package:graphql/src/scheduler/scheduler.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
-import 'package:collection/collection.dart';
-
-import 'package:gql_exec/gql_exec.dart';
-import 'package:gql_link/gql_link.dart' show Link;
-
-import 'package:graphql/src/cache/cache.dart';
-import 'package:graphql/src/core/observable_query.dart';
-import 'package:graphql/src/core/_base_options.dart';
 import 'package:graphql/src/core/cancellation_token.dart';
-import 'package:graphql/src/core/mutation_options.dart';
-import 'package:graphql/src/core/query_options.dart';
-import 'package:graphql/src/core/query_result.dart';
-import 'package:graphql/src/core/policies.dart';
-import 'package:graphql/src/exceptions.dart';
-import 'package:graphql/src/scheduler/scheduler.dart';
-
-import 'package:graphql/src/core/_query_write_handling.dart';
 
 typedef DeepEqualsFn = bool Function(dynamic a, dynamic b);
 typedef AsyncDeepEqualsFn = Future<bool> Function(dynamic a, dynamic b);
@@ -339,7 +336,19 @@ class QueryManager {
           await subscription.cancel();
         }
       } else {
-        response = await responseStream.first;
+        final completer = Completer<Response>();
+        
+        // Listen for the first response or error
+        responseStream.listen(completer.complete,
+            onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) {
+            // We return the first error encountered
+            completer.completeError(error, stackTrace);
+          }
+        });
+
+        // Await the response or error
+        response = await completer.future;
       }
 
       queryResult = mapFetchResultToQueryResult(

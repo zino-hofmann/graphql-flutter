@@ -11,16 +11,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-      - name: Run tests with coverage
-        run: |
-          make dep
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          make ci_coverage_client
-          ./codecov
-          make ci_coverage_flutter
-          ./codecov
+      - name: Install dependencies
+        run: make dep
+      - name: Run coverage (dart)
+        run: make ci_coverage_client
+      - name: Upload coverage (dart)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: graphql
+      - name: Run coverage (flutter)
+        run: make ci_coverage_flutter
+      - name: Upload coverage (flutter)
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          flags: graphql_flutter
