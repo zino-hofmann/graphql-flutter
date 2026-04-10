@@ -282,13 +282,19 @@ class QueryManager {
       }
 
       // Listen for the first response or error
-      responseStream.listen(completer.complete,
-          onError: (Object error, StackTrace stackTrace) {
-        if (!completer.isCompleted) {
-          // We return the first error encountered
-          completer.completeError(error, stackTrace);
-        }
-      });
+      responseStream.listen(
+        (Response value) {
+          if (!completer.isCompleted) {
+            completer.complete(value);
+          }
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) {
+            // We return the first error encountered
+            completer.completeError(error, stackTrace);
+          }
+        },
+      );
 
       // Await the response or error
       response = await completer.future;

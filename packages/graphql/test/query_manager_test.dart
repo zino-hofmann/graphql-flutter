@@ -42,5 +42,31 @@ void main() {
       );
       client.queryManager.refetchQuery<dynamic>(observable.queryId);
     });
+
+    test('uses first response when link emits multiple events', () async {
+      const ping = 'ping';
+
+      when(link.request(any)).thenAnswer(
+        (_) => Stream.fromIterable(<Response>[
+          Response(
+            data: <String, dynamic>{ping: 1},
+            response: <String, dynamic>{},
+          ),
+          Response(
+            data: <String, dynamic>{ping: 2},
+            response: <String, dynamic>{},
+          ),
+        ]),
+      );
+
+      final result = await client.query(
+        QueryOptions(
+          document: parseString('{$ping}'),
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+      );
+
+      expect(result.data![ping], 1);
+    });
   });
 }
