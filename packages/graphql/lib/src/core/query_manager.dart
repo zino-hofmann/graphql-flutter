@@ -281,14 +281,42 @@ class QueryManager {
         responseStream = responseStream.timeout(timeout);
       }
 
-      // Listen for the first response or error
-      responseStream.listen(completer.complete,
-          onError: (Object error, StackTrace stackTrace) {
-        if (!completer.isCompleted) {
-          // We return the first error encountered
-          completer.completeError(error, stackTrace);
-        }
-      });
+      // Listen for the first response or error.
+      //
+      // Both `onData` and `onError` must be guarded against completing the
+      // completer more than once. `Stream.timeout` forwards a
+      // `TimeoutException` to `onError` without cancelling the source
+      // subscription, so a late event (e.g. a successful response that
+      // arrives after the timeout has already settled the completer) can
+      // still be delivered. Completing an already-completed completer throws
+      // "Bad state: Future already completed" from inside this async callback,
+      // which escapes the surrounding try/catch and crashes the app.
+      //
+      // Once the completer is settled we cancel the subscription so the
+      // underlying request does not keep running after we have a result.
+      late final StreamSubscription<Response> subscription;
+      subscription = responseStream.listen(
+        (response) {
+          if (!completer.isCompleted) {
+            completer.complete(response);
+          }
+          subscription.cancel();
+        },
+        onError: (Object error, StackTrace stackTrace) {
+          if (!completer.isCompleted) {
+            // We return the first error encountered
+            completer.completeError(error, stackTrace);
+          }
+          subscription.cancel();
+        },
+        onDone: () {
+          // The stream closed without emitting; surface this the same way
+          // `Stream.first` used to so the awaiting future does not hang.
+          if (!completer.isCompleted) {
+            completer.completeError(StateError('No element'));
+          }
+        },
+      );
 
       // Await the response or error
       response = await completer.future;
