@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:trash_themes/themes.dart';
 import './graphql_bloc/main.dart' show GraphQLBlocPatternScreen;
 import './graphql_widget/main.dart' show GraphQLWidgetScreen;
+import './cancellation/main.dart' show GraphQLCancellationDemo;
 import 'fetchmore/main.dart';
 
 void main() => runApp(MyApp());
@@ -61,6 +62,20 @@ class MyApp extends StatelessWidget {
                     );
                   },
                   child: const Text('Fetchmore (Pagination) Example'),
+                )),
+                Spacer(),
+                Flexible(
+                    child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute<GraphQLCancellationDemo>(
+                        builder: (BuildContext context) =>
+                            const GraphQLCancellationDemo(),
+                      ),
+                    );
+                  },
+                  child: const Text('Cancellation Demo'),
                 )),
               ],
             ),
