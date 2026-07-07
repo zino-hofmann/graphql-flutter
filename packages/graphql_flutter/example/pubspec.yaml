@@ -12,6 +12,8 @@ dependencies:
   graphql_flutter:
     path: ..
   trash_themes: ^0.0.1
+  http: ^1.1.0
+  http_parser: ^4.0.0
 
 dev_dependencies:
   pedantic: ^1.8.0+1
