@@ -16,6 +16,7 @@ import 'package:graphql/src/scheduler/scheduler.dart';
 import 'package:graphql/src/utilities/helpers.dart';
 import 'package:graphql/src/utilities/response.dart';
 import 'package:meta/meta.dart';
+import 'package:graphql/src/core/cancellation_token.dart';
 
 typedef DeepEqualsFn = bool Function(dynamic a, dynamic b);
 typedef AsyncDeepEqualsFn = Future<bool> Function(dynamic a, dynamic b);
@@ -268,8 +269,14 @@ class QueryManager {
 
     bool rereadFromCache = false;
 
+    // Add cancellation token to context if present
+    if (options.cancellationToken != null) {
+      request = request.updateContextEntry<CancellationContextEntry>(
+        (entry) => CancellationContextEntry(options.cancellationToken!),
+      );
+    }
+
     try {
-      final completer = Completer<Response>();
       // execute the request through the provided link(s)
       Stream<Response> responseStream = link.request(request);
 
@@ -279,6 +286,33 @@ class QueryManager {
       final timeout = options.queryRequestTimeout ?? this.requestTimeout;
       if (timeout case final Duration timeout) {
         responseStream = responseStream.timeout(timeout);
+      }
+
+      final completer = Completer<Response>();
+      late final StreamSubscription<Response> subscription;
+
+      // If a cancellation token is provided, settle the completer with a
+      // CancelledException when it fires so the awaiting future completes even
+      // if the link does not surface the abort as an error. A token that was
+      // already cancelled short-circuits before we subscribe.
+      final cancellationToken = options.cancellationToken;
+      StreamSubscription<void>? cancellationSubscription;
+      if (cancellationToken != null) {
+        if (cancellationToken.isCancelled) {
+          throw const CancelledException('Operation was cancelled');
+        }
+        cancellationSubscription = cancellationToken.onCancel.listen((_) {
+          // The link (e.g. CancellableHttpLink) will detect cancellation and
+          // abort the underlying request; settle the completer regardless and
+          // stop listening to the response stream.
+          if (!completer.isCompleted) {
+            completer.completeError(
+              const CancelledException('Operation was cancelled'),
+              StackTrace.current,
+            );
+          }
+          subscription.cancel();
+        });
       }
 
       // Listen for the first response or error.
@@ -294,13 +328,13 @@ class QueryManager {
       //
       // Once the completer is settled we cancel the subscription so the
       // underlying request does not keep running after we have a result.
-      late final StreamSubscription<Response> subscription;
       subscription = responseStream.listen(
         (response) {
           if (!completer.isCompleted) {
             completer.complete(response);
           }
           subscription.cancel();
+          cancellationSubscription?.cancel();
         },
         onError: (Object error, StackTrace stackTrace) {
           if (!completer.isCompleted) {
@@ -308,6 +342,7 @@ class QueryManager {
             completer.completeError(error, stackTrace);
           }
           subscription.cancel();
+          cancellationSubscription?.cancel();
         },
         onDone: () {
           // The stream closed without emitting; surface this the same way
