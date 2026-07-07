@@ -31,6 +31,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     this.onError,
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
+    CancellationToken? cancellationToken,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -42,6 +43,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
           optimisticResult: optimisticResult,
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
+          cancellationToken: cancellationToken,
         );
 
   final OnMutationCompleted? onCompleted;
@@ -55,6 +57,41 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         update,
         onError,
       ];
+
+  /// Generic copyWith for all fields. There is also a more specific option:
+  /// - [copyWithPolicies]
+  MutationOptions<TParsed> copyWith({
+    DocumentNode? document,
+    String? operationName,
+    Map<String, dynamic>? variables,
+    FetchPolicy? fetchPolicy,
+    ErrorPolicy? errorPolicy,
+    CacheRereadPolicy? cacheRereadPolicy,
+    Context? context,
+    Object? optimisticResult,
+    OnMutationCompleted? onCompleted,
+    OnMutationUpdate<TParsed>? update,
+    OnError? onError,
+    ResultParserFn<TParsed>? parserFn,
+    Duration? queryRequestTimeout,
+    CancellationToken? cancellationToken,
+  }) =>
+      MutationOptions<TParsed>(
+        document: document ?? this.document,
+        operationName: operationName ?? this.operationName,
+        variables: variables ?? this.variables,
+        fetchPolicy: fetchPolicy ?? this.fetchPolicy,
+        errorPolicy: errorPolicy ?? this.errorPolicy,
+        cacheRereadPolicy: cacheRereadPolicy ?? this.cacheRereadPolicy,
+        context: context ?? this.context,
+        optimisticResult: optimisticResult ?? this.optimisticResult,
+        onCompleted: onCompleted ?? this.onCompleted,
+        update: update ?? this.update,
+        onError: onError ?? this.onError,
+        parserFn: parserFn ?? this.parserFn,
+        queryRequestTimeout: queryRequestTimeout ?? this.queryRequestTimeout,
+        cancellationToken: cancellationToken ?? this.cancellationToken,
+      );
 
   MutationOptions<TParsed> copyWithPolicies(Policies policies) =>
       MutationOptions(
@@ -71,6 +108,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         onError: onError,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 
   WatchQueryOptions<TParsed> asWatchQueryOptions() =>
@@ -85,6 +123,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         context: context,
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
+        cancellationToken: cancellationToken,
       );
 }
 
