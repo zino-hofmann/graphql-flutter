@@ -145,7 +145,7 @@ from the main (upstream) repository:
 
 ## <a name="rules"></a> Coding Rules
 
-see `doc/dev/MANTAINERS.md` file
+see `doc/dev/MAINTAINERS.md` file
 
 
 ## <a name="commit"></a> Commit Message Guidelines
@@ -156,7 +156,7 @@ we use the git commit messages trigger releases.
 
 ### Commit Message Format
 
-see `doc/dev/MANTAINERS.md` file
+see `doc/dev/MAINTAINERS.md` file
  
 [github]: https://github.com/zino-app/graphql-flutter
 [discord]: https://discord.gg/tXTtBfC
