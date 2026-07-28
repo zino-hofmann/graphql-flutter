@@ -429,7 +429,7 @@ return FloatingActionButton(
 
 `GraphQLCache` allows for optimistic mutations by passing an `optimisticResult` to `RunMutation`. It will then call `update(GraphQLDataProxy cache, QueryResult result)` twice (once eagerly with `optimisticResult`), and rebroadcast all queries with the optimistic cache state.
 
-A complete and well-commented rundown of how exactly one interfaces with the `proxy` provided to `update` can be fount in the
+A complete and well-commented rundown of how exactly one interfaces with the `proxy` provided to `update` can be found in the
 [`GraphQLDataProxy` API docs](https://pub.dev/documentation/graphql/latest/graphql/GraphQLDataProxy-class.html)
 
 ```dart

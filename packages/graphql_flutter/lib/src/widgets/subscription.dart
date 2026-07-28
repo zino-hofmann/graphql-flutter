@@ -4,7 +4,7 @@ import 'package:graphql/client.dart';
 import 'package:graphql_flutter/src/widgets/hooks/graphql_client.dart';
 import 'package:graphql_flutter/src/widgets/hooks/subscription.dart';
 
-/// Creats a subscription with [GraphQLClient.subscribe].
+/// Creates a subscription with [GraphQLClient.subscribe].
 ///
 /// The [builder] is passed a [QueryResult] with only the **most recent**
 /// `data`. [ResultAccumulator] can be used to accumulate results.
@@ -78,7 +78,7 @@ class Subscription<TParsed> extends HookWidget {
   }
 }
 
-/// Creats a subscription widget like [Subscription] but
+/// Creates a subscription widget like [Subscription] but
 /// with an external client.
 class SubscriptionOnClient<TParsed> extends HookWidget {
   const SubscriptionOnClient({
