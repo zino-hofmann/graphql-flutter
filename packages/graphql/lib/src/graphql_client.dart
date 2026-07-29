@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:graphql/src/core/core.dart';
 import 'package:graphql/src/cache/cache.dart';
+import 'package:graphql/src/links/websocket_link/websocket_link.dart';
 
 import 'package:graphql/src/core/fetch_more.dart';
 
@@ -23,6 +24,7 @@ class GraphQLClient implements GraphQLDataProxy {
   /// Constructs a [GraphQLClient] given a [Link] and a [Cache].
   GraphQLClient({
     required this.link,
+    this.websocketLink,
     required this.cache,
     DefaultPolicies? defaultPolicies,
     bool alwaysRebroadcast = false,
@@ -47,14 +49,55 @@ class GraphQLClient implements GraphQLDataProxy {
   /// The [Link] over which GraphQL documents will be resolved into a [Response].
   final Link link;
 
+  /// Optional [WebSocketLink] for subscription-aware clients that compose [link]
+  /// with helpers like `Link.split(...)`.
+  final WebSocketLink? websocketLink;
+
   /// The initial [Cache] to use in the data store.
   final GraphQLCache cache;
 
   late final QueryManager queryManager;
 
+  /// Stream of [SocketConnectionState] changes for the underlying WebSocket connection.
+  ///
+  /// Returns `null` if no [WebSocketLink] is configured or if the socket client
+  /// has not been initialized yet.
+  ///
+  /// This is useful for detecting when a subscription connection is lost or restored,
+  /// so that data can be refetched to ensure freshness.
+  ///
+  /// Example usage:
+  /// ```dart
+  /// final wsLink = WebSocketLink('ws://example.com/graphql');
+  /// final client = GraphQLClient(
+  ///   link: Link.split((request) => request.isSubscription, wsLink, httpLink),
+  ///   cache: GraphQLCache(),
+  ///   websocketLink: wsLink,
+  /// );
+  ///
+  /// client.connectionState?.listen((state) {
+  ///   if (state == SocketConnectionState.notConnected) {
+  ///     // connection lost — refetch queries to get fresh data
+  ///   }
+  /// });
+  /// ```
+  Stream<SocketConnectionState>? get connectionState {
+    final configuredLink = websocketLink;
+    if (configuredLink != null) {
+      return configuredLink.connectionState;
+    }
+
+    final l = link;
+    if (l is WebSocketLink) {
+      return l.connectionState;
+    }
+    return null;
+  }
+
   /// Create a copy of the client with the provided information.
   GraphQLClient copyWith({
     Link? link,
+    WebSocketLink? websocketLink,
     GraphQLCache? cache,
     DefaultPolicies? defaultPolicies,
     bool? alwaysRebroadcast,
@@ -65,6 +108,7 @@ class GraphQLClient implements GraphQLDataProxy {
   }) {
     return GraphQLClient(
       link: link ?? this.link,
+      websocketLink: websocketLink ?? this.websocketLink,
       cache: cache ?? this.cache,
       defaultPolicies: defaultPolicies ?? this.defaultPolicies,
       alwaysRebroadcast: alwaysRebroadcast ?? queryManager.alwaysRebroadcast,
