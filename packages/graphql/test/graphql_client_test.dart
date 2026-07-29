@@ -454,32 +454,24 @@ query WalletGetContent($input: WalletGetContentInput!) {
 
         final QueryResult r = await client.query(_options);
         expect(r.exception, isNull);
+        expect(r.data, equals(data));
+
+        final blocks = (r.data!["walletGetContent"]
+            as Map<String, dynamic>)["blocks"] as List<dynamic>;
         expect(
-            r.data,
-            equals({
-              ...data,
-              "walletGetContent": {
-                ...data["walletGetContent"] as Map<String, dynamic>,
-                "blocks": [
-                  {
-                    ...(data["walletGetContent"]
-                            as Map<String, dynamic>)["blocks"][0]
-                        as Map<String, dynamic>,
-                    "items": ((data["walletGetContent"]
-                            as Map<String, dynamic>)["blocks"][1]
-                        as Map<String, dynamic>)["items"],
-                  },
-                  {
-                    ...(data["walletGetContent"]
-                            as Map<String, dynamic>)["blocks"][1]
-                        as Map<String, dynamic>,
-                    "items": ((data["walletGetContent"]
-                            as Map<String, dynamic>)["blocks"][1]
-                        as Map<String, dynamic>)["items"],
-                  }
-                ]
-              }
-            }));
+          (blocks[0] as Map<String, dynamic>)["items"],
+          equals(
+            (data["walletGetContent"] as Map<String, dynamic>)["blocks"][0]
+                ["items"],
+          ),
+        );
+        expect(
+          (blocks[1] as Map<String, dynamic>)["items"],
+          equals(
+            (data["walletGetContent"] as Map<String, dynamic>)["blocks"][1]
+                ["items"],
+          ),
+        );
       });
 
       test('successful response with parser', () async {
