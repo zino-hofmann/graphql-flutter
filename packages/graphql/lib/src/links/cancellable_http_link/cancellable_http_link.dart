@@ -246,14 +246,15 @@ class CancellableHttpLink extends Link {
         fileMap.isEmpty && useGETForQueries && _isQuery(request);
 
     if (useGetForThisRequest) {
+      final params = _encodeAsUriParams(body);
+      final query = params['query'];
+      if (query != null) {
+        // collapse indentation so it doesn't bloat the GET URL
+        params['query'] = query.replaceAll(RegExp(r'\s+'), ' ').trim();
+      }
       return http.AbortableRequest(
         'GET',
-        uri.replace(
-          queryParameters: _encodeAttempter(
-            request,
-            _encodeAsUriParams,
-          )(body),
-        ),
+        uri.replace(queryParameters: params),
         abortTrigger: abortTrigger,
       )..headers.addAll(headers);
     }
