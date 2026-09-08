@@ -32,6 +32,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -44,6 +45,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
           cancellationToken: cancellationToken,
+          queryDeduplication: queryDeduplication,
         );
 
   final OnMutationCompleted? onCompleted;
@@ -75,6 +77,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   }) =>
       MutationOptions<TParsed>(
         document: document ?? this.document,
@@ -91,6 +94,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         parserFn: parserFn ?? this.parserFn,
         queryRequestTimeout: queryRequestTimeout ?? this.queryRequestTimeout,
         cancellationToken: cancellationToken ?? this.cancellationToken,
+        queryDeduplication: queryDeduplication ?? this.queryDeduplication,
       );
 
   MutationOptions<TParsed> copyWithPolicies(Policies policies) =>
@@ -109,6 +113,7 @@ class MutationOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 
   WatchQueryOptions<TParsed> asWatchQueryOptions() =>
