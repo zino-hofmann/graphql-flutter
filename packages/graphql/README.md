@@ -1051,6 +1051,23 @@ When combining links, **it is important to note that**:
 - Terminating links like `HttpLink` and `WebsocketLink` must come at the end of a route, and will not call links following them.
 - Link order is very important. In `HttpLink(myEndpoint).concat(AuthLink(getToken: authenticate))`, the `AuthLink` will never be called.
 
+#### Opting a query out of `DedupeLink`
+
+`DedupeLink()` (as wired up above) deduplicates **every** request by default: identical, concurrent operations collapse into a single network call, with no way to opt out per-call ([see #1384](https://github.com/zino-hofmann/graphql-flutter/issues/1384)). Since that default cannot be changed from this package, the flag needs one line of wiring: pass `QueryDeduplicationContextEntry.shouldDedupe` as `DedupeLink`'s `shouldDedupe` predicate, then set the entry per-call via `QueryOptions`/`MutationOptions`' `queryDeduplication`:
+
+```dart
+final link = DedupeLink(
+  shouldDedupe: QueryDeduplicationContextEntry.shouldDedupe,
+).concat(httpLink);
+
+// deduplicated by default, same as before:
+client.query(QueryOptions(document: myQuery));
+
+// opts this call out of deduplication, so concurrent, identical calls each
+// hit the network:
+client.query(QueryOptions(document: myQuery, queryDeduplication: false));
+```
+
 ### AWS AppSync Support
 
 **Cognito Pools**

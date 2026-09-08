@@ -31,6 +31,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     this.onComplete,
     this.onError,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -43,6 +44,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
           cancellationToken: cancellationToken,
+          queryDeduplication: queryDeduplication,
         );
 
   final OnQueryComplete? onComplete;
@@ -76,6 +78,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
     OnQueryComplete? onComplete,
     OnQueryError? onError,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   }) =>
       QueryOptions<TParsed>(
         document: document ?? this.document,
@@ -92,6 +95,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         onComplete: onComplete ?? this.onComplete,
         onError: onError ?? this.onError,
         cancellationToken: cancellationToken ?? this.cancellationToken,
+        queryDeduplication: queryDeduplication ?? this.queryDeduplication,
       );
 
   QueryOptions<TParsed> withFetchMoreOptions(
@@ -106,6 +110,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         queryRequestTimeout: queryRequestTimeout,
         context: context,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
         variables: {
           ...variables,
           ...fetchMoreOptions.variables,
@@ -127,6 +132,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 
   QueryOptions<TParsed> copyWithPolicies(Policies policies) => QueryOptions(
@@ -142,6 +148,7 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 }
 
@@ -160,6 +167,7 @@ class SubscriptionOptions<TParsed extends Object?>
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   }) : super(
           fetchPolicy: fetchPolicy,
           errorPolicy: errorPolicy,
@@ -172,6 +180,7 @@ class SubscriptionOptions<TParsed extends Object?>
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
           cancellationToken: cancellationToken,
+          queryDeduplication: queryDeduplication,
         );
   SubscriptionOptions<TParsed> copyWithPolicies(Policies policies) =>
       SubscriptionOptions(
@@ -186,6 +195,7 @@ class SubscriptionOptions<TParsed extends Object?>
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 }
 
@@ -207,6 +217,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   })  : eagerlyFetchResults = eagerlyFetchResults ?? fetchResults,
         super(
           document: document,
@@ -221,6 +232,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
           parserFn: parserFn,
           queryRequestTimeout: queryRequestTimeout,
           cancellationToken: cancellationToken,
+          queryDeduplication: queryDeduplication,
         );
 
   /// Whether or not to fetch results every time a new listener is added.
@@ -263,6 +275,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
     ResultParserFn<TParsed>? parserFn,
     Duration? queryRequestTimeout,
     CancellationToken? cancellationToken,
+    bool? queryDeduplication,
   }) =>
       WatchQueryOptions<TParsed>(
         document: document ?? this.document,
@@ -281,6 +294,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         parserFn: parserFn ?? this.parserFn,
         queryRequestTimeout: queryRequestTimeout ?? this.queryRequestTimeout,
         cancellationToken: cancellationToken ?? this.cancellationToken,
+        queryDeduplication: queryDeduplication ?? this.queryDeduplication,
       );
 
   WatchQueryOptions<TParsed> copyWithFetchPolicy(
@@ -302,6 +316,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
   WatchQueryOptions<TParsed> copyWithPolicies(
     Policies policies,
@@ -322,6 +337,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 
   WatchQueryOptions<TParsed> copyWithPollInterval(Duration? pollInterval) =>
@@ -341,6 +357,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 
   WatchQueryOptions<TParsed> copyWithVariables(
@@ -361,6 +378,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 
   WatchQueryOptions<TParsed> copyWithOptimisticResult(
@@ -381,6 +399,7 @@ class WatchQueryOptions<TParsed extends Object?> extends QueryOptions<TParsed> {
         parserFn: parserFn,
         queryRequestTimeout: queryRequestTimeout,
         cancellationToken: cancellationToken,
+        queryDeduplication: queryDeduplication,
       );
 }
 
