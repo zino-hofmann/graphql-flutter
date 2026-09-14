@@ -105,9 +105,9 @@ final _authLink = AuthLink(
 
 Link _link = _authLink.concat(_httpLink);
 
-/// subscriptions must be split otherwise `HttpLink` will. swallow them
+/// subscriptions must be split otherwise `HttpLink` will swallow them
 if (websocketEndpoint != null){
-  final _wsLink = WebSocketLink(websockeEndpoint);
+  final _wsLink = WebSocketLink(websocketEndpoint);
   _link = Link.split((request) => request.isSubscription, _wsLink, _link);
 }
 
@@ -859,7 +859,7 @@ client.readQuery(queryRequest); //
 
 ### `FragmentRequest`, `readFragment`, and `writeFragment`
 `FragmentRequest` has almost the same api as `Request`, but is provided directly from `graphql` for consistency.
-It is used to access `readFragment` and `writeFragment`. The main differences are that they cannot be retreived from options, and that `FragmentRequests` require `idFields` to find their cooresponding entities:
+It is used to access `readFragment` and `writeFragment`. The main differences are that they cannot be retrieved from options, and that `FragmentRequests` require `idFields` to find their corresponding entities:
 ```dart
 
 final fragmentDoc = gql(
@@ -967,7 +967,7 @@ Possible options:
 
 ### Rebroadcasting
 Rebroadcasting behavior only applies to `watchMutation` and `watchQuery`, which both return an `ObservableQuery`.
-There is no rebroadcasting option for subscriptions, because it would be indistiguishable from the previous event in the stream.
+There is no rebroadcasting option for subscriptions, because it would be indistinguishable from the previous event in the stream.
 
 Rebroadcasting is enabled unless either `FetchPolicy.noCache` or `CacheRereadPolicy.ignoreAll` are set,
 and whether it considers optimistic results is controlled by the specific `CacheRereadPolicy`.
@@ -1014,7 +1014,7 @@ This makes all link development coordinated across the ecosystem, so that we can
 
 > **NB**: `WebSocketLink` and other "terminating links" must be used with `split` when there are multiple terminating links.
 
-The [`gql_link`] systm has a well-specified routing system:
+The [`gql_link`] system has a well-specified routing system:
 ![link diagram]
 
 a rundown of the composition api:
@@ -1048,7 +1048,7 @@ link = Link.split((request) => request.isSubscription, websocketLink, link);
 
 When combining links, **it is important to note that**:
 
-- Terminating links like `HttpLink` and `WebsocketLink` must come at the end of a route, and will not call links following them.
+- Terminating links like `HttpLink` and `WebSocketLink` must come at the end of a route, and will not call links following them.
 - Link order is very important. In `HttpLink(myEndpoint).concat(AuthLink(getToken: authenticate))`, the `AuthLink` will never be called.
 
 ### AWS AppSync Support
@@ -1107,7 +1107,7 @@ import 'add_star.graphql.dart';
 
   await client.mutateAddStar(
     OptionsMutationAddStar(
-      variables: VariablesMutationAddStar(starableId: repositoryID)
+      variables: VariablesMutationAddStar(starrableId: repositoryID)
     )
   );
 ```
