@@ -8,11 +8,23 @@ import 'dart:io';
 const String forceDisconnectCommand = '___force_disconnect___';
 const String forceAuthDisconnectCommand = '___force_auth_disconnect___';
 
+/// Headers from the most recent websocket handshake.
+HttpHeaders? lastHandshakeHeaders;
+
 /// Main function to create and run the echo server over the web socket.
 Future<String> runWebSocketServer(
     {String host = "127.0.0.1", int port = 5600}) async {
   HttpServer server = await HttpServer.bind(host, port);
-  server.transform(WebSocketTransformer()).listen(onWebSocketData);
+  server.listen((HttpRequest request) async {
+    lastHandshakeHeaders = request.headers;
+    if (WebSocketTransformer.isUpgradeRequest(request)) {
+      final WebSocket client = await WebSocketTransformer.upgrade(request);
+      onWebSocketData(client);
+    } else {
+      request.response.statusCode = HttpStatus.badRequest;
+      await request.response.close();
+    }
+  });
   return "ws://$host:$port";
 }
 
