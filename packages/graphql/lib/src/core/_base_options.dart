@@ -25,6 +25,7 @@ abstract class BaseOptions<TParsed extends Object?> {
     this.optimisticResult,
     this.queryRequestTimeout,
     this.cancellationToken,
+    this.queryDeduplication,
   })  : policies = Policies(
           fetch: fetchPolicy,
           error: errorPolicy,
@@ -71,6 +72,18 @@ abstract class BaseOptions<TParsed extends Object?> {
   /// with a [CancelledException].
   final CancellationToken? cancellationToken;
 
+  /// Whether this operation should be deduplicated with other in-flight,
+  /// identical operations by a [DedupeLink] in the link chain.
+  ///
+  /// `null` (the default) leaves the [Context] untouched, so a [DedupeLink]
+  /// deduplicates as it always has (every request, unless it was built with
+  /// a custom `shouldDedupe`). Passing `false` attaches a
+  /// [QueryDeduplicationContextEntry] that a [DedupeLink] can read via its
+  /// `shouldDedupe` predicate to skip deduplication for this operation only,
+  /// mirroring Apollo Client's per-query `queryDeduplication` option. See
+  /// [QueryDeduplicationContextEntry] for the predicate to wire up.
+  final bool? queryDeduplication;
+
   // TODO consider inverting this relationship
   /// Resolve these options into a request
   Request get asRequest => Request(
@@ -79,7 +92,11 @@ abstract class BaseOptions<TParsed extends Object?> {
           operationName: operationName,
         ),
         variables: variables,
-        context: context,
+        context: queryDeduplication == null
+            ? context
+            : context.withEntry(
+                QueryDeduplicationContextEntry(dedupe: queryDeduplication!),
+              ),
       );
 
   @protected
@@ -93,6 +110,7 @@ abstract class BaseOptions<TParsed extends Object?> {
         parserFn,
         queryRequestTimeout,
         cancellationToken,
+        queryDeduplication,
       ];
 
   OperationType get type {

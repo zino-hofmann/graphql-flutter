@@ -154,6 +154,107 @@ void main() {
           equals('bar'),
         );
       });
+      test(
+          'issue 1384, DedupeLink collapses concurrent identical queries '
+          'unless queryDeduplication opts a query out', () async {
+        final _options = QueryOptions(
+          document: parseString(readRepositories),
+          variables: <String, dynamic>{
+            'nRepositories': 42,
+          },
+          fetchPolicy: FetchPolicy.networkOnly,
+        );
+        final repoData = readRepositoryData(withTypenames: true);
+
+        final dedupingLink = MockLink();
+        when(
+          dedupingLink.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            Response(
+              data: repoData,
+              response: {},
+            ),
+          ]),
+        );
+        final dedupedClient = GraphQLClient(
+          cache: getTestCache(),
+          link: DedupeLink(
+                  shouldDedupe: QueryDeduplicationContextEntry.shouldDedupe)
+              .concat(dedupingLink),
+        );
+
+        // Reproduces https://github.com/zino-hofmann/graphql-flutter/issues/1384:
+        // with a DedupeLink in the chain, firing the same `networkOnly`
+        // query 5 times concurrently collapses into a single network call.
+        final dedupedResults = await Future.wait(
+          List.generate(5, (_) => dedupedClient.query(_options)),
+        );
+        for (final r in dedupedResults) {
+          expect(r.exception, isNull);
+          expect(r.data, equals(repoData));
+        }
+        verify(dedupingLink.request(any)).called(1);
+
+        // Opting an individual query out of deduplication (mirroring Apollo
+        // Client's per-query `queryDeduplication` option) makes every
+        // concurrent call reach the network.
+        final passThroughLink = MockLink();
+        when(
+          passThroughLink.request(any),
+        ).thenAnswer(
+          (_) => Stream.fromIterable([
+            Response(
+              data: repoData,
+              response: {},
+            ),
+          ]),
+        );
+        final optedOutClient = GraphQLClient(
+          cache: getTestCache(),
+          link: DedupeLink(
+                  shouldDedupe: QueryDeduplicationContextEntry.shouldDedupe)
+              .concat(passThroughLink),
+        );
+        final optedOutOptions =
+            _options.copyWithOptions(queryDeduplication: false);
+
+        final optedOutResults = await Future.wait(
+          List.generate(5, (_) => optedOutClient.query(optedOutOptions)),
+        );
+        for (final r in optedOutResults) {
+          expect(r.exception, isNull);
+          expect(r.data, equals(repoData));
+        }
+        verify(passThroughLink.request(any)).called(5);
+      });
+      test(
+          'QueryDeduplicationContextEntry.shouldDedupe defaults to true, '
+          'false only when the entry says queryDeduplication: false', () async {
+        final noEntry = Request(
+          operation: Operation(document: parseString(readRepositories)),
+        );
+        final dedupeTrue = Request(
+          operation: Operation(document: parseString(readRepositories)),
+          context: Context()
+              .withEntry(const QueryDeduplicationContextEntry(dedupe: true)),
+        );
+        final dedupeFalse = Request(
+          operation: Operation(document: parseString(readRepositories)),
+          context: Context()
+              .withEntry(const QueryDeduplicationContextEntry(dedupe: false)),
+        );
+
+        expect(QueryDeduplicationContextEntry.shouldDedupe(noEntry), isTrue);
+        expect(
+          QueryDeduplicationContextEntry.shouldDedupe(dedupeTrue),
+          isTrue,
+        );
+        expect(
+          QueryDeduplicationContextEntry.shouldDedupe(dedupeFalse),
+          isFalse,
+        );
+      });
       test('issue 1208', () async {
         final client = GraphQLClient(
           cache: GraphQLCache(

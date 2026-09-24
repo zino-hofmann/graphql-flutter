@@ -1,3 +1,9 @@
+# Unreleased
+
+## Added
+- add `queryDeduplication` to `QueryOptions`/`MutationOptions`, `QueryDeduplicationContextEntry`, and its `QueryDeduplicationContextEntry.shouldDedupe` predicate, so a `DedupeLink` can be configured (`DedupeLink(shouldDedupe: QueryDeduplicationContextEntry.shouldDedupe)`) to let an individual operation opt out of deduplication, fixing [#1384](https://github.com/zino-hofmann/graphql-flutter/issues/1384). @Yasser-Ameur
+
+
 # v5.2.3
 
 ## Fixed
