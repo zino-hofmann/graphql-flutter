@@ -1,5 +1,5 @@
 import 'package:graphql/src/cache/_normalizing_data_proxy.dart';
-import 'package:normalize/normalize.dart' show PartialDataException;
+import 'package:normalize/normalize.dart' show PartialDataException, TypePolicy;
 import 'package:test/test.dart';
 
 import 'package:graphql/src/cache/cache.dart';
@@ -308,6 +308,92 @@ void main() {
         cache.readQuery(fileVarsTest.request),
         equals(fileVarsTest.data),
       );
+    });
+  });
+
+  group('Issue #1516: nested objects with same id in lists', () {
+    late GraphQLCache cache;
+    setUp(() {
+      cache = getTestCache();
+    });
+
+    test('unique refs round trip correctly', () {
+      cache.writeQuery(
+        issue1516SameIdTest.request,
+        data: issue1516SameIdTest.data,
+      );
+      final result = cache.readQuery(issue1516SameIdTest.request);
+      expect(result, equals(issue1516SameIdTest.data));
+
+      // Verify each match has the correct ref name
+      final matches =
+          (result!['bracket'] as Map<String, dynamic>)['matches'] as List;
+      expect(
+        matches[0]['source']['ref']['name'],
+        equals('Winner of Match 10'),
+      );
+      expect(
+        matches[1]['source']['ref']['name'],
+        equals('Winner of Match 11'),
+      );
+      expect(
+        matches[2]['source']['ref']['name'],
+        equals('Winner of Match 12'),
+      );
+      // match4 shares ref1 with match1, so same name is expected
+      expect(
+        matches[3]['source']['ref']['name'],
+        equals('Winner of Match 10'),
+      );
+    });
+
+    test(
+      'conflicting refs with same id should preserve original values (#1516)',
+      () {
+        // Issue #1516: when multiple objects share the same __typename + id
+        // but have different field values, the cache write/read round trip
+        // should preserve the original data, not corrupt it.
+        cache.writeQuery(
+          issue1516ConflictingRefsTest.request,
+          data: issue1516ConflictingRefsTest.data,
+        );
+        final result = cache.readQuery(issue1516ConflictingRefsTest.request);
+
+        final matches =
+            (result!['bracket'] as Map<String, dynamic>)['matches'] as List;
+
+        // Each ref should preserve its original name value from the response
+        expect(matches[0]['source']['ref']['name'], equals('First Ref Name'));
+        expect(matches[1]['source']['ref']['name'], equals('Second Ref Name'));
+        expect(matches[2]['source']['ref']['name'], equals('Third Ref Name'));
+      },
+    );
+
+    test('TypePolicy with empty keyFields prevents normalization collision',
+        () {
+      // Workaround: disable normalization for the conflicting type
+      final cacheWithPolicy = GraphQLCache(
+        typePolicies: {
+          'MatchRef': const TypePolicy(keyFields: {}),
+        },
+        partialDataPolicy: PartialDataCachePolicy.reject,
+      );
+
+      cacheWithPolicy.writeQuery(
+        issue1516ConflictingRefsTest.request,
+        data: issue1516ConflictingRefsTest.data,
+      );
+      final result =
+          cacheWithPolicy.readQuery(issue1516ConflictingRefsTest.request);
+
+      final matches =
+          (result!['bracket'] as Map<String, dynamic>)['matches'] as List;
+
+      // With normalization disabled for MatchRef, each ref keeps its
+      // original value because they are stored inline (not normalized).
+      expect(matches[0]['source']['ref']['name'], equals('First Ref Name'));
+      expect(matches[1]['source']['ref']['name'], equals('Second Ref Name'));
+      expect(matches[2]['source']['ref']['name'], equals('Third Ref Name'));
     });
   });
 
