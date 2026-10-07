@@ -917,6 +917,95 @@ Future<void> main() async {
     */
   });
 
+  group('WebSocketLink connectionState', () {
+    test('exposes connectionState from underlying SocketClient', () async {
+      final wsLink = WebSocketLink(
+        wsUrl,
+        config: SocketClientConfig(
+          delayBetweenReconnectionAttempts: const Duration(milliseconds: 1),
+          initialPayload: {'protocol': GraphQLProtocol.graphqlWs},
+        ),
+      );
+
+      // Before connecting, connectionState is null
+      expect(wsLink.connectionState, isNull);
+
+      // Trigger connection by calling connectOrReconnect
+      wsLink.connectOrReconnect();
+
+      // Now connectionState should be available
+      expect(wsLink.connectionState, isNotNull);
+
+      // BehaviorSubject emits current state first (notConnected),
+      // then transitions through connecting -> connected
+      await expectLater(
+        wsLink.connectionState!,
+        emitsInOrder([
+          SocketConnectionState.notConnected,
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      await wsLink.dispose();
+    });
+
+    test(
+        'GraphQLClient exposes connectionState when using Link.split with a WebSocketLink',
+        () async {
+      final wsLink = WebSocketLink(
+        wsUrl,
+        config: SocketClientConfig(
+          delayBetweenReconnectionAttempts: const Duration(milliseconds: 1),
+          initialPayload: {'protocol': GraphQLProtocol.graphqlWs},
+        ),
+      );
+      final mockLink = MockLink();
+
+      final client = GraphQLClient(
+        link: Link.split(
+          (request) => request.isSubscription,
+          wsLink,
+          mockLink,
+        ),
+        websocketLink: wsLink,
+        cache: GraphQLCache(),
+      );
+
+      // Before connecting, connectionState is null
+      expect(client.connectionState, isNull);
+
+      // Trigger connection
+      wsLink.connectOrReconnect();
+
+      // Now connectionState should be available
+      expect(client.connectionState, isNotNull);
+
+      // BehaviorSubject emits current state first (notConnected),
+      // then transitions through connecting -> connected
+      await expectLater(
+        client.connectionState!,
+        emitsInOrder([
+          SocketConnectionState.notConnected,
+          SocketConnectionState.connecting,
+          SocketConnectionState.connected,
+        ]),
+      );
+
+      await wsLink.dispose();
+    });
+
+    test('GraphQLClient connectionState is null for non-WebSocket links', () {
+      final mockLink = MockLink();
+      final client = GraphQLClient(
+        link: mockLink,
+        cache: GraphQLCache(),
+      );
+
+      expect(client.connectionState, isNull);
+    });
+  });
+
   group('SocketClient with dynamic payload', () {
     late SocketClient socketClient;
 
