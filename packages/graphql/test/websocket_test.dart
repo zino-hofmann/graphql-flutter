@@ -898,23 +898,28 @@ Future<void> main() async {
         emits(initPayload),
       );
     });
+  });
 
-    /*
-    FIXME: Testing the correct header in the request
-    group('SocketClient with custom headers with const payload', () {
-      const customHeaders = {'myHeader': 'myHeader'};
+  group('SocketClient with custom headers', () {
+    late SocketClient socketClient;
+    const customHeaders = {'myHeader': 'myHeader'};
 
-      setUp(overridePrint((log) {
-        socketClient = getTestClient(wsUrl: wsUrl, customHeaders: customHeaders);
-      }));
+    setUp(overridePrint((log) {
+      socketClient = getTestClient(wsUrl: wsUrl, customHeaders: customHeaders);
+    }));
 
-      test('check header', () async {
-        await socketClient.connectionState
-            .where((state) => state == SocketConnectionState.notConnected)
-            .first;
-      });
+    tearDown(overridePrint(
+      (log) => socketClient.dispose(),
+    ));
+
+    test('sends custom headers on the websocket handshake', () async {
+      await socketClient.connectionState
+          .where((state) => state == SocketConnectionState.connected)
+          .first;
+
+      expect(lastHandshakeHeaders, isNotNull);
+      expect(lastHandshakeHeaders!.value('myHeader'), 'myHeader');
     });
-    */
   });
 
   group('SocketClient with dynamic payload', () {
