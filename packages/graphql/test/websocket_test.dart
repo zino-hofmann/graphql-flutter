@@ -898,7 +898,6 @@ Future<void> main() async {
         emits(initPayload),
       );
     });
-
   });
 
   group('SocketClient with custom headers', () {
