@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:graphql/src/core/result_parser.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
@@ -622,6 +624,104 @@ query WalletGetContent($input: WalletGetContentInput!) {
               'go-evercookie',
               'watchbot',
             ]));
+      });
+
+      group('fetch-more queryRequestTimeout', () {
+        final repoData = readRepositoryData(withTypenames: true);
+
+        Future<QueryResult> fetchMoreAfterDelay({
+          required Duration? originalTimeout,
+          required Duration? fetchMoreTimeout,
+          required Duration delay,
+        }) async {
+          var calls = 0;
+          when(link.request(any)).thenAnswer((_) {
+            final response = Response(data: repoData, response: {});
+            // the first request is the original query and answers at once,
+            // the second one is the fetchMore request
+            return ++calls == 1
+                ? Stream.value(response)
+                : Stream.fromFuture(Future.delayed(delay, () => response));
+          });
+          final options = QueryOptions(
+            document: parseString(readRepositories),
+            variables: <String, dynamic>{'nRepositories': 42},
+            queryRequestTimeout: originalTimeout,
+          );
+          final first = await client.query(options);
+          expect(first.exception, isNull);
+          return client.fetchMore(
+            FetchMoreOptions(
+              updateQuery: (previous, fetched) => fetched,
+              queryRequestTimeout: fetchMoreTimeout,
+            ),
+            previousResult: first,
+            originalOptions: options,
+          );
+        }
+
+        test('a timeout shorter than the original one is applied', () async {
+          final result = await fetchMoreAfterDelay(
+            originalTimeout: const Duration(seconds: 5),
+            fetchMoreTimeout: const Duration(milliseconds: 20),
+            delay: const Duration(milliseconds: 300),
+          );
+          expect(result.exception?.linkException, isA<UnknownException>());
+          expect(
+            result.exception?.linkException?.originalException,
+            isA<TimeoutException>(),
+          );
+        });
+
+        test('a timeout longer than the original one is applied', () async {
+          final result = await fetchMoreAfterDelay(
+            originalTimeout: const Duration(milliseconds: 20),
+            fetchMoreTimeout: const Duration(seconds: 5),
+            delay: const Duration(milliseconds: 300),
+          );
+          expect(result.exception, isNull);
+          expect(result.data, equals(repoData));
+        });
+
+        test('falls back to the original query timeout when null', () async {
+          final result = await fetchMoreAfterDelay(
+            originalTimeout: const Duration(milliseconds: 20),
+            fetchMoreTimeout: null,
+            delay: const Duration(milliseconds: 300),
+          );
+          expect(
+            result.exception?.linkException?.originalException,
+            isA<TimeoutException>(),
+          );
+        });
+
+        test('FetchMoreOptions.partial applies the timeout too', () async {
+          var calls = 0;
+          when(link.request(any)).thenAnswer((_) {
+            final response = Response(data: repoData, response: {});
+            return ++calls == 1
+                ? Stream.value(response)
+                : Stream.fromFuture(Future.delayed(
+                    const Duration(milliseconds: 300), () => response));
+          });
+          final options = QueryOptions(
+            document: parseString(readRepositories),
+            variables: <String, dynamic>{'nRepositories': 42},
+          );
+          final first = await client.query(options);
+          final result = await client.fetchMore(
+            FetchMoreOptions.partial(
+              updateQuery: (previous, fetched) => fetched,
+              queryRequestTimeout: const Duration(milliseconds: 20),
+            ),
+            previousResult: first,
+            originalOptions: options,
+          );
+          expect(
+            result.exception?.linkException?.originalException,
+            isA<TimeoutException>(),
+          );
+        });
       });
 
       test('successful response without normalization', () async {
