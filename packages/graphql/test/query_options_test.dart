@@ -71,4 +71,93 @@ void main() {
       });
     });
   });
+
+  group('policies', () {
+    final policies = Policies(
+      fetch: FetchPolicy.cacheFirst,
+      error: ErrorPolicy.all,
+      cacheReread: CacheRereadPolicy.ignoreAll,
+    );
+
+    group('Policies.copyWith', () {
+      test('fetch changes only fetch', () {
+        final copy = policies.copyWith(fetch: FetchPolicy.networkOnly);
+        expect(
+          copy,
+          equals(Policies(
+            fetch: FetchPolicy.networkOnly,
+            error: ErrorPolicy.all,
+            cacheReread: CacheRereadPolicy.ignoreAll,
+          )),
+        );
+      });
+
+      test('error changes only error', () {
+        final copy = policies.copyWith(error: ErrorPolicy.ignore);
+        expect(
+          copy,
+          equals(Policies(
+            fetch: FetchPolicy.cacheFirst,
+            error: ErrorPolicy.ignore,
+            cacheReread: CacheRereadPolicy.ignoreAll,
+          )),
+        );
+      });
+
+      test('no arguments returns an equal copy', () {
+        expect(policies.copyWith(), equals(policies));
+      });
+    });
+
+    group('DefaultPolicies.copyWith', () {
+      final slot = {
+        'watchQuery': Policies(fetch: FetchPolicy.networkOnly),
+        'query': Policies(fetch: FetchPolicy.cacheOnly),
+        'watchMutation': Policies(error: ErrorPolicy.all),
+        'mutate': Policies(error: ErrorPolicy.ignore),
+        'subscribe': Policies(fetch: FetchPolicy.noCache),
+      };
+      final defaults = DefaultPolicies(
+        watchQuery: slot['watchQuery'],
+        query: slot['query'],
+        watchMutation: slot['watchMutation'],
+        mutate: slot['mutate'],
+        subscribe: slot['subscribe'],
+      );
+      final replacement = Policies(
+        fetch: FetchPolicy.cacheAndNetwork,
+        error: ErrorPolicy.all,
+        cacheReread: CacheRereadPolicy.ignoreOptimisitic,
+      );
+
+      for (final changed in slot.keys) {
+        test('$changed changes only $changed', () {
+          final copy = defaults.copyWith(
+            watchQuery: changed == 'watchQuery' ? replacement : null,
+            query: changed == 'query' ? replacement : null,
+            watchMutation: changed == 'watchMutation' ? replacement : null,
+            mutate: changed == 'mutate' ? replacement : null,
+            subscribe: changed == 'subscribe' ? replacement : null,
+          );
+          final expected = {
+            'watchQuery': defaults.watchQuery,
+            'query': defaults.query,
+            'watchMutation': defaults.watchMutation,
+            'mutate': defaults.mutate,
+            'subscribe': defaults.subscribe,
+            changed: replacement,
+          };
+          expect(copy.watchQuery, equals(expected['watchQuery']));
+          expect(copy.query, equals(expected['query']));
+          expect(copy.watchMutation, equals(expected['watchMutation']));
+          expect(copy.mutate, equals(expected['mutate']));
+          expect(copy.subscribe, equals(expected['subscribe']));
+        });
+      }
+
+      test('no arguments returns an equal copy', () {
+        expect(defaults.copyWith(), equals(defaults));
+      });
+    });
+  });
 }
