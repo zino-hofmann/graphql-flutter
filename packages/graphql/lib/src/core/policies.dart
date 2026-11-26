@@ -155,8 +155,11 @@ class Policies {
         overrides?.cacheReread ?? cacheReread!,
       );
 
-  Policies copyWith({FetchPolicy? fetch, ErrorPolicy? error}) =>
-      Policies(fetch: fetch, error: error, cacheReread: cacheReread);
+  Policies copyWith({FetchPolicy? fetch, ErrorPolicy? error}) => Policies(
+        fetch: fetch ?? this.fetch,
+        error: error ?? this.error,
+        cacheReread: cacheReread,
+      );
 
   operator ==(Object other) =>
       identical(this, other) ||
@@ -288,11 +291,11 @@ class DefaultPolicies {
     Policies? subscribe,
   }) =>
       DefaultPolicies(
-        watchQuery: watchQuery,
-        query: query,
-        watchMutation: watchMutation,
-        mutate: mutate,
-        subscribe: subscribe,
+        watchQuery: watchQuery ?? this.watchQuery,
+        query: query ?? this.query,
+        watchMutation: watchMutation ?? this.watchMutation,
+        mutate: mutate ?? this.mutate,
+        subscribe: subscribe ?? this.subscribe,
       );
 
   List<Object> _getChildren() => [
