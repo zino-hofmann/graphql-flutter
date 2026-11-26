@@ -606,7 +606,7 @@ class QueryManager {
 
     // If two ObservableQueries are backed by the same [Request], we only need
     // to [readQuery] for it once.
-    final Map<Request, QueryResult<Object?>> diffQueryResultCache = {};
+    final Map<Request, Map<String, dynamic>> diffQueryDataCache = {};
     final Map<Request, bool> ignoreQueryResults = {};
 
     final List<ObservableQuery<Object?>> queriesSnapshot =
@@ -614,16 +614,20 @@ class QueryManager {
 
     for (final query in queriesSnapshot) {
       final Request request = query.options.asRequest;
-      final cachedQueryResult = diffQueryResultCache[request];
+      final cachedQueryData = diffQueryDataCache[request];
       if (query == exclude || !query.isRebroadcastSafe) {
         continue;
       }
-      if (cachedQueryResult != null) {
+      if (cachedQueryData != null) {
         // We've already done the diff and denormalized, emit to the observable
         addQueryResult(
           request,
           query.queryId,
-          cachedQueryResult,
+          QueryResult(
+            data: cachedQueryData,
+            options: query.options,
+            source: QueryResultSource.cache,
+          ),
           fromRebroadcast: true,
         );
       } else if (ignoreQueryResults.containsKey(request)) {
@@ -642,7 +646,7 @@ class QueryManager {
             options: query.options,
             source: QueryResultSource.cache,
           );
-          diffQueryResultCache[request] = queryResult;
+          diffQueryDataCache[request] = cachedData!;
           addQueryResult(
             request,
             query.queryId,
