@@ -97,4 +97,108 @@ void main() {
       },
     );
   });
+
+  group('eager results of a request shared with a watched query', () {
+    final document = parseString('{ fetchPerson { id name } }');
+    String nameOf(Map<String, dynamic> data) =>
+        data['fetchPerson']['name'] as String;
+
+    // a watched query for the same request that already holds a result
+    Future<ObservableQuery<Object?>> watchedQuery() async {
+      when(link.request(any)).thenAnswer(
+        (_) => Stream.value(Response(
+          data: <String, dynamic>{
+            '__typename': 'Query',
+            'fetchPerson': <String, dynamic>{
+              '__typename': 'Person',
+              'id': '1',
+              'name': 'ada',
+            },
+          },
+          response: <String, dynamic>{},
+        )),
+      );
+      final observable = client.watchQuery(WatchQueryOptions<Object?>(
+        document: document,
+        fetchPolicy: FetchPolicy.networkOnly,
+      ));
+      final concrete = observable.stream.firstWhere((r) => r.isConcrete);
+      observable.fetchResults();
+      await concrete;
+      return observable;
+    }
+
+    test('cacheOnly with another parsed type is answered from the cache',
+        () async {
+      final observable = await watchedQuery();
+
+      final result = await client.query(QueryOptions<String>(
+        document: document,
+        fetchPolicy: FetchPolicy.cacheOnly,
+        parserFn: nameOf,
+      ));
+
+      expect(result.exception, isNull);
+      expect(result.parsedData, 'ada');
+      verify(link.request(any)).called(1);
+      await observable.close();
+    });
+
+    test('keeps the parserFn of the query when the parsed type is the same',
+        () async {
+      final observable = await watchedQuery();
+
+      final result = await client.query(QueryOptions<Object?>(
+        document: document,
+        fetchPolicy: FetchPolicy.cacheFirst,
+        parserFn: nameOf,
+      ));
+
+      expect(result.parsedData, 'ada');
+      verify(link.request(any)).called(1);
+      await observable.close();
+    });
+
+    test('still reuses the parsed data when the parserFn is the same',
+        () async {
+      var parsed = 0;
+      Object? parse(Map<String, dynamic> data) {
+        parsed++;
+        return nameOf(data);
+      }
+
+      when(link.request(any)).thenAnswer(
+        (_) => Stream.value(Response(
+          data: <String, dynamic>{
+            '__typename': 'Query',
+            'fetchPerson': <String, dynamic>{
+              '__typename': 'Person',
+              'id': '1',
+              'name': 'ada',
+            },
+          },
+          response: <String, dynamic>{},
+        )),
+      );
+      final observable = client.watchQuery(WatchQueryOptions<Object?>(
+        document: document,
+        fetchPolicy: FetchPolicy.networkOnly,
+        parserFn: parse,
+      ));
+      final concrete = observable.stream.firstWhere((r) => r.isConcrete);
+      observable.fetchResults();
+      expect((await concrete).parsedData, 'ada');
+      expect(parsed, 1);
+
+      final result = await client.query(QueryOptions<Object?>(
+        document: document,
+        fetchPolicy: FetchPolicy.cacheFirst,
+        parserFn: parse,
+      ));
+
+      expect(result.parsedData, 'ada');
+      expect(parsed, 1, reason: 'the watched query result was reused');
+      await observable.close();
+    });
+  });
 }
