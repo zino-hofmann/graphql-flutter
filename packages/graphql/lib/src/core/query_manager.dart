@@ -420,14 +420,23 @@ class QueryManager {
       // we attempt to resolve the from the cache
       if (shouldRespondEagerlyFromCache(options.fetchPolicy) &&
           !queryResult.isOptimistic) {
-        final latestResult = _getQueryResultByRequest<TParsed>(request);
+        final latestResult = _getQueryResultByRequest(request);
         if (latestResult != null && latestResult.data != null) {
           // we have a result already cached + deserialized for this request
           // so we reuse it.
           // latest result won't be for loading, it must contain data
-          queryResult = latestResult.copyWith(
-            source: QueryResultSource.cache,
-          );
+          //
+          // The watched query may have another parsed type or parserFn, so
+          // its whole result is only reused when it matches these options.
+          // Otherwise only its data is, which skips the denormalization.
+          queryResult = latestResult is QueryResult<TParsed> &&
+                  latestResult.parserFn == options.parserFn
+              ? latestResult.copyWith(source: QueryResultSource.cache)
+              : QueryResult(
+                  options: options,
+                  data: latestResult.data,
+                  source: QueryResultSource.cache,
+                );
         } else {
           // otherwise, we try to find the query in cache (which will require
           // deserialization)
@@ -482,10 +491,10 @@ class QueryManager {
   /// If a request already has a result associated with it in cache (as
   /// determined by [ObservableQuery.latestResult]), we can return it without
   /// needing to denormalize + parse again.
-  QueryResult<TParsed>? _getQueryResultByRequest<TParsed>(Request request) {
+  QueryResult<Object?>? _getQueryResultByRequest(Request request) {
     for (final query in queries.values) {
       if (query.options.asRequest == request) {
-        return query.latestResult as QueryResult<TParsed>?;
+        return query.latestResult;
       }
     }
     return null;
