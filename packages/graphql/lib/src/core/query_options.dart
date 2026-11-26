@@ -103,7 +103,8 @@ class QueryOptions<TParsed extends Object?> extends BaseOptions<TParsed> {
         fetchPolicy: FetchPolicy.noCache,
         errorPolicy: errorPolicy,
         parserFn: parserFn,
-        queryRequestTimeout: queryRequestTimeout,
+        queryRequestTimeout:
+            fetchMoreOptions.queryRequestTimeout ?? queryRequestTimeout,
         context: context,
         cancellationToken: cancellationToken,
         variables: {
@@ -396,7 +397,7 @@ class FetchMoreOptions {
     this.document,
     this.variables = const {},
     required this.updateQuery,
-    Duration? queryRequestTimeout,
+    this.queryRequestTimeout,
   });
 
   /// Automatically merge the results of [updateQuery] into `previousResultData`.
@@ -420,6 +421,11 @@ class FetchMoreOptions {
   final DocumentNode? document;
 
   final Map<String, dynamic> variables;
+
+  /// Overrides the timeout of the original query for this fetchMore request.
+  ///
+  /// Falls back to the original query's `queryRequestTimeout` when `null`.
+  final Duration? queryRequestTimeout;
 
   /// Strategy for merging the fetchMore result data
   /// with the result data already in the cache
